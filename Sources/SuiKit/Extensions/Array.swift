@@ -1,6 +1,6 @@
 //
 //  Array.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //

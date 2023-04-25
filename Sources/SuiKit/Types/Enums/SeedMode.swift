@@ -1,6 +1,6 @@
 //
-//  EncodingProtocol.swift
-//  SuiKit
+//  SeedMode.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -24,23 +24,8 @@
 //
 
 import Foundation
-import UInt256
-import AnyCodable
 
-public protocol EncodingProtocol: EncodingContainer { }
-
-extension UInt8: EncodingProtocol{ }
-extension UInt16: EncodingProtocol { }
-extension UInt32: EncodingProtocol { }
-extension UInt64: EncodingProtocol { }
-extension UInt128: EncodingProtocol { }
-extension UInt256: EncodingProtocol { }
-extension Int: EncodingProtocol { }
-extension UInt: EncodingProtocol { }
-
-extension Bool: EncodingProtocol { }
-extension String: EncodingProtocol { }
-extension Data: EncodingProtocol { }
-
-extension Array: EncodingContainer where Element: EncodingProtocol { }
-extension Dictionary: EncodingContainer where Key: EncodingProtocol, Value: Any { }
+public enum SeedMode: String {
+    case Ed25519Bip32
+    case Bip39
+}

@@ -1,6 +1,6 @@
 //
-//  EncodingProtocol.swift
-//  SuiKit
+//  TypeProtocol.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -22,25 +22,10 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
-
 import Foundation
-import UInt256
-import AnyCodable
 
-public protocol EncodingProtocol: EncodingContainer { }
-
-extension UInt8: EncodingProtocol{ }
-extension UInt16: EncodingProtocol { }
-extension UInt32: EncodingProtocol { }
-extension UInt64: EncodingProtocol { }
-extension UInt128: EncodingProtocol { }
-extension UInt256: EncodingProtocol { }
-extension Int: EncodingProtocol { }
-extension UInt: EncodingProtocol { }
-
-extension Bool: EncodingProtocol { }
-extension String: EncodingProtocol { }
-extension Data: EncodingProtocol { }
-
-extension Array: EncodingContainer where Element: EncodingProtocol { }
-extension Dictionary: EncodingContainer where Key: EncodingProtocol, Value: Any { }
+public protocol TypeProtcol: KeyProtocol {
+    /// Returns the type variant the class represents
+    /// - Returns: An Integer value that represents the class's type tag
+    func variant() -> Int
+}

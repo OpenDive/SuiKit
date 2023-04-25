@@ -1,6 +1,6 @@
 //
-//  EncodingProtocol.swift
-//  SuiKit
+//  ClientConfig.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -24,23 +24,26 @@
 //
 
 import Foundation
-import UInt256
-import AnyCodable
 
-public protocol EncodingProtocol: EncodingContainer { }
+/// Client Configuration for the REST client
+public struct ClientConfig {
+    public init(
+        expirationTtl: Int = 600,
+        gasUnitPrice: Int = 100,
+        maxGasAmount: Int = 100_000,
+        transactionWaitInSeconds: Int = 20,
+        baseUrl: String
+    ) {
+        self.expirationTtl = expirationTtl
+        self.gasUnitPrice = gasUnitPrice
+        self.maxGasAmount = maxGasAmount
+        self.transactionWaitInSeconds = transactionWaitInSeconds
+        self.baseUrl = baseUrl
+    }
 
-extension UInt8: EncodingProtocol{ }
-extension UInt16: EncodingProtocol { }
-extension UInt32: EncodingProtocol { }
-extension UInt64: EncodingProtocol { }
-extension UInt128: EncodingProtocol { }
-extension UInt256: EncodingProtocol { }
-extension Int: EncodingProtocol { }
-extension UInt: EncodingProtocol { }
-
-extension Bool: EncodingProtocol { }
-extension String: EncodingProtocol { }
-extension Data: EncodingProtocol { }
-
-extension Array: EncodingContainer where Element: EncodingProtocol { }
-extension Dictionary: EncodingContainer where Key: EncodingProtocol, Value: Any { }
+    public var expirationTtl: Int
+    public var gasUnitPrice: Int
+    public var maxGasAmount: Int
+    public var transactionWaitInSeconds: Int
+    public var baseUrl: String
+}

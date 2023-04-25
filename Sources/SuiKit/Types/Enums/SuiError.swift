@@ -21,4 +21,14 @@ public enum SuiError: Swift.Error, Equatable {
     case keysCountOutOfRange(min: Int, max: Int)
     case thresholdOutOfRange(min: Int, max: Int)
     case noContentInKey
+    case invalidDerivationPath
+    case invalidJsonData
+    case missingAccountAddressKey
+    case missingPrivateKey
+    case invalidAddressLength
+    case seedModeIncompatibleWithEd25519Bip32BasedSeeds(seedMode: String)
+    case invalidSeedLength
+    case notImplemented
+    case encodingError
+    case invalidUrl(url: String)
 }

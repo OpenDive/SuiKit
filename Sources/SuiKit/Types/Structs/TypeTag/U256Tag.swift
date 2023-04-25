@@ -1,6 +1,6 @@
 //
-//  EncodingProtocol.swift
-//  SuiKit
+//  U256Tag.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -25,22 +25,25 @@
 
 import Foundation
 import UInt256
-import AnyCodable
 
-public protocol EncodingProtocol: EncodingContainer { }
+/// UInt256 Type Tag
+public struct U256Tag: TypeProtcol, Equatable {
+    /// The value itself
+    let value: Int
 
-extension UInt8: EncodingProtocol{ }
-extension UInt16: EncodingProtocol { }
-extension UInt32: EncodingProtocol { }
-extension UInt64: EncodingProtocol { }
-extension UInt128: EncodingProtocol { }
-extension UInt256: EncodingProtocol { }
-extension Int: EncodingProtocol { }
-extension UInt: EncodingProtocol { }
+    public static func ==(lhs: U256Tag, rhs: U256Tag) -> Bool {
+        return lhs.value == rhs.value
+    }
 
-extension Bool: EncodingProtocol { }
-extension String: EncodingProtocol { }
-extension Data: EncodingProtocol { }
+    public func variant() -> Int {
+        return TypeTag.u256
+    }
 
-extension Array: EncodingContainer where Element: EncodingProtocol { }
-extension Dictionary: EncodingContainer where Key: EncodingProtocol, Value: Any { }
+    public static func deserialize(from deserializer: Deserializer) throws -> U256Tag {
+        return try U256Tag(value: Int(Deserializer.u256(deserializer)))
+    }
+
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.u256(serializer, UInt256(self.value))
+    }
+}

@@ -31,4 +31,5 @@ public enum SuiError: Swift.Error, Equatable {
     case notImplemented
     case encodingError
     case invalidUrl(url: String)
+    case invalidCoinType
 }

@@ -54,13 +54,8 @@ extension URLSession {
         decoder.dataDecodingStrategy = dataDecodingStrategy
         decoder.dateDecodingStrategy = dateDecodingStrategy
 
-        do {
-            let decoded = try decoder.decode(type, from: data)
-            return decoded
-        } catch {
-            let decoded = try decoder.decode(AptosRestClientError.self, from: data)
-            throw decoded
-        }
+        let decoded = try decoder.decode(type, from: data)
+        return decoded
     }
 
     /// Uses Swift 5.5's new `Async` `Await` handlers to decode input data.

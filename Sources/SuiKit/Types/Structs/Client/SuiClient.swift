@@ -20,6 +20,14 @@ public struct SuiClient {
         return try JSONDecoder().decode(JSON.self, from: data)["result"]
     }
     
+    public func getGasPrice() async throws -> UInt64 {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest("suix_getReferenceGasPrice", [])
+        )
+        return try JSONDecoder().decode(JSON.self, from: data)["result"].uInt64Value
+    }
+    
     public func totalSupply(_ coinType: String = "0x2::sui::SUI") async throws -> UInt64 {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -140,7 +148,7 @@ public struct SuiClient {
         )
     }
     
-    public func getObject(_ objectId: String, _ options: GetObject) async throws -> SuiObjectResponse {
+    public func getObject(_ objectId: String, _ options: GetObject = GetObject()) async throws -> SuiObjectResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -157,7 +165,7 @@ public struct SuiClient {
             version: value["version"].intValue,
             digest: value["digest"].stringValue,
             type: value["type"].stringValue,
-            owner: SuiObjectOwner(addressOwner: value["owner"]["addressOwner"].stringValue),
+            owner: SuiObjectOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
             previousTransaction: value["previousTransaction"].stringValue,
             storageRebate: value["storageRebate"].intValue,
             content: SuiMoveObject(
@@ -167,6 +175,43 @@ public struct SuiClient {
                 fields: value["content"]["fields"]
             )
         )
+    }
+    
+    public func getOwnedObjects(_ account: AccountAddress, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getOwnedObjects",
+                [
+                    AnyCodable(account.description),
+                    AnyCodable(query),
+                    AnyCodable(cursor),
+                    AnyCodable(limit)
+                ]
+            )
+        )
+        var result: [SuiObjectResponse] = []
+        for (_, val):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
+            let value = val["data"]
+            result.append(
+                SuiObjectResponse(
+                    objectId: value["objectId"].stringValue,
+                    version: value["version"].intValue,
+                    digest: value["digest"].stringValue,
+                    type: value["type"].stringValue,
+                    owner: SuiObjectOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
+                    previousTransaction: value["previousTransaction"].stringValue,
+                    storageRebate: value["storageRebate"].intValue,
+                    content: SuiMoveObject(
+                        dataType: value["content"]["dataType"].stringValue,
+                        type: value["content"]["type"].stringValue,
+                        hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue,
+                        fields: value["content"]["fields"]
+                    )
+                )
+            )
+        }
+        return result
     }
     
     private func getServerUrl() throws -> URL {

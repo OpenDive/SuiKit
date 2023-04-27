@@ -8,11 +8,29 @@
 import Foundation
 
 public struct GetObject: Codable {
-    let showType: Bool
-    let showOwner: Bool
-    let showPreviousTransaction: Bool
-    let showDisplay: Bool
-    let showContent: Bool
-    let showBcs: Bool
-    let showStorageRebate: Bool
+    public var showType: Bool
+    public var showOwner: Bool
+    public var showPreviousTransaction: Bool
+    public var showDisplay: Bool
+    public var showContent: Bool
+    public var showBcs: Bool
+    public var showStorageRebate: Bool
+    
+    public init(
+        showType: Bool = true,
+        showOwner: Bool = true,
+        showPreviousTransaction: Bool = true,
+        showDisplay: Bool = true,
+        showContent: Bool = true,
+        showBcs: Bool = true,
+        showStorageRebate: Bool = true
+    ) {
+        self.showType = showType
+        self.showOwner = showOwner
+        self.showPreviousTransaction = showPreviousTransaction
+        self.showDisplay = showDisplay
+        self.showContent = showContent
+        self.showBcs = showBcs
+        self.showStorageRebate = showStorageRebate
+    }
 }

@@ -284,6 +284,37 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
+    public func moveCall(
+        _ sender: Account,
+        _ packageObjectId: String,
+        _ module: String,
+        _ function: String,
+        _ typeArguments: [String],
+        _ arguments: [String],
+        _ gas: String,
+        _ gasBudget: Int,
+        _ executionMode: SuiTransactionBuilderMode
+    ) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_moveCall",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable(packageObjectId),
+                    AnyCodable(module),
+                    AnyCodable(function),
+                    AnyCodable(typeArguments),
+                    AnyCodable(arguments),
+                    AnyCodable(gas),
+                    AnyCodable(gasBudget),
+                    AnyCodable(executionMode.asString())
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
     public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> TransactionResponse {
         // 1. Create byte array of 3 '0' elements (this is called the intent)
         let flag: [UInt8] = [0, 0, 0]

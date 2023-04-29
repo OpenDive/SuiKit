@@ -30,7 +30,7 @@ import CryptoSwift
 /// Represents an Aptos wallet.
 public class Wallet: Hashable {
     /// The derivation path.
-    private static let derivationPath: String = "m/44'/637'/x'/0'/0'"
+    private static let derivationPath: String = "m/44'/784'/0'/0'/0'"
 
     /// The seed derived from the mnemonic and/or passphrase.
     private var _seed: Data? = nil
@@ -180,25 +180,6 @@ public class Wallet: Hashable {
     public static func == (lhs: Wallet, rhs: Wallet) -> Bool {
         return
             lhs.mnemonic == rhs.mnemonic
-    }
-    
-    /// Converts A Public Key Address into a Sui Address
-    /// - Parameter publicKeyBytes: The Public Key itself
-    /// - Returns: A String
-    public func toSuiAddress(publicKeyBytes: Data) -> String {
-        let sha3 = SHA3(variant: .sha256)
-        var addressBytes = [UInt8](repeating: 0, count: publicKeyBytes.count + 1)
-        addressBytes[0] = 0x00
-        
-        for (index, byte) in publicKeyBytes.enumerated() {
-            addressBytes[index + 1] = byte
-        }
-        
-        let result = sha3.calculate(for: addressBytes)
-        let hashString = result.map { String(format: "%02x", $0) }.joined()
-        let truncatedHashString = String(hashString.prefix(40))
-        
-        return "0x" + truncatedHashString
     }
 
     /// Get an Aptos Blockchain account at the specified index from an Ed25519 BIP-32-based seed.

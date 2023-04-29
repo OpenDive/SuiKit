@@ -9,7 +9,6 @@ import Foundation
 
 public struct FaucetClient {
     public let baseUrl: String
-    public let client: SuiClient
     
     public func funcAccount(_ address: String) async throws {
         guard let url = URL(string: baseUrl) else {

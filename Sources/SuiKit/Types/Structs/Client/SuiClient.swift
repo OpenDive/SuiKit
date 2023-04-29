@@ -8,6 +8,7 @@
 import Foundation
 import SwiftyJSON
 import AnyCodable
+import Blake2
 
 public struct SuiClient {
     public var clientConfig: ClientConfig
@@ -214,6 +215,118 @@ public struct SuiClient {
         return result
     }
     
+    public func pay(_ sender: Account, _ coin: String, _ gasCoin: String, _ receiver: AccountAddress, _ amount: Int,  _ gasBudget: Int) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_pay",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable([coin]),
+                    AnyCodable([receiver.description]),
+                    AnyCodable(["\(amount)"]),
+                    AnyCodable(gasCoin),
+                    AnyCodable("\(gasBudget)")
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func paySui(_ sender: Account, _ receiver: AccountAddress, _ amount: Int, _ gasBudget: Int, _ coin: String) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_paySui",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable([coin]),
+                    AnyCodable([receiver.description]),
+                    AnyCodable(["\(amount)"]),
+                    AnyCodable("\(gasBudget)")
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func transferSui(_ sender: Account, _ receiver: AccountAddress, _ gasBudget: Int, _ amount: UInt64, _ suiObjectId: String) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_transferSui",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable(suiObjectId),
+                    AnyCodable(gasBudget),
+                    AnyCodable(receiver.description),
+                    AnyCodable(amount)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> TransactionResponse {
+        // 1. Create byte array of 3 '0' elements (this is called the intent)
+        let flag: [UInt8] = [0, 0, 0]
+        
+        // 2. Append the base64 tx_bytes decoded to bytes
+        guard let txDecoded = Data.fromBase64(txBlock.txBytes) else {
+            throw SuiError.stringToDataFailure(value: txBlock.txBytes)
+        }
+        let signatureData = Data(flag) + txDecoded
+        
+        // 3. Sign the new extended bytes (this is the 'signature') as a Blake2B hash
+        let hash = try Blake2.hash(.b2b, size: 32, data: signatureData)
+        let signature: Signature = try signer.privateKey.sign(data: hash)
+        
+        // 4. join the key_flag byte (in your case this will be 0 for ed25519) with the signature and then the public key bytes
+        let pubKey = try signer.publicKey().key
+        let finalData = Data([0x00]) + signature.signature + pubKey
+        
+        // 5. Encode using base64
+        let finalB64 = finalData.base64EncodedString()
+        
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_executeTransactionBlock",
+                [
+                    AnyCodable(txBlock.txBytes),
+                    AnyCodable([finalB64]),
+                    AnyCodable(TransactionBlockResponseOptions()),
+                    AnyCodable(SuiRequestType.waitForLocalExecution.asString())
+                ]
+            )
+        )
+        
+        return try await self.getTransactionResponse(data)
+    }
+    
+    private func getTransactionResponse(_ data: Data) async throws -> TransactionResponse {
+        let json = JSON(data)["result"]
+        var responseObjects: [String: SuiObjectRef] = [:]
+        for objects in JSON(data)["result"]["inputObjects"] {
+            let objDict = objects.1.dictionaryValue
+            let objValue = objDict.values.first!
+            responseObjects["\(objDict.keys.first!)"] = SuiObjectRef(
+                version: objValue["version"].uInt8Value,
+                objectId: objValue["objectId"].stringValue,
+                digest: objValue["digest"].stringValue
+            )
+        }
+        return TransactionResponse(
+            txBytes: json["txBytes"].stringValue,
+            gas: SuiObjectRef(
+                version: json["gas"][0]["version"].uInt8Value,
+                objectId: json["gas"][0]["objectId"].stringValue,
+                digest: json["gas"][0]["digest"].stringValue
+            ),
+            inputObjects: responseObjects
+        )
+    }
+    
     private func getServerUrl() throws -> URL {
         guard let url = URL(string: self.clientConfig.baseUrl) else {
             throw SuiError.invalidUrl(url: self.clientConfig.baseUrl)
@@ -242,6 +355,7 @@ public struct SuiClient {
         do {
             let requestData = try JSONEncoder().encode(request)
             requestUrl.httpBody = requestData
+            print(JSON(requestData))
         } catch {
             throw SuiError.encodingError
         }

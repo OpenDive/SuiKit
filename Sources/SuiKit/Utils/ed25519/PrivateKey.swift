@@ -25,7 +25,6 @@
 
 import Foundation
 import ed25519swift
-import Blake2
 
 /// The ED25519 Private Key
 public struct PrivateKey: Equatable, KeyProtocol, CustomStringConvertible {
@@ -106,8 +105,7 @@ public struct PrivateKey: Equatable, KeyProtocol, CustomStringConvertible {
     ///
     /// - Note: The input message is converted into a UInt8 array and passed to the sign function of the Ed25519 implementation along with the private key converted into a UInt8 array. The resulting signature is then used to create a new Signature instance.
     public func sign(data: Data) throws -> Signature {
-        let hash = try Blake2.hash(.b2b, size: 32, data: data)
-        let signedMessage = Ed25519.sign(message: [UInt8](hash), secretKey: [UInt8](self.key))
+        let signedMessage = Ed25519.sign(message: [UInt8](data), secretKey: [UInt8](self.key))
         return Signature(signature: Data(signedMessage))
     }
 

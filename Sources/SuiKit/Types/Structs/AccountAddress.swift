@@ -25,6 +25,7 @@
 
 import Foundation
 import CryptoSwift
+import Blake2
 
 /// An enum representing the available authorization key schemes for Aptos Blockchain accounts.
 enum AuthKeyScheme {
@@ -110,10 +111,8 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Throws: An error of type AptosError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
     public static func fromKey(_ key: PublicKey) throws -> AccountAddress {
-        var addressBytes = Data(count: key.key.count + 1)
-        addressBytes[0..<key.key.count] = key.key[0..<key.key.count]
-        addressBytes[key.key.count] = AuthKeyScheme.ed25519
-        let result = addressBytes.sha3(.sha256)
+        let data = Data([UInt8](Data(count: 1)) + key.key)
+        let result = try Blake2.hash(.b2b, size: 32, data: data)
 
         return try AccountAddress(address: result)
     }
@@ -135,7 +134,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
         var addressBytes = Data(count: keysBytes.count + 1)
         addressBytes[0..<keysBytes.count] = keysBytes[0..<keysBytes.count]
         addressBytes[keysBytes.count] = AuthKeyScheme.multiEd25519
-        let result = addressBytes.sha3(.sha256)
+        let result = try Blake2.hash(.b2b, size: 32, data: addressBytes)
 
         return try AccountAddress(address: result)
     }
@@ -158,7 +157,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
         addressBytes[0..<creator.address.count] = creator.address[0..<creator.address.count]
         addressBytes[creator.address.count..<creator.address.count + seed.count] = seed[0..<seed.count]
         addressBytes[creator.address.count + seed.count] = AuthKeyScheme.deriveResourceAccountAddress
-        let result = addressBytes.sha3(.sha256)
+        let result = try Blake2.hash(.b2b, size: 32, data: addressBytes)
 
         return try AccountAddress(address: result)
     }
@@ -181,7 +180,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
         addressBytes[0..<creator.address.count] = creator.address[0..<creator.address.count]
         addressBytes[creator.address.count..<creator.address.count + seed.count] = seed[0..<seed.count]
         addressBytes[creator.address.count + seed.count] = AuthKeyScheme.deriveObjectAddressFromSeed
-        let result = addressBytes.sha3(.sha256)
+        let result = try Blake2.hash(.b2b, size: 32, data: addressBytes)
 
         return try AccountAddress(address: result)
     }

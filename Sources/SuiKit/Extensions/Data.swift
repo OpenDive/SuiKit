@@ -40,12 +40,26 @@ public extension Data {
     init(hex: String) {
         self.init([UInt8](hex: hex))
     }
-
+    
     var bytes: [UInt8] {
         Array(self)
     }
-
+    
     func hexEncodedString() -> String {
         return map { String(format: "%02hhx", $0) }.joined()
+    }
+    
+    public static func fromBase64(_ encoded: String) -> Data? {
+        // Prefixes padding-character(s) (if needed).
+        var encoded = encoded;
+        let remainder = encoded.count % 4
+        if remainder > 0 {
+            encoded = encoded.padding(
+                toLength: encoded.count + 4 - remainder,
+                withPad: "=", startingAt: 0);
+        }
+        
+        // Finally, decode.
+        return Data(base64Encoded: encoded);
     }
 }

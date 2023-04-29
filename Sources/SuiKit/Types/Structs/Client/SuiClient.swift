@@ -267,6 +267,23 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
+    public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_publish",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable(compiledModules),
+                    AnyCodable(dependencies),
+                    AnyCodable(gas),
+                    AnyCodable(gasBudget)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
     public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> TransactionResponse {
         // 1. Create byte array of 3 '0' elements (this is called the intent)
         let flag: [UInt8] = [0, 0, 0]

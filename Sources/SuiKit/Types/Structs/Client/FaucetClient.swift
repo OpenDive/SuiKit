@@ -10,6 +10,10 @@ import Foundation
 public struct FaucetClient {
     public let baseUrl: String
     
+    public init(baseUrl: String) {
+        self.baseUrl = baseUrl
+    }
+    
     public func funcAccount(_ address: String) async throws {
         guard let url = URL(string: baseUrl) else {
             throw SuiError.invalidUrl(url: baseUrl)

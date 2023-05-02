@@ -13,6 +13,10 @@ import Blake2
 public struct SuiClient {
     public var clientConfig: ClientConfig
     
+    public init(clientConfig: ClientConfig) {
+        self.clientConfig = clientConfig
+    }
+    
     public func info() async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -224,9 +228,9 @@ public struct SuiClient {
                     AnyCodable(sender.accountAddress.description),
                     AnyCodable([coin]),
                     AnyCodable([receiver.description]),
-                    AnyCodable(["\(amount)"]),
+                    AnyCodable([amount]),
                     AnyCodable(gasCoin),
-                    AnyCodable("\(gasBudget)")
+                    AnyCodable(gasBudget)
                 ]
             )
         )
@@ -242,8 +246,24 @@ public struct SuiClient {
                     AnyCodable(sender.accountAddress.description),
                     AnyCodable([coin]),
                     AnyCodable([receiver.description]),
-                    AnyCodable(["\(amount)"]),
-                    AnyCodable("\(gasBudget)")
+                    AnyCodable([amount]),
+                    AnyCodable(gasBudget)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func payAllSui(_ sender: Account, _ receiver: AccountAddress, _ inputCoin: String, _ gasBudget: Int) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_payAllSui",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable([inputCoin]),
+                    AnyCodable(receiver.description),
+                    AnyCodable(gasBudget)
                 ]
             )
         )
@@ -258,9 +278,9 @@ public struct SuiClient {
                 [
                     AnyCodable(sender.accountAddress.description),
                     AnyCodable(suiObjectId),
-                    AnyCodable(gasBudget),
+                    AnyCodable("\(gasBudget)"),
                     AnyCodable(receiver.description),
-                    AnyCodable(amount)
+                    AnyCodable("\(amount)")
                 ]
             )
         )
@@ -307,8 +327,25 @@ public struct SuiClient {
                     AnyCodable(typeArguments),
                     AnyCodable(arguments),
                     AnyCodable(gas),
-                    AnyCodable(gasBudget),
+                    AnyCodable("\(gasBudget)"),
                     AnyCodable(executionMode.asString())
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func transferObject(_ sender: Account, _ receiver: AccountAddress, _ objectId: String, _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_transferObject",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable(objectId),
+                    AnyCodable(gas),
+                    AnyCodable("\(gasBudget)"),
+                    AnyCodable(receiver.description)
                 ]
             )
         )
@@ -410,6 +447,7 @@ public struct SuiClient {
         
         return try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
             let task = URLSession.shared.dataTask(with: requestUrl) { data, _, error in
+                print(JSON(data ?? "NONE"))
                 if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {

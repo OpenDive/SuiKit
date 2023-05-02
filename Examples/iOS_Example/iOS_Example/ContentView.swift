@@ -97,7 +97,7 @@ struct ContentView: View {
                         let gas = try await restClient.getGasPrice()
                         if let bob, let alice {
                             let txBlock = try await restClient.transferSui(
-                                bob.account, alice.account.accountAddress, Int(gas), UInt64(1_000_000_000), "0x2"
+                                bob.account, alice.account.accountAddress, Int(gas), UInt64(1_000_000_000), "0x2::coin::Coin<0x2::sui::SUI>"
                             )
                             let result = try await restClient.executeTransactionBlocks(txBlock, bob.account)
                             print(result)

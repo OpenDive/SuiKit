@@ -61,8 +61,8 @@ struct ContentView: View {
                     do {
                         if let bob, let alice {
                             self.isAirdropping = true
-                            let faucetClient = FaucetClient(baseUrl: "https://faucet.devnet.sui.io/gas")
-//                            try await faucetClient.funcAccount(alice.account.accountAddress.description)
+                            let faucetClient = FaucetClient(baseUrl: "https://faucet.testnet.sui.io/gas")
+                            try await faucetClient.funcAccount(alice.account.accountAddress.description)
                             try await faucetClient.funcAccount(bob.account.accountAddress.description)
                             self.isAirdropping = false
                         }
@@ -80,7 +80,7 @@ struct ContentView: View {
                         .clipShape(Capsule())
                         .padding(.top, 8)
                 } else {
-                    Text("Airdrop 10 SUI")
+                    Text("Airdrop 1 SUI")
                         .font(.headline)
                         .foregroundColor(.white)
                         .frame(width: 270, height: 50)
@@ -93,7 +93,7 @@ struct ContentView: View {
             Button {
                 Task {
                     do {
-                        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: "https://sui-devnet-kr-1.cosmostation.io"))
+                        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: "https://fullnode.testnet.sui.io:443"))
                         let gas = try await restClient.getGasPrice()
                         if let bob, let alice {
                             let txBlock = try await restClient.transferSui(

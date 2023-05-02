@@ -287,6 +287,23 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
+    public func splitCoin(_ signer: Account, _ coinObjectId: String, _ splitAmount: Int, _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_splitCoin",
+                [
+                    AnyCodable(signer.accountAddress.description),
+                    AnyCodable(coinObjectId),
+                    AnyCodable("\(splitAmount)"),
+                    AnyCodable(gas),
+                    AnyCodable("\(gasBudget)")
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
     public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),

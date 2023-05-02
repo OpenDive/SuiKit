@@ -119,6 +119,7 @@ extension URLSession {
     private func asyncData(with request: URLRequest) async throws -> Data {
         try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
             let task = URLSession.shared.dataTask(with: request) { data, _, error in
+                print(JSON(data ?? "None"))
                 if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {

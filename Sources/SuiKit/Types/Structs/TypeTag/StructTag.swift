@@ -27,7 +27,11 @@ import Foundation
 
 /// Struct Type Tag
 public struct StructTag: TypeProtcol, Equatable {
-    let value: StructTagValue
+    public let value: StructTagValue
+    
+    public init(value: StructTagValue) {
+        self.value = value
+    }
 
     public static func ==(lhs: StructTag, rhs: StructTag) -> Bool {
         return lhs.value == rhs.value
@@ -42,7 +46,7 @@ public struct StructTag: TypeProtcol, Equatable {
     ///
     /// - Returns: A StructTag instance that has been deserialized from the given string representation.
     ///
-    /// - Throws: An AptosError indicating that the given string representation is invalid and cannot be deserialized to a StructTag instance.
+    /// - Throws: An SuiError indicating that the given string representation is invalid and cannot be deserialized to a StructTag instance.
     public static func fromStr(_ typeTag: String) throws -> StructTag {
         var name = ""
         var index = 0

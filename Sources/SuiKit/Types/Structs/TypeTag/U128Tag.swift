@@ -28,7 +28,11 @@ import Foundation
 /// UInt128 Type Tag
 public struct U128Tag: TypeProtcol, Equatable {
     /// The value itself
-    let value: Int
+    public let value: UInt128
+    
+    public init(value: UInt128) {
+        self.value = value
+    }
 
     public static func ==(lhs: U128Tag, rhs: U128Tag) -> Bool {
         return lhs.value == rhs.value
@@ -39,7 +43,7 @@ public struct U128Tag: TypeProtcol, Equatable {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> U128Tag {
-        return try U128Tag(value: Int(Deserializer.u128(deserializer)))
+        return try U128Tag(value: Deserializer.u128(deserializer))
     }
 
     public func serialize(_ serializer: Serializer) throws {

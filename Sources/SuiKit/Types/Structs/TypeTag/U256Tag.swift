@@ -29,7 +29,11 @@ import UInt256
 /// UInt256 Type Tag
 public struct U256Tag: TypeProtcol, Equatable {
     /// The value itself
-    let value: Int
+    public let value: UInt256
+    
+    public init(value: UInt256) {
+        self.value = value
+    }
 
     public static func ==(lhs: U256Tag, rhs: U256Tag) -> Bool {
         return lhs.value == rhs.value
@@ -40,7 +44,7 @@ public struct U256Tag: TypeProtcol, Equatable {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> U256Tag {
-        return try U256Tag(value: Int(Deserializer.u256(deserializer)))
+        return try U256Tag(value: Deserializer.u256(deserializer))
     }
 
     public func serialize(_ serializer: Serializer) throws {

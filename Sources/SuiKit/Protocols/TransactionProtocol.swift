@@ -1,5 +1,5 @@
 //
-//  U32Tag.swift
+//  TransactionProtocol.swift
 //  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,28 +25,6 @@
 
 import Foundation
 
-/// UInt32 Type Tag
-public struct U32Tag: TypeProtcol, Equatable {
-    /// The value itself
-    public let value: Int
-
-    public init(value: Int) {
-        self.value = value
-    }
-    
-    public static func ==(lhs: U32Tag, rhs: U32Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
-
-    public func variant() -> Int {
-        return TypeTag.u32
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> U32Tag {
-        return try U32Tag(value: Int(Deserializer.u32(deserializer)))
-    }
-
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u32(serializer, UInt32(self.value))
-    }
+public protocol TransactionProtocol: KeyProtocol {
+    var tyArgs: [TypeTag] { get set }
 }

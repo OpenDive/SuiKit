@@ -28,7 +28,11 @@ import Foundation
 /// UInt16 Type Tag
 public struct U16Tag: TypeProtcol, Equatable {
     /// The value itself
-    let value: Int
+    public let value: Int
+    
+    public init(value: Int) {
+        self.value = value
+    }
 
     public static func ==(lhs: U16Tag, rhs: U16Tag) -> Bool {
         return lhs.value == rhs.value

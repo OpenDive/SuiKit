@@ -1,5 +1,5 @@
 //
-//  U32Tag.swift
+//  MultiEd25519Authenticator.swift
 //  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,28 +25,26 @@
 
 import Foundation
 
-/// UInt32 Type Tag
-public struct U32Tag: TypeProtcol, Equatable {
-    /// The value itself
-    public let value: Int
+// TODO: Implement struct
+public struct MultiEd25519Authenticator: AuthenticatorProtocol {
+    public var publicKey: MultiPublicKey
+    public var signature: MultiSignature
 
-    public init(value: Int) {
-        self.value = value
-    }
-    
-    public static func ==(lhs: U32Tag, rhs: U32Tag) -> Bool {
-        return lhs.value == rhs.value
+    public func verify(_ data: Data) throws -> Bool {
+        throw SuiError.notImplemented
     }
 
-    public func variant() -> Int {
-        return TypeTag.u32
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> U32Tag {
-        return try U32Tag(value: Int(Deserializer.u32(deserializer)))
+    public static func deserialize(from deserializer: Deserializer) throws -> MultiEd25519Authenticator {
+        throw SuiError.notImplemented
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u32(serializer, UInt32(self.value))
+        try Serializer._struct(serializer, value: self.publicKey)
+        try Serializer._struct(serializer, value: self.signature)
+    }
+
+    public func isEqualTo(_ rhs: AuthenticatorProtocol) -> Bool {
+        guard let APrhs = rhs as? MultiEd25519Authenticator else { return false }
+        return self.publicKey == APrhs.publicKey && self.signature == APrhs.signature
     }
 }

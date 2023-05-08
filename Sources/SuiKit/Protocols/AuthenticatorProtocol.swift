@@ -1,5 +1,5 @@
 //
-//  U32Tag.swift
+//  AuthenticatorProtocol.swift
 //  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,28 +25,24 @@
 
 import Foundation
 
-/// UInt32 Type Tag
-public struct U32Tag: TypeProtcol, Equatable {
-    /// The value itself
-    public let value: Int
+public protocol AuthenticatorProtocol: KeyProtocol {
+    /// Verifies the contents of the provided data.
+    ///
+    /// This function takes in a Data object and attempts to verify its contents. It returns true if the data is valid and false otherwise.
+    ///
+    /// - Parameter data: The data to be verified.
+    ///
+    /// - Throws: An error of type VerificationError if the data cannot be verified.
+    ///
+    /// - Returns: A boolean value indicating whether or not the data is valid.
+    func verify(_ data: Data) throws -> Bool
 
-    public init(value: Int) {
-        self.value = value
-    }
-    
-    public static func ==(lhs: U32Tag, rhs: U32Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
-
-    public func variant() -> Int {
-        return TypeTag.u32
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> U32Tag {
-        return try U32Tag(value: Int(Deserializer.u32(deserializer)))
-    }
-
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u32(serializer, UInt32(self.value))
-    }
+    /// Compares the current Ed25519Authenticator instance to another object conforming to AuthenticatorProtocol,
+    /// and returns a boolean indicating whether they have the same publicKey and signature properties.
+    ///
+    /// - Parameters:
+    ///    - rhs: The other object conforming to AuthenticatorProtocol to compare against.
+    ///
+    /// - Returns: A boolean indicating whether the two objects have the same publicKey and signature properties.
+    func isEqualTo(_ rhs: any AuthenticatorProtocol) -> Bool
 }

@@ -28,7 +28,11 @@ import Foundation
 /// UInt64 Type Tag
 public struct U64Tag: TypeProtcol, Equatable {
     /// The value itself
-    let value: Int
+    public let value: Int
+    
+    public init(value: Int) {
+        self.value = value
+    }
 
     public static func ==(lhs: U64Tag, rhs: U64Tag) -> Bool {
         return lhs.value == rhs.value

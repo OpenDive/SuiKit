@@ -8,12 +8,12 @@
 import Foundation
 
 public struct SuiObjectResponse {
-    let objectId: String
-    let version: Int
-    let digest: String
-    let type: String?
-    let owner: SuiObjectOwner?
-    let previousTransaction: String?
-    let storageRebate: Int?
-    let content: SuiMoveObject
+    public let objectId: String
+    public let version: Int
+    public let digest: String
+    public let type: String?
+    public let owner: SuiObjectOwner?
+    public let previousTransaction: String?
+    public let storageRebate: Int?
+    public let content: SuiMoveObject
 }

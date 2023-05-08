@@ -1,5 +1,5 @@
 //
-//  U32Tag.swift
+//  Ed25519Authenticator.swift
 //  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,28 +25,27 @@
 
 import Foundation
 
-/// UInt32 Type Tag
-public struct U32Tag: TypeProtcol, Equatable {
-    /// The value itself
-    public let value: Int
+public struct Ed25519Authenticator: AuthenticatorProtocol {
+    public let publicKey: PublicKey
+    public let signature: Signature
 
-    public init(value: Int) {
-        self.value = value
-    }
-    
-    public static func ==(lhs: U32Tag, rhs: U32Tag) -> Bool {
-        return lhs.value == rhs.value
+    public func verify(_ data: Data) throws -> Bool {
+        return try self.publicKey.verify(data: data, signature: self.signature)
     }
 
-    public func variant() -> Int {
-        return TypeTag.u32
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> U32Tag {
-        return try U32Tag(value: Int(Deserializer.u32(deserializer)))
+    public static func deserialize(from deserializer: Deserializer) throws -> Ed25519Authenticator {
+        let key = try deserializer._struct(type: PublicKey.self)
+        let signature = try deserializer._struct(type: Signature.self)
+        return Ed25519Authenticator(publicKey: key, signature: signature)
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u32(serializer, UInt32(self.value))
+        try Serializer._struct(serializer, value: self.publicKey)
+        try Serializer._struct(serializer, value: self.signature)
+    }
+
+    public func isEqualTo(_ rhs: any AuthenticatorProtocol) -> Bool {
+        guard let APrhs = rhs as? Ed25519Authenticator else { return false }
+        return self.publicKey == APrhs.publicKey && self.signature == APrhs.signature
     }
 }

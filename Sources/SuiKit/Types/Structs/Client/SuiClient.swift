@@ -33,7 +33,7 @@ public struct SuiClient {
         return try JSONDecoder().decode(JSON.self, from: data)["result"].uInt64Value
     }
     
-    public func totalSupply(_ coinType: String = "0x2::sui::SUI") async throws -> UInt64 {
+    public func totalSupply(_ coinType: String) async throws -> UInt64 {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getTotalSupply", [AnyCodable(coinType)])
@@ -41,27 +41,32 @@ public struct SuiClient {
         return try JSONDecoder().decode(JSON.self, from: data)["result"]["value"].uInt64Value
     }
     
-    public func getAllBalances(_ account: AccountAddress) async throws -> [Balance] {
+    public func getAllBalances(_ account: AccountAddress) async throws -> [CoinBalance] {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getAllBalances", [
                 AnyCodable(account.description)
             ])
         )
-        var balances: [Balance] = []
+        var balances: [CoinBalance] = []
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"] {
+            let lockedBalance = value["lockedBalance"]
             balances.append(
-                Balance(
+                CoinBalance(
                     coinType: value["coinType"].stringValue,
                     coinObjectCount: value["coinObjectCount"].intValue,
-                    totalBalance: value["totalBalance"].uInt64Value
+                    totalBalance: value["totalBalance"].stringValue,
+                    lockedBalance: value["lockedBalance"].isEmpty ? nil : LockedBalance(
+                        epochId: lockedBalance["epochId"].intValue,
+                        number: lockedBalance["number"].intValue
+                    )
                 )
             )
         }
         return balances
     }
     
-    public func getBalance(_ account: AccountAddress, _ coinType: String = "0x2::sui::SUI") async throws -> Balance {
+    public func getBalance(_ account: AccountAddress, _ coinType: String) async throws -> CoinBalance {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getBalance", [
@@ -70,14 +75,19 @@ public struct SuiClient {
             ])
         )
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        return Balance(
+        let lockedBalance = value["lockedBalance"]
+        return CoinBalance(
             coinType: value["coinType"].stringValue,
             coinObjectCount: value["coinObjectCount"].intValue,
-            totalBalance: value["totalBalance"].uInt64Value
+            totalBalance: value["totalBalance"].stringValue,
+            lockedBalance: value["lockedBalance"].isEmpty ? nil : LockedBalance(
+                epochId: lockedBalance["epochId"].intValue,
+                number: lockedBalance["number"].intValue
+            )
         )
     }
     
-    public func getAllCoins(_ account: AccountAddress, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> [CoinPage] {
+    public func getAllCoins(_ account: AccountAddress, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getAllCoins", [
@@ -86,23 +96,28 @@ public struct SuiClient {
                 AnyCodable(limit)
             ])
         )
-        var coinPages: [CoinPage] = []
+        var coinPages: [CoinStruct] = []
+        let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
             coinPages.append(
-                CoinPage(
+                CoinStruct(
                     coinType: value["coinType"].stringValue,
                     coinObjectId: value["coinObjectId"].stringValue,
                     version: value["version"].stringValue,
                     digest: value["digest"].stringValue,
-                    balance: value["balance"].uInt64Value,
+                    balance: value["balance"].stringValue,
                     previousTransaction: value["previousTransaction"].stringValue
                 )
             )
         }
-        return coinPages
+        return PaginatedCoins(
+            data: coinPages,
+            nextCursor: result["nextCursor"].stringValue,
+            hasNextPage: result["hasNextPage"].boolValue
+        )
     }
     
-    public func getCoins(_ account: AccountAddress, _ coinType: String = "0x2::sui::SUI", _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> [CoinPage] {
+    public func getCoins(_ account: AccountAddress, _ coinType: String, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -115,20 +130,25 @@ public struct SuiClient {
                 ]
             )
         )
-        var coinPages: [CoinPage] = []
-        for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
+        var coinPages: [CoinStruct] = []
+        let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
+        for (_, value): (String, JSON) in result["data"] {
             coinPages.append(
-                CoinPage(
+                CoinStruct(
                     coinType: value["coinType"].stringValue,
                     coinObjectId: value["coinObjectId"].stringValue,
                     version: value["version"].stringValue,
                     digest: value["digest"].stringValue,
-                    balance: value["balance"].uInt64Value,
+                    balance: value["balance"].stringValue,
                     previousTransaction: value["previousTransaction"].stringValue
                 )
             )
         }
-        return coinPages
+        return PaginatedCoins(
+            data: coinPages,
+            nextCursor: result["nextCursor"].stringValue,
+            hasNextPage: result["hasNextPage"].boolValue
+        )
     }
     
     public func getCoinMetadata(_ coinType: String) async throws -> SuiCoinMetadata {
@@ -150,6 +170,124 @@ public struct SuiClient {
             name: value["name"].stringValue,
             symbol: value["symbol"].stringValue,
             id: value["id"].stringValue
+        )
+    }
+    
+    public func getEvents(_ transactionDigest: String) async throws -> PaginatedSuiMoveEvent {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getEvents",
+                [
+                    AnyCodable(transactionDigest)
+                ]
+            )
+        )
+        var eventPages: [SuiMoveEvent] = []
+        let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
+        for (_, value): (String, JSON) in result["data"] {
+            let cursor = value["id"]
+            eventPages.append(
+                SuiMoveEvent(
+                    bcs: value["bcs"].stringValue,
+                    parsedJson: value["parsedJson"].dictionaryValue,
+                    packageId: value["packageId"].stringValue,
+                    sender: value["sender"].stringValue,
+                    transactionModule: value["transactionModule"].stringValue,
+                    type: value["type"].stringValue,
+                    id: Cursor(
+                        txDigest: cursor["txDigest"].stringValue,
+                        eventSeq: cursor["eventSeq"].stringValue
+                    )
+                )
+            )
+        }
+        let cursor = result["nextCursor"]
+        return PaginatedSuiMoveEvent(
+            data: eventPages,
+            nextCursor: Cursor(
+                txDigest: cursor["txDigest"].stringValue,
+                eventSeq: cursor["eventSeq"].stringValue
+            ),
+            hasNextPage: result["hasNextPage"].boolValue
+        )
+    }
+    
+    public func getCheckpoint(_ id: String) async throws -> Checkpoint {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getCheckpoint",
+                [
+                    AnyCodable(id)
+                ]
+            )
+        )
+        let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
+        let epochRollingGasCostSummary = value["epochRollingGasCostSummary"]
+        let gasCostSummary = GasCostSummary(
+            computationCost: epochRollingGasCostSummary["computationCost"].stringValue,
+            storageCost: epochRollingGasCostSummary["storageCost"].stringValue,
+            storageRebate: epochRollingGasCostSummary["storageRebate"].stringValue,
+            nonRefundableStorageFee: epochRollingGasCostSummary["nonRefundableStorageFee"].stringValue
+        )
+        
+        return Checkpoint(
+            epoch: value["epoch"].stringValue,
+            sequenceNumber: value["sequenceNumber"].stringValue,
+            digest: value["digest"].stringValue,
+            networkTotalTransactions: value["networkTotalTransactions"].stringValue,
+            previousDigest: value["previousDigest"].string,
+            epochRollingGasCostSummary: gasCostSummary,
+            timestampMs: value["timestampMs"].stringValue,
+            validatorSignature: value["validatorSignature"].stringValue,
+            transactions: value["transactions"].arrayValue.map { $0.stringValue },
+            checkpointComitments: value["transactions"].arrayValue.map { $0.rawValue }
+        )
+    }
+    
+    public func getCheckpoints(_ cursor: String? = nil, _ limit: Int? = nil, _ descendingOrder: Bool = false) async throws -> CheckpointPage {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getCheckpoints",
+                [
+                    AnyCodable(cursor),
+                    AnyCodable(limit),
+                    AnyCodable(descendingOrder)
+                ]
+            )
+        )
+        var checkpointPages: [Checkpoint] = []
+        let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
+        for (_, value): (String, JSON) in result["data"] {
+            let epochRollingGasCostSummary = value["epochRollingGasCostSummary"]
+            let gasCostSummary = GasCostSummary(
+                computationCost: epochRollingGasCostSummary["computationCost"].stringValue,
+                storageCost: epochRollingGasCostSummary["storageCost"].stringValue,
+                storageRebate: epochRollingGasCostSummary["storageRebate"].stringValue,
+                nonRefundableStorageFee: epochRollingGasCostSummary["nonRefundableStorageFee"].stringValue
+            )
+            
+            checkpointPages.append(
+                Checkpoint(
+                    epoch: value["epoch"].stringValue,
+                    sequenceNumber: value["sequenceNumber"].stringValue,
+                    digest: value["digest"].stringValue,
+                    networkTotalTransactions: value["networkTotalTransactions"].stringValue,
+                    previousDigest: value["previousDigest"].string,
+                    epochRollingGasCostSummary: gasCostSummary,
+                    timestampMs: value["timestampMs"].stringValue,
+                    validatorSignature: value["validatorSignature"].stringValue,
+                    transactions: value["transactions"].arrayValue.map { $0.stringValue },
+                    checkpointComitments: value["transactions"].arrayValue.map { $0.rawValue }
+                )
+            )
+        }
+        return CheckpointPage(
+            data: checkpointPages,
+            nextCursor: result["nextCursor"].stringValue,
+            hasNextPage: result["hasNextPage"].boolValue
         )
     }
     
@@ -219,7 +357,7 @@ public struct SuiClient {
         return result
     }
     
-    public func pay(_ sender: Account, _ coin: String, _ gasCoin: String, _ receiver: AccountAddress, _ amount: Int,  _ gasBudget: Int) async throws -> TransactionResponse {
+    public func pay(_ sender: Account, _ coin: String, _ gasCoin: String, _ receiver: AccountAddress, _ amount: String,  _ gasBudget: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -237,7 +375,7 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
-    public func paySui(_ sender: Account, _ receiver: AccountAddress, _ amount: Int, _ gasBudget: Int, _ coin: String) async throws -> TransactionResponse {
+    public func paySui(_ sender: Account, _ receiver: AccountAddress, _ amount: String, _ gasBudget: String, _ coin: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -270,7 +408,7 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
-    public func transferSui(_ sender: Account, _ receiver: AccountAddress, _ gasBudget: Int, _ amount: UInt64, _ suiObjectId: String) async throws -> TransactionResponse {
+    public func transferSui(_ sender: Account, _ receiver: AccountAddress, _ gasBudget: String, _ amount: String, _ suiObjectId: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -278,16 +416,33 @@ public struct SuiClient {
                 [
                     AnyCodable(sender.accountAddress.description),
                     AnyCodable(suiObjectId),
-                    AnyCodable("\(gasBudget)"),
+                    AnyCodable(gasBudget),
                     AnyCodable(receiver.description),
-                    AnyCodable("\(amount)")
+                    AnyCodable(amount)
                 ]
             )
         )
         return try await self.getTransactionResponse(data)
     }
     
-    public func splitCoin(_ signer: Account, _ coinObjectId: String, _ splitAmount: Int, _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
+    public func transferObject(_ sender: Account, _ objectId: objectId, _ gas: objectId, _ gasBudget: String, _ recipient: AccountAddress) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_transferObject",
+                [
+                    AnyCodable(sender.accountAddress.description),
+                    AnyCodable(objectId),
+                    AnyCodable(gas),
+                    AnyCodable(gasBudget),
+                    AnyCodable(recipient.description)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func splitCoin(_ signer: Account, _ coinObjectId: String, _ splitAmount: String, _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -295,16 +450,16 @@ public struct SuiClient {
                 [
                     AnyCodable(signer.accountAddress.description),
                     AnyCodable(coinObjectId),
-                    AnyCodable("\(splitAmount)"),
+                    AnyCodable(splitAmount),
                     AnyCodable(gas),
-                    AnyCodable("\(gasBudget)")
+                    AnyCodable(gasBudget)
                 ]
             )
         )
         return try await self.getTransactionResponse(data)
     }
     
-    public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
+    public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -326,11 +481,11 @@ public struct SuiClient {
         _ packageObjectId: String,
         _ module: String,
         _ function: String,
-        _ typeArguments: [String],
+        _ typeArguments: [TypeTag],
         _ arguments: [String],
         _ gas: String,
-        _ gasBudget: Int,
-        _ executionMode: SuiTransactionBuilderMode
+        _ gasBudget: String,
+        _ executionMode: SuiRequestType
     ) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -344,7 +499,7 @@ public struct SuiClient {
                     AnyCodable(typeArguments),
                     AnyCodable(arguments),
                     AnyCodable(gas),
-                    AnyCodable("\(gasBudget)"),
+                    AnyCodable(gasBudget),
                     AnyCodable(executionMode.asString())
                 ]
             )
@@ -352,7 +507,41 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
-    public func transferObject(_ sender: Account, _ receiver: AccountAddress, _ objectId: String, _ gas: String, _ gasBudget: Int) async throws -> TransactionResponse {
+    public func requestAddStake(_ signer: Account, _ coins: [String], _ amount: String, _ validators: SuiAddress, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_requestAddStake",
+                [
+                    AnyCodable(signer.accountAddress.description),
+                    AnyCodable(coins),
+                    AnyCodable(amount),
+                    AnyCodable(validators),
+                    AnyCodable(gas),
+                    AnyCodable(gasBudget)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func requestWithdrawStake(_ signer: Account, _ stakedSui: objectId, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_requestWithdrawStake",
+                [
+                    AnyCodable(signer.accountAddress.description),
+                    AnyCodable(stakedSui),
+                    AnyCodable(gas),
+                    AnyCodable(gasBudget)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
+    public func transferObject(_ sender: Account, _ receiver: AccountAddress, _ objectId: String, _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -361,7 +550,7 @@ public struct SuiClient {
                     AnyCodable(sender.accountAddress.description),
                     AnyCodable(objectId),
                     AnyCodable(gas),
-                    AnyCodable("\(gasBudget)"),
+                    AnyCodable(gasBudget),
                     AnyCodable(receiver.description)
                 ]
             )
@@ -369,7 +558,7 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
-    public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> TransactionResponse {
+    public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> JSON {
         // 1. Create byte array of 3 '0' elements (this is called the intent)
         let flag: [UInt8] = [0, 0, 0]
         
@@ -403,7 +592,7 @@ public struct SuiClient {
             )
         )
         
-        return try await self.getTransactionResponse(data)
+        return JSON(data)["result"]
     }
     
     private func getTransactionResponse(_ data: Data) async throws -> TransactionResponse {
@@ -457,14 +646,13 @@ public struct SuiClient {
         do {
             let requestData = try JSONEncoder().encode(request)
             requestUrl.httpBody = requestData
-            print(JSON(requestData))
         } catch {
             throw SuiError.encodingError
         }
         
         return try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
             let task = URLSession.shared.dataTask(with: requestUrl) { data, _, error in
-                print(JSON(data ?? "NONE"))
+                print(JSON(data))
                 if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {

@@ -28,7 +28,11 @@ import Foundation
 /// UInt8 Type Tag
 public struct U8Tag: TypeProtcol, Equatable {
     /// The value itself
-    let value: Int
+    public let value: Int
+    
+    public init(value: Int) {
+        self.value = value
+    }
 
     public static func ==(lhs: U8Tag, rhs: U8Tag) -> Bool {
         return lhs.value == rhs.value

@@ -32,4 +32,8 @@ public enum SuiError: Swift.Error, Equatable {
     case encodingError
     case invalidUrl(url: String)
     case invalidCoinType
+    case invalidVariant
+    case invalidTransactionType
+    case invalidAuthenticatorType
+    case invalidType(type: String)
 }

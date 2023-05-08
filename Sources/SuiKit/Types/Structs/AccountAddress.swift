@@ -82,7 +82,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Returns: An AccountAddress instance created from the provided hexadecimal string.
     ///
-    /// - Throws: An error of type AptosError indicating that the provided hexadecimal string is invalid and cannot be converted to an AccountAddress instance.
+    /// - Throws: An error of type SuiError indicating that the provided hexadecimal string is invalid and cannot be converted to an AccountAddress instance.
     public static func fromHex(_ address: String) throws -> AccountAddress {
         var addr = address
 
@@ -109,7 +109,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Returns: An AccountAddress instance created from the provided PublicKey.
     ///
-    /// - Throws: An error of type AptosError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
+    /// - Throws: An error of type SuiError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
     public static func fromKey(_ key: PublicKey) throws -> AccountAddress {
         let data = Data([UInt8](Data(count: 1)) + key.key)
         let result = try Blake2.hash(.b2b, size: 32, data: data)
@@ -128,7 +128,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Returns: An AccountAddress instance created from the provided MultiPublicKey.
     ///
-    /// - Throws: An error of type AptosError indicating that the provided MultiPublicKey is invalid and cannot be converted to an AccountAddress instance.
+    /// - Throws: An error of type SuiError indicating that the provided MultiPublicKey is invalid and cannot be converted to an AccountAddress instance.
     public static func fromMultiEd25519(keys: MultiPublicKey) throws -> AccountAddress {
         let keysBytes = keys.toBytes()
         var addressBytes = Data(count: keysBytes.count + 1)
@@ -151,7 +151,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Returns: An AccountAddress instance representing the newly created resource account.
     ///
-    /// - Throws: An error of type AptosError indicating that the provided creator address or seed is invalid and cannot be used to create a resource account.
+    /// - Throws: An error of type SuiError indicating that the provided creator address or seed is invalid and cannot be used to create a resource account.
     public static func forResourceAccount(_ creator: AccountAddress, seed: Data) throws -> AccountAddress {
         var addressBytes = Data(count: creator.address.count + seed.count + 1)
         addressBytes[0..<creator.address.count] = creator.address[0..<creator.address.count]
@@ -174,7 +174,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Returns: An AccountAddress instance representing the newly created named object.
     ///
-    /// - Throws: An error of type AptosError indicating that the provided creator address or seed is invalid and cannot be used to create a named object.
+    /// - Throws: An error of type SuiError indicating that the provided creator address or seed is invalid and cannot be used to create a named object.
     public static func forNamedObject(_ creator: AccountAddress, seed: Data) throws -> AccountAddress {
         var addressBytes = Data(count: creator.address.count + seed.count + 1)
         addressBytes[0..<creator.address.count] = creator.address[0..<creator.address.count]
@@ -195,7 +195,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Returns: An AccountAddress object that represents the named token.
     ///
-    /// - Throws: An error of type AptosError.stringToDataFailure if collectionName, tokenName, or "::" can't be converted into Data.
+    /// - Throws: An error of type SuiError.stringToDataFailure if collectionName, tokenName, or "::" can't be converted into Data.
     public static func forNamedToken(_ creator: AccountAddress, _ collectionName: String, _ tokenName: String) throws -> AccountAddress {
         guard let collectionData = collectionName.data(using: .utf8) else {
             throw SuiError.stringToDataFailure(value: "\(collectionName)")
@@ -220,7 +220,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///    - creator: The creator's AccountAddress.
     ///    - collectionName: The name of the collection as a String.
     ///
-    /// - Throws: An AptosError object of type stringToDataFailure if the conversion of the collection name string to data
+    /// - Throws: An SuiError object of type stringToDataFailure if the conversion of the collection name string to data
     /// using UTF-8 encoding fails.
     ///
     /// - Returns: An AccountAddress that represents the named collection.

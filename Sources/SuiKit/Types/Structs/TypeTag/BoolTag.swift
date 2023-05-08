@@ -28,7 +28,11 @@ import Foundation
 /// Bool Type Tag
 public struct BoolTag: TypeProtcol, Equatable {
     /// The value itself
-    let value: Bool
+    public let value: Bool
+    
+    public init(value: Bool) {
+        self.value = value
+    }
 
     public static func ==(lhs: BoolTag, rhs: BoolTag) -> Bool {
         return lhs.value == rhs.value

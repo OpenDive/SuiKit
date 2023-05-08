@@ -119,7 +119,6 @@ extension URLSession {
     private func asyncData(with request: URLRequest) async throws -> Data {
         try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
             let task = URLSession.shared.dataTask(with: request) { data, _, error in
-                print(JSON(data ?? "None"))
                 if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {
@@ -142,9 +141,9 @@ extension URLSession {
     /// - Returns: The decoded `JSON` object.
     ///
     /// - Throws: An error if the decoding process fails.
-    public func decodeUrl(with url: URL, _ body: [String: Any]) async throws {
+    public func decodeUrl(with url: URL, _ body: [String: Any]) async throws -> Data {
         let jsonData = try? JSONSerialization.data(withJSONObject: body)
-        let _ = try await self.asyncData(
+        return try await self.asyncData(
             with: url, method: .post,
             body: jsonData
         )

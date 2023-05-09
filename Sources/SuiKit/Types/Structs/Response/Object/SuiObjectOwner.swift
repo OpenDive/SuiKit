@@ -11,5 +11,5 @@ public struct SuiObjectOwner: Codable {
     enum CodingKeys: String, CodingKey {
         case addressOwner = "AddressOwner"
     }
-    let addressOwner: String
+    public let addressOwner: String
 }

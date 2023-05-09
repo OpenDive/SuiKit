@@ -12,13 +12,13 @@
 		7D657DA02A000965008D3754 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D657D9F2A000965008D3754 /* Assets.xcassets */; };
 		7D657DA32A000965008D3754 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 7D657DA22A000965008D3754 /* Preview Assets.xcassets */; };
 		7D657DAC2A000984008D3754 /* SuiKit in Frameworks */ = {isa = PBXBuildFile; productRef = 7D657DAB2A000984008D3754 /* SuiKit */; };
-		7D657DAE2A053C09008D3754 /* collection.move in Resources */ = {isa = PBXBuildFile; fileRef = 7D657DAD2A053C09008D3754 /* collection.move */; };
 		7D657DB22A0546DE008D3754 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DB12A0546DE008D3754 /* HomeViewModel.swift */; };
 		7D657DB52A05B47F008D3754 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DB32A05B47F008D3754 /* HomeView.swift */; };
 		7D657DB62A05B47F008D3754 /* AccountView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DB42A05B47F008D3754 /* AccountView.swift */; };
 		7D657DB82A05B51F008D3754 /* TransferView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DB72A05B51F008D3754 /* TransferView.swift */; };
 		7D657DBA2A05B5E9008D3754 /* CreateCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DB92A05B5E9008D3754 /* CreateCollectionView.swift */; };
 		7D657DBC2A05B665008D3754 /* MintNFTView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DBB2A05B665008D3754 /* MintNFTView.swift */; };
+		7D657DC42A09FBE6008D3754 /* Package.json in Resources */ = {isa = PBXBuildFile; fileRef = 7D657DC32A09FBE6008D3754 /* Package.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -28,13 +28,13 @@
 		7D657D9F2A000965008D3754 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		7D657DA22A000965008D3754 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		7D657DAA2A000977008D3754 /* SuiKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = SuiKit; path = ../..; sourceTree = "<group>"; };
-		7D657DAD2A053C09008D3754 /* collection.move */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = collection.move; sourceTree = "<group>"; };
 		7D657DB12A0546DE008D3754 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
 		7D657DB32A05B47F008D3754 /* HomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		7D657DB42A05B47F008D3754 /* AccountView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountView.swift; sourceTree = "<group>"; };
 		7D657DB72A05B51F008D3754 /* TransferView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TransferView.swift; sourceTree = "<group>"; };
 		7D657DB92A05B5E9008D3754 /* CreateCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateCollectionView.swift; sourceTree = "<group>"; };
 		7D657DBB2A05B665008D3754 /* MintNFTView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MintNFTView.swift; sourceTree = "<group>"; };
+		7D657DC32A09FBE6008D3754 /* Package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Package.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,7 +71,6 @@
 			children = (
 				7D657DB02A0546D1008D3754 /* View Models */,
 				7D657DAF2A0546C7008D3754 /* Views */,
-				7D657DAD2A053C09008D3754 /* collection.move */,
 				7D657D9B2A000964008D3754 /* iOS_ExampleApp.swift */,
 				7D657D9D2A000964008D3754 /* ContentView.swift */,
 				7D657D9F2A000965008D3754 /* Assets.xcassets */,
@@ -111,6 +110,7 @@
 		7D657DB02A0546D1008D3754 /* View Models */ = {
 			isa = PBXGroup;
 			children = (
+				7D657DC32A09FBE6008D3754 /* Package.json */,
 				7D657DB12A0546DE008D3754 /* HomeViewModel.swift */,
 			);
 			path = "View Models";
@@ -179,7 +179,7 @@
 			files = (
 				7D657DA32A000965008D3754 /* Preview Assets.xcassets in Resources */,
 				7D657DA02A000965008D3754 /* Assets.xcassets in Resources */,
-				7D657DAE2A053C09008D3754 /* collection.move in Resources */,
+				7D657DC42A09FBE6008D3754 /* Package.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

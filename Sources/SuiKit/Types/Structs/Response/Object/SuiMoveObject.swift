@@ -9,8 +9,8 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiMoveObject: Codable {
-    let dataType: String
-    let type: String
-    let hasPublicTransfer: Bool
-    let fields: JSON
+    public let dataType: String
+    public let type: String
+    public let hasPublicTransfer: Bool
+    public let fields: JSON
 }

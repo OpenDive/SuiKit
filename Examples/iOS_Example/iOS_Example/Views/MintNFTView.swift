@@ -28,11 +28,11 @@ import SwiftUI
 struct MintNFTView: View {
     @ObservedObject var viewModel: HomeViewModel
 
-    @State private var objectId: String = "0xa6feff4e40c90bf34abafed94d523744050df63b"
+    @State private var objectId: String = "0xf0048471654fd5cad2e9c0db7243fc5094693153802bec6dcf49e255ec29a6a1"
     @State private var tokenName: String = "SuiTestingCollectionNFT"
     @State private var tokenDescription: String = "SuiTestingCollection"
     @State private var supply: String = "100"
-    @State private var tokenURL: String = "https://aptos.dev/img/aptos_word_dark.svg"
+    @State private var tokenURL: String = "https://assets-global.website-files.com/6425f546844727ce5fb9e5ab/6439ab96e20cad137a4c80d0_TopNavLogo.svg"
 
     @State private var message: String = ""
     @State private var isShowingPopup: Bool = false
@@ -44,7 +44,7 @@ struct MintNFTView: View {
 
     var body: some View {
         VStack {
-            Image("aptosLogo")
+            Image("suiLogo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: UIScreen.main.bounds.width - 200)
@@ -89,8 +89,8 @@ struct MintNFTView: View {
                         self.isMintingNft = true
                         try await self.viewModel.createNft(
                             self.viewModel.currentWallet.account,
-                            objectId,
                             tokenName,
+                            objectId,
                             tokenDescription,
                             tokenURL,
                             supply,

@@ -459,6 +459,23 @@ public struct SuiClient {
         return try await self.getTransactionResponse(data)
     }
     
+    public func mergeCoin(_ signer: Account, _ primaryCoin: objectId, _ coinToMerge: objectId, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "unsafe_mergeCoins",
+                [
+                    AnyCodable(signer.accountAddress.description),
+                    AnyCodable(primaryCoin),
+                    AnyCodable(coinToMerge),
+                    AnyCodable(gas),
+                    AnyCodable(gasBudget)
+                ]
+            )
+        )
+        return try await self.getTransactionResponse(data)
+    }
+    
     public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -485,7 +502,7 @@ public struct SuiClient {
         _ arguments: [String],
         _ gas: String,
         _ gasBudget: String,
-        _ executionMode: SuiRequestType
+        _ executionMode: SuiTransactionBuilderMode
     ) async throws -> TransactionResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -535,23 +552,6 @@ public struct SuiClient {
                     AnyCodable(stakedSui),
                     AnyCodable(gas),
                     AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try await self.getTransactionResponse(data)
-    }
-    
-    public func transferObject(_ sender: Account, _ receiver: AccountAddress, _ objectId: String, _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_transferObject",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable(objectId),
-                    AnyCodable(gas),
-                    AnyCodable(gasBudget),
-                    AnyCodable(receiver.description)
                 ]
             )
         )
@@ -652,7 +652,6 @@ public struct SuiClient {
         
         return try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
             let task = URLSession.shared.dataTask(with: requestUrl) { data, _, error in
-                print(JSON(data))
                 if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {

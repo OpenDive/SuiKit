@@ -11,10 +11,10 @@ import AnyCodable
 import Blake2
 
 public struct SuiClient {
-    public var clientConfig: ClientConfig
+    public var connection: any ConnectionProtcol
     
-    public init(clientConfig: ClientConfig) {
-        self.clientConfig = clientConfig
+    public init(connection: any ConnectionProtcol) {
+        self.connection = connection
     }
     
     public func info() async throws -> JSON {
@@ -619,8 +619,8 @@ public struct SuiClient {
     }
     
     private func getServerUrl() throws -> URL {
-        guard let url = URL(string: self.clientConfig.baseUrl) else {
-            throw SuiError.invalidUrl(url: self.clientConfig.baseUrl)
+        guard let url = URL(string: self.connection.fullNode) else {
+            throw SuiError.invalidUrl(url: self.connection.fullNode)
         }
         return url
     }

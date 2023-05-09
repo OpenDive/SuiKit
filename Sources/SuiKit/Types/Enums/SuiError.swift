@@ -36,4 +36,5 @@ public enum SuiError: Swift.Error, Equatable {
     case invalidTransactionType
     case invalidAuthenticatorType
     case invalidType(type: String)
+    case faucetUrlRequired
 }

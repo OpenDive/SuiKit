@@ -49,7 +49,7 @@ public extension Data {
         return map { String(format: "%02hhx", $0) }.joined()
     }
     
-    public static func fromBase64(_ encoded: String) -> Data? {
+    static func fromBase64(_ encoded: String) -> Data? {
         // Prefixes padding-character(s) (if needed).
         var encoded = encoded;
         let remainder = encoded.count % 4

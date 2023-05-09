@@ -9,13 +9,16 @@ import Foundation
 import SwiftyJSON
 
 public struct FaucetClient {
-    public let baseUrl: String
+    public let connection: any ConnectionProtcol
     
-    public init(baseUrl: String) {
-        self.baseUrl = baseUrl
+    public init(connection: any ConnectionProtcol) {
+        self.connection = connection
     }
     
     public func funcAccount(_ address: String) async throws -> FaucetCoinInfo {
+        guard let baseUrl = connection.faucet else {
+            throw SuiError.faucetUrlRequired
+        }
         guard let url = URL(string: baseUrl) else {
             throw SuiError.invalidUrl(url: baseUrl)
         }

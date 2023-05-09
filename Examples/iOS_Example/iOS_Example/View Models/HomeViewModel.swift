@@ -12,9 +12,9 @@ import SwiftyJSON
 public class HomeViewModel: ObservableObject {
     @Published var wallets: [Wallet] = []
     @Published var currentWallet: Wallet
-
-    let restBaseUrl = "https://fullnode.devnet.sui.io:443"
-    let faucetUrl = "https://faucet.devnet.sui.io/gas"
+    
+    public let restClient = SuiClient(connection: devnetConnection)
+    public let faucetClient = FaucetClient(connection: devnetConnection)
 
     public init(_ mnemos: [[String]]? = nil) throws {
         if let mnemos {
@@ -60,16 +60,13 @@ public class HomeViewModel: ObservableObject {
     }
 
     public func getCurrentWalletBalance() async throws -> Double {
-        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: self.restBaseUrl))
         return (Double(
-            try await restClient.getBalance(self.currentWallet.account.accountAddress, "0x2::sui::SUI").totalBalance
+            try await self.restClient.getBalance(self.currentWallet.account.accountAddress, "0x2::sui::SUI").totalBalance
         ) ?? 0) / Double(1_000_000_000)
     }
 
     public func airdropToCurrentWallet() async throws {
-        let faucetClient = FaucetClient(baseUrl: faucetUrl)
-
-        let _ = try await faucetClient.funcAccount(self.currentWallet.account.accountAddress.description)
+        let _ = try await self.faucetClient.funcAccount(self.currentWallet.account.accountAddress.description)
     }
 
     public func createNft(
@@ -81,8 +78,7 @@ public class HomeViewModel: ObservableObject {
         _ mintCap: String,
         _ recipient: String
     ) async throws {
-        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: self.restBaseUrl))
-        let objects = try await restClient.getOwnedObjects(signer.accountAddress)
+        let objects = try await self.restClient.getOwnedObjects(signer.accountAddress)
         let suiCoinObjects = objects.filter { $0.type == "0x2::coin::Coin<0x2::sui::SUI>" }
         
         if !suiCoinObjects.isEmpty {
@@ -91,7 +87,7 @@ public class HomeViewModel: ObservableObject {
                 description,
                 url
             ]
-            let tx = try await restClient.moveCall(
+            let tx = try await self.restClient.moveCall(
                 signer,
                 objectId,
                 "devnet_nft",
@@ -102,13 +98,12 @@ public class HomeViewModel: ObservableObject {
                 "\(Int(200_000_000))",
                 .commit
             )
-            let _ = try await restClient.executeTransactionBlocks(tx, signer)
+            let _ = try await self.restClient.executeTransactionBlocks(tx, signer)
         }
     }
     
     public func fetchObjectId() async throws -> String {
-        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: self.restBaseUrl))
-        let objects = try await restClient.getOwnedObjects(self.currentWallet.account.accountAddress)
+        let objects = try await self.restClient.getOwnedObjects(self.currentWallet.account.accountAddress)
         let id = objects.filter { $0.content.fields["package"].exists() }
         return id[0].content.fields["package"].stringValue
     }
@@ -121,30 +116,28 @@ public class HomeViewModel: ObservableObject {
             throw NSError(domain: "package is corrupted", code: -1)
         }
         let fileData = JSON(fileCompiledData)
-        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: self.restBaseUrl))
-        let objects = try await restClient.getOwnedObjects(signer.accountAddress)
+        let objects = try await self.restClient.getOwnedObjects(signer.accountAddress)
         let suiCoinObjects = objects.filter { $0.type == "0x2::coin::Coin<0x2::sui::SUI>" }
         
         if !suiCoinObjects.isEmpty {
-            let tx = try await restClient.publish(
+            let tx = try await self.restClient.publish(
                 signer,
                 fileData["modules"].arrayValue.map { $0.stringValue },
                 fileData["dependencies"].arrayValue.map { $0.stringValue },
                 suiCoinObjects[0].objectId,
                 "\(Int(200_000_000))"
             )
-            let _ = try await restClient.executeTransactionBlocks(tx, signer)
+            let _ = try await self.restClient.executeTransactionBlocks(tx, signer)
         }
     }
 
     public func createTransaction(_ signer: Account, _ receiverAddress: AccountAddress, _ amount: Double) async throws {
-        let restClient = SuiClient(clientConfig: ClientConfig(baseUrl: self.restBaseUrl))
-        let objects = try await restClient.getOwnedObjects(signer.accountAddress)
+        let objects = try await self.restClient.getOwnedObjects(signer.accountAddress)
         let suiCoinObjects = objects.filter { $0.type == "0x2::coin::Coin<0x2::sui::SUI>" }
         
         if !suiCoinObjects.isEmpty {
-            let gas = try await restClient.getGasPrice()
-            let tx = try await restClient.transferSui(
+            let gas = try await self.restClient.getGasPrice()
+            let tx = try await self.restClient.transferSui(
                 signer,
                 receiverAddress,
                 "\(Int(1_000 * gas + 1_000_000))",

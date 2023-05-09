@@ -1,6 +1,6 @@
 //
-//  Data.swift
-//  SuiKit
+//  AuthenticatorProtocol.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -23,43 +23,26 @@
 //  THE SOFTWARE.
 //
 
-import CommonCrypto
 import Foundation
 
-public extension Data {
-    /// Two octet checksum as defined in RFC-4880. Sum of all octets, mod 65536
-    func checksum() -> UInt16 {
-        let s = withUnsafeBytes { buf in
-            buf.lazy.map(UInt32.init).reduce(UInt32(0), +)
-        }
-        return UInt16(s % 65535)
-    }
-}
+public protocol AuthenticatorProtocol: KeyProtocol {
+    /// Verifies the contents of the provided data.
+    ///
+    /// This function takes in a Data object and attempts to verify its contents. It returns true if the data is valid and false otherwise.
+    ///
+    /// - Parameter data: The data to be verified.
+    ///
+    /// - Throws: An error of type VerificationError if the data cannot be verified.
+    ///
+    /// - Returns: A boolean value indicating whether or not the data is valid.
+    func verify(_ data: Data) throws -> Bool
 
-public extension Data {
-    init(hex: String) {
-        self.init([UInt8](hex: hex))
-    }
-    
-    var bytes: [UInt8] {
-        Array(self)
-    }
-    
-    func hexEncodedString() -> String {
-        return map { String(format: "%02hhx", $0) }.joined()
-    }
-    
-    static func fromBase64(_ encoded: String) -> Data? {
-        // Prefixes padding-character(s) (if needed).
-        var encoded = encoded;
-        let remainder = encoded.count % 4
-        if remainder > 0 {
-            encoded = encoded.padding(
-                toLength: encoded.count + 4 - remainder,
-                withPad: "=", startingAt: 0);
-        }
-        
-        // Finally, decode.
-        return Data(base64Encoded: encoded);
-    }
+    /// Compares the current Ed25519Authenticator instance to another object conforming to AuthenticatorProtocol,
+    /// and returns a boolean indicating whether they have the same publicKey and signature properties.
+    ///
+    /// - Parameters:
+    ///    - rhs: The other object conforming to AuthenticatorProtocol to compare against.
+    ///
+    /// - Returns: A boolean indicating whether the two objects have the same publicKey and signature properties.
+    func isEqualTo(_ rhs: any AuthenticatorProtocol) -> Bool
 }

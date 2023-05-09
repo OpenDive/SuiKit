@@ -1,6 +1,6 @@
 //
-//  Data.swift
-//  SuiKit
+//  MultiEd25519Authenticator.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -23,43 +23,28 @@
 //  THE SOFTWARE.
 //
 
-import CommonCrypto
 import Foundation
 
-public extension Data {
-    /// Two octet checksum as defined in RFC-4880. Sum of all octets, mod 65536
-    func checksum() -> UInt16 {
-        let s = withUnsafeBytes { buf in
-            buf.lazy.map(UInt32.init).reduce(UInt32(0), +)
-        }
-        return UInt16(s % 65535)
-    }
-}
+// TODO: Implement struct
+public struct MultiEd25519Authenticator: AuthenticatorProtocol {
+    public var publicKey: MultiPublicKey
+    public var signature: MultiSignature
 
-public extension Data {
-    init(hex: String) {
-        self.init([UInt8](hex: hex))
+    public func verify(_ data: Data) throws -> Bool {
+        throw SuiError.notImplemented
     }
-    
-    var bytes: [UInt8] {
-        Array(self)
+
+    public static func deserialize(from deserializer: Deserializer) throws -> MultiEd25519Authenticator {
+        throw SuiError.notImplemented
     }
-    
-    func hexEncodedString() -> String {
-        return map { String(format: "%02hhx", $0) }.joined()
+
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: self.publicKey)
+        try Serializer._struct(serializer, value: self.signature)
     }
-    
-    static func fromBase64(_ encoded: String) -> Data? {
-        // Prefixes padding-character(s) (if needed).
-        var encoded = encoded;
-        let remainder = encoded.count % 4
-        if remainder > 0 {
-            encoded = encoded.padding(
-                toLength: encoded.count + 4 - remainder,
-                withPad: "=", startingAt: 0);
-        }
-        
-        // Finally, decode.
-        return Data(base64Encoded: encoded);
+
+    public func isEqualTo(_ rhs: AuthenticatorProtocol) -> Bool {
+        guard let APrhs = rhs as? MultiEd25519Authenticator else { return false }
+        return self.publicKey == APrhs.publicKey && self.signature == APrhs.signature
     }
 }

@@ -1,6 +1,6 @@
 //
-//  Data.swift
-//  SuiKit
+//  ClientConfig.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -23,43 +23,27 @@
 //  THE SOFTWARE.
 //
 
-import CommonCrypto
 import Foundation
 
-public extension Data {
-    /// Two octet checksum as defined in RFC-4880. Sum of all octets, mod 65536
-    func checksum() -> UInt16 {
-        let s = withUnsafeBytes { buf in
-            buf.lazy.map(UInt32.init).reduce(UInt32(0), +)
-        }
-        return UInt16(s % 65535)
+/// Client Configuration for the REST client
+public struct ClientConfig {
+    public init(
+        expirationTtl: Int = 600,
+        gasUnitPrice: Int = 100,
+        maxGasAmount: Int = 100_000,
+        transactionWaitInSeconds: Int = 20,
+        baseUrl: String
+    ) {
+        self.expirationTtl = expirationTtl
+        self.gasUnitPrice = gasUnitPrice
+        self.maxGasAmount = maxGasAmount
+        self.transactionWaitInSeconds = transactionWaitInSeconds
+        self.baseUrl = baseUrl
     }
-}
 
-public extension Data {
-    init(hex: String) {
-        self.init([UInt8](hex: hex))
-    }
-    
-    var bytes: [UInt8] {
-        Array(self)
-    }
-    
-    func hexEncodedString() -> String {
-        return map { String(format: "%02hhx", $0) }.joined()
-    }
-    
-    static func fromBase64(_ encoded: String) -> Data? {
-        // Prefixes padding-character(s) (if needed).
-        var encoded = encoded;
-        let remainder = encoded.count % 4
-        if remainder > 0 {
-            encoded = encoded.padding(
-                toLength: encoded.count + 4 - remainder,
-                withPad: "=", startingAt: 0);
-        }
-        
-        // Finally, decode.
-        return Data(base64Encoded: encoded);
-    }
+    public var expirationTtl: Int
+    public var gasUnitPrice: Int
+    public var maxGasAmount: Int
+    public var transactionWaitInSeconds: Int
+    public var baseUrl: String
 }

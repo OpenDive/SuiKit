@@ -25,10 +25,11 @@
 
 import Foundation
 import UInt256
+import AnyCodable
 
 public protocol EncodingProtocol: EncodingContainer { }
 
-extension UInt8: EncodingProtocol { }
+extension UInt8: EncodingProtocol{ }
 extension UInt16: EncodingProtocol { }
 extension UInt32: EncodingProtocol { }
 extension UInt64: EncodingProtocol { }

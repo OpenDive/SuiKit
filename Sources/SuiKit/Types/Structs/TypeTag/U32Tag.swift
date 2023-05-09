@@ -1,6 +1,6 @@
 //
-//  Data.swift
-//  SuiKit
+//  U32Tag.swift
+//  AptosKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -23,43 +23,30 @@
 //  THE SOFTWARE.
 //
 
-import CommonCrypto
 import Foundation
 
-public extension Data {
-    /// Two octet checksum as defined in RFC-4880. Sum of all octets, mod 65536
-    func checksum() -> UInt16 {
-        let s = withUnsafeBytes { buf in
-            buf.lazy.map(UInt32.init).reduce(UInt32(0), +)
-        }
-        return UInt16(s % 65535)
-    }
-}
+/// UInt32 Type Tag
+public struct U32Tag: TypeProtcol, Equatable {
+    /// The value itself
+    public let value: Int
 
-public extension Data {
-    init(hex: String) {
-        self.init([UInt8](hex: hex))
+    public init(value: Int) {
+        self.value = value
     }
     
-    var bytes: [UInt8] {
-        Array(self)
+    public static func ==(lhs: U32Tag, rhs: U32Tag) -> Bool {
+        return lhs.value == rhs.value
     }
-    
-    func hexEncodedString() -> String {
-        return map { String(format: "%02hhx", $0) }.joined()
+
+    public func variant() -> Int {
+        return TypeTag.u32
     }
-    
-    static func fromBase64(_ encoded: String) -> Data? {
-        // Prefixes padding-character(s) (if needed).
-        var encoded = encoded;
-        let remainder = encoded.count % 4
-        if remainder > 0 {
-            encoded = encoded.padding(
-                toLength: encoded.count + 4 - remainder,
-                withPad: "=", startingAt: 0);
-        }
-        
-        // Finally, decode.
-        return Data(base64Encoded: encoded);
+
+    public static func deserialize(from deserializer: Deserializer) throws -> U32Tag {
+        return try U32Tag(value: Int(Deserializer.u32(deserializer)))
+    }
+
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.u32(serializer, UInt32(self.value))
     }
 }

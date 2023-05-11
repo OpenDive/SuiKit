@@ -27,7 +27,7 @@ import Foundation
 import ed25519swift
 
 /// The ED25519 Public Key
-public struct PublicKey: Equatable, KeyProtocol, CustomStringConvertible {
+public struct ED25519PublicKey: Equatable, KeyProtocol, CustomStringConvertible {
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
@@ -35,13 +35,13 @@ public struct PublicKey: Equatable, KeyProtocol, CustomStringConvertible {
     let key: Data
 
     public init(data: Data) throws {
-        guard data.count <= PublicKey.LENGTH else {
+        guard data.count <= ED25519PublicKey.LENGTH else {
             throw SuiError.invalidPublicKey
         }
         self.key = data
     }
 
-    public static func == (lhs: PublicKey, rhs: PublicKey) -> Bool {
+    public static func == (lhs: ED25519PublicKey, rhs: ED25519PublicKey) -> Bool {
         return lhs.key == rhs.key
     }
 
@@ -68,12 +68,12 @@ public struct PublicKey: Equatable, KeyProtocol, CustomStringConvertible {
         )
     }
 
-    public static func deserialize(from deserializer: Deserializer) throws -> PublicKey {
+    public static func deserialize(from deserializer: Deserializer) throws -> ED25519PublicKey {
         let key = try Deserializer.toBytes(deserializer)
-        if key.count != PublicKey.LENGTH {
+        if key.count != ED25519PublicKey.LENGTH {
             throw SuiError.lengthMismatch
         }
-        return try PublicKey(data: key)
+        return try ED25519PublicKey(data: key)
     }
 
     public func serialize(_ serializer: Serializer) throws {

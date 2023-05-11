@@ -28,7 +28,7 @@ import Foundation
 /// The ED25519 Multi-Public Key
 public struct MultiPublicKey: EncodingProtocol, CustomStringConvertible, Equatable {
     /// The Public Keys themselves
-    public var keys: [PublicKey]
+    public var keys: [ED25519PublicKey]
 
     /// The current amount of keys in the keys array
     public var threshold: Int
@@ -42,7 +42,7 @@ public struct MultiPublicKey: EncodingProtocol, CustomStringConvertible, Equatab
     /// The minimum threshold amount
     public static let minThreshold: Int = 1
 
-    init(keys: [PublicKey], threshold: Int, checked: Bool = true) throws {
+    init(keys: [ED25519PublicKey], threshold: Int, checked: Bool = true) throws {
         if checked {
             if MultiPublicKey.minKeys > keys.count || MultiPublicKey.maxKeys < keys.count {
                 throw SuiError.keysCountOutOfRange(min: MultiPublicKey.minKeys, max: MultiPublicKey.maxKeys)
@@ -88,7 +88,7 @@ public struct MultiPublicKey: EncodingProtocol, CustomStringConvertible, Equatab
         let maxKeys = MultiPublicKey.maxKeys
         let minThreshold = MultiPublicKey.minThreshold
 
-        let nSigners = Int(key.count / PublicKey.LENGTH)
+        let nSigners = Int(key.count / ED25519PublicKey.LENGTH)
 
         if minKeys > nSigners || nSigners > maxKeys {
             throw SuiError.keysCountOutOfRange(min: minKeys, max: maxKeys)
@@ -104,12 +104,12 @@ public struct MultiPublicKey: EncodingProtocol, CustomStringConvertible, Equatab
             throw SuiError.thresholdOutOfRange(min: minThreshold, max: nSigners)
         }
 
-        var keys: [PublicKey] = []
+        var keys: [ED25519PublicKey] = []
 
         for i in 0..<nSigners {
-            let startByte = i * PublicKey.LENGTH
-            let endByte = (i + 1) * PublicKey.LENGTH
-            keys.append(try PublicKey(data: Data(key[startByte..<endByte])))
+            let startByte = i * ED25519PublicKey.LENGTH
+            let endByte = (i + 1) * ED25519PublicKey.LENGTH
+            keys.append(try ED25519PublicKey(data: Data(key[startByte..<endByte])))
         }
 
         return try MultiPublicKey(keys: keys, threshold: threshold)

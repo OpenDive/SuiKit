@@ -31,7 +31,7 @@ public struct Account: Equatable {
     public let accountAddress: AccountAddress
 
     /// The private key for the account
-    public let privateKey: PrivateKey
+    public let privateKey: ED25519PrivateKey
 
     public static func == (lhs: Account, rhs: Account) -> Bool {
         return
@@ -48,7 +48,7 @@ public struct Account: Equatable {
     ///
     /// - Returns: A new Account instance with a randomly generated private key and associated account address.
     public static func generate() throws -> Account {
-        let privateKey = try PrivateKey.random()
+        let privateKey = try ED25519PrivateKey.random()
         let accountAddress = try AccountAddress.fromKey(privateKey.publicKey())
         return Account(accountAddress: accountAddress, privateKey: privateKey)
     }
@@ -63,7 +63,7 @@ public struct Account: Equatable {
     ///
     /// - Returns: An Account instance containing the derived AccountAddress and PrivateKey.
     public static func loadKey(_ key: String) throws -> Account {
-        let privateKey = PrivateKey.fromHex(key)
+        let privateKey = ED25519PrivateKey.fromHex(key)
         let accountAddress = try AccountAddress.fromKey(privateKey.publicKey())
         return Account(accountAddress: accountAddress, privateKey: privateKey)
     }
@@ -94,7 +94,7 @@ public struct Account: Equatable {
         }
 
         let accountAddress = try AccountAddress.fromHex(accountAddressHex)
-        let privateKey = PrivateKey.fromHex(privateKeyHex)
+        let privateKey = ED25519PrivateKey.fromHex(privateKeyHex)
 
         return Account(accountAddress: accountAddress, privateKey: privateKey)
     }
@@ -140,7 +140,7 @@ public struct Account: Equatable {
     
     /// Returns the public key of the associated account
     /// - Returns: A PublicKey object
-    public func publicKey() throws -> PublicKey {
+    public func publicKey() throws -> ED25519PublicKey {
         return try self.privateKey.publicKey()
     }
 }

@@ -55,6 +55,10 @@ public class Deserializer {
     public init(data: Data) {
         self.input = data
     }
+    
+    public func output() -> Data {
+        return self.input
+    }
 
     /// Calculate the remaining number of bytes in the input data buffer.
     ///

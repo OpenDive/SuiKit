@@ -16,7 +16,8 @@ let package = Package(
         .package(url: "https://github.com/pebble8888/ed25519swift.git", from: "1.2.7"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "4.0.0"),
         .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.1.0"),
-        .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0")
+        .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
+        .package(url: "https://github.com/GigaBitcoin/secp256k1.swift.git", from: "0.11.0")
     ],
     targets: [
         .target(
@@ -26,7 +27,8 @@ let package = Package(
                 .product(name: "ed25519swift", package: "ed25519swift"),
                 .product(name: "SwiftyJSON", package: "swiftyjson"),
                 .product(name: "Blake2", package: "Blake2.swift"),
-                .product(name: "AnyCodable", package: "AnyCodable")
+                .product(name: "AnyCodable", package: "AnyCodable"),
+                .product(name: "secp256k1", package: "secp256k1.swift")
             ],
             path: "Sources"
         ),

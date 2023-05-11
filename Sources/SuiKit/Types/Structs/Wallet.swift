@@ -29,8 +29,9 @@ import CryptoSwift
 
 /// Represents an Aptos wallet.
 public class Wallet: Hashable {
-    /// The derivation path.
-    private static let derivationPath: String = "m/44'/784'/0'/0'/0'"
+    /// The derivation paths.
+    private static let ED25519DerivationPath: String = "m/44'/784'/0'/0'/0'"
+    private static let SECP256K1DerivationPath: String = "m/54'/784'/0'/0/0"
 
     /// The seed derived from the mnemonic and/or passphrase.
     private var _seed: Data? = nil
@@ -67,18 +68,17 @@ public class Wallet: Hashable {
                 throw SuiError.seedModeIncompatibleWithEd25519Bip32BasedSeeds(seedMode: seedMode.rawValue)
             }
 
-            let path: String = Wallet.derivationPath.replacingOccurrences(of: "x", with: String(0))
+            let path: String = Wallet.ED25519DerivationPath.replacingOccurrences(of: "x", with: String(0))
             var account: Data = Data()
             (key: account, chainCode: _) = try _ed25519Bip32.derivePath(path: path)
             (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: account)
-
         } else {
             (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: seed[0..<32])
         }
 
         self.account = Account(
-            accountAddress: try AccountAddress.fromKey(try PublicKey(data: publicKey)),
-            privateKey: PrivateKey(key: privateKey)
+            accountAddress: try AccountAddress.fromKey(try ED25519PublicKey(data: publicKey)),
+            privateKey: ED25519PrivateKey(key: privateKey)
         )
     }
 
@@ -94,11 +94,7 @@ public class Wallet: Hashable {
         var publicKey: Data = Data()
 
         if self.seedMode == .Ed25519Bip32 {
-            if self.seedMode != .Ed25519Bip32 {
-                throw SuiError.seedModeIncompatibleWithEd25519Bip32BasedSeeds(seedMode: seedMode.rawValue)
-            }
-
-            let path: String = Wallet.derivationPath.replacingOccurrences(of: "x", with: String(0))
+            let path: String = Wallet.ED25519DerivationPath.replacingOccurrences(of: "x", with: String(0))
             var account: Data = Data()
             (key: account, chainCode: _) = try _ed25519Bip32.derivePath(path: path)
             (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: account)
@@ -108,8 +104,8 @@ public class Wallet: Hashable {
         }
 
         self.account = Account(
-            accountAddress: try AccountAddress.fromKey(try PublicKey(data: publicKey)),
-            privateKey: PrivateKey(key: privateKey)
+            accountAddress: try AccountAddress.fromKey(try ED25519PublicKey(data: publicKey)),
+            privateKey: ED25519PrivateKey(key: privateKey)
         )
     }
 
@@ -125,22 +121,17 @@ public class Wallet: Hashable {
         var publicKey: Data = Data()
 
         if self.seedMode == .Ed25519Bip32 {
-            if self.seedMode != .Ed25519Bip32 {
-                throw SuiError.seedModeIncompatibleWithEd25519Bip32BasedSeeds(seedMode: seedMode.rawValue)
-            }
-
-            let path: String = Wallet.derivationPath.replacingOccurrences(of: "x", with: String(0))
+            let path: String = Wallet.ED25519DerivationPath.replacingOccurrences(of: "x", with: String(0))
             var account: Data = Data()
             (key: account, chainCode: _) = try _ed25519Bip32.derivePath(path: path)
             (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: account)
-
         } else {
             (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: seed[0..<32])
         }
 
         self.account = Account(
-            accountAddress: try AccountAddress.fromKey(try PublicKey(data: publicKey)),
-            privateKey: PrivateKey(key: privateKey)
+            accountAddress: try AccountAddress.fromKey(try ED25519PublicKey(data: publicKey)),
+            privateKey: ED25519PrivateKey(key: privateKey)
         )
     }
 
@@ -158,7 +149,7 @@ public class Wallet: Hashable {
         var publicKey: Data = Data()
 
         if self.seedMode == .Ed25519Bip32 {
-            let path: String = Wallet.derivationPath.replacingOccurrences(of: "x", with: String(0))
+            let path: String = Wallet.ED25519DerivationPath.replacingOccurrences(of: "x", with: String(0))
             var account: Data = Data()
             (key: account, chainCode: _) = try _ed25519Bip32.derivePath(path: path)
             (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: account)
@@ -168,8 +159,8 @@ public class Wallet: Hashable {
         }
 
         self.account = Account(
-            accountAddress: try AccountAddress.fromKey(try PublicKey(data: publicKey)),
-            privateKey: PrivateKey(key: privateKey)
+            accountAddress: try AccountAddress.fromKey(try ED25519PublicKey(data: publicKey)),
+            privateKey: ED25519PrivateKey(key: privateKey)
         )
     }
 
@@ -197,15 +188,15 @@ public class Wallet: Hashable {
             throw SuiError.seedModeIncompatibleWithEd25519Bip32BasedSeeds(seedMode: seedMode.rawValue)
         }
 
-        let path: String = Wallet.derivationPath.replacingOccurrences(of: "x", with: String(index))
+        let path: String = Wallet.ED25519DerivationPath.replacingOccurrences(of: "x", with: String(index))
         var account: Data = Data()
         var privateKey: Data = Data()
         var publicKey: Data = Data()
         (key: account, chainCode: _) = try _ed25519Bip32.derivePath(path: path)
         (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: account)
         return Account(
-            accountAddress: try AccountAddress.fromKey(try PublicKey(data: publicKey)),
-            privateKey: PrivateKey(key: privateKey)
+            accountAddress: try AccountAddress.fromKey(try ED25519PublicKey(data: publicKey)),
+            privateKey: ED25519PrivateKey(key: privateKey)
         )
     }
     
@@ -234,8 +225,8 @@ public class Wallet: Hashable {
                 var publicKey: Data = Data()
                 (privateKey: privateKey, publicKey: publicKey) = Wallet.edKeyPairFromSeed(seed: _seed[0..<32])
                 self.account = Account(
-                    accountAddress: try AccountAddress.fromKey(try PublicKey(data: publicKey)),
-                    privateKey: PrivateKey(key: privateKey)
+                    accountAddress: try AccountAddress.fromKey(try ED25519PublicKey(data: publicKey)),
+                    privateKey: ED25519PrivateKey(key: privateKey)
                 )
             }
         }

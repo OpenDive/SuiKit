@@ -26,7 +26,7 @@
 import Foundation
 
 public struct Ed25519Authenticator: AuthenticatorProtocol {
-    public let publicKey: PublicKey
+    public let publicKey: ED25519PublicKey
     public let signature: Signature
 
     public func verify(_ data: Data) throws -> Bool {
@@ -34,7 +34,7 @@ public struct Ed25519Authenticator: AuthenticatorProtocol {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> Ed25519Authenticator {
-        let key = try deserializer._struct(type: PublicKey.self)
+        let key = try deserializer._struct(type: ED25519PublicKey.self)
         let signature = try deserializer._struct(type: Signature.self)
         return Ed25519Authenticator(publicKey: key, signature: signature)
     }

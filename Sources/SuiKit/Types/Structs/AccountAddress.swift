@@ -110,7 +110,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     /// - Returns: An AccountAddress instance created from the provided PublicKey.
     ///
     /// - Throws: An error of type SuiError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
-    public static func fromKey(_ key: PublicKey) throws -> AccountAddress {
+    public static func fromKey(_ key: ED25519PublicKey) throws -> AccountAddress {
         let data = Data([UInt8](Data(count: 1)) + key.key)
         let result = try Blake2.hash(.b2b, size: 32, data: data)
 

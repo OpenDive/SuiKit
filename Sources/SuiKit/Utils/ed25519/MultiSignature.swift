@@ -33,7 +33,7 @@ public struct MultiSignature: EncodingProtocol, Equatable {
     /// The compact representation of which keys among a set of N possible keys have signed a given message
     public var bitmap: Data
 
-    init(publicKey: MultiPublicKey, signatureMap: [(PublicKey, Signature)]) {
+    init(publicKey: MultiPublicKey, signatureMap: [(ED25519PublicKey, Signature)]) {
         self.signatures = []
         var bitmap: UInt32 = 0
         

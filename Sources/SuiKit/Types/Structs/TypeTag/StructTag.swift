@@ -26,7 +26,7 @@
 import Foundation
 
 /// Struct Type Tag
-public struct StructTag: TypeProtcol, Equatable {
+public struct StructTag: TypeProtocol, Equatable {
     public let value: StructTagValue
     
     public init(value: StructTagValue) {

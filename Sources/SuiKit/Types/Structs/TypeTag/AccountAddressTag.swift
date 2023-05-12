@@ -26,7 +26,7 @@
 import Foundation
 
 /// AccountAddress Type Tag
-public struct AccountAddressTag: TypeProtcol, Equatable {
+public struct AccountAddressTag: TypeProtocol, Equatable {
     /// The value itself
     let value: AccountAddress
 

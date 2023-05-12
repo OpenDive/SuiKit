@@ -26,7 +26,7 @@
 import Foundation
 
 /// UInt128 Type Tag
-public struct U128Tag: TypeProtcol, Equatable {
+public struct U128Tag: TypeProtocol, Equatable {
     /// The value itself
     public let value: UInt128
     

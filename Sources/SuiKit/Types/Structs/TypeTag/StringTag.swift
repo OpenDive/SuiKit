@@ -8,7 +8,7 @@
 import Foundation
 
 /// String Type Tag
-public struct StringTag: TypeProtcol, Equatable {
+public struct StringTag: TypeProtocol, Equatable {
     /// The value itself
     public let value: String
     

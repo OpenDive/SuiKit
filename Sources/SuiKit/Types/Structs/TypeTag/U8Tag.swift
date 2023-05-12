@@ -26,7 +26,7 @@
 import Foundation
 
 /// UInt8 Type Tag
-public struct U8Tag: TypeProtcol, Equatable {
+public struct U8Tag: TypeProtocol, Equatable {
     /// The value itself
     public let value: Int
     

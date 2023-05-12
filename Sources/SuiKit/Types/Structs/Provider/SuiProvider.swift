@@ -10,7 +10,7 @@ import SwiftyJSON
 import AnyCodable
 import Blake2
 
-public struct SuiClient {
+public struct SuiProvider {
     public var connection: any ConnectionProtcol
     
     public init(connection: any ConnectionProtcol) {

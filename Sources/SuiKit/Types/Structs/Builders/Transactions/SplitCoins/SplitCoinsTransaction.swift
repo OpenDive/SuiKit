@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SplitCoinsTransaction {
+public struct SplitCoinsTransaction: TransactionTypesProtocol {
     public let kind: String
     public let coin: ObjectTransactionArgument
     public let amounts: [PureTransactionArgument]

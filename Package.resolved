@@ -10,6 +10,15 @@
       }
     },
     {
+      "identity" : "bigint",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/attaswift/BigInt.git",
+      "state" : {
+        "revision" : "0ed110f7555c34ff468e72e1686e59721f2b0da6",
+        "version" : "5.3.0"
+      }
+    },
+    {
       "identity" : "blake2.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tesseract-one/Blake2.swift.git",

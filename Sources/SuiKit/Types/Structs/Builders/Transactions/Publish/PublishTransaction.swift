@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PublishTransaction {
+public struct PublishTransaction: TransactionTypesProtocol {
     public let kind: String
     public let modules: [[UInt8]]
     public let dependencies: [objectId]

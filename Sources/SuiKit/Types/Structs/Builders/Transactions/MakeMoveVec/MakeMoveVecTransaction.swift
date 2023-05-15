@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MakeMoveVecTransaction {
+public struct MakeMoveVecTransaction: TransactionTypesProtocol {
     public let kind: String
     public let objects: ObjectTransactionArgument
     public let type: TypeTag?

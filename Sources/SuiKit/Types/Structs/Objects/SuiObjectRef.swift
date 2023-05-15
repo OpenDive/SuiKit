@@ -9,6 +9,6 @@ import Foundation
 
 public struct SuiObjectRef: Codable {
     public let version: UInt8
-    public let objectId: String
-    public let digest: String
+    public let objectId: objectId
+    public let digest: TransactionDigest
 }

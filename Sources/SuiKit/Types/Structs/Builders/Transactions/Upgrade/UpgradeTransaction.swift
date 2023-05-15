@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct UpgradeTransaction {
+public struct UpgradeTransaction: TransactionTypesProtocol {
     public let kind: String
     public let modules: [[UInt8]]
     public let dependencies: [objectId]

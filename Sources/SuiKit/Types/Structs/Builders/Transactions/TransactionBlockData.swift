@@ -183,8 +183,11 @@ public struct TransactionBlockDataBuilder {
         try transactionData.serialize(ser)
         return ser.output()
     }
-    
-    // TODO: Implement getDigest() function
+
+    public func getDigest() throws -> String {
+        let bytes = try self.build()
+        return TransactionBlockDataBuilder.getDigestFromBytes(bytes: bytes)
+    }
 }
 
 public let TRANSACTION_DATA_MAX_SIZE = 128 * 1024

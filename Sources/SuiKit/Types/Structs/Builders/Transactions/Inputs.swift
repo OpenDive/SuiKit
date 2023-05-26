@@ -47,9 +47,37 @@ public struct Inputs {
     }
 }
 
-public enum ObjectArg: Codable {
+public enum ObjectArg: Codable, KeyProtocol {
     case immOrOwned(ImmOrOwned)
     case shared(SharedArg)
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .immOrOwned(let immOrOwned):
+            try Serializer.u8(serializer, 0)
+            try Serializer._struct(serializer, value: immOrOwned)
+        case .shared(let sharedArg):
+            try Serializer.u8(serializer, 1)
+            try Serializer._struct(serializer, value: sharedArg)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> ObjectArg {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return ObjectArg.immOrOwned(
+                try Deserializer._struct(deserializer)
+            )
+        case 1:
+            return ObjectArg.shared(
+                try Deserializer._struct(deserializer)
+            )
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 }
 
 public struct ObjectCallArg {
@@ -63,22 +91,66 @@ public struct BuilderCallArg {
 
 public let MAX_PURE_ARGUMENT_SIZE = 16 * 1024
 
-public struct ImmOrOwned: Codable {
+public struct ImmOrOwned: Codable, KeyProtocol {
     public let immOrOwned: SuiObjectRef
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: immOrOwned)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> ImmOrOwned {
+        return ImmOrOwned(
+            immOrOwned: try Deserializer._struct(deserializer)
+        )
+    }
 }
 
-public struct SharedArg: Codable {
+public struct SharedArg: Codable, KeyProtocol {
     public let shared: SharedObjectArg
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: shared)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SharedArg {
+        return SharedArg(
+            shared: try Deserializer._struct(deserializer)
+        )
+    }
 }
 
-public struct SharedObjectArg: Codable {
-    public let objectId: String
+public struct SharedObjectArg: Codable, KeyProtocol {
+    public let objectId: objectId
     public let initialSharedVersion: UInt8
     public let mutable: Bool
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, objectId)
+        try Serializer.u8(serializer, initialSharedVersion)
+        try Serializer.bool(serializer, mutable)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SharedObjectArg {
+        return SharedObjectArg(
+            objectId: try Deserializer.string(deserializer),
+            initialSharedVersion: try Deserializer.u8(deserializer),
+            mutable: try deserializer.bool()
+        )
+    }
 }
 
-public struct PureCallArg: Codable {
+public struct PureCallArg: Codable, KeyProtocol {
     public let pure: [UInt8]
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try serializer.sequence(pure, Serializer.u8)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> PureCallArg {
+        return PureCallArg(pure:
+            try deserializer.sequence(valueDecoder: Deserializer.u8)
+        )
+    }
 }
 
 public let SUI_ADDRESS_LENGTH = 32

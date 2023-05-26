@@ -54,7 +54,7 @@ public enum TransactionArgument: Codable {
 public struct TransactionBlockInput: Codable, TransactionArgumentTypeProtocol {
     public let kind: String
     public let index: Int
-    public let value: AnyCodable?
+    public let value: SuiJsonValue?
     public let valueType: ValueType?
     
     public enum CodingKeys: String, CodingKey {

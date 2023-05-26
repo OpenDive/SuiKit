@@ -44,47 +44,6 @@ let MAX_U128 = UInt128.max
 /// The max UInt256 value
 let MAX_U256 = UInt256.max
 
-public indirect enum TypeName {
-    case single(String)
-    case multiple(String, [TypeName])
-    
-    public func value(data: TypeName) -> String {
-        switch data {
-        case .single(let string):
-            return string
-        case .multiple(let string, let array):
-            return "\(string)\(array.map { value(data: $0) })"
-        }
-    }
-    
-    public var type: String {
-        switch self {
-        case .single:
-            return "single"
-        case .multiple:
-            return "multiple"
-        }
-    }
-}
-
-public struct TypeNameResult {
-    public var name: String
-    public var params: [TypeName]
-}
-
-public enum StructTypeDefinition {
-    case typeName(TypeName)
-    case structType([String: StructTypeDefinition])
-}
-
-public enum EnumValueDefinition {
-    case typeName(TypeName)
-    case structType(StructTypeDefinition)
-    case null
-}
-
-public typealias EnumTypeDefinition = [String: EnumValueDefinition]
-
 /// A BCS (Binary Canonical Serialization) Deserializer meant for Deserializing data
 public class Deserializer {
     /// The input data itself
@@ -228,13 +187,13 @@ public class Deserializer {
     /// This function uses the type's deserialize(from:) method, passing the current Deserializer instance,
     /// to deserialize the structure from the input data buffer.
     ///
-    /// - Parameter type: The type of the structure that conforms to KeyProtocol to be deserialized.
+    /// - Parameter type: The Deserializer instance to deserialize the struct from.
     ///
     /// - Returns: An instance of type T deserialized from the input data buffer.
     ///
     /// - Throws: Any error that may occur during the deserialization process, such as reading the input data or decoding the structure.
-    public func _struct<T: KeyProtocol>(type: T.Type) throws -> T {
-        return try T.deserialize(from: self)
+    public static func _struct<T: KeyProtocol>(_ deserializer: Deserializer) throws -> T {
+        return try T.deserialize(from: deserializer)
     }
     
     /// Deserialize a UInt8 value from the Deserializer's input data buffer.
@@ -390,30 +349,4 @@ public class Deserializer {
             throw SuiError.invalidLength
         }
     }
-}
-
-public enum Encoding: String {
-    case base58
-    case base64
-    case hex
-}
-
-public struct BcsConfig {
-    public enum AddressEncoding: String {
-        case hex
-        case base64
-    }
-    
-    public struct BcsConfigTypes {
-        public let structs: [String: StructTypeDefinition]?
-        public let enums: [String: EnumTypeDefinition]?
-        public let aliases: [String: String]?
-    }
-    
-    public let vectorType: String
-    public let addressLength: UInt
-    public let addressEncoding: AddressEncoding
-    public let genericSeparators: (String, String)?
-    public let types: BcsConfigTypes
-    public let withPrimitives: Bool?
 }

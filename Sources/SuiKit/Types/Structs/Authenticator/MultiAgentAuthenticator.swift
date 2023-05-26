@@ -43,7 +43,7 @@ public struct MultiAgentAuthenticator: AuthenticatorProtocol {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> MultiAgentAuthenticator {
-        let sender = try deserializer._struct(type: Authenticator.self)
+        let sender: Authenticator = try Deserializer._struct(deserializer)
         let secondaryAddresses = try deserializer.sequence(valueDecoder: AccountAddress.deserialize)
         let secondaryAuthenticator = try deserializer.sequence(valueDecoder: Authenticator.deserialize)
         return MultiAgentAuthenticator(sender: sender, secondarySigner: Array(zip(secondaryAddresses, secondaryAuthenticator)))

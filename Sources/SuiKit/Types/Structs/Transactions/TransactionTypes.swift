@@ -155,7 +155,7 @@ public struct MoveCallSuiTransaction: Codable, KeyProtocol {
     }
 }
 
-public enum SuiTransaction: Codable, KeyProtocol {
+public enum SuiTransaction: Codable, KeyProtocol, TransactionTypesProtocol {
     case moveCall(MoveCallSuiTransaction)
     case transferObjects([SuiArgument], SuiArgument)
     case splitCoins(SuiArgument, [SuiArgument])
@@ -163,6 +163,25 @@ public enum SuiTransaction: Codable, KeyProtocol {
     case publish(PublishType)
     case upgrade(UpgradeType)
     case makeMoveVec(String?, [SuiArgument])
+    
+    public var kind: String {
+        switch self {
+        case .moveCall:
+            return "MoveCall"
+        case .transferObjects:
+            return "TransferObject"
+        case .splitCoins:
+            return "SplitCoin"
+        case .mergeCoins:
+            return "MergeCoin"
+        case .publish:
+            return "Publish"
+        case .upgrade:
+            return "Upgrade"
+        case .makeMoveVec:
+            return "MakeMoveVec"
+        }
+    }
     
     public func serialize(_ serializer: Serializer) throws {
         switch self {
@@ -172,87 +191,423 @@ public enum SuiTransaction: Codable, KeyProtocol {
         case .transferObjects(let array, let suiArgument):
             try Serializer.u8(serializer, 1)
             try serializer.sequence(array, Serializer._struct)
+            try Serializer._struct(serializer, value: suiArgument)
         case .splitCoins(let suiArgument, let array):
             try Serializer.u8(serializer, 2)
+            try Serializer._struct(serializer, value: suiArgument)
+            try serializer.sequence(array, Serializer._struct)
         case .mergeCoins(let suiArgument, let array):
             try Serializer.u8(serializer, 3)
+            try Serializer._struct(serializer, value: suiArgument)
+            try serializer.sequence(array, Serializer._struct)
         case .publish(let publishType):
             try Serializer.u8(serializer, 4)
+            try Serializer._struct(serializer, value: publishType)
         case .upgrade(let upgradeType):
             try Serializer.u8(serializer, 5)
+            try Serializer._struct(serializer, value: upgradeType)
         case .makeMoveVec(let string, let array):
             try Serializer.u8(serializer, 6)
+            if let string { try Serializer.str(serializer, string) }
+            try serializer.sequence(array, Serializer._struct)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiTransaction {
-        <#code#>
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return SuiTransaction.moveCall(
+                try Deserializer._struct(deserializer)
+            )
+        case 1:
+            return SuiTransaction.transferObjects(
+                try deserializer.sequence(valueDecoder: Deserializer._struct),
+                try Deserializer._struct(deserializer)
+            )
+        case 2:
+            return SuiTransaction.splitCoins(
+                try Deserializer._struct(deserializer),
+                try deserializer.sequence(valueDecoder: Deserializer._struct)
+            )
+        case 3:
+            return SuiTransaction.mergeCoins(
+                try Deserializer._struct(deserializer),
+                try deserializer.sequence(valueDecoder: Deserializer._struct)
+            )
+        case 4:
+            return SuiTransaction.publish(
+                try Deserializer._struct(deserializer)
+            )
+        case 5:
+            return SuiTransaction.upgrade(
+                try Deserializer._struct(deserializer)
+            )
+        case 6:
+            return SuiTransaction.makeMoveVec(
+                try Deserializer.string(deserializer),
+                try deserializer.sequence(valueDecoder: Deserializer._struct)
+            )
+        default:
+            throw SuiError.notImplemented
+        }
     }
 }
 
-public enum PublishType: Codable {
+public enum PublishType: Codable, KeyProtocol {
     case oldType(SuiMovePackage, [objectId])
     case newType([objectId])
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .oldType(let suiMovePackage, let array):
+            try Serializer.u8(serializer, 0)
+            try Serializer._struct(serializer, value: suiMovePackage)
+            try serializer.sequence(array, Serializer.str)
+        case .newType(let array):
+            try Serializer.u8(serializer, 1)
+            try serializer.sequence(array, Serializer.str)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> PublishType {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return PublishType.oldType(
+                try Deserializer._struct(deserializer),
+                try deserializer.sequence(valueDecoder: Deserializer.string)
+            )
+        case 1:
+            return PublishType.newType(
+                try deserializer.sequence(valueDecoder: Deserializer.string)
+            )
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 }
 
-public enum UpgradeType: Codable {
+public enum UpgradeType: Codable, KeyProtocol {
     case oldType(SuiMovePackage, [objectId], objectId, SuiArgument)
     case newType([objectId], objectId, SuiArgument)
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .oldType(let suiMovePackage, let array, let objectId, let suiArgument):
+            try Serializer.u8(serializer, 0)
+            try Serializer._struct(serializer, value: suiMovePackage)
+            try serializer.sequence(array, Serializer.str)
+            try Serializer.str(serializer, objectId)
+            try Serializer._struct(serializer, value: suiArgument)
+        case .newType(let array, let objectId, let suiArgument):
+            try Serializer.u8(serializer, 1)
+            try serializer.sequence(array, Serializer.str)
+            try Serializer.str(serializer, objectId)
+            try Serializer._struct(serializer, value: suiArgument)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> UpgradeType {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return UpgradeType.oldType(
+                try Deserializer._struct(deserializer),
+                try deserializer.sequence(valueDecoder: Deserializer.string),
+                try Deserializer.string(deserializer),
+                try Deserializer._struct(deserializer)
+            )
+        case 1:
+            return UpgradeType.newType(
+                try deserializer.sequence(valueDecoder: Deserializer.string),
+                try Deserializer.string(deserializer),
+                try Deserializer._struct(deserializer)
+            )
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 }
 
-public enum SuiCallArg: Codable {
+public enum SuiCallArg: Codable, KeyProtocol {
     case pure(PureSuiCallArg)
     case ownedObject(OwnedObjectSuiCallArg)
     case sharedObject(SharedObjectSuiCallArg)
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .pure(let pureSuiCallArg):
+            try Serializer.u8(serializer, 0)
+            try Serializer._struct(serializer, value: pureSuiCallArg)
+        case .ownedObject(let ownedObjectSuiCallArg):
+            try Serializer.u8(serializer, 1)
+            try Serializer._struct(serializer, value: ownedObjectSuiCallArg)
+        case .sharedObject(let sharedObjectSuiCallArg):
+            try Serializer.u8(serializer, 2)
+            try Serializer._struct(serializer, value: sharedObjectSuiCallArg)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SuiCallArg {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return SuiCallArg.pure(try Deserializer._struct(deserializer))
+        case 1:
+            return SuiCallArg.ownedObject(try Deserializer._struct(deserializer))
+        case 2:
+            return SuiCallArg.sharedObject(try Deserializer._struct(deserializer))
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 }
 
-public struct PureSuiCallArg: Codable {
+public struct PureSuiCallArg: Codable, KeyProtocol {
     public let type: String
     public let valueType: String?
     public let value: SuiJsonValue
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, type)
+        if let valueType { try Serializer.str(serializer, valueType) }
+        try Serializer._struct(serializer, value: value)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> PureSuiCallArg {
+        return PureSuiCallArg(
+            type: try Deserializer.string(deserializer),
+            valueType: try Deserializer.string(deserializer),
+            value: try Deserializer._struct(deserializer)
+        )
+    }
 }
 
-public enum SuiJsonValue: Codable {
+public enum SuiJsonValue: Codable, KeyProtocol {
     case boolean(Bool)
-    case number(Double)
+    case number(UInt64)
     case string(String)
     case callArg(CallArg)
     case array([SuiJsonValue])
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .boolean(let bool):
+            try Serializer.u8(serializer, 0)
+            try Serializer.bool(serializer, bool)
+        case .number(let uint64):
+            try Serializer.u8(serializer, 1)
+            try Serializer.u64(serializer, uint64)
+        case .string(let string):
+            try Serializer.u8(serializer, 2)
+            try Serializer.str(serializer, string)
+        case .callArg(let callArg):
+            try Serializer.u8(serializer, 3)
+            try Serializer._struct(serializer, value: callArg)
+        case .array(let array):
+            try Serializer.u8(serializer, 4)
+            try serializer.sequence(array, Serializer._struct)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SuiJsonValue {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return SuiJsonValue.boolean(try deserializer.bool())
+        case 1:
+            return SuiJsonValue.number(try Deserializer.u64(deserializer))
+        case 2:
+            return SuiJsonValue.string(try Deserializer.string(deserializer))
+        case 3:
+            return SuiJsonValue.callArg(try Deserializer._struct(deserializer))
+        case 4:
+            return SuiJsonValue.array(try deserializer.sequence(valueDecoder: Deserializer._struct))
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 }
 
-public struct OwnedObjectSuiCallArg: Codable {
+public struct OwnedObjectSuiCallArg: Codable, KeyProtocol {
     public let type: String
     public let objectType: String
     public let objectId: objectId
     public let version: SequenceNumber
     public let digest: ObjectDigest
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, type)
+        try Serializer.str(serializer, objectType)
+        try Serializer.str(serializer, objectId)
+        try Serializer.str(serializer, version)
+        try Serializer.str(serializer, digest)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> OwnedObjectSuiCallArg {
+        return OwnedObjectSuiCallArg(
+            type: try Deserializer.string(deserializer),
+            objectType: try Deserializer.string(deserializer),
+            objectId: try Deserializer.string(deserializer),
+            version: try Deserializer.string(deserializer),
+            digest: try Deserializer.string(deserializer)
+        )
+    }
 }
 
-public struct SharedObjectSuiCallArg: Codable {
+public struct SharedObjectSuiCallArg: Codable, KeyProtocol {
     public let type: String
     public let objectType: String
     public let objectId: objectId
     public let initialSharedVersion: SequenceNumber
     public let mutable: Bool
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, type)
+        try Serializer.str(serializer, objectType)
+        try Serializer.str(serializer, objectId)
+        try Serializer.str(serializer, initialSharedVersion)
+        try Serializer.bool(serializer, mutable)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SharedObjectSuiCallArg {
+        return SharedObjectSuiCallArg(
+            type: try Deserializer.string(deserializer),
+            objectType: try Deserializer.string(deserializer),
+            objectId: try Deserializer.string(deserializer),
+            initialSharedVersion: try Deserializer.string(deserializer),
+            mutable: try deserializer.bool()
+        )
+    }
 }
 
-public struct ProgrammableTransaction: Codable {
+public struct ProgrammableTransaction: Codable, KeyProtocol {
     public let transactions: [SuiTransaction]
     public let inputs: [SuiCallArg]
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try serializer.sequence(transactions, Serializer._struct)
+        try serializer.sequence(inputs, Serializer._struct)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> ProgrammableTransaction {
+        return ProgrammableTransaction(
+            transactions: try deserializer.sequence(valueDecoder: Deserializer._struct),
+            inputs: try deserializer.sequence(valueDecoder: Deserializer._struct)
+        )
+    }
 }
 
-public enum TransactionKindName: String {
+public enum TransactionKindName: String, KeyProtocol {
     case changeEpoch = "ChangeEpoch"
     case consensusCommitPrologue = "ConsensusCommitPrologue"
     case genesis = "Genesis"
     case programmableTransaction = "ProgrammableTransaction"
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, self.rawValue)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> TransactionKindName {
+        let result = TransactionKindName(rawValue: try Deserializer.string(deserializer))
+        if let result { return result }
+        throw SuiError.notImplemented
+    }
 }
 
-public enum SuiTransactionBlockKind {
+public enum SuiTransactionBlockKind: KeyProtocol {
     case changeEpoch(SuiChangeEpoch)
     case consensusCommitPrologue(SuiConsensusCommitPrologue)
     case genesis(Genesis)
     case programmableTransaction(ProgrammableTransaction)
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .changeEpoch(let suiChangeEpoch):
+            try Serializer.u8(serializer, 0)
+            try Serializer._struct(serializer, value: suiChangeEpoch)
+        case .consensusCommitPrologue(let suiConsensusCommitPrologue):
+            try Serializer.u8(serializer, 1)
+            try Serializer._struct(serializer, value: suiConsensusCommitPrologue)
+        case .genesis(let genesis):
+            try Serializer.u8(serializer, 2)
+            try Serializer._struct(serializer, value: genesis)
+        case .programmableTransaction(let programmableTransaction):
+            try Serializer.u8(serializer, 3)
+            try Serializer._struct(serializer, value: programmableTransaction)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SuiTransactionBlockKind {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return SuiTransactionBlockKind.changeEpoch(try Deserializer._struct(deserializer))
+        case 1:
+            return SuiTransactionBlockKind.consensusCommitPrologue(try Deserializer._struct(deserializer))
+        case 2:
+            return SuiTransactionBlockKind.genesis(try Deserializer._struct(deserializer))
+        case 3:
+            return SuiTransactionBlockKind.programmableTransaction(try Deserializer._struct(deserializer))
+        default:
+            throw SuiError.notImplemented
+        }
+    }
+}
+
+public enum TransactionData: KeyProtocol {
+    case V1(TransactionDataV1)
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .V1(let transactionDataV1):
+            try Serializer.u8(serializer, 0)
+            try Serializer._struct(serializer, value: transactionDataV1)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> TransactionData {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return TransactionData.V1(
+                try Deserializer._struct(deserializer)
+            )
+        default:
+            throw SuiError.notImplemented
+        }
+    }
+}
+
+public struct TransactionDataV1: KeyProtocol {
+    public let kind: SuiTransactionBlockKind
+    public let sender: SuiAddress
+    public let gasData: SuiGasData
+    public let expiration: TransactionExpiration
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: kind)
+        try Serializer.str(serializer, sender)
+        try Serializer._struct(serializer, value: gasData)
+        try Serializer._struct(serializer, value: expiration)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> TransactionDataV1 {
+        return TransactionDataV1(
+            kind: try Deserializer._struct(deserializer),
+            sender: try Deserializer.string(deserializer),
+            gasData: try Deserializer._struct(deserializer),
+            expiration: try Deserializer._struct(deserializer)
+        )
+    }
 }
 
 extension SuiTransactionBlockKind {
@@ -270,22 +625,80 @@ extension SuiTransactionBlockKind {
     }
 }
 
-public struct SuiTransactionBlockData {
+public struct SuiTransactionBlockData: KeyProtocol {
     public let messageVersion: String
     public let transaction: SuiTransactionBlockKind
     public let sender: SuiAddress
     public let gasData: SuiGasData
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, messageVersion)
+        try Serializer._struct(serializer, value: transaction)
+        try Serializer.str(serializer, sender)
+        try Serializer._struct(serializer, value: gasData)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SuiTransactionBlockData {
+        return SuiTransactionBlockData(
+            messageVersion: try Deserializer.string(deserializer),
+            transaction: try Deserializer._struct(deserializer),
+            sender: try Deserializer.string(deserializer),
+            gasData: try Deserializer._struct(deserializer)
+        )
+    }
 }
 
-public enum GenericAuthoritySignature {
+public enum GenericAuthoritySignature: KeyProtocol {
     case authoritySignature(AuthoritySignature)
     case authoritySignatureArray([AuthoritySignature])
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .authoritySignature(let authoritySignature):
+            try Serializer.u8(serializer, 0)
+            try Serializer.str(serializer, authoritySignature)
+        case .authoritySignatureArray(let array):
+            try Serializer.u8(serializer, 1)
+            try serializer.sequence(array, Serializer.str)
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> GenericAuthoritySignature {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return GenericAuthoritySignature.authoritySignature(
+                try Deserializer.string(deserializer)
+            )
+        case 1:
+            return GenericAuthoritySignature.authoritySignatureArray(
+                try deserializer.sequence(valueDecoder: Deserializer.string)
+            )
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 }
 
-public struct AuthorityQuorumSignInfo {
+public struct AuthorityQuorumSignInfo: KeyProtocol {
     public let epoch: EpochId
     public let signature: GenericAuthoritySignature
     public let signersMap: [UInt8]
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer.str(serializer, epoch)
+        try Serializer._struct(serializer, value: signature)
+        try serializer.sequence(signersMap, Serializer.u8)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> AuthorityQuorumSignInfo {
+        return AuthorityQuorumSignInfo(
+            epoch: try Deserializer.string(deserializer),
+            signature: try Deserializer._struct(deserializer),
+            signersMap: try deserializer.sequence(valueDecoder: Deserializer.u8)
+        )
+    }
 }
 
 public enum ExecutionStatusType: String {
@@ -308,11 +721,11 @@ public struct OwnedObjectRef {
     public let reference: SuiObjectRef
 }
 
+public enum MessageVersion: String {
+    case v1
+}
+
 public struct TransactionEffects {
-    public enum MessageVersion: String {
-        case v1
-    }
-    
     public var messageVersion: MessageVersion
     public var status: ExecutionStatus
     public var executedEpoch: EpochId

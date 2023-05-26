@@ -39,7 +39,7 @@ public struct AccountAddressTag: TypeProtocol, Equatable {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> AccountAddressTag {
-        return try AccountAddressTag(value: deserializer._struct(type: AccountAddress.self))
+        return try AccountAddressTag(value: Deserializer._struct(deserializer))
     }
 
     public func serialize(_ serializer: Serializer) throws {

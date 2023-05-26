@@ -93,12 +93,95 @@ public struct TransactionBlockDataBuilder {
         return Base58.base58Encode(hash)
     }
     
-    // TODO: Implement build() function
     public func build(
         overrides: TransactionBlockDataBuilder? = nil,
         onlyTransactionKind: Bool? = nil
-    ) {
+    ) throws -> Data {
+        let inputsCallArgs = self.serializedTransactionDataBuilder.inputs.compactMap { value in
+            switch value.value {
+            case .callArg(let callArg):
+                return callArg
+            default:
+                return nil
+            }
+        }
         
+        let inputs: [SuiCallArg] = inputsCallArgs.map { value in
+            switch value {
+            case .pure(let pureObject):
+                let jsonValues: [SuiJsonValue] = pureObject.pure.map { SuiJsonValue.number(UInt64($0)) }
+                return SuiCallArg.pure(PureSuiCallArg(
+                    type: "pure",
+                    valueType: nil,
+                    value: SuiJsonValue.array(jsonValues)
+                ))
+            case .object(let objectArg):
+                switch objectArg {
+                case .immOrOwned(let immOrOwned):
+                    return SuiCallArg.ownedObject(OwnedObjectSuiCallArg(
+                        type: "object",
+                        objectType: "immOrOwnedObject",
+                        objectId: immOrOwned.immOrOwned.objectId,
+                        version: "\(immOrOwned.immOrOwned.version)",
+                        digest: immOrOwned.immOrOwned.digest
+                    ))
+                case .shared(let sharedArg):
+                    return SuiCallArg.sharedObject(SharedObjectSuiCallArg(
+                        type: "object",
+                        objectType: "sharedObject",
+                        objectId: sharedArg.shared.objectId,
+                        initialSharedVersion: "\(sharedArg.shared.initialSharedVersion)",
+                        mutable: sharedArg.shared.mutable
+                    ))
+                }
+            }
+        }
+        
+        let transactions = self.serializedTransactionDataBuilder.transactions.compactMap {
+            if let tx = $0 as? SuiTransaction {
+                return tx
+            }
+            return nil
+        }
+        
+        let kind = ProgrammableTransaction(transactions: transactions, inputs: inputs)
+        
+        if let onlyTransactionKind, onlyTransactionKind {
+            let ser = Serializer()
+            try SuiTransactionBlockKind.programmableTransaction(kind).serialize(ser)
+            return ser.output()
+        }
+        
+        let expiration = overrides?.serializedTransactionDataBuilder.expiration ?? self.serializedTransactionDataBuilder.expiration
+        let senderUnwrapped = overrides?.serializedTransactionDataBuilder.sender ?? self.serializedTransactionDataBuilder.sender
+        let gasConfig = overrides?.serializedTransactionDataBuilder.gasConfig ?? self.serializedTransactionDataBuilder.gasConfig
+        
+        guard
+            let sender = senderUnwrapped,
+            let budget = gasConfig.budget,
+            let payment = gasConfig.payment,
+            let price = gasConfig.price
+        else {
+            throw SuiError.notImplemented
+        }
+        
+        let transactionData = TransactionData.V1(TransactionDataV1(
+            kind: SuiTransactionBlockKind.programmableTransaction(kind),
+            sender: prepareSuiAddress(address: sender),
+            gasData: SuiGasData(
+                payment: payment,
+                owner: prepareSuiAddress(
+                    address: self.serializedTransactionDataBuilder.gasConfig.owner ?? sender
+                ),
+                price: price,
+                budget: budget
+            ),
+            expiration: expiration
+        ))
+        
+        let ser = Serializer()
+        try transactionData.serialize(ser)
+        return ser.output()
     }
     
     // TODO: Implement getDigest() function

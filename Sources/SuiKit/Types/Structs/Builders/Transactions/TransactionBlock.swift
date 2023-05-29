@@ -146,4 +146,110 @@ public struct TransactionBlock {
         }
         self.blockData?.serializedTransactionDataBuilder.gasConfig.payment = payments
     }
+    
+    mutating private func input(type: ValueType, value: SuiJsonValue?) throws -> TransactionBlockInput {
+        guard let index = self.blockData?.serializedTransactionDataBuilder.inputs.count else {
+            throw SuiError.notImplemented
+        }
+        let input = TransactionBlockInput(
+            kind: "Input",
+            index: index,
+            value: value,
+            type: type
+        )
+        self.blockData?.serializedTransactionDataBuilder.inputs.append(input)
+        return input
+    }
+    
+    public mutating func object(value: objectId) throws -> [TransactionBlockInput] {
+        let id = getIdFromCallArg(arg: value)
+        guard let blockData = self.blockData else { throw SuiError.notImplemented }
+        let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
+            if input.type == .object {
+                guard let valueEnum = input.value else { return false }
+                switch valueEnum {
+                case .callArg(let callArg):
+                    switch callArg {
+                    case .object(let objectArg):
+                        return id == getIdFromCallArg(arg: ObjectCallArg(object: objectArg))
+                    default:
+                        return false
+                    }
+                default:
+                    return false
+                }
+            }
+            
+            return false
+        }
+        
+        if !inserted.isEmpty {
+            return inserted
+        }
+        
+        return [
+            try self.input(
+                type: .object,
+                value: SuiJsonValue.string(value)
+            )
+        ]
+    }
+    
+    public mutating func object(value: ObjectCallArg) throws -> [TransactionBlockInput] {
+        let id = getIdFromCallArg(arg: value)
+        guard let blockData = self.blockData else { throw SuiError.notImplemented }
+        let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
+            if input.type == .object {
+                guard let valueEnum = input.value else { return false }
+                switch valueEnum {
+                case .callArg(let callArg):
+                    switch callArg {
+                    case .object(let objectArg):
+                        return id == getIdFromCallArg(arg: ObjectCallArg(object: objectArg))
+                    default:
+                        return false
+                    }
+                default:
+                    return false
+                }
+            }
+            
+            return false
+        }
+        
+        if !inserted.isEmpty {
+            return inserted
+        }
+        
+        return [
+            try self.input(
+                type: .object,
+                value: SuiJsonValue.callArg(
+                    CallArg.object(value.object)
+                )
+            )
+        ]
+    }
+    
+    // TODO: Implement Shared Object Ref function
+    
+    // TODO: Implement Object Ref function
+    
+    // TODO: Implement Pure function
+    
+    // TODO: Implement Add function
+    
+    // TODO: Implement Object Ref function
+    
+    // TODO: Implement build function
+    
+    // TODO: Implement getDigest function
+    
+    // TODO: Implement prepareGasPrice function
+    
+    // TODO: Implement various client functions
+    
+    // TODO: Implement prepareTransactions function
+    
+    // TODO: Implement prepare function
 }

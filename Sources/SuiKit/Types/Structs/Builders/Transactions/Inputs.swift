@@ -119,6 +119,19 @@ public struct SharedArg: Codable, KeyProtocol {
     }
 }
 
+public func getIdFromCallArg(arg: objectId) -> String {
+    return normalizeSuiAddress(value: arg)
+}
+
+public func getIdFromCallArg(arg: ObjectCallArg) -> String {
+    switch arg.object {
+    case .immOrOwned(let immOwned):
+        return normalizeSuiAddress(value: immOwned.immOrOwned.objectId)
+    case .shared(let shared):
+        return normalizeSuiAddress(value: shared.shared.objectId)
+    }
+}
+
 public struct SharedObjectArg: Codable, KeyProtocol {
     public let objectId: objectId
     public let initialSharedVersion: UInt8

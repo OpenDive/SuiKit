@@ -7,6 +7,6 @@
 
 import Foundation
 
-public protocol TransactionTypesProtocol {
+public protocol TransactionTypesProtocol: Codable {
     var kind: String { get }
 }

@@ -7,11 +7,11 @@
 
 import Foundation
 
-public struct SuiGasData: KeyProtocol {
-    public let payment: [SuiObjectRef]?
-    public let owner: String?
-    public let price: String?
-    public let budget: String?
+public struct SuiGasData: KeyProtocol, Codable {
+    public var payment: [SuiObjectRef]?
+    public var owner: String?
+    public var price: String?
+    public var budget: String?
     
     public init(
         payment: [SuiObjectRef]? = nil,

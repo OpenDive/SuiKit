@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TransferObjectsTransaction: TransactionTypesProtocol {
+public struct TransferObjectsTransaction {
     public let kind: String
     public let objects: [ObjectTransactionArgument]
     public let address: PureTransactionArgument

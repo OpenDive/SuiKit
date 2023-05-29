@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MergeCoinsTransaction: TransactionTypesProtocol {
+public struct MergeCoinsTransaction {
     public let kind: String
     public let destination: ObjectTransactionArgument
     public let sources: [ObjectTransactionArgument]

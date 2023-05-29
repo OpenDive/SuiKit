@@ -8,18 +8,11 @@
 import Foundation
 import AnyCodable
 
-public enum TransactionArgument: KeyProtocol {
+public enum TransactionArgument: KeyProtocol, Codable {
     case transactionBlockInput(TransactionBlockInput)
     case gasCoin(GasCoin)
     case result(Result)
     case nestedResult(NestedResult)
-    
-//    public func nestedResult(for index: Int) -> TransactionArgument? {
-//        switch self {
-//        case .nestedResult(let nestedResult):
-//            <#code#>
-//        }
-//    }
 
     public func serialize(_ serializer: Serializer) throws {
         switch self {
@@ -56,7 +49,7 @@ public enum TransactionArgument: KeyProtocol {
     }
 }
 
-public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol {
+public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
     public let kind: String
     public let index: Int
     public let value: SuiJsonValue?
@@ -79,7 +72,7 @@ public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtoco
     }
 }
 
-public enum ValueType: String, KeyProtocol {
+public enum ValueType: String, KeyProtocol, Codable {
     case pure
     case object
     
@@ -106,7 +99,7 @@ public enum ValueType: String, KeyProtocol {
     }
 }
 
-public struct GasCoin: KeyProtocol, TransactionArgumentTypeProtocol {
+public struct GasCoin: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
     public let kind: String
     
     public func serialize(_ serializer: Serializer) throws {
@@ -118,7 +111,7 @@ public struct GasCoin: KeyProtocol, TransactionArgumentTypeProtocol {
     }
 }
 
-public struct Result: KeyProtocol, TransactionArgumentTypeProtocol {
+public struct Result: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
     public let kind: String
     public let index: Int
     
@@ -135,7 +128,7 @@ public struct Result: KeyProtocol, TransactionArgumentTypeProtocol {
     }
 }
 
-public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol {
+public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
     public let kind: String
     public let index: Int
     public let resultIndex: Int
@@ -155,7 +148,7 @@ public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol {
     }
 }
 
-public struct ObjectTransactionArgument {
+public struct ObjectTransactionArgument: Codable {
     public let argument: TransactionArgument
     public let kind: TransactionArgumentKind
     
@@ -165,7 +158,7 @@ public struct ObjectTransactionArgument {
     }
 }
 
-public struct PureTransactionArgument {
+public struct PureTransactionArgument: Codable {
     public let argument: TransactionArgument
     public let kind: TransactionArgumentKind
     

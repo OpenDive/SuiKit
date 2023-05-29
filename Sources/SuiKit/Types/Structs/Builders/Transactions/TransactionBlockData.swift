@@ -30,14 +30,14 @@ public struct TransactionBlockDataBuilder {
                                 kind: "Input",
                                 index: idx,
                                 value: pureSuiCallArg.value,
-                                valueType: .pure
+                                type: .pure
                             )
                         default:
                             return TransactionBlockInput(
                                 kind: "Input",
                                 index: idx,
                                 value: nil,
-                                valueType: .object
+                                type: .object
                             )
                         }
                     },
@@ -68,14 +68,14 @@ public struct TransactionBlockDataBuilder {
                                     kind: "Input",
                                     index: idx,
                                     value: pureSuiCallArg.value,
-                                    valueType: .pure
+                                    type: .pure
                                 )
                             default:
                                 return TransactionBlockInput(
                                     kind: "Input",
                                     index: idx,
                                     value: nil,
-                                    valueType: .object
+                                    type: .object
                                 )
                             }
                         },
@@ -91,6 +91,10 @@ public struct TransactionBlockDataBuilder {
     public static func getDigestFromBytes(bytes: Data) -> String {
         let hash = hashTypedData(typeTag: "TransactionData", data: bytes)
         return Base58.base58Encode(hash)
+    }
+    
+    public static func restore(data: SerializedTransactionDataBuilder) -> TransactionBlockDataBuilder {
+        return TransactionBlockDataBuilder(serializedTransactionDataBuilder: data)
     }
     
     public func build(
@@ -137,12 +141,7 @@ public struct TransactionBlockDataBuilder {
             }
         }
         
-        let transactions = self.serializedTransactionDataBuilder.transactions.compactMap {
-            if let tx = $0 as? SuiTransaction {
-                return tx
-            }
-            return nil
-        }
+        let transactions = self.serializedTransactionDataBuilder.transactions
         
         let kind = ProgrammableTransaction(transactions: transactions, inputs: inputs)
         
@@ -183,10 +182,14 @@ public struct TransactionBlockDataBuilder {
         try transactionData.serialize(ser)
         return ser.output()
     }
-
+    
     public func getDigest() throws -> String {
         let bytes = try self.build()
         return TransactionBlockDataBuilder.getDigestFromBytes(bytes: bytes)
+    }
+    
+    public func snapshot() -> SerializedTransactionDataBuilder {
+        return self.serializedTransactionDataBuilder
     }
 }
 
@@ -208,13 +211,36 @@ public func hashTypedData(typeTag: String, data: Data) -> [UInt8] {
     return Array(hashedData)
 }
 
-public struct SerializedTransactionDataBuilder {
-    public let version: UInt8 = 1
-    public let sender: SuiAddress?
-    public let expiration: TransactionExpiration
-    public let gasConfig: SuiGasData
-    public let inputs: [TransactionBlockInput]
-    public let transactions: [any TransactionTypesProtocol]
+public struct SerializedTransactionDataBuilder: Codable {
+    public var version: UInt8 = 1
+    public var sender: SuiAddress?
+    public var expiration: TransactionExpiration
+    public var gasConfig: SuiGasData
+    public var inputs: [TransactionBlockInput]
+    public var transactions: [SuiTransaction]
+    
+    enum CodingKeys: String, CodingKey {
+        case version
+        case sender
+        case expiration
+        case gasConfig
+        case inputs
+        case transactions
+    }
+    
+    public init(
+        sender: SuiAddress?,
+        expiration: TransactionExpiration,
+        gasConfig: SuiGasData,
+        inputs: [TransactionBlockInput],
+        transactions: [SuiTransaction]
+    ) {
+        self.sender = sender
+        self.expiration = expiration
+        self.gasConfig = gasConfig
+        self.inputs = inputs
+        self.transactions = transactions
+    }
 }
 
 public enum TransactionExpiration: KeyProtocol {

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum TransactionArgumentKind {
+public enum TransactionArgumentKind: Codable {
     case object
     case pure(type: String)
     

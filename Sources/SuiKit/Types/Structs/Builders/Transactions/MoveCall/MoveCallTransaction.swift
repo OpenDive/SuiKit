@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MoveCallTransaction: Codable, TransactionTypesProtocol {
+public struct MoveCallTransaction: Codable {
     public let kind: String
     public let target: String
     public let typeArguments: [String]

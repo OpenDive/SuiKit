@@ -78,7 +78,7 @@ public struct Transactions {
         )
     }
     
-    public func makeMoveVec(type: TypeTag? = nil, objects: ObjectTransactionArgument) -> MakeMoveVecTransaction {
+    public func makeMoveVec(type: String? = nil, objects: ObjectTransactionArgument) -> MakeMoveVecTransaction {
         return MakeMoveVecTransaction(
             kind: "MakeMoveVec",
             objects: objects,

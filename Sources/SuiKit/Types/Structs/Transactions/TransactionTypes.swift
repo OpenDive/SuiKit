@@ -394,6 +394,7 @@ public enum SuiJsonValue: Codable, KeyProtocol {
     case string(String)
     case callArg(CallArg)
     case array([SuiJsonValue])
+    case data(Data)
     
     public func serialize(_ serializer: Serializer) throws {
         switch self {
@@ -412,6 +413,9 @@ public enum SuiJsonValue: Codable, KeyProtocol {
         case .array(let array):
             try Serializer.u8(serializer, 4)
             try serializer.sequence(array, Serializer._struct)
+        case .data(let data):
+            try Serializer.u8(serializer, 5)
+            serializer.fixedBytes(data)
         }
     }
     
@@ -429,6 +433,8 @@ public enum SuiJsonValue: Codable, KeyProtocol {
             return SuiJsonValue.callArg(try Deserializer._struct(deserializer))
         case 4:
             return SuiJsonValue.array(try deserializer.sequence(valueDecoder: Deserializer._struct))
+        case 5:
+            return SuiJsonValue.data(try Deserializer.toBytes(deserializer))
         default:
             throw SuiError.notImplemented
         }

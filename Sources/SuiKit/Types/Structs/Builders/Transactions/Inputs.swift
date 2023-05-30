@@ -9,17 +9,11 @@ import Foundation
 import AnyCodable
 
 public struct Inputs {
-    public func pure(data: Data) -> PureCallArg {
+    public static func pure(data: Data) -> PureCallArg {
         return PureCallArg(pure: [UInt8](data))
     }
     
-    public func pure(data: TypeTag) throws -> PureCallArg {
-        let ser = Serializer()
-        try data.serialize(ser)
-        return PureCallArg(pure: [UInt8](ser.output()))
-    }
-    
-    public func objectRef(suiObjectRef: SuiObjectRef) -> ObjectCallArg {
+    public static func objectRef(suiObjectRef: SuiObjectRef) -> ObjectCallArg {
         return ObjectCallArg(
             object: .immOrOwned(
                 ImmOrOwned(
@@ -32,7 +26,7 @@ public struct Inputs {
         )
     }
     
-    public func sharedObjectRef(sharedObjectRef: SharedObjectRef) -> ObjectCallArg {
+    public static func sharedObjectRef(sharedObjectRef: SharedObjectRef) -> ObjectCallArg {
         return ObjectCallArg(
             object: .shared(
                 SharedArg(

@@ -230,14 +230,29 @@ public struct TransactionBlock {
             )
         ]
     }
+
+    public mutating func objectRef(objectRef: SuiObjectRef) throws -> [TransactionBlockInput] {
+        return try self.object(value: Inputs.objectRef(suiObjectRef: objectRef))
+    }
     
-    // TODO: Implement Shared Object Ref function
+    public mutating func shredObjectRef(sharedObjectRef: SharedObjectRef) throws -> [TransactionBlockInput] {
+        return try self.object(value: Inputs.sharedObjectRef(sharedObjectRef: sharedObjectRef))
+    }
+
+    public mutating func pure(value: SuiJsonValue) throws -> TransactionBlockInput {
+        return try self.input(type: .pure, value: value)
+    }
     
-    // TODO: Implement Object Ref function
-    
-    // TODO: Implement Pure function
-    
-    // TODO: Implement Add function
+    public mutating func add(transaction: SuiTransaction) throws -> TransactionArgument {
+        self.blockData?.serializedTransactionDataBuilder.transactions.append(transaction)
+        guard let index = self.blockData?.serializedTransactionDataBuilder.transactions.count else {
+            throw SuiError.notImplemented
+        }
+        guard let result = TransactionResult(index: index - 1)[index - 1] else {
+            throw SuiError.notImplemented
+        }
+        return result
+    }
     
     // TODO: Implement Object Ref function
     

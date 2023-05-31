@@ -148,7 +148,7 @@ public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol, Codabl
     }
 }
 
-public struct ObjectTransactionArgument: Codable {
+public struct ObjectTransactionArgument: Codable, KeyProtocol {
     public let argument: TransactionArgument
     public let kind: TransactionArgumentKind
     
@@ -156,14 +156,44 @@ public struct ObjectTransactionArgument: Codable {
         self.argument = argument
         self.kind = .object
     }
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: argument)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> ObjectTransactionArgument {
+        return ObjectTransactionArgument(
+            argument: try Deserializer._struct(deserializer)
+        )
+    }
 }
 
-public struct PureTransactionArgument: Codable {
+public struct PureTransactionArgument: Codable, KeyProtocol {
     public let argument: TransactionArgument
     public let kind: TransactionArgumentKind
     
     public init(argument: TransactionArgument, type: String) {
         self.argument = argument
         self.kind = .pure(type: type)
+    }
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: argument)
+        try Serializer._struct(serializer, value: kind)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> PureTransactionArgument {
+        let argument: TransactionArgument = try Deserializer._struct(deserializer)
+        let kindEnum: TransactionArgumentKind = try Deserializer._struct(deserializer)
+        
+        switch kindEnum {
+        case .pure(let type):
+            return PureTransactionArgument(
+                argument: argument,
+                type: type
+            )
+        default:
+            throw SuiError.notImplemented
+        }
     }
 }

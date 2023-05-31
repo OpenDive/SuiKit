@@ -9,7 +9,7 @@ import Foundation
 import AnyCodable
 
 public struct Transactions {
-    public func moveCall(input: MoveCallTransactionInput) -> MoveCallTransaction {
+    public static func moveCall(input: MoveCallTransactionInput) -> MoveCallTransaction {
         return MoveCallTransaction(
             kind: "MoveCall",
             target: input.target,
@@ -18,7 +18,7 @@ public struct Transactions {
         )
     }
     
-    public func transferObjects(objects: [ObjectTransactionArgument], address: PureTransactionArgument) -> TransferObjectsTransaction {
+    public static func transferObjects(objects: [ObjectTransactionArgument], address: PureTransactionArgument) -> TransferObjectsTransaction {
         return TransferObjectsTransaction(
             kind: "TransferObject",
             objects: objects,
@@ -26,7 +26,7 @@ public struct Transactions {
         )
     }
     
-    public func splitCoins(coins: ObjectTransactionArgument, amounts: [TransactionArgument]) -> SplitCoinsTransaction {
+    public static func splitCoins(coins: ObjectTransactionArgument, amounts: [TransactionArgument]) -> SplitCoinsTransaction {
         return SplitCoinsTransaction(
             kind: "SplitCoins",
             coin: coins,
@@ -34,7 +34,7 @@ public struct Transactions {
         )
     }
     
-    public func mergeCoins(destination: ObjectTransactionArgument, sources: [ObjectTransactionArgument]) -> MergeCoinsTransaction {
+    public static func mergeCoins(destination: ObjectTransactionArgument, sources: [ObjectTransactionArgument]) -> MergeCoinsTransaction {
         return MergeCoinsTransaction(
             kind: "MergeCoins",
             destination: destination,
@@ -42,7 +42,7 @@ public struct Transactions {
         )
     }
     
-    public func publish(modules: [[UInt8]], dependencies: [objectId]) -> PublishTransaction {
+    public static func publish(modules: [[UInt8]], dependencies: [objectId]) -> PublishTransaction {
         return PublishTransaction(
             kind: "Publish",
             modules: modules,
@@ -50,7 +50,7 @@ public struct Transactions {
         )
     }
     
-    public func publish(modules: [String], dependencies: [objectId]) -> PublishTransaction {
+    public static func publish(modules: [String], dependencies: [objectId]) -> PublishTransaction {
         return PublishTransaction(
             kind: "Publish",
             modules: modules.map { B64.fromB64(sBase64: $0) },
@@ -58,7 +58,7 @@ public struct Transactions {
         )
     }
     
-    public func upgrade(modules: [[UInt8]], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
+    public static func upgrade(modules: [[UInt8]], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
         return UpgradeTransaction(
             kind: "Upgrade",
             modules: modules,
@@ -68,7 +68,7 @@ public struct Transactions {
         )
     }
     
-    public func upgrade(modules: [String], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
+    public static func upgrade(modules: [String], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
         return UpgradeTransaction(
             kind: "Upgrade",
             modules: modules.map { B64.fromB64(sBase64: $0) },
@@ -78,7 +78,7 @@ public struct Transactions {
         )
     }
     
-    public func makeMoveVec(type: String? = nil, objects: ObjectTransactionArgument) -> MakeMoveVecTransaction {
+    public static func makeMoveVec(type: String? = nil, objects: [ObjectTransactionArgument]) -> MakeMoveVecTransaction {
         return MakeMoveVecTransaction(
             kind: "MakeMoveVec",
             objects: objects,

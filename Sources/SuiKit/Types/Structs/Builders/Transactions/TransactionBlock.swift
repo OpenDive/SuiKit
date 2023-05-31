@@ -254,17 +254,266 @@ public struct TransactionBlock {
         return result
     }
     
-    // TODO: Implement Object Ref function
+    public mutating func splitCoin(coin: TransactionBlockInput, amounts: [TransactionBlockInput]) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.splitCoins(
+                Transactions.splitCoins(
+                    coins: ObjectTransactionArgument(
+                        argument: TransactionArgument.transactionBlockInput(coin)
+                    ),
+                    amounts: amounts.map { TransactionArgument.transactionBlockInput($0) }
+                )
+            )
+        )
+    }
+
+    public mutating func mergeCoin(destination: TransactionBlockInput, sources: [TransactionBlockInput]) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.mergeCoins(
+                Transactions.mergeCoins(
+                    destination: ObjectTransactionArgument(
+                        argument: TransactionArgument.transactionBlockInput(destination)
+                    ),
+                    sources: sources.map {
+                        ObjectTransactionArgument(
+                            argument: TransactionArgument.transactionBlockInput($0)
+                        )
+                    }
+                )
+            )
+        )
+    }
+
+    public mutating func publish(
+        modules: [Data],
+        dependencies: [objectId]
+    ) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.publish(
+                Transactions.publish(
+                    modules: modules.map { [UInt8]($0) },
+                    dependencies: dependencies
+                )
+            )
+        )
+    }
+    
+    public mutating func upgrade(
+        modules: [Data],
+        dependencies: [objectId],
+        packageId: objectId,
+        ticket: TransactionBlockInput
+    ) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.upgrade(
+                Transactions.upgrade(
+                    modules: modules.map { [UInt8]($0) },
+                    dependencies: dependencies,
+                    packageId: packageId,
+                    ticket: ObjectTransactionArgument(
+                        argument: TransactionArgument.transactionBlockInput(ticket)
+                    )
+                )
+            )
+        )
+    }
+    
+    public mutating func moveCall(target: String, arguments: [TransactionArgument]?, typeArguments: [String]?) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.moveCall(
+                Transactions.moveCall(
+                    input: MoveCallTransactionInput(
+                        target: target,
+                        arguments: arguments,
+                        typeArguments: typeArguments
+                    )
+                )
+            )
+        )
+    }
+    
+    public mutating func transferObject(objects: [TransactionBlockInput], address: TransactionBlockInput) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.transferObjects(
+                Transactions.transferObjects(
+                    objects: objects.map {
+                        ObjectTransactionArgument(
+                            argument: TransactionArgument.transactionBlockInput($0)
+                        )
+                    },
+                    address: PureTransactionArgument(
+                        argument: TransactionArgument.transactionBlockInput(address),
+                        type: "address"
+                    )
+                )
+            )
+        )
+    }
+    
+    public mutating func makeMoveVec(type: String? = nil, objects: [TransactionBlockInput]) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransaction.makeMoveVec(
+                Transactions.makeMoveVec(
+                    type: type,
+                    objects: objects.map {
+                        ObjectTransactionArgument(
+                            argument: TransactionArgument.transactionBlockInput($0)
+                        )
+                    }
+                )
+            )
+        )
+    }
+
+    public func serialize() throws -> Data {
+        guard let blockData = self.blockData else { throw SuiError.notImplemented }
+        return try JSONEncoder().encode(blockData.snapshot())
+    }
     
     // TODO: Implement build function
+    public func build() {
+        
+    }
     
     // TODO: Implement getDigest function
+    public func getDigest() {
+        
+    }
     
-    // TODO: Implement prepareGasPrice function
+    private mutating func prepareGasPayment(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
+        if self.isMissingSender(onlyTransactionKind) {
+            throw SuiError.notImplemented
+        }
+        
+        guard let gasOwner =
+            self.blockData?.serializedTransactionDataBuilder.gasConfig.owner ??
+            self.blockData?.serializedTransactionDataBuilder.sender
+        else {
+            throw SuiError.notImplemented
+        }
+        
+        let coins = try await provider.getCoins(
+            AccountAddress.fromHex(gasOwner),
+            "0x2::sui::SUI"
+        )
+        
+        let paymentCoins = coins.data.filter { coin in
+            let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
+                if let value = input.value {
+                    switch value {
+                    case .callArg(let callArg):
+                        switch callArg {
+                        case .object(let objectArg):
+                            switch objectArg {
+                            case .immOrOwned(let immOrOwned):
+                                return coin.coinObjectId == immOrOwned.immOrOwned.objectId
+                            default:
+                                return false
+                            }
+                        default:
+                            return false
+                        }
+                    default:
+                        return false
+                    }
+                }
+                return false
+            }
+            
+            return matchingInput != nil && !matchingInput!.isEmpty
+        }[0..<TransactionConstants.MAX_GAS_OBJECTS].map { coin in
+            SuiObjectRef(
+                version: UInt8(Int(coin.version) ?? 0),
+                objectId: coin.coinObjectId,
+                digest: coin.digest
+            )
+        }
+        
+        guard !paymentCoins.isEmpty else {
+            throw SuiError.notImplemented
+        }
+        
+        try self.setGasPayment(payments: paymentCoins)
+    }
     
-    // TODO: Implement various client functions
+    private mutating func prepareGasPrice(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
+        if self.isMissingSender(onlyTransactionKind) {
+            throw SuiError.notImplemented
+        }
+        
+        self.setGasPrice(
+            price: BigInt(
+                try await provider.getGasPrice()
+            )
+        )
+    }
     
     // TODO: Implement prepareTransactions function
+    private mutating func prepareTransactions(provider: SuiProvider) async throws {
+        guard let blockData = self.blockData?.serializedTransactionDataBuilder else {
+            throw SuiError.notImplemented
+        }
+        
+        var moveModulesToResolve: [MoveCallTransaction] = []
+        
+        struct ObjectsToResolve {
+            let id: String
+            let input: TransactionBlockInput
+            let normalizedType: SuiMoveNormalizedType
+        }
+        
+        var objectsToResolve: [ObjectsToResolve] = []
+        
+        blockData.transactions.forEach { tx in
+            if tx.kind == "MoveCall" {
+                switch tx {
+                case .moveCall(let moveCall):
+                    let needsResolution = moveCall.arguments.allSatisfy { argument in
+                        switch argument {
+                        case .transactionBlockInput(let transactionBlockInput):
+                            switch blockData.inputs[transactionBlockInput.index].value {
+                            case .callArg:
+                                return false
+                            default:
+                                return true
+                            }
+                        default:
+                            return false
+                        }
+                    }
+                    
+                    if needsResolution {
+                        moveModulesToResolve.append(moveCall)
+                    }
+                    
+                    return
+                default:
+                    break
+                }
+            }
+            
+//            let transactionType = self.get
+        }
+    }
     
     // TODO: Implement prepare function
+    private mutating func prepare(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
+        if self.isMissingSender(onlyTransactionKind) {
+            throw SuiError.notImplemented
+        }
+        
+        try await self.prepareGasPrice(provider: provider, onlyTransactionKind: onlyTransactionKind)
+        try await self.prepareTransactions(provider: provider)
+        
+        if onlyTransactionKind != nil && !(onlyTransactionKind!) {
+            try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
+        }
+    }
+    
+    private func isMissingSender(_ onlyTransactionKind: Bool? = nil) -> Bool {
+        return
+            onlyTransactionKind != nil &&
+            !(onlyTransactionKind!) &&
+            self.blockData?.serializedTransactionDataBuilder.sender == nil
+    }
 }

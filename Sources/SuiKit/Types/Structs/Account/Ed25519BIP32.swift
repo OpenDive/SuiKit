@@ -1,6 +1,6 @@
 //
 //  Ed25519BIP32.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //

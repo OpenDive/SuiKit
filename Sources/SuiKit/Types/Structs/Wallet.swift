@@ -1,6 +1,6 @@
 //
 //  Wallet.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -27,7 +27,7 @@ import Foundation
 import ed25519swift
 import CryptoSwift
 
-/// Represents an Aptos wallet.
+/// Represents an sui wallet.
 public class Wallet: Hashable {
     /// The derivation paths.
     private static let ED25519DerivationPath: String = "m/44'/784'/0'/0'/0'"
@@ -40,7 +40,7 @@ public class Wallet: Hashable {
     private var _ed25519Bip32: Ed25519BIP32
 
     /// The seed mode used for key generation.
-    /// Aptos currently supports BIP39
+    /// sui currently supports BIP39
     private var seedMode: SeedMode = .Ed25519Bip32
 
     /// The passphrase string.
@@ -173,9 +173,9 @@ public class Wallet: Hashable {
             lhs.mnemonic == rhs.mnemonic
     }
 
-    /// Get an Aptos Blockchain account at the specified index from an Ed25519 BIP-32-based seed.
+    /// Get an sui Blockchain account at the specified index from an Ed25519 BIP-32-based seed.
     ///
-    /// This function gets an Aptos Blockchain account at the specified index from an Ed25519 BIP-32-based seed, and returns the resulting Account instance.
+    /// This function gets an sui Blockchain account at the specified index from an Ed25519 BIP-32-based seed, and returns the resulting Account instance.
     ///
     /// - Parameters:
     /// - index: An integer value representing the index of the account to retrieve from the Ed25519 BIP-32-based seed.
@@ -210,9 +210,9 @@ public class Wallet: Hashable {
         return mnemonic.seed!
     }
 
-    /// Initialize the first Aptos Blockchain account using the provided seed.
+    /// Initialize the first sui Blockchain account using the provided seed.
     ///
-    /// This function initializes the first Aptos Blockchain account using the provided seed and sets the resulting account as the default account of the Wallet instance. If the seed mode is Ed25519Bip32, the function creates an Ed25519BIP32 instance using the provided seed, gets the first account at index 0 using the getAccount function, and sets it as the default account. Otherwise, the function creates an Account instance using the provided seed and sets it as the default account.
+    /// This function initializes the first sui Blockchain account using the provided seed and sets the resulting account as the default account of the Wallet instance. If the seed mode is Ed25519Bip32, the function creates an Ed25519BIP32 instance using the provided seed, gets the first account at index 0 using the getAccount function, and sets it as the default account. Otherwise, the function creates an Account instance using the provided seed and sets it as the default account.
     ///
     /// - Throws: An error of type SuiError indicating that the seed mode is incompatible with Ed25519 BIP-32-based seeds or that an AccountAddress or PrivateKey instance cannot be created from the retrieved public key or private key bytes, respectively.
     private func initializeFirstAccount() throws {

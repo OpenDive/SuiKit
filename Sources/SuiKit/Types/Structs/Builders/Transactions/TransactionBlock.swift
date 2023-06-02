@@ -492,7 +492,9 @@ public struct TransactionBlock {
                 }
             }
             
-//            let transactionType = self.get
+            // TODO: Get the matching struct definition for the transaction, and use it to attempt to automatically encode the matching inputs.
+            
+            // TODO: Iterate over transaction map
         }
     }
     

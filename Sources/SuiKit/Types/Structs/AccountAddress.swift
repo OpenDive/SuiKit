@@ -1,6 +1,6 @@
 //
 //  AccountAddress.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -27,7 +27,7 @@ import Foundation
 import CryptoSwift
 import Blake2
 
-/// An enum representing the available authorization key schemes for Aptos Blockchain accounts.
+/// An enum representing the available authorization key schemes for sui Blockchain accounts.
 enum AuthKeyScheme {
     /// The ED25519 authorization key scheme value.
     static let ed25519: UInt8 = 0x00
@@ -45,7 +45,7 @@ enum AuthKeyScheme {
     static let deriveResourceAccountAddress: UInt8 = 0xFF
 }
 
-/// The Aptos Blockchain Account Address
+/// The sui Blockchain Account Address
 public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     /// The address data itself
     public let address: Data

@@ -1,6 +1,6 @@
 //
 //  Account.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -25,7 +25,7 @@
 
 import Foundation
 
-/// Aptos Blockchain Account
+/// sui Blockchain Account
 public struct Account: Equatable {
     /// The account address associated with the account
     public let accountAddress: AccountAddress

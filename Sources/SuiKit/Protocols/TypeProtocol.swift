@@ -1,6 +1,6 @@
 //
 //  TypeProtocol.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -24,7 +24,7 @@
 //
 import Foundation
 
-public protocol TypeProtcol: KeyProtocol {
+public protocol TypeProtocol: KeyProtocol {
     /// Returns the type variant the class represents
     /// - Returns: An Integer value that represents the class's type tag
     func variant() -> Int

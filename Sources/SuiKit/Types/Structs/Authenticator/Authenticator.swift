@@ -1,6 +1,6 @@
 //
 //  Authenticator.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -25,7 +25,7 @@
 
 import Foundation
 
-/// Aptos Blockchain Authenticator
+/// sui Blockchain Authenticator
 public struct Authenticator: Equatable, KeyProtocol {
     public static let ed25519: Int = 0
     public static let multiEd25519: Int = 1

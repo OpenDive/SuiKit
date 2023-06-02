@@ -10,7 +10,7 @@ import SwiftyJSON
 import AnyCodable
 import Blake2
 
-public struct SuiClient {
+public struct SuiProvider {
     public var connection: any ConnectionProtcol
     
     public init(connection: any ConnectionProtcol) {
@@ -303,6 +303,7 @@ public struct SuiClient {
             )
         )
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
+        guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
         return SuiObjectResponse(
             objectId: value["objectId"].stringValue,
             version: value["version"].intValue,
@@ -312,10 +313,9 @@ public struct SuiClient {
             previousTransaction: value["previousTransaction"].stringValue,
             storageRebate: value["storageRebate"].intValue,
             content: SuiMoveObject(
-                dataType: value["content"]["dataType"].stringValue,
                 type: value["content"]["type"].stringValue,
-                hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue,
-                fields: value["content"]["fields"]
+                fields: fields,
+                hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
             )
         )
     }
@@ -336,6 +336,7 @@ public struct SuiClient {
         var result: [SuiObjectResponse] = []
         for (_, val):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
             let value = val["data"]
+            guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields", code: -1) }
             result.append(
                 SuiObjectResponse(
                     objectId: value["objectId"].stringValue,
@@ -346,10 +347,9 @@ public struct SuiClient {
                     previousTransaction: value["previousTransaction"].stringValue,
                     storageRebate: value["storageRebate"].intValue,
                     content: SuiMoveObject(
-                        dataType: value["content"]["dataType"].stringValue,
                         type: value["content"]["type"].stringValue,
-                        hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue,
-                        fields: value["content"]["fields"]
+                        fields: fields,
+                        hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
                     )
                 )
             )

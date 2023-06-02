@@ -1,6 +1,6 @@
 //
 //  U32Tag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -26,7 +26,7 @@
 import Foundation
 
 /// UInt32 Type Tag
-public struct U32Tag: TypeProtcol, Equatable {
+public struct U32Tag: TypeProtocol, Equatable {
     /// The value itself
     public let value: Int
 

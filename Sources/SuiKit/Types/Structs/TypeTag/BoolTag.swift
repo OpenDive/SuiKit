@@ -1,6 +1,6 @@
 //
 //  BoolTag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -26,7 +26,7 @@
 import Foundation
 
 /// Bool Type Tag
-public struct BoolTag: TypeProtcol, Equatable {
+public struct BoolTag: TypeProtocol, Equatable {
     /// The value itself
     public let value: Bool
     

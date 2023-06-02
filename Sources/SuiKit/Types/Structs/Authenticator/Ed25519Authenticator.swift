@@ -1,6 +1,6 @@
 //
 //  Ed25519Authenticator.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -34,8 +34,8 @@ public struct Ed25519Authenticator: AuthenticatorProtocol {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> Ed25519Authenticator {
-        let key = try deserializer._struct(type: ED25519PublicKey.self)
-        let signature = try deserializer._struct(type: Signature.self)
+        let key: ED25519PublicKey = try Deserializer._struct(deserializer)
+        let signature: Signature = try Deserializer._struct(deserializer)
         return Ed25519Authenticator(publicKey: key, signature: signature)
     }
 

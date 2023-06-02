@@ -1,6 +1,6 @@
 //
 //  AccountAddressTag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -26,7 +26,7 @@
 import Foundation
 
 /// AccountAddress Type Tag
-public struct AccountAddressTag: TypeProtcol, Equatable {
+public struct AccountAddressTag: TypeProtocol, Equatable {
     /// The value itself
     let value: AccountAddress
 
@@ -39,7 +39,7 @@ public struct AccountAddressTag: TypeProtcol, Equatable {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> AccountAddressTag {
-        return try AccountAddressTag(value: deserializer._struct(type: AccountAddress.self))
+        return try AccountAddressTag(value: Deserializer._struct(deserializer))
     }
 
     public func serialize(_ serializer: Serializer) throws {

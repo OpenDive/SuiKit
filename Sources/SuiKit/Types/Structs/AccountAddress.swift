@@ -1,6 +1,6 @@
 //
 //  AccountAddress.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -27,25 +27,16 @@ import Foundation
 import CryptoSwift
 import Blake2
 
-/// An enum representing the available authorization key schemes for Aptos Blockchain accounts.
+/// An enum representing the available authorization key schemes for sui Blockchain accounts.
 enum AuthKeyScheme {
     /// The ED25519 authorization key scheme value.
     static let ed25519: UInt8 = 0x00
 
     /// The multi-ED25519 authorization key scheme value.
     static let multiEd25519: UInt8 = 0x01
-
-    /// The authorization key scheme value used to derive an object address from a GUID.
-    static let deriveObjectAddressFromGuid: Data = Data([0xFD])
-
-    /// The authorization key scheme value used to derive an object address from a seed.
-    static let deriveObjectAddressFromSeed: UInt8 = 0xFE
-
-    /// The authorization key scheme value used to derive a resource account address.
-    static let deriveResourceAccountAddress: UInt8 = 0xFF
 }
 
-/// The Aptos Blockchain Account Address
+/// The sui Blockchain Account Address
 public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     /// The address data itself
     public let address: Data
@@ -137,98 +128,6 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
         let result = try Blake2.hash(.b2b, size: 32, data: addressBytes)
 
         return try AccountAddress(address: result)
-    }
-
-    /// Create an AccountAddress instance for a resource account.
-    ///
-    /// This function creates an AccountAddress instance for a resource account given the creator's address and a seed value. The function generates a new address by concatenating the byte
-    /// representation of the creator's address, the provided seed value, and the DERIVE_RESOURCE_ACCOUNT_ADDRESS authorization key scheme value. It then computes the SHA3-256
-    /// hash of the resulting byte array to generate a new AccountAddress instance.
-    ///
-    /// - Parameters:
-    ///    - creator: An AccountAddress instance representing the address of the account that will create the resource account.
-    ///    - seed: A Data value used to create a unique resource account.
-    ///
-    /// - Returns: An AccountAddress instance representing the newly created resource account.
-    ///
-    /// - Throws: An error of type SuiError indicating that the provided creator address or seed is invalid and cannot be used to create a resource account.
-    public static func forResourceAccount(_ creator: AccountAddress, seed: Data) throws -> AccountAddress {
-        var addressBytes = Data(count: creator.address.count + seed.count + 1)
-        addressBytes[0..<creator.address.count] = creator.address[0..<creator.address.count]
-        addressBytes[creator.address.count..<creator.address.count + seed.count] = seed[0..<seed.count]
-        addressBytes[creator.address.count + seed.count] = AuthKeyScheme.deriveResourceAccountAddress
-        let result = try Blake2.hash(.b2b, size: 32, data: addressBytes)
-
-        return try AccountAddress(address: result)
-    }
-
-    /// Create an AccountAddress instance for a named object.
-    ///
-    /// This function creates an AccountAddress instance for a named object given the creator's address and a seed value. The function generates a new address by concatenating the byte representation
-    /// of the creator's address, the provided seed value, and the DERIVE_OBJECT_ADDRESS_FROM_SEED authorization key scheme value. It then computes the SHA3-256 hash of the resulting byte
-    /// array to generate a new AccountAddress instance.
-    ///
-    /// - Parameters:
-    ///    - creator: An AccountAddress instance representing the address of the account that will create the named object.
-    ///    - seed: A Data value used to create a unique named object.
-    ///
-    /// - Returns: An AccountAddress instance representing the newly created named object.
-    ///
-    /// - Throws: An error of type SuiError indicating that the provided creator address or seed is invalid and cannot be used to create a named object.
-    public static func forNamedObject(_ creator: AccountAddress, seed: Data) throws -> AccountAddress {
-        var addressBytes = Data(count: creator.address.count + seed.count + 1)
-        addressBytes[0..<creator.address.count] = creator.address[0..<creator.address.count]
-        addressBytes[creator.address.count..<creator.address.count + seed.count] = seed[0..<seed.count]
-        addressBytes[creator.address.count + seed.count] = AuthKeyScheme.deriveObjectAddressFromSeed
-        let result = try Blake2.hash(.b2b, size: 32, data: addressBytes)
-
-        return try AccountAddress(address: result)
-    }
-
-    /// Generates an AccountAddress for a named token by concatenating the collectionName, the tokenName, and the separator "::"
-    /// as a Data and calling the forNamedObject function with the resulting Data as the seed.
-    ///
-    /// - Parameters:
-    ///    - creator: The AccountAddress of the account that creates the token.
-    ///    - collectionName: A String that represents the name of the collection to which the token belongs.
-    ///    - tokenName: A String that represents the name of the token.
-    ///
-    /// - Returns: An AccountAddress object that represents the named token.
-    ///
-    /// - Throws: An error of type SuiError.stringToDataFailure if collectionName, tokenName, or "::" can't be converted into Data.
-    public static func forNamedToken(_ creator: AccountAddress, _ collectionName: String, _ tokenName: String) throws -> AccountAddress {
-        guard let collectionData = collectionName.data(using: .utf8) else {
-            throw SuiError.stringToDataFailure(value: "\(collectionName)")
-        }
-        guard let tokenData = tokenName.data(using: .utf8) else {
-            throw SuiError.stringToDataFailure(value: "\(tokenName)")
-        }
-        guard let seperatorData = "::".data(using: .utf8) else {
-            throw SuiError.stringToDataFailure(value: "::")
-        }
-        return try AccountAddress.forNamedObject(creator, seed: collectionData + seperatorData + tokenData)
-    }
-
-    /// Derive an AccountAddress for a named collection.
-    ///
-    /// This function takes the creator's AccountAddress and the name of the collection as a String. The collection name is
-    /// then converted to data using UTF-8 encoding. The forNamedObject function is called with the creator's address and the
-    /// collection name data as the seed. This returns an AccountAddress derived from the creator's address and collection name
-    /// seed, which represents the named collection.
-    ///
-    /// - Parameters:
-    ///    - creator: The creator's AccountAddress.
-    ///    - collectionName: The name of the collection as a String.
-    ///
-    /// - Throws: An SuiError object of type stringToDataFailure if the conversion of the collection name string to data
-    /// using UTF-8 encoding fails.
-    ///
-    /// - Returns: An AccountAddress that represents the named collection.
-    public static func forNamedCollection(_ creator: AccountAddress, _ collectionName: String) throws -> AccountAddress {
-        guard let collectionData = collectionName.data(using: .utf8) else {
-            throw SuiError.stringToDataFailure(value: "\(collectionName)")
-        }
-        return try AccountAddress.forNamedObject(creator, seed: collectionData)
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> AccountAddress {

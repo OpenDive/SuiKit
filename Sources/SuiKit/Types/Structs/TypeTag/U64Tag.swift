@@ -1,6 +1,6 @@
 //
 //  U64Tag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -26,7 +26,7 @@
 import Foundation
 
 /// UInt64 Type Tag
-public struct U64Tag: TypeProtcol, Equatable {
+public struct U64Tag: TypeProtocol, Equatable {
     /// The value itself
     public let value: Int
     

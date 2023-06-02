@@ -1,6 +1,6 @@
 //
 //  TypeTag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -25,7 +25,7 @@
 
 import Foundation
 
-/// Aptos Blockchain Type Tag
+/// sui Blockchain Type Tag
 public struct TypeTag: KeyProtocol, Equatable {
     /// Boolean Type Tag
     public static let bool: Int = 0
@@ -63,9 +63,9 @@ public struct TypeTag: KeyProtocol, Equatable {
     public static let string: Int = 11
 
     /// The value itself
-    let value: any TypeProtcol
+    let value: any TypeProtocol
 
-    public init(value: any TypeProtcol) {
+    public init(value: any TypeProtocol) {
         self.value = value
     }
 

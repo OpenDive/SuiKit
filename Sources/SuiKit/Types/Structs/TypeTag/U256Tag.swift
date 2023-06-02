@@ -1,6 +1,6 @@
 //
 //  U256Tag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -27,7 +27,7 @@ import Foundation
 import UInt256
 
 /// UInt256 Type Tag
-public struct U256Tag: TypeProtcol, Equatable {
+public struct U256Tag: TypeProtocol, Equatable {
     /// The value itself
     public let value: UInt256
     

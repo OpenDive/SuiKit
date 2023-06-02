@@ -1,6 +1,6 @@
 //
 //  StructTag.swift
-//  AptosKit
+//  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
 //
@@ -26,7 +26,7 @@
 import Foundation
 
 /// Struct Type Tag
-public struct StructTag: TypeProtcol, Equatable {
+public struct StructTag: TypeProtocol, Equatable {
     public let value: StructTagValue
     
     public init(value: StructTagValue) {
@@ -76,7 +76,7 @@ public struct StructTag: TypeProtcol, Equatable {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> StructTag {
-        let address = try deserializer._struct(type: AccountAddress.self)
+        let address: AccountAddress = try Deserializer._struct(deserializer)
         let module = try Deserializer.string(deserializer)
         let name = try Deserializer.string(deserializer)
         let typeArgs: [TypeTag] = try deserializer.sequence(valueDecoder: TypeTag.deserialize)

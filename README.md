@@ -38,7 +38,6 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 - [ ] Complete documentation of SuiKit.
 - [ ] Comprehensive Unit and Integration Test coverage.
-- [ ] Implement data streaming for Fine-Tune and GPT-3 event streams.
 
 ## Requirements
 

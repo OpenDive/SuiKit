@@ -114,6 +114,81 @@ do {
 }
 ```
 
+As well here is how to use the move call function
+
+```swift
+import Suikit
+do {
+    // Create new wallet
+    let memo = Mnemonic (wordcount: 12, wordlist: Wordlists.english)
+    let newWallet = try Wallet (mnemonic: mnemo)
+    
+    // Create Signer and Provider
+    let provider = SuiProvider()
+    let signer = RawSigner (account: newWallet.account, provider: provider)
+    
+    // Create transaction block
+    let tx = TransactionBlock()
+    
+    // Prepare merge coin 
+    tx.moveCall (
+        target: "Ox...::nft: :mint" arguments: [tx.pure "Example NFT") ]
+    )
+    
+    // Execute transaction
+    let result = try await signer.signAndExecuteTransaction (transactionBlock: tx)
+    
+    print (result)
+catch {
+    print ("Error: (error)")
+}
+```
+
+And this is how to publish a package. (Note: it is recommended for this to be used in a CLI / MacOS enviornment)
+
+```swift
+import SuiKit 
+import Swifty]SON
+
+do {
+    // Import Package Module JSON
+    guard let fileUrl = Bundle. main.ur(forResource: "Package", withExtension: "json") else {
+        throw NSError (domain: "Package is missing", code: -1)
+    }
+    guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
+        throw NSError (domain: "Package is corrupted", code: -1)
+    }
+    let fileData = JSON (fileCompiledData)
+    
+    // Create new wallet
+    let memo = Mnemonic(wordcount: 12, wordlist: Wordlists.english)
+    let newWallet = try Wallet mnemonic: mnemo)
+    
+    // Create Signer and Provider
+    let provider = SuiProvider()
+    let signer = RawSigner (account: newWallet.account, provider: provider)
+    
+    // Create transaction block
+    let tx = TransactionBlock()
+    
+    // Prepare Publish
+    let publishObject = tx.publish(
+        fileData["modules"], 
+        fileData["dependencies"]
+    )
+    
+    // Prepare Transfer Object
+    t×.transferObjects([publishObject], tx.pure(await signer. getAddress()))
+
+    // Execute transaction
+    let result = try await signer. signAndExecuteTransaction( transactionBlock: tx)
+    
+    print(result)
+} catch {
+    print("Error: \(error)")
+}
+```
+
 ## Development And Testing
 
 We welcome anyone to contribute to the project through posting issues, if they encounter any bugs / glitches while using SuiKit; and as well with creating pull issues that add any additional features to SuiKit.

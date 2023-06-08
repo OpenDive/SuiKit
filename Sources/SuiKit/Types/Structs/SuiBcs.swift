@@ -7,8 +7,8 @@
 
 import Foundation
 
-public enum CallArg: Codable, KeyProtocol {
-    case pure(PureCallArg)
+public indirect enum CallArg: Codable, KeyProtocol {
+    case pure(PureSuiCallArg)
     case object(ObjectArg)
     
     public func serialize(_ serializer: Serializer) throws {

@@ -459,12 +459,12 @@ public struct TransactionBlock {
         struct ObjectsToResolve {
             let id: String
             let input: TransactionBlockInput
-            let normalizedType: SuiMoveNormalizedType
+            let normalizedType: SuiMoveNormalizedType?
         }
         
         var objectsToResolve: [ObjectsToResolve] = []
         
-        blockData.transactions.forEach { tx in
+        try blockData.transactions.forEach { tx in
             if tx.kind == "MoveCall" {
                 switch tx {
                 case .moveCall(let moveCall):
@@ -492,9 +492,176 @@ public struct TransactionBlock {
                 }
             }
             
-            // TODO: Get the matching struct definition for the transaction, and use it to attempt to automatically encode the matching inputs.
+            func encodeInput(
+                index: Int,
+                blockData: inout SerializedTransactionDataBuilder,
+                objectsToResolve: inout [ObjectsToResolve]
+            ) throws {
+                guard !(blockData.inputs.isEmpty), blockData.inputs.count > index else {
+                    throw SuiError.notImplemented
+                }
+                var input = blockData.inputs[index]
+                
+                switch input.type {
+                case .object:
+                    switch input.value {
+                    case .callArg:
+                        return
+                    case .string(let str):
+                        objectsToResolve.append(ObjectsToResolve(id: str, input: input, normalizedType: nil))
+                    default:
+                        throw SuiError.notImplemented
+                    }
+                default:
+                    if let value = input.value {
+                        blockData.inputs[index] = TransactionBlockInput(
+                            kind: "pure",
+                            index: index,
+                            value: SuiJsonValue.callArg(
+                                CallArg.pure(
+                                    PureSuiCallArg(
+                                        type: "pure",
+                                        valueType: nil,
+                                        value: value
+                                    )
+                                )
+                            ),
+                            type: .pure
+                        )
+                    }
+                }
+            }
+
+            switch tx {
+            case .moveCall(let moveCallTransaction):
+                try moveCallTransaction.arguments.forEach { txArgument in
+                    switch txArgument {
+                    case .transactionBlockInput(let transactionBlockInput):
+                        if self.blockData != nil {
+                            try encodeInput(
+                                index: transactionBlockInput.index,
+                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                                objectsToResolve: &objectsToResolve
+                            )
+                        }
+                    default:
+                        break
+                    }
+                }
+            case .transferObjects(let transferObjectsTransaction):
+                try transferObjectsTransaction.objects.forEach { objectArgument in
+                    switch objectArgument.argument {
+                    case .transactionBlockInput(let transactionBlockInput):
+                        if self.blockData != nil {
+                            try encodeInput(
+                                index: transactionBlockInput.index,
+                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                                objectsToResolve: &objectsToResolve
+                            )
+                        }
+                    default:
+                        break
+                    }
+                }
+            case .splitCoins(let splitCoinsTransaction):
+                try splitCoinsTransaction.amounts.forEach { pureTx in
+                    switch pureTx.argument {
+                    case .transactionBlockInput(let transactionBlockInput):
+                        if self.blockData != nil {
+                            try encodeInput(
+                                index: transactionBlockInput.index,
+                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                                objectsToResolve: &objectsToResolve
+                            )
+                        }
+                    default:
+                        break
+                    }
+                }
+                switch splitCoinsTransaction.coin.argument {
+                case .transactionBlockInput(let transactionBlockInput):
+                    if self.blockData != nil {
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
+                    }
+                default:
+                    break
+                }
+            case .mergeCoins(let mergeCoinsTransaction):
+                try mergeCoinsTransaction.sources.forEach { objectTx in
+                    switch objectTx.argument {
+                    case .transactionBlockInput(let transactionBlockInput):
+                        if self.blockData != nil {
+                            try encodeInput(
+                                index: transactionBlockInput.index,
+                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                                objectsToResolve: &objectsToResolve
+                            )
+                        }
+                    default:
+                        break
+                    }
+                }
+                switch mergeCoinsTransaction.destination.argument {
+                case .transactionBlockInput(let transactionBlockInput):
+                    if self.blockData != nil {
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
+                    }
+                default:
+                    break
+                }
+            case .publish:
+                break
+            case .upgrade(let upgradeTransaction):
+                switch upgradeTransaction.ticket.argument {
+                case .transactionBlockInput(let transactionBlockInput):
+                    if self.blockData != nil {
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
+                    }
+                default:
+                    break
+                }
+            case .makeMoveVec(let makeMoveVecTransaction):
+                try makeMoveVecTransaction.objects.forEach { objectTx in
+                    switch objectTx.argument {
+                    case .transactionBlockInput(let transactionBlockInput):
+                        if self.blockData != nil {
+                            try encodeInput(
+                                index: transactionBlockInput.index,
+                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
+                                objectsToResolve: &objectsToResolve
+                            )
+                        }
+                    default:
+                        break
+                    }
+                }
+            }
             
-            // TODO: Iterate over transaction map
+            if moveModulesToResolve.count > 0 {
+                moveModulesToResolve.forEach { moveCallTx in
+                    let moveCallArguments = moveCallTx.target.components(separatedBy: "::")
+                    
+                    if moveCallArguments.count == 3 {
+                        let packageId = moveCallArguments[0]
+                        let moduleName = moveCallArguments[1]
+                        let functionName = moveCallArguments[2]
+                        
+//                        let normalizedMoveFunction = provider.getNorm
+                    }
+                }
+            }
         }
     }
     

@@ -113,12 +113,7 @@ public struct TransactionBlockDataBuilder {
         let inputs: [SuiCallArg] = inputsCallArgs.map { value in
             switch value {
             case .pure(let pureObject):
-                let jsonValues: [SuiJsonValue] = pureObject.pure.map { SuiJsonValue.number(UInt64($0)) }
-                return SuiCallArg.pure(PureSuiCallArg(
-                    type: "pure",
-                    valueType: nil,
-                    value: SuiJsonValue.array(jsonValues)
-                ))
+                return SuiCallArg.pure(pureObject)
             case .object(let objectArg):
                 switch objectArg {
                 case .immOrOwned(let immOrOwned):

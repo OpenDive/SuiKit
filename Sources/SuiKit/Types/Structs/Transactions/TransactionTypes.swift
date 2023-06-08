@@ -336,7 +336,7 @@ public struct PureSuiCallArg: Codable, KeyProtocol {
     }
 }
 
-public enum SuiJsonValueType {
+public enum SuiJsonValueType: String {
     case boolean
     case number
     case string

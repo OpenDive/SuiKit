@@ -558,6 +558,77 @@ public struct SuiProvider {
         return try await self.getTransactionResponse(data)
     }
     
+    // TODO: Finish GetNormalizedMoveModulesByPackage
+    public func getNormalizedMoveModulesByPackage(_ package: String) async throws {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getNormalizedMoveModulesByPackage",
+                [
+                    AnyCodable(package)
+                ]
+            )
+        )
+        let jsonData = JSON(data)
+        print(String(decoding: data, as: UTF8.self))
+        let testModule = SuiMoveNormalizedModule(
+            fileFormatVersion: jsonData["fileFormatVersion"].intValue,
+            address: jsonData["address"].stringValue,
+            name: jsonData["name"].stringValue,
+            friends: jsonData["friends"].arrayValue.map {
+                SuiMoveModuleId(
+                    address: $0["address"].stringValue,
+                    name: $0["name"].stringValue
+                )
+            },
+            structs: try jsonData["structs"].arrayValue.map {
+                SuiMoveNormalizedStruct(
+                    abilities: SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue }),
+                    typeParameters: $0.arrayValue.map {
+                        SuiMoveStructTypeParameter(
+                            constraints: SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue }),
+                            isPhantom: $0["isPhantom"].boolValue
+                        )
+                    },
+                    fields: try $0["fields"].arrayValue.map {
+                        SuiMoveNormalizedField(
+                            name: $0["name"].stringValue,
+                            type: try JSONDecoder().decode(SuiMoveNormalizedType.self, from: $0["type"].rawData())
+                        )
+                    }
+                )
+            },
+            exposedFunctions: try jsonData["exposedFunctions"].arrayValue.map {
+                SuiMoveNormalizedFunction(
+                    visibility: try JSONDecoder().decode(SuiMoveVisibility.self, from: $0.rawData()),
+                    isEntry: $0["isEntry"].boolValue,
+                    typeParameters: $0.arrayValue.map {
+                        SuiMoveAbilitySet(
+                            abilities: $0["typeParameters"].arrayValue.map {
+                                $0.stringValue
+                            }
+                        )
+                    },
+//                    parameters: $0["parameters"].arrayValue.map {
+//                        SuiMoveNormalizedType
+//                    },
+                    parameters: [], //SuiMoveNormalizedType,
+                    returnValues: [] //SuiMoveNormalizedType
+                )
+            }
+        )
+        //  -> SuiMoveNormalizedModule
+        print(testModule)
+    }
+    
+    // TODO: Finish getNormalizedMoveStruct
+    
+    // TODO: Finish getNormalizedMoveModule
+    
+    // TODO: Finish getNormalizedMoveFunction
+    
+    // TODO: Finish getMoveFunctionArgTypes
+    
     public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> JSON {
         // 1. Create byte array of 3 '0' elements (this is called the intent)
         let flag: [UInt8] = [0, 0, 0]

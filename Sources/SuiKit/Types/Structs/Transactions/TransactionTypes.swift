@@ -8,6 +8,7 @@
 import Foundation
 import AnyCodable
 import BigInt
+import SwiftyJSON
 
 public typealias EpochId = String
 public typealias SequenceNumber = String
@@ -343,15 +344,22 @@ public enum SuiJsonValueType: String {
     case callArg
     case array
     case data
+    case input
 }
 
-public enum SuiJsonValue: Codable, KeyProtocol {
+public indirect enum SuiJsonValue: Codable, KeyProtocol {
     case boolean(Bool)
     case number(UInt64)
     case string(String)
-    case callArg(CallArg)
+    case callArg(SuiCallArg)
     case array([SuiJsonValue])
     case data(Data)
+    case input(TransactionBlockInput)
+    
+    // TODO: Create fromJSONObject function
+//    public static func fromJSONObject(_ data: JSON, _ type: String) throws -> SuiJsonValue {
+//        let valueType 
+//    }
     
     public var kind: SuiJsonValueType {
         switch self {
@@ -367,6 +375,8 @@ public enum SuiJsonValue: Codable, KeyProtocol {
             return .array
         case .data:
             return .array
+        case .input:
+            return .input
         }
     }
     
@@ -390,6 +400,9 @@ public enum SuiJsonValue: Codable, KeyProtocol {
         case .data(let data):
             try Serializer.u8(serializer, 5)
             serializer.fixedBytes(data)
+        case .input(let txInput):
+            try Serializer.u8(serializer, 6)
+            try Serializer._struct(serializer, value: txInput)
         }
     }
     
@@ -409,6 +422,8 @@ public enum SuiJsonValue: Codable, KeyProtocol {
             return SuiJsonValue.array(try deserializer.sequence(valueDecoder: Deserializer._struct))
         case 5:
             return SuiJsonValue.data(try Deserializer.toBytes(deserializer))
+        case 6:
+            return SuiJsonValue.input(try Deserializer._struct(deserializer))
         default:
             throw SuiError.notImplemented
         }
@@ -877,11 +892,12 @@ public struct PaginatedTransactionResponse {
 }
 
 public struct DryRunTransactionBlockResponse {
+    public let digest: String
+    public let transaction: SuiTransactionBlockData
+    public let txSigntures: [String]
+    public let rawTransaction: String
     public let effects: TransactionEffects
-    public let events: TransactionEvents
     public let objectChanges: [SuiObjectChange]
-    public let balanceChanges: [BalanceChange]
-    public let input: SuiTransactionBlockData
 }
 
 public struct TransactionFunctions {

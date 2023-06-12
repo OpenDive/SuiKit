@@ -12,7 +12,7 @@ public struct SuiObjectResponse {
     public let version: Int
     public let digest: String
     public let type: String?
-    public let owner: SuiObjectOwner?
+    public let owner: ObjectOwner?
     public let previousTransaction: String?
     public let storageRebate: Int?
     public let content: SuiMoveObject

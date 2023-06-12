@@ -16,8 +16,8 @@ public struct SuiObjectInfo {
 
 public struct ObjectOwner {
     public let addressOwner: AddressOwner
-    public let objectOwner: ObjectOwnerAddress
-    public let shared: Shared
+    public let objectOwner: ObjectOwnerAddress?
+    public let shared: Shared?
 }
 
 public struct AddressOwner {

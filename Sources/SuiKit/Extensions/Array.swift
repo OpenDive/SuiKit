@@ -31,10 +31,16 @@ extension Array {
         self = [Element]()
         self.reserveCapacity(reserveCapacity)
     }
-
+    
     @inlinable
     var slice: ArraySlice<Element> {
         self[startIndex ..< endIndex]
+    }
+    
+    func chunked(into size: Int) -> [[Element]] {
+        return stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
     }
 }
 
@@ -76,7 +82,7 @@ public extension Array where Element == UInt8 {
             append(b)
         }
     }
-
+    
     func toHexString() -> String {
         lazy.reduce(into: "") {
             var s = String($1, radix: 16)
@@ -92,14 +98,14 @@ public extension Array where Element == UInt8 {
     func toBase64() -> String {
         Data(self).base64EncodedString()
     }
-
+    
     init(base64: String) {
         self.init()
-
+        
         guard let decodedData = Data(base64Encoded: base64) else {
             return
         }
-
+        
         append(contentsOf: decodedData.bytes)
     }
 }

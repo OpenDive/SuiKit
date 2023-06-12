@@ -101,38 +101,12 @@ public struct TransactionBlockDataBuilder {
         overrides: TransactionBlockDataBuilder? = nil,
         onlyTransactionKind: Bool? = nil
     ) throws -> Data {
-        let inputsCallArgs = self.serializedTransactionDataBuilder.inputs.compactMap { value in
+        let inputs = self.serializedTransactionDataBuilder.inputs.compactMap { value in
             switch value.value {
             case .callArg(let callArg):
                 return callArg
             default:
                 return nil
-            }
-        }
-        
-        let inputs: [SuiCallArg] = inputsCallArgs.map { value in
-            switch value {
-            case .pure(let pureObject):
-                return SuiCallArg.pure(pureObject)
-            case .object(let objectArg):
-                switch objectArg {
-                case .immOrOwned(let immOrOwned):
-                    return SuiCallArg.ownedObject(OwnedObjectSuiCallArg(
-                        type: "object",
-                        objectType: "immOrOwnedObject",
-                        objectId: immOrOwned.immOrOwned.objectId,
-                        version: "\(immOrOwned.immOrOwned.version)",
-                        digest: immOrOwned.immOrOwned.digest
-                    ))
-                case .shared(let sharedArg):
-                    return SuiCallArg.sharedObject(SharedObjectSuiCallArg(
-                        type: "object",
-                        objectType: "sharedObject",
-                        objectId: sharedArg.shared.objectId,
-                        initialSharedVersion: "\(sharedArg.shared.initialSharedVersion)",
-                        mutable: sharedArg.shared.mutable
-                    ))
-                }
             }
         }
         

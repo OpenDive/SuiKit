@@ -309,7 +309,13 @@ public struct SuiProvider {
             version: value["version"].intValue,
             digest: value["digest"].stringValue,
             type: value["type"].stringValue,
-            owner: SuiObjectOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
+            owner: ObjectOwner(
+                addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
+                objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
+                shared: Shared(
+                    shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["InitialSharedVersion"].intValue)
+                )
+            ),
             previousTransaction: value["previousTransaction"].stringValue,
             storageRebate: value["storageRebate"].intValue,
             content: SuiMoveObject(
@@ -343,7 +349,13 @@ public struct SuiProvider {
                     version: value["version"].intValue,
                     digest: value["digest"].stringValue,
                     type: value["type"].stringValue,
-                    owner: SuiObjectOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
+                        objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
+                        shared: Shared(
+                            shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["InitialSharedVersion"].intValue)
+                        )
+                    ),
                     previousTransaction: value["previousTransaction"].stringValue,
                     storageRebate: value["storageRebate"].intValue,
                     content: SuiMoveObject(
@@ -372,7 +384,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func paySui(_ sender: Account, _ receiver: AccountAddress, _ amount: String, _ gasBudget: String, _ coin: String) async throws -> TransactionResponse {
@@ -389,7 +401,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func payAllSui(_ sender: Account, _ receiver: AccountAddress, _ inputCoin: String, _ gasBudget: Int) async throws -> TransactionResponse {
@@ -405,7 +417,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func transferSui(_ sender: Account, _ receiver: AccountAddress, _ gasBudget: String, _ amount: String, _ suiObjectId: String) async throws -> TransactionResponse {
@@ -422,7 +434,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func transferObject(_ sender: Account, _ objectId: objectId, _ gas: objectId, _ gasBudget: String, _ recipient: AccountAddress) async throws -> TransactionResponse {
@@ -439,7 +451,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func splitCoin(_ signer: Account, _ coinObjectId: String, _ splitAmount: String, _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
@@ -456,7 +468,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func mergeCoin(_ signer: Account, _ primaryCoin: objectId, _ coinToMerge: objectId, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
@@ -473,7 +485,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
@@ -490,7 +502,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func moveCall(
@@ -521,7 +533,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func requestAddStake(_ signer: Account, _ coins: [String], _ amount: String, _ validators: SuiAddress, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
@@ -539,7 +551,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
     public func requestWithdrawStake(_ signer: Account, _ stakedSui: objectId, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
@@ -555,11 +567,10 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try await self.getTransactionResponse(data)
+        return self.getTransactionResponse(data)
     }
     
-    // TODO: Finish GetNormalizedMoveModulesByPackage
-    public func getNormalizedMoveModulesByPackage(_ package: String) async throws {
+    public func getNormalizedMoveModulesByPackage(_ package: String) async throws -> SuiMoveNormalizedModules {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -569,63 +580,163 @@ public struct SuiProvider {
                 ]
             )
         )
-        let jsonData = JSON(data)
-        print(String(decoding: data, as: UTF8.self))
-        let testModule = SuiMoveNormalizedModule(
-            fileFormatVersion: jsonData["fileFormatVersion"].intValue,
-            address: jsonData["address"].stringValue,
-            name: jsonData["name"].stringValue,
-            friends: jsonData["friends"].arrayValue.map {
-                SuiMoveModuleId(
-                    address: $0["address"].stringValue,
-                    name: $0["name"].stringValue
-                )
-            },
-            structs: try jsonData["structs"].arrayValue.map {
-                SuiMoveNormalizedStruct(
-                    abilities: SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue }),
-                    typeParameters: $0.arrayValue.map {
-                        SuiMoveStructTypeParameter(
-                            constraints: SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue }),
-                            isPhantom: $0["isPhantom"].boolValue
-                        )
-                    },
-                    fields: try $0["fields"].arrayValue.map {
-                        SuiMoveNormalizedField(
-                            name: $0["name"].stringValue,
-                            type: try JSONDecoder().decode(SuiMoveNormalizedType.self, from: $0["type"].rawData())
-                        )
-                    }
-                )
-            },
-            exposedFunctions: try jsonData["exposedFunctions"].arrayValue.map {
-                SuiMoveNormalizedFunction(
-                    visibility: try JSONDecoder().decode(SuiMoveVisibility.self, from: $0.rawData()),
-                    isEntry: $0["isEntry"].boolValue,
-                    typeParameters: $0.arrayValue.map {
-                        SuiMoveAbilitySet(
-                            abilities: $0["typeParameters"].arrayValue.map {
-                                $0.stringValue
-                            }
-                        )
-                    },
-//                    parameters: $0["parameters"].arrayValue.map {
-//                        SuiMoveNormalizedType
-//                    },
-                    parameters: [], //SuiMoveNormalizedType,
-                    returnValues: [] //SuiMoveNormalizedType
-                )
-            }
-        )
-        //  -> SuiMoveNormalizedModule
-        print(testModule)
+
+        var modules: SuiMoveNormalizedModules = [:]
+        
+        for (key, subJson): (String, JSON) in JSON(data)["result"].dictionaryValue {
+            let structs: [String: SuiMoveNormalizedStruct] = try self.decodeModuleStruct(subJson["structs"])
+            let exposedFunctions: [String: SuiMoveNormalizedFunction] = try self.decodeModuleFunction(subJson["exposedFunctions"])
+            
+            let normalizedModule = SuiMoveNormalizedModule(
+                fileFormatVersion: subJson["fileFormatVersion"].intValue,
+                address: subJson["address"].stringValue,
+                name: key,
+                friends: subJson["friends"].arrayValue.map {
+                    SuiMoveModuleId(
+                        address: $0["address"].stringValue,
+                        name: $0["name"].stringValue
+                    )
+                },
+                structs: structs,
+                exposedFunctions: exposedFunctions
+            )
+            
+            modules[key] = normalizedModule
+        }
+        
+        return modules
     }
     
     // TODO: Finish getNormalizedMoveStruct
     
     // TODO: Finish getNormalizedMoveModule
     
-    // TODO: Finish getNormalizedMoveFunction
+    public func getMultiObjects(_ ids: [objectId], _ options: GetObject?) async throws -> [SuiObjectResponse] {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_multiGetObjects",
+                [
+                    AnyCodable(ids),
+                    AnyCodable(options)
+                ]
+            )
+        )
+        
+        let jsonResponse = JSON(data)["result"]
+        var objectResponses: [SuiObjectResponse] = []
+        
+        try jsonResponse.arrayValue.forEach { jsonData in
+            let value = jsonData["data"]
+            guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
+            
+            objectResponses.append(
+                SuiObjectResponse(
+                    objectId: value["objectId"].stringValue,
+                    version: value["version"].intValue,
+                    digest: value["digest"].stringValue,
+                    type: value["type"].stringValue,
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
+                        objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
+                        shared: Shared(
+                            shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["InitialSharedVersion"].intValue)
+                        )
+                    ),
+                    previousTransaction: value["previousTransaction"].stringValue,
+                    storageRebate: value["storageRebate"].intValue,
+                    content: SuiMoveObject(
+                        type: value["content"]["type"].stringValue,
+                        fields: fields,
+                        hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
+                    )
+                )
+            )
+        }
+        
+        return objectResponses
+    }
+    
+    // TODO: Create DryRunTransactionBlock function
+//    public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> DryRunTransactionBlockResponse {
+//        let data = try await self.sendSuiJsonRpc(
+//            try self.getServerUrl(),
+//            SuiRequest(
+//                "sui_dryRunTransactionBlock",
+//                [
+//                    AnyCodable(B64.toB64(transactionBlock))
+//                ]
+//            )
+//        )
+//        let result = JSON(data)["result"]
+//        let tx = result["transaction"]["data"]
+//        let programmableTx = tx["transaction"]
+//        
+//        return DryRunTransactionBlockResponse(
+//            digest: result["digest"].stringValue,
+//            transaction: SuiTransactionBlockData(
+//                messageVersion: tx["messageVersion"].stringValue,
+//                transaction: SuiTransactionBlockKind.programmableTransaction(
+//                    ProgrammableTransaction(
+//                        transactions: , // [SuiTransaction]
+//                        inputs: programmableTx["inputs"].arrayValue.map {
+//                            let type = $0["type"].stringValue
+//                            switch type {
+//                            case "pure":
+//                                return SuiCallArg.pure(
+//                                    PureSuiCallArg(
+//                                        type: "pure",
+//                                        valueType: $0["valueType"].stringValue,
+//                                        value:  // SuiJsonValue
+//                                    )
+//                                )
+//                            }
+//                        }
+//                    )
+//                ),
+//                sender: , // SuiAddress (String)
+//                gasData:  // SuiGasData
+//            ),
+//            txSigntures: , // [String]
+//            rawTransaction: , // String
+//            effects: , // TransactionEffects
+//            objectChanges:  // [SuiObjectChange]
+//        )
+//    }
+
+    public func getNormalizedMoveFunction(
+        _ package: String,
+        _ moduleName: String,
+        _ functionName: String
+    ) async throws -> SuiMoveNormalizedFunction {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getNormalizedMoveFunction",
+                [
+                    AnyCodable(package),
+                    AnyCodable(moduleName),
+                    AnyCodable(functionName)
+                ]
+            )
+        )
+        
+        let result = JSON(data)["result"]
+        
+        return SuiMoveNormalizedFunction(
+            visibility: try SuiMoveVisibility.decodeVisibility(result["visibility"]),
+            isEntry: result["isEntry"].boolValue,
+            typeParameters: result["typeParameters"].arrayValue.map {
+                SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue })
+            },
+            parameters: try result["parameters"].arrayValue.map {
+                try SuiMoveNormalizedType.decodeNormalizedType($0)
+            },
+            returnValues: try result["return"].arrayValue.map {
+                try SuiMoveNormalizedType.decodeNormalizedType($0)
+            }
+        )
+    }
     
     // TODO: Finish getMoveFunctionArgTypes
     
@@ -666,7 +777,57 @@ public struct SuiProvider {
         return JSON(data)["result"]
     }
     
-    private func getTransactionResponse(_ data: Data) async throws -> TransactionResponse {
+    private func decodeModuleStruct(_ data: JSON) throws -> [String: SuiMoveNormalizedStruct] {
+        var structs: [String: SuiMoveNormalizedStruct] = [:]
+        
+        for (keyStructs, structsSubJson): (String, JSON) in data.dictionaryValue {
+            structs[keyStructs] = SuiMoveNormalizedStruct(
+                abilities: SuiMoveAbilitySet(
+                    abilities: structsSubJson["abilities"]["abilities"].arrayValue.map { $0.stringValue }
+                ),
+                typeParameters: structsSubJson["typeParameters"].arrayValue.map {
+                    SuiMoveStructTypeParameter(
+                        constraints: SuiMoveAbilitySet(
+                            abilities: $0["constraints"]["abilities"].arrayValue.map { $0.stringValue }
+                        ),
+                        isPhantom: $0["isPhantom"].boolValue
+                    )
+                },
+                fields: try structsSubJson["fields"].arrayValue.map {
+                    SuiMoveNormalizedField(
+                        name: $0["name"].stringValue,
+                        type: try SuiMoveNormalizedType.decodeNormalizedType($0["type"])
+                    )
+                }
+            )
+        }
+        
+        return structs
+    }
+    
+    private func decodeModuleFunction(_ data: JSON) throws -> [String: SuiMoveNormalizedFunction] {
+        var functions: [String: SuiMoveNormalizedFunction] = [:]
+        
+        for (keyFunctions, functionsSubJson): (String, JSON) in data.dictionaryValue {
+            functions[keyFunctions] = SuiMoveNormalizedFunction(
+                visibility: try SuiMoveVisibility.decodeVisibility(functionsSubJson["visibility"]),
+                isEntry: functionsSubJson["isEntry"].boolValue,
+                typeParameters: functionsSubJson["typeParameters"].arrayValue.map {
+                    SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue })
+                },
+                parameters: try functionsSubJson["parameters"].arrayValue.map {
+                    try SuiMoveNormalizedType.decodeNormalizedType($0)
+                },
+                returnValues: try functionsSubJson["return"].arrayValue.map {
+                    try SuiMoveNormalizedType.decodeNormalizedType($0)
+                }
+            )
+        }
+        
+        return functions
+    }
+    
+    private func getTransactionResponse(_ data: Data) -> TransactionResponse {
         let json = JSON(data)["result"]
         var responseObjects: [String: SuiObjectRef] = [:]
         for objects in JSON(data)["result"]["inputObjects"] {

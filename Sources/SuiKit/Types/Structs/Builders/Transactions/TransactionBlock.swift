@@ -170,8 +170,10 @@ public struct TransactionBlock {
                 switch valueEnum {
                 case .callArg(let callArg):
                     switch callArg {
-                    case .object(let objectArg):
-                        return id == getIdFromCallArg(arg: ObjectCallArg(object: objectArg))
+                    case .ownedObject(let ownedObjectArg):
+                        return id == ownedObjectArg.objectId
+                    case .sharedObject(let sharedObjectArg):
+                        return id == sharedObjectArg.objectId
                     default:
                         return false
                     }
@@ -204,8 +206,10 @@ public struct TransactionBlock {
                 switch valueEnum {
                 case .callArg(let callArg):
                     switch callArg {
-                    case .object(let objectArg):
-                        return id == getIdFromCallArg(arg: ObjectCallArg(object: objectArg))
+                    case .ownedObject(let ownedObjectArg):
+                        return id == ownedObjectArg.objectId
+                    case .sharedObject(let sharedObjectArg):
+                        return id == sharedObjectArg.objectId
                     default:
                         return false
                     }
@@ -221,14 +225,44 @@ public struct TransactionBlock {
             return inserted
         }
         
-        return [
-            try self.input(
-                type: .object,
-                value: SuiJsonValue.callArg(
-                    CallArg.object(value.object)
+        switch value.object {
+        case .immOrOwned(let immOrOwned):
+            let ownedObj = immOrOwned.immOrOwned
+            return [
+                try self.input(
+                    type: .object,
+                    value: .callArg(
+                        SuiCallArg.ownedObject(
+                            OwnedObjectSuiCallArg(
+                                type: "object",
+                                objectType: "immOrOwnedObject",
+                                objectId: ownedObj.objectId,
+                                version: "\(ownedObj.version)",
+                                digest: ownedObj.digest
+                            )
+                        )
+                    )
                 )
-            )
-        ]
+            ]
+        case .shared(let sharedArg):
+            let sharedObj = sharedArg.shared
+            return [
+                try self.input(
+                    type: .object,
+                    value: .callArg(
+                        SuiCallArg.sharedObject(
+                            SharedObjectSuiCallArg(
+                                type: "object",
+                                objectType: "sharedObject",
+                                objectId: sharedObj.objectId,
+                                initialSharedVersion: "\(sharedObj.initialSharedVersion)",
+                                mutable: sharedObj.mutable
+                            )
+                        )
+                    )
+                )
+            ]
+        }
     }
 
     public mutating func objectRef(objectRef: SuiObjectRef) throws -> [TransactionBlockInput] {
@@ -403,13 +437,8 @@ public struct TransactionBlock {
                     switch value {
                     case .callArg(let callArg):
                         switch callArg {
-                        case .object(let objectArg):
-                            switch objectArg {
-                            case .immOrOwned(let immOrOwned):
-                                return coin.coinObjectId == immOrOwned.immOrOwned.objectId
-                            default:
-                                return false
-                            }
+                        case .ownedObject(let ownedObject):
+                            return coin.coinObjectId == ownedObject.objectId
                         default:
                             return false
                         }
@@ -447,8 +476,7 @@ public struct TransactionBlock {
             )
         )
     }
-    
-    // TODO: Implement prepareTransactions function
+
     private mutating func prepareTransactions(provider: SuiProvider) async throws {
         guard let blockData = self.blockData?.serializedTransactionDataBuilder else {
             throw SuiError.notImplemented
@@ -458,13 +486,13 @@ public struct TransactionBlock {
         
         struct ObjectsToResolve {
             let id: String
-            let input: TransactionBlockInput
+            var input: TransactionBlockInput
             let normalizedType: SuiMoveNormalizedType?
         }
         
         var objectsToResolve: [ObjectsToResolve] = []
         
-        try blockData.transactions.forEach { tx in
+        try await blockData.transactions.asyncForEach { tx in
             if tx.kind == "MoveCall" {
                 switch tx {
                 case .moveCall(let moveCall):
@@ -500,7 +528,7 @@ public struct TransactionBlock {
                 guard !(blockData.inputs.isEmpty), blockData.inputs.count > index else {
                     throw SuiError.notImplemented
                 }
-                var input = blockData.inputs[index]
+                let input = blockData.inputs[index]
                 
                 switch input.type {
                 case .object:
@@ -518,7 +546,7 @@ public struct TransactionBlock {
                             kind: "pure",
                             index: index,
                             value: SuiJsonValue.callArg(
-                                CallArg.pure(
+                                SuiCallArg.pure(
                                     PureSuiCallArg(
                                         type: "pure",
                                         valueType: nil,
@@ -650,7 +678,7 @@ public struct TransactionBlock {
             }
             
             if moveModulesToResolve.count > 0 {
-                moveModulesToResolve.forEach { moveCallTx in
+                try await moveModulesToResolve.asyncForEach { moveCallTx in
                     let moveCallArguments = moveCallTx.target.components(separatedBy: "::")
                     
                     if moveCallArguments.count == 3 {
@@ -658,7 +686,126 @@ public struct TransactionBlock {
                         let moduleName = moveCallArguments[1]
                         let functionName = moveCallArguments[2]
                         
-//                        let normalizedMoveFunction = provider.getNorm
+                        let normalized = try await provider.getNormalizedMoveFunction(
+                            packageId, moduleName, functionName
+                        )
+                        
+                        let hasTxContext =
+                            normalized.parameters.count > 0 &&
+                            self.isTxcontext(normalized.parameters.last!)
+                        
+                        let params = hasTxContext ? normalized.parameters.dropLast() : normalized.parameters
+                        
+                        guard params.count == moveCallTx.arguments.count else { throw SuiError.notImplemented }
+                        
+                        try params.enumerated().forEach { (idx, param) in
+                            let arg = moveCallTx.arguments[idx]
+                            
+                            switch arg {
+                            case .transactionBlockInput(let blockInputArgument):
+                                var input = blockData.inputs[blockInputArgument.index]
+                                switch input.value {
+                                case .callArg: return
+                                default: break
+                                }
+                                guard let inputValue = input.value else { return }
+                                
+                                let serType = try self.getPureSerializationType(param, inputValue)
+                                
+                                if let serType {
+                                    input.value = .callArg(.pure(PureSuiCallArg(type: serType, valueType: nil, value: inputValue)))
+                                    return
+                                }
+                                
+                                let structVal = self.extractStructTag(param)
+                                
+                                if structVal != nil {
+                                    switch param {
+                                    case .structure(let structObject):
+                                        if !(structObject.typeArguments.isEmpty) {
+                                            switch inputValue {
+                                            case .string(let strInputValue):
+                                                objectsToResolve.append(
+                                                    ObjectsToResolve(
+                                                        id: strInputValue,
+                                                        input: input,
+                                                        normalizedType: param
+                                                    )
+                                                )
+                                                return
+                                            default:
+                                                throw SuiError.notImplemented
+                                            }
+                                        }
+                                    default: break
+                                    }
+                                }
+                            default: return
+                            }
+                            
+                            throw SuiError.notImplemented
+                        }
+                        
+                        if objectsToResolve.count > 0 {
+                            let dedupedIds = objectsToResolve.map { $0.id }
+                            let objectChunks = dedupedIds.chunked(into: TransactionConstants.MAX_OBJECTS_PER_FETCH)
+                            
+                            var objects: [SuiObjectResponse] = []
+                            
+                            try await objectChunks.asyncForEach {
+                                let result = try await provider.getMultiObjects($0, GetObject(showOwner: true))
+                                objects.append(contentsOf: result)
+                            }
+                            
+                            var objectsById: [String: SuiObjectResponse] = [:]
+                            
+                            dedupedIds.enumerated().forEach { idx, id in
+                                objectsById[id] = objects[idx]
+                            }
+                            
+                            for var objectToResolve in objectsToResolve {
+                                let object = objectsById[objectToResolve.id]
+                                
+                                if let object {
+                                    let initialSharedVersion = self.getSharedObjectInitialVersion(object)
+                                    
+                                    if let initialSharedVersion {
+                                        switch objectToResolve.input.value {
+                                        case .callArg(let callArg):
+                                            let mutable = self.isMutableSharedObjectInput(callArg) || (
+                                                objectToResolve.normalizedType != nil &&
+                                                extractMutableReference(objectToResolve.normalizedType!) != nil
+                                            )
+                                            
+                                            switch callArg {
+                                            case .sharedObject:
+                                                objectToResolve.input.value = .callArg(
+                                                    .sharedObject(
+                                                        SharedObjectSuiCallArg(
+                                                            type: "object",
+                                                            objectType: "sharedObject",
+                                                            objectId: objectToResolve.id,
+                                                            initialSharedVersion: "\(initialSharedVersion)",
+                                                            mutable: mutable
+                                                        )
+                                                    )
+                                                )
+                                            default:
+                                                if let objRef = self.getObjectReference(object) {
+                                                    let txInputs = try objectRef(objectRef: objRef)
+                                                    objectToResolve.input.value = SuiJsonValue.array(
+                                                        txInputs.map {
+                                                            SuiJsonValue.input($0)
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        default: break
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -676,6 +823,10 @@ public struct TransactionBlock {
         
         if onlyTransactionKind != nil && !(onlyTransactionKind!) {
             try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
+            
+            if self.blockData?.serializedTransactionDataBuilder.gasConfig.budget == nil {
+                // TODO: Implement DryRunTransaction call
+            }
         }
     }
     
@@ -685,4 +836,224 @@ public struct TransactionBlock {
             !(onlyTransactionKind!) &&
             self.blockData?.serializedTransactionDataBuilder.sender == nil
     }
+    
+    private func isTxcontext(_ param: SuiMoveNormalizedType) -> Bool {
+        let structTag = self.extractStructTag(param)
+        
+        return
+            structTag?.address == "0x2" &&
+            structTag?.module == "tx_context" &&
+            structTag?.name == "TxContext"
+    }
+    
+    private func extractStructTag(_ normalizedType: SuiMoveNormalizedType) -> SuiMoveNormalizedStructType? {
+        let ref = self.extractReference(normalizedType)
+        let mutRef = self.extractMutableReference(normalizedType)
+        
+        switch ref {
+        case .structure(let structure):
+            return structure
+        default:
+            break
+        }
+        
+        switch mutRef {
+        case .structure(let structure):
+            return structure
+        default:
+            break
+        }
+        
+        return nil
+    }
+    
+    private func extractReference(_ normalizedType: SuiMoveNormalizedType) -> SuiMoveNormalizedType? {
+        switch normalizedType {
+        case .reference(let suiMoveNormalizedType):
+            return .reference(suiMoveNormalizedType)
+        default:
+            return nil
+        }
+    }
+    
+    private func extractMutableReference(_ normalizedType: SuiMoveNormalizedType) -> SuiMoveNormalizedType? {
+        switch normalizedType {
+        case .mutableReference(let suiMoveNormalizedType):
+            return .mutableReference(suiMoveNormalizedType)
+        default:
+            return nil
+        }
+    }
+    
+    private func getPureSerializationType(_ normalizedType: SuiMoveNormalizedType, _ argVal: SuiJsonValue) throws -> String? {
+        enum AllowedTypes: String {
+            case Address
+            case Bool
+            case U8
+            case U16
+            case U32
+            case U64
+            case U128
+            case U256
+            
+            public static func isAllowed(_ input: SuiMoveNormalizedType) -> Bool {
+                return AllowedTypes(rawValue: input.type) != nil
+            }
+        }
+        
+        if AllowedTypes.isAllowed(normalizedType) {
+            switch normalizedType {
+            case .bool:
+                try self.expectType("boolean", argVal)
+            case .u8, .u16, .u32, .u64, .u128, .u256:
+                try self.expectType("number", argVal)
+            case .address, .signer:
+                try self.expectType("string", argVal)
+                switch argVal {
+                case .string(let str):
+                    guard self.isValidSuiAddress(str) else { throw SuiError.notImplemented }
+                default:
+                    throw SuiError.notImplemented
+                }
+            default: break
+            }
+            return normalizedType.type.lowercased()
+        }
+        
+        switch normalizedType {
+        case .vector(let normalizedTypeVector):
+            if argVal.kind == .string, normalizedTypeVector.type == "U8" {
+                return "string"
+            }
+            let innerType = try self.getPureSerializationType(normalizedTypeVector, argVal)
+            guard innerType != nil else { return nil }
+            return "vector<\(innerType!)>"
+        case .structure(let normalizedStruct):
+            if self.isSameStruct(normalizedStruct, ResolvedAsciiStr()) {
+                return "string"
+            }
+            if self.isSameStruct(normalizedStruct, ResolvedUtf8Str()) {
+                return "utf8string"
+            }
+            if self.isSameStruct(normalizedStruct, ResolvedSuiId()) {
+                return "address"
+            }
+            if self.isSameStruct(normalizedStruct, ResolvedStdOption()) {
+                let optionToVec: SuiMoveNormalizedType = .vector(normalizedStruct.typeArguments[0])
+                return try self.getPureSerializationType(optionToVec, argVal)
+            }
+        default: break
+        }
+        
+        return nil
+    }
+    
+    private func expectType(_ typeName: String, _ argVal: SuiJsonValue) throws {
+        if SuiJsonValueType(rawValue: typeName) == nil {
+            throw SuiError.notImplemented
+        }
+        if (SuiJsonValueType(rawValue: typeName))! != argVal.kind {
+            throw SuiError.notImplemented
+        }
+    }
+    
+    private func isValidSuiAddress(_ value: String) -> Bool {
+        return isHex(value) && self.getHexByteLength(value) == 32
+    }
+    
+    private func isHex(_ value: String) -> Bool {
+        let regex = try! NSRegularExpression(pattern: "^(0x|0X)?[a-fA-F0-9]+$")
+        let range = NSRange(location: 0, length: value.utf16.count)
+        let match = regex.firstMatch(in: value, options: [], range: range)
+
+        return match != nil && value.count % 2 == 0
+    }
+    
+    private func getHexByteLength(_ value: String) -> Int {
+        if value.hasPrefix("0x") || value.hasPrefix("0X") {
+            return (value.count - 2) / 2
+        } else {
+            return value.count / 2
+        }
+    }
+    
+    private func isSameStruct(_ lhs: SuiMoveNormalizedStructType, _ rhs: any ResolvedProtocol) -> Bool {
+        return
+            lhs.address == rhs.address &&
+            lhs.module == rhs.module &&
+            lhs.name == rhs.name
+    }
+    
+    private func getSharedObjectInitialVersion(_ resp: SuiObjectResponse) -> Int? {
+        if let owner = resp.owner, let initialSharedVersion = owner.shared?.shared.initialSharedVersion {
+            return initialSharedVersion
+        }
+        return nil
+    }
+    
+    private func getSharedObjectInput(_ arg: SuiCallArg) -> SharedObjectSuiCallArg? {
+        switch arg {
+        case .sharedObject(let sharedObjectSuiCallArg):
+            return sharedObjectSuiCallArg
+        default: return nil
+        }
+    }
+    
+    private func isMutableSharedObjectInput(_ arg: SuiCallArg) -> Bool {
+        return self.getSharedObjectInput(arg)?.mutable ?? false
+    }
+    
+    private func getObjectReference(_ resp: SuiObjectResponse) -> SuiObjectRef? {
+        return SuiObjectRef(
+            version: UInt8(resp.version),
+            objectId: resp.objectId,
+            digest: resp.digest
+        )
+    }
+}
+
+public struct ResolvedStdOption: ResolvedProtocol {
+    public var address: String = ResolvedConstants.moveStdlibAddress
+    public var module: String = ResolvedConstants.stdOptionModuleName
+    public var name: String = ResolvedConstants.stdOptionStructName
+}
+
+public struct ResolvedUtf8Str: ResolvedProtocol {
+    public var address: String = ResolvedConstants.moveStdlibAddress
+    public var module: String = ResolvedConstants.stdUtf8ModuleName
+    public var name: String = ResolvedConstants.stdUtf8StructName
+}
+
+public struct ResolvedAsciiStr: ResolvedProtocol {
+    public var address: String = ResolvedConstants.moveStdlibAddress
+    public var module: String = ResolvedConstants.stdAsciiModuleName
+    public var name: String = ResolvedConstants.stdAsciiStructName
+}
+
+public struct ResolvedSuiId: ResolvedProtocol {
+    public var address: String = ResolvedConstants.suiFrameworkAddress
+    public var module: String = ResolvedConstants.objectModuleName
+    public var name: String = ResolvedConstants.idStructName
+}
+
+public struct ResolvedConstants {
+    public static let stdOptionStructName = "Option"
+    public static let stdOptionModuleName = "option"
+    
+    public static let stdUtf8StructName = "String"
+    public static let stdUtf8ModuleName = "string"
+    
+    public static let stdAsciiStructName = "String"
+    public static let stdAsciiModuleName = "ascii"
+    
+    public static let suiSystemAddress = "0x3"
+    public static let suiFrameworkAddress = "0x2"
+    public static let moveStdlibAddress = "0x1"
+    
+    public static let objectModuleName = "object"
+    public static let uidStructName = "UID"
+    public static let idStructName = "ID"
+    
+    public static let suiTypeArg = "\(ResolvedConstants.suiFrameworkAddress)::sui::SUI"
+    public static let validatorsEventQuery = "\(ResolvedConstants.suiSystemAddress)::validator_set::ValidatorEpochInfoEventV2"
 }

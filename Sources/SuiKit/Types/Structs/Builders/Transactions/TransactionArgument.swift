@@ -50,10 +50,10 @@ public enum TransactionArgument: KeyProtocol, Codable {
 }
 
 public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public let kind: String
-    public let index: Int
-    public let value: SuiJsonValue?
-    public let type: ValueType?
+    public var kind: String
+    public var index: Int
+    public var value: SuiJsonValue?
+    public var type: ValueType?
     
     public func serialize(_ serializer: Serializer) throws {
         try Serializer.str(serializer, kind)

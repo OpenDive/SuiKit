@@ -148,7 +148,7 @@ And this is how to publish a package. (Note: it is recommended for this to be us
 
 ```swift
 import SuiKit 
-import Swifty]SON
+import SwiftyJSON
 
 do {
     // Import Package Module JSON

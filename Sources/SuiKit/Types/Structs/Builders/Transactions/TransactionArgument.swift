@@ -7,21 +7,58 @@
 
 import Foundation
 import AnyCodable
+import SwiftyJSON
 
 public enum TransactionArgument: KeyProtocol, Codable {
-    case transactionBlockInput(TransactionBlockInput)
-    case gasCoin(GasCoin)
+    case input(TransactionBlockInput)
+    case gasCoin
     case result(Result)
     case nestedResult(NestedResult)
+    
+//    public static func fromJsonObject(_ data: JSON, _ type: String) throws -> TransactionArgument {
+//        enum TransactionArgumentType: String {
+//            case input = "Input"
+//            case gasCoin = "GasCoin"
+//            case result = "Result"
+//            case nestedResult = "NestedResult"
+//        }
+//        
+//        guard let txType = TransactionArgumentType(rawValue: type) else { throw SuiError.notImplemented }
+//        
+//        switch txType {
+//        case .input:
+//            return .input(
+//                TransactionBlockInput(
+//                    index: , // Int
+//                    value: , // SuiJsonValue?
+//                    type:  // ValueType?
+//                )
+//            )
+//        case .gasCoin:
+//            return .gasCoin
+//        case .result:
+//            return .result(
+//                Result(
+//                    index:  // Int
+//                )
+//            )
+//        case .nestedResult:
+//            return .nestedResult(
+//                NestedResult(
+//                    index: , // Int
+//                    resultIndex:  // Int
+//                )
+//            )
+//        }
+//    }
 
     public func serialize(_ serializer: Serializer) throws {
         switch self {
-        case .transactionBlockInput(let transactionBlockInput):
+        case .input(let transactionBlockInput):
             try Serializer.u8(serializer, 0)
             try Serializer._struct(serializer, value: transactionBlockInput)
-        case .gasCoin(let gasCoin):
+        case .gasCoin:
             try Serializer.u8(serializer, 1)
-            try Serializer._struct(serializer, value: gasCoin)
         case .result(let result):
             try Serializer.u8(serializer, 2)
             try Serializer._struct(serializer, value: result)
@@ -36,9 +73,9 @@ public enum TransactionArgument: KeyProtocol, Codable {
         
         switch type {
         case 0:
-            return TransactionArgument.transactionBlockInput(try Deserializer._struct(deserializer))
+            return TransactionArgument.input(try Deserializer._struct(deserializer))
         case 1:
-            return TransactionArgument.gasCoin(try Deserializer._struct(deserializer))
+            return TransactionArgument.gasCoin
         case 2:
             return TransactionArgument.result(try Deserializer._struct(deserializer))
         case 3:
@@ -50,13 +87,11 @@ public enum TransactionArgument: KeyProtocol, Codable {
 }
 
 public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public var kind: String
     public var index: Int
     public var value: SuiJsonValue?
     public var type: ValueType?
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.str(serializer, kind)
         try Serializer.u64(serializer, UInt64(index))
         if let value { try Serializer._struct(serializer, value: value) }
         if let type { try Serializer._struct(serializer, value: type) }
@@ -64,7 +99,6 @@ public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtoco
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionBlockInput {
         return TransactionBlockInput(
-            kind: try Deserializer.string(deserializer),
             index: Int(try Deserializer.u64(deserializer)),
             value: try Deserializer._struct(deserializer),
             type: try Deserializer._struct(deserializer)
@@ -99,49 +133,31 @@ public enum ValueType: String, KeyProtocol, Codable {
     }
 }
 
-public struct GasCoin: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public let kind: String
-    
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.str(serializer, kind)
-    }
-    
-    public static func deserialize(from deserializer: Deserializer) throws -> GasCoin {
-        return GasCoin(kind: try Deserializer.string(deserializer))
-    }
-}
-
 public struct Result: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public let kind: String
     public let index: Int
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.str(serializer, kind)
         try Serializer.u64(serializer, UInt64(index))
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> Result {
         return Result(
-            kind: try Deserializer.string(deserializer),
             index: Int(try Deserializer.u64(deserializer))
         )
     }
 }
 
 public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public let kind: String
     public let index: Int
     public let resultIndex: Int
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.str(serializer, kind)
         try Serializer.u64(serializer, UInt64(index))
         try Serializer.u64(serializer, UInt64(resultIndex))
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> NestedResult {
         return NestedResult(
-            kind: try Deserializer.string(deserializer),
             index: Int(try Deserializer.u64(deserializer)),
             resultIndex: Int(try Deserializer.u64(deserializer))
         )

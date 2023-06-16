@@ -14,7 +14,7 @@ public class TransactionResult {
     
     public init(index: Int) {
         self.transactionArgument = TransactionArgument.result(
-            Result(kind: "Result", index: index)
+            Result(index: index)
         )
         self.nestedResults = []
     }
@@ -27,7 +27,6 @@ public class TransactionResult {
             case .result(let result):
                 let nestedResult = TransactionArgument.nestedResult(
                     NestedResult(
-                        kind: "NestedResult",
                         index: result.index,
                         resultIndex: resultIndex
                     )
@@ -152,7 +151,6 @@ public struct TransactionBlock {
             throw SuiError.notImplemented
         }
         let input = TransactionBlockInput(
-            kind: "Input",
             index: index,
             value: value,
             type: type
@@ -293,9 +291,9 @@ public struct TransactionBlock {
             transaction: SuiTransaction.splitCoins(
                 Transactions.splitCoins(
                     coins: ObjectTransactionArgument(
-                        argument: TransactionArgument.transactionBlockInput(coin)
+                        argument: TransactionArgument.input(coin)
                     ),
-                    amounts: amounts.map { TransactionArgument.transactionBlockInput($0) }
+                    amounts: amounts.map { TransactionArgument.input($0) }
                 )
             )
         )
@@ -306,11 +304,11 @@ public struct TransactionBlock {
             transaction: SuiTransaction.mergeCoins(
                 Transactions.mergeCoins(
                     destination: ObjectTransactionArgument(
-                        argument: TransactionArgument.transactionBlockInput(destination)
+                        argument: TransactionArgument.input(destination)
                     ),
                     sources: sources.map {
                         ObjectTransactionArgument(
-                            argument: TransactionArgument.transactionBlockInput($0)
+                            argument: TransactionArgument.input($0)
                         )
                     }
                 )
@@ -345,7 +343,7 @@ public struct TransactionBlock {
                     dependencies: dependencies,
                     packageId: packageId,
                     ticket: ObjectTransactionArgument(
-                        argument: TransactionArgument.transactionBlockInput(ticket)
+                        argument: TransactionArgument.input(ticket)
                     )
                 )
             )
@@ -372,11 +370,11 @@ public struct TransactionBlock {
                 Transactions.transferObjects(
                     objects: objects.map {
                         ObjectTransactionArgument(
-                            argument: TransactionArgument.transactionBlockInput($0)
+                            argument: TransactionArgument.input($0)
                         )
                     },
                     address: PureTransactionArgument(
-                        argument: TransactionArgument.transactionBlockInput(address),
+                        argument: TransactionArgument.input(address),
                         type: "address"
                     )
                 )
@@ -391,7 +389,7 @@ public struct TransactionBlock {
                     type: type,
                     objects: objects.map {
                         ObjectTransactionArgument(
-                            argument: TransactionArgument.transactionBlockInput($0)
+                            argument: TransactionArgument.input($0)
                         )
                     }
                 )
@@ -498,7 +496,7 @@ public struct TransactionBlock {
                 case .moveCall(let moveCall):
                     let needsResolution = moveCall.arguments.allSatisfy { argument in
                         switch argument {
-                        case .transactionBlockInput(let transactionBlockInput):
+                        case .input(let transactionBlockInput):
                             switch blockData.inputs[transactionBlockInput.index].value {
                             case .callArg:
                                 return false
@@ -543,7 +541,6 @@ public struct TransactionBlock {
                 default:
                     if let value = input.value {
                         blockData.inputs[index] = TransactionBlockInput(
-                            kind: "pure",
                             index: index,
                             value: SuiJsonValue.callArg(
                                 SuiCallArg.pure(
@@ -564,7 +561,7 @@ public struct TransactionBlock {
             case .moveCall(let moveCallTransaction):
                 try moveCallTransaction.arguments.forEach { txArgument in
                     switch txArgument {
-                    case .transactionBlockInput(let transactionBlockInput):
+                    case .input(let transactionBlockInput):
                         if self.blockData != nil {
                             try encodeInput(
                                 index: transactionBlockInput.index,
@@ -579,7 +576,7 @@ public struct TransactionBlock {
             case .transferObjects(let transferObjectsTransaction):
                 try transferObjectsTransaction.objects.forEach { objectArgument in
                     switch objectArgument.argument {
-                    case .transactionBlockInput(let transactionBlockInput):
+                    case .input(let transactionBlockInput):
                         if self.blockData != nil {
                             try encodeInput(
                                 index: transactionBlockInput.index,
@@ -594,7 +591,7 @@ public struct TransactionBlock {
             case .splitCoins(let splitCoinsTransaction):
                 try splitCoinsTransaction.amounts.forEach { pureTx in
                     switch pureTx.argument {
-                    case .transactionBlockInput(let transactionBlockInput):
+                    case .input(let transactionBlockInput):
                         if self.blockData != nil {
                             try encodeInput(
                                 index: transactionBlockInput.index,
@@ -607,7 +604,7 @@ public struct TransactionBlock {
                     }
                 }
                 switch splitCoinsTransaction.coin.argument {
-                case .transactionBlockInput(let transactionBlockInput):
+                case .input(let transactionBlockInput):
                     if self.blockData != nil {
                         try encodeInput(
                             index: transactionBlockInput.index,
@@ -621,7 +618,7 @@ public struct TransactionBlock {
             case .mergeCoins(let mergeCoinsTransaction):
                 try mergeCoinsTransaction.sources.forEach { objectTx in
                     switch objectTx.argument {
-                    case .transactionBlockInput(let transactionBlockInput):
+                    case .input(let transactionBlockInput):
                         if self.blockData != nil {
                             try encodeInput(
                                 index: transactionBlockInput.index,
@@ -634,7 +631,7 @@ public struct TransactionBlock {
                     }
                 }
                 switch mergeCoinsTransaction.destination.argument {
-                case .transactionBlockInput(let transactionBlockInput):
+                case .input(let transactionBlockInput):
                     if self.blockData != nil {
                         try encodeInput(
                             index: transactionBlockInput.index,
@@ -649,7 +646,7 @@ public struct TransactionBlock {
                 break
             case .upgrade(let upgradeTransaction):
                 switch upgradeTransaction.ticket.argument {
-                case .transactionBlockInput(let transactionBlockInput):
+                case .input(let transactionBlockInput):
                     if self.blockData != nil {
                         try encodeInput(
                             index: transactionBlockInput.index,
@@ -663,7 +660,7 @@ public struct TransactionBlock {
             case .makeMoveVec(let makeMoveVecTransaction):
                 try makeMoveVecTransaction.objects.forEach { objectTx in
                     switch objectTx.argument {
-                    case .transactionBlockInput(let transactionBlockInput):
+                    case .input(let transactionBlockInput):
                         if self.blockData != nil {
                             try encodeInput(
                                 index: transactionBlockInput.index,
@@ -702,7 +699,7 @@ public struct TransactionBlock {
                             let arg = moveCallTx.arguments[idx]
                             
                             switch arg {
-                            case .transactionBlockInput(let blockInputArgument):
+                            case .input(let blockInputArgument):
                                 var input = blockData.inputs[blockInputArgument.index]
                                 switch input.value {
                                 case .callArg: return

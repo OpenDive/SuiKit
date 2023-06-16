@@ -121,6 +121,88 @@ public enum SuiTransaction: Codable, KeyProtocol, TransactionTypesProtocol {
     case upgrade(UpgradeTransaction)
     case makeMoveVec(MakeMoveVecTransaction)
     
+//    public static func fromJsonObject(_ data: JSON, _ type: String) throws -> SuiTransaction {
+//        enum SuiTransactionTypes: String {
+//            case moveCall = "MoveCall"
+//            case transferObject = "TransferObject"
+//            case splitCoin = "SplitCoin"
+//            case mergeCoin = "MergeCoin"
+//            case publish = "Publish"
+//            case upgrade = "Upgrade"
+//            case makeMoveVec = "MakeMoveVec"
+//        }
+//        
+//        guard let txType = SuiTransactionTypes(rawValue: type) else { throw SuiError.notImplemented }
+//        
+//        switch txType {
+//        case .moveCall:
+//            return .moveCall(
+//                Transactions.moveCall(
+//                    input: MoveCallTransactionInput(
+//                        target: "\(data["package"].stringValue)::\(data["module"].stringValue)::\(data["function"].stringValue)",
+//                        arguments: try data["arguments"].arrayValue.map {
+//                            try TransactionArgument.fromJsonObject($0, $0.dictionaryValue.keys.first!)
+//                        },
+//                        typeArguments: data["type_arguments"].arrayValue.map { $0.stringValue }
+//                    )
+//                )
+//            )
+//        case .transferObject:
+//            return .transferObjects(
+//                Transactions.transferObjects(
+//                    objects: try data[0].arrayValue.map {
+//                        ObjectTransactionArgument(
+//                            argument: try TransactionArgument.fromJsonObject($0, $0.dictionaryValue.keys.first!)
+//                        )
+//                    },
+//                    address: PureTransactionArgument(
+//                        argument: try TransactionArgument.fromJsonObject(
+//                            data[1].dictionaryValue.values.first!,
+//                            data[1].dictionaryValue.keys.first!
+//                        ),
+//                        type: "Address"
+//                    )
+//                )
+//            )
+//        case .splitCoin:
+//            return .splitCoins(
+//                Transactions.splitCoins(
+//                    coins: ,  // ObjectTransactionArgument
+//                    amounts:  // [TransactionArgument]
+//                )
+//            )
+//        case .mergeCoin:
+//            return .mergeCoins(
+//                Transactions.mergeCoins(
+//                    destination: , // ObjectTransactionArgument
+//                    sources:  // [ObjectTransactionArgument]
+//                )
+//            )
+//        case .publish:
+//            return .publish(
+//                Transactions.publish(
+//                    modules: , // [[UInt8]]
+//                    dependencies:  // [String]
+//                )
+//            )
+//        case .upgrade:
+//            return .upgrade(
+//                Transactions.upgrade(
+//                    modules: , // [[UInt8]]
+//                    dependencies: , // [String]
+//                    packageId: , // String
+//                    ticket:  // ObjectTransactionArgument
+//                )
+//            )
+//        case .makeMoveVec:
+//            return .makeMoveVec(
+//                Transactions.makeMoveVec(
+//                    objects:  // [ObjectTransactionArgument]
+//                )
+//            )
+//        }
+//    }
+    
     public var kind: String {
         switch self {
         case .moveCall:
@@ -356,10 +438,25 @@ public indirect enum SuiJsonValue: Codable, KeyProtocol {
     case data(Data)
     case input(TransactionBlockInput)
     
-    // TODO: Create fromJSONObject function
-//    public static func fromJSONObject(_ data: JSON, _ type: String) throws -> SuiJsonValue {
-//        let valueType 
-//    }
+    public static func fromJSONObject(_ data: JSON) throws -> SuiJsonValue {
+        if let boolData = data.bool {
+            return .boolean(boolData)
+        }
+        if let int64Data = data.int64 {
+            return .number(UInt64(int64Data))
+        }
+        if let strData = data.string {
+            return .string(strData)
+        }
+        if let arrayData = data.array {
+            return .array(try arrayData.map { try SuiJsonValue.fromJSONObject($0) })
+        }
+        if let dataValue = data.rawValue as? Data {
+            return .data(dataValue)
+        }
+        
+        throw SuiError.notImplemented
+    }
     
     public var kind: SuiJsonValueType {
         switch self {
@@ -854,6 +951,106 @@ public enum SuiObjectChange {
             return "wrapped"
         case .created:
             return "created"
+        }
+    }
+    
+    public static func fromJsonObject(_ data: JSON, _ type: String) throws -> SuiObjectChange {
+        enum SuiObjectChangeType: String {
+            case published
+            case transferred
+            case mutated
+            case deleted
+            case wrapped
+            case created
+        }
+        
+        guard let changeType = SuiObjectChangeType(rawValue: type) else { throw SuiError.notImplemented }
+        
+        switch changeType {
+        case .published:
+            return .published(
+                SuiObjectChangePublished(
+                    packageId: data["packageId"].stringValue,
+                    version: data["version"].stringValue,
+                    digest: data["digest"].stringValue,
+                    modules: data["modules"].arrayValue.map { $0.stringValue }
+                )
+            )
+        case .transferred:
+            return .transferred(
+                SuiObjectChangeTransferred(
+                    sender: data["sender"].stringValue,
+                    recipient: ObjectOwner(
+                        addressOwner: AddressOwner(
+                            addressOwner: data["recipient"]["AddressOwner"].stringValue
+                        ),
+                        objectOwner: ObjectOwnerAddress(
+                            objectOwner: data["recipient"]["ObjectOwner"].stringValue
+                        ),
+                        shared: nil
+                    ),
+                    objectType: data["objectType"].stringValue,
+                    objectId: data["objectId"].stringValue,
+                    version: data["version"].stringValue,
+                    digest: data["digest"].stringValue
+                )
+            )
+        case .mutated:
+            return .mutated(
+                SuiObjectChangeMutated(
+                    sender: data["sender"].stringValue,
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(
+                            addressOwner: data["owner"]["AddressOwner"].stringValue
+                        ),
+                        objectOwner: ObjectOwnerAddress(
+                            objectOwner: data["recipient"]["ObjectOwner"].stringValue
+                        ),
+                        shared: nil
+                    ),
+                    objectType: data["objectType"].stringValue,
+                    version: data["version"].stringValue,
+                    previousVersion: data["previousVersion"].stringValue,
+                    digest: data["digest"].stringValue
+                )
+            )
+        case .deleted:
+            return .deleted(
+                SuiObjectChangeDeleted(
+                    sender: data["sender"].stringValue,
+                    objectType: data["objectType"].stringValue,
+                    objectId: data["objectId"].stringValue,
+                    version: data["version"].stringValue
+                )
+            )
+        case .wrapped:
+            return .wrapped(
+                SuiObjectChangeWrapped(
+                    sender: data["sender"].stringValue,
+                    objectType: data["objectType"].stringValue,
+                    objectId: data["objectId"].stringValue,
+                    version: data["version"].stringValue
+                )
+            )
+        case .created:
+            return .created(
+                SuiObjectChangeCreated(
+                    sender: data["sender"].stringValue,
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(
+                            addressOwner: data["owner"]["AddressOwner"].stringValue
+                        ),
+                        objectOwner: ObjectOwnerAddress(
+                            objectOwner: data["recipient"]["ObjectOwner"].stringValue
+                        ),
+                        shared: nil
+                    ),
+                    objectType: data["objectType"].stringValue,
+                    objectId: data["objectId"].stringValue,
+                    version: data["version"].stringValue,
+                    digest: data["digest"].stringValue
+                )
+            )
         }
     }
 }

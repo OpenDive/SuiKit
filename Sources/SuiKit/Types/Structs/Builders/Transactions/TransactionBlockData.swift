@@ -27,14 +27,12 @@ public struct TransactionBlockDataBuilder {
                         switch value {
                         case .pure(let pureSuiCallArg):
                             return TransactionBlockInput(
-                                kind: "Input",
                                 index: idx,
                                 value: pureSuiCallArg.value,
                                 type: .pure
                             )
                         default:
                             return TransactionBlockInput(
-                                kind: "Input",
                                 index: idx,
                                 value: nil,
                                 type: .object
@@ -65,14 +63,12 @@ public struct TransactionBlockDataBuilder {
                             switch value {
                             case .pure(let pureSuiCallArg):
                                 return TransactionBlockInput(
-                                    kind: "Input",
                                     index: idx,
                                     value: pureSuiCallArg.value,
                                     type: .pure
                                 )
                             default:
                                 return TransactionBlockInput(
-                                    kind: "Input",
                                     index: idx,
                                     value: nil,
                                     type: .object

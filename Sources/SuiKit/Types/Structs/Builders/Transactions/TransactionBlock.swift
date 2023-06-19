@@ -402,14 +402,14 @@ public struct TransactionBlock {
         return try JSONEncoder().encode(blockData.snapshot())
     }
     
-    // TODO: Implement build function
-    public func build() {
-        
+    public mutating func build(_ provider: SuiProvider, _ onlyTransactionKind: Bool? = nil) async throws -> Data {
+        try await self.prepare(provider: provider, onlyTransactionKind: onlyTransactionKind)
+        return try self.blockData?.build(onlyTransactionKind: onlyTransactionKind) ?? Data()
     }
-    
-    // TODO: Implement getDigest function
-    public func getDigest() {
-        
+
+    public mutating func getDigest(_ provider: SuiProvider) async throws -> String {
+        try await self.prepare(provider: provider)
+        return try self.blockData?.getDigest() ?? ""
     }
     
     private mutating func prepareGasPayment(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
@@ -809,7 +809,6 @@ public struct TransactionBlock {
         }
     }
     
-    // TODO: Implement prepare function
     private mutating func prepare(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
         if self.isMissingSender(onlyTransactionKind) {
             throw SuiError.notImplemented
@@ -821,8 +820,30 @@ public struct TransactionBlock {
         if onlyTransactionKind != nil && !(onlyTransactionKind!) {
             try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
             
-            if self.blockData?.serializedTransactionDataBuilder.gasConfig.budget == nil {
-                // TODO: Implement DryRunTransaction call
+            if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
+                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build()))
+                
+                guard dryRunResult.effects.status.status != .failure else {
+                    throw SuiError.notImplemented
+                }
+                
+                let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
+                    Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
+                )
+                
+                let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
+                
+                let gasBudget =
+                    baseComputationCostWithOverhead +
+                    (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
+                    (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
+                
+                self.setGasBudget(
+                    price:
+                        gasBudget > baseComputationCostWithOverhead ?
+                        BigInt(gasBudget) :
+                        BigInt(baseComputationCostWithOverhead)
+                )
             }
         }
     }

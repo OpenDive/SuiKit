@@ -15,6 +15,7 @@ public enum TransactionArgument: KeyProtocol, Codable {
     case result(Result)
     case nestedResult(NestedResult)
     
+    // TODO: Implement fromJsonObject function
 //    public static func fromJsonObject(_ data: JSON, _ type: String) throws -> TransactionArgument {
 //        enum TransactionArgumentType: String {
 //            case input = "Input"

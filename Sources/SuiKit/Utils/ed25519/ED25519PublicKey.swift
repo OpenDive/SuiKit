@@ -27,12 +27,14 @@ import Foundation
 import ed25519swift
 
 /// The ED25519 Public Key
-public struct ED25519PublicKey: Equatable, KeyProtocol, CustomStringConvertible {
+public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
+    public var type: KeyType = .ed25519
+    
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
     /// The key itself
-    let key: Data
+    public var key: Data
 
     public init(data: Data) throws {
         guard data.count <= ED25519PublicKey.LENGTH else {
@@ -60,7 +62,7 @@ public struct ED25519PublicKey: Equatable, KeyProtocol, CustomStringConvertible 
     /// - Returns: A Boolean value indicating whether the signature is valid or not.
     ///
     /// - Throws: An error of type Ed25519Error.invalidSignature if the signature is invalid or an error occurred during verification.
-    public func verify(data: Data, signature: Signature) throws -> Bool {
+    public func verify(data: Data, signature: Signature, _ privateKey: Data) throws -> Bool {
         return Ed25519.verify(
             signature: [UInt8](signature.signature),
             message: [UInt8](data),

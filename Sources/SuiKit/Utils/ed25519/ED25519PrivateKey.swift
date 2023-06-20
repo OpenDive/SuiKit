@@ -27,12 +27,17 @@ import Foundation
 import ed25519swift
 
 /// The ED25519 Private Key
-public struct ED25519PrivateKey: Equatable, KeyProtocol, CustomStringConvertible {
+public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
+    public typealias PrivateKeyType = ED25519PrivateKey
+    public typealias PublicKeyType = ED25519PublicKey
+    
+    public var type: KeyType = .ed25519
+    
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
     /// The key itself
-    public let key: Data
+    public var key: Data
 
     public init(key: Data) {
         self.key = key
@@ -78,7 +83,7 @@ public struct ED25519PrivateKey: Equatable, KeyProtocol, CustomStringConvertible
     /// - Throws: An error if the calculation of the public key fails, or if the public key cannot be used to create a PublicKey instance.
     ///
     /// - Note: The private key is converted into a UInt8 array and passed to the calcPublicKey function of the Ed25519 implementation. The resulting public key is then used to create a new PublicKey instance.
-    public func publicKey() throws -> ED25519PublicKey {
+    public func publicKey() throws -> PublicKeyType {
         let key = Ed25519.calcPublicKey(secretKey: [UInt8](self.key))
         return try ED25519PublicKey(data: Data(key))
     }
@@ -90,7 +95,7 @@ public struct ED25519PrivateKey: Equatable, KeyProtocol, CustomStringConvertible
     /// - Throws: An error if the generation of the key pair fails or if the generated private key cannot be used to create a PrivateKey instance.
     ///
     /// - Note: The generateKeyPair function of the Ed25519 implementation is called to generate a new key pair, and the secret key is extracted and used to create a new PrivateKey instance.
-    public static func random() throws -> ED25519PrivateKey {
+    public static func random() throws -> PrivateKeyType {
         let privateKeyArray = Ed25519.generateKeyPair().secretKey
         return ED25519PrivateKey(key: Data(privateKeyArray))
     }

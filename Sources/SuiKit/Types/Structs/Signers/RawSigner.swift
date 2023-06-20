@@ -25,14 +25,12 @@ public struct RawSigner: SignerWithProviderProtocol {
         return try wallet.account.publicKey().description
     }
     
-    // TODO: Implement SignData function
     public func signData(data: Data) throws -> String {
         let pubKey = try self.getAddress()
         let digest = try Blake2.hash(.b2b, size: 32, data: data)
         let signature = try self.wallet.account.privateKey.sign(data: digest)
-        // TODO: Implement protocol typing for signature schemes
-//        let signatureScheme =
-        return ""
+        let signatureScheme = self.wallet.account.privateKey.type
+        return try toSerializedSignature(signature, signatureScheme, pubKey)
     }
     
     public func connect(provider: SuiProvider) throws -> RawSigner {
@@ -56,12 +54,35 @@ public struct RawSigner: SignerWithProviderProtocol {
     public func signTransactionBlock(transactionBlock: inout TransactionBlock) async throws -> SignedTransaction {
         let txBlockBytes = try await self.prepareTransactionBlock(&transactionBlock)
         let intentMessage = messageWithIntent(.TransactionData, txBlockBytes)
-        let signature = try self.signMessage(intentMessage)
+        let signature = try self.signData(data: intentMessage)
         
         return SignedTransaction(
             transactionBlockBytes: B64.toB64([UInt8](txBlockBytes)),
             signature: signature
         )
+    }
+    
+    public func signAndExecuteTransactionBlock(
+        _ transactionBlock: inout TransactionBlock,
+        _ options: SuiTransactionBlockResponseOptions? = nil,
+        _ requestType: SuiRequestType? = nil
+    ) async throws -> TransactionBlockResponse {
+        let signedTxBlock = try await self.signTransactionBlock(transactionBlock: &transactionBlock)
+        return try await self.provider.executeTransactionBlock(
+            signedTxBlock.transactionBlockBytes,
+            signedTxBlock.signature,
+            options,
+            requestType
+        )
+    }
+    
+    public func getTransactionBlockDigest(_ tx: inout TransactionBlock) async throws -> String {
+        tx.setSenderIfNotSet(sender: try self.getAddress())
+        return try await tx.getDigest(self.provider)
+    }
+    
+    public func getTransactionBlockDigest(_ tx: inout Data) -> String {
+        return TransactionBlockDataBuilder.getDigestFromBytes(bytes: tx)
     }
 }
 
@@ -93,4 +114,26 @@ public func messageWithIntent(_ scope: IntentScope, _ message: Data) -> Data {
     intentMessage.append(intentData)
     intentMessage.append(message)
     return intentMessage
+}
+
+public func toSerializedSignature(
+    _ signature: Signature,
+    _ signatureScheme: KeyType,
+    _ pubKey: String
+) throws -> String {
+    var serializedSignature = Data(capacity: 1 + signature.signature.count + pubKey.count)
+    
+    serializedSignature.append(
+        Signature.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] ?? 0x00
+    )
+    serializedSignature.replaceSubrange(
+        1 ..< 1 + signature.signature.count,
+        with: signature.signature
+    )
+    serializedSignature.replaceSubrange(
+        1 + signature.signature.count ..< 1 + signature.signature.count + pubKey.count,
+        with: try pubKey.bytes
+    )
+    
+    return B64.toB64([UInt8](serializedSignature))
 }

@@ -8,12 +8,17 @@
 import Foundation
 import secp256k1
 
-public struct SECP256K1PrivateKey: Equatable, KeyProtocol, CustomStringConvertible {
+public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
+    public typealias PrivateKeyType = SECP256K1PrivateKey
+    public typealias PublicKeyType = SECP256K1PublicKey
+    
+    public var type: KeyType = .secp256k1
+    
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
     /// The key itself
-    public let key: Data
+    public var key: Data
 
     public init(key: Data) {
         self.key = key

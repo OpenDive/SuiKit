@@ -29,14 +29,16 @@ import Foundation
 public struct Account: Equatable {
     /// The account address associated with the account
     public let accountAddress: AccountAddress
+    
+//    public let accountType: AccountType
 
     /// The private key for the account
-    public let privateKey: ED25519PrivateKey
+    public let privateKey: any PrivateKeyProtocol
 
     public static func == (lhs: Account, rhs: Account) -> Bool {
         return
             lhs.accountAddress == rhs.accountAddress &&
-            lhs.privateKey == rhs.privateKey
+            lhs.privateKey.key == rhs.privateKey.key
     }
 
     /// Generate a new account instance with a random private key.
@@ -140,7 +142,7 @@ public struct Account: Equatable {
     
     /// Returns the public key of the associated account
     /// - Returns: A PublicKey object
-    public func publicKey() throws -> ED25519PublicKey {
+    public func publicKey() throws -> any PublicKeyProtocol {
         return try self.privateKey.publicKey()
     }
 }

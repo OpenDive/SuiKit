@@ -1088,7 +1088,7 @@ public struct PaginatedTransactionResponse {
     public let hasNextPage: Bool
 }
 
-public struct DryRunTransactionBlockResponse {
+public struct TransactionBlockResponse {
     public let digest: String
     public let transaction: SuiTransactionBlockData
     public let txSigntures: [String]

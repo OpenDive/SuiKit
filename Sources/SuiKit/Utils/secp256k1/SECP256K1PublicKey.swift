@@ -8,12 +8,14 @@
 import Foundation
 import secp256k1
 
-public struct SECP256K1PublicKey: Equatable, KeyProtocol, CustomStringConvertible {
+public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
+    
+    public var type: KeyType = .secp256k1
 
     /// The key itself
-    let key: Data
+    public var key: Data
 
     public init(data: Data) throws {
         guard data.count <= SECP256K1PublicKey.LENGTH else {

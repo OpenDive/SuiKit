@@ -657,7 +657,7 @@ public struct SuiProvider {
         return objectResponses
     }
 
-    public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> DryRunTransactionBlockResponse {
+    public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> TransactionBlockResponse {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -667,205 +667,7 @@ public struct SuiProvider {
                 ]
             )
         )
-        let result = JSON(data)["result"]
-        let tx = result["transaction"]["data"]
-        let programmableTx = tx["transaction"]
-        let effects = result["effects"]
-        
-        return DryRunTransactionBlockResponse(
-            digest: result["digest"].stringValue,
-            transaction: SuiTransactionBlockData(
-                messageVersion: tx["messageVersion"].stringValue,
-                transaction: SuiTransactionBlockKind.programmableTransaction(
-                    ProgrammableTransaction(
-//                        transactions: try programmableTx["transactions"].arrayValue.map {
-//                            for (txKey, txValue) in $0.dictionaryValue {
-//                                return try SuiTransaction.fromJsonObject(txValue, txKey)
-//                            }
-//                        },
-                        transactions: [],
-                        inputs: try programmableTx["inputs"].arrayValue.map {
-                            let type = $0["type"].stringValue
-                            switch type {
-                            case "pure":
-                                return SuiCallArg.pure(
-                                    PureSuiCallArg(
-                                        type: "pure",
-                                        valueType: $0["valueType"].stringValue,
-                                        value: try SuiJsonValue.fromJSONObject($0["value"])
-                                    )
-                                )
-                            case "object":
-                                let objectType = $0["objectType"].stringValue
-                                switch objectType {
-                                case "immOrOwnedObject":
-                                    return SuiCallArg.ownedObject(
-                                        OwnedObjectSuiCallArg(
-                                            type: "object",
-                                            objectType: "immOrOwnedObject",
-                                            objectId: $0["objectId"].stringValue,
-                                            version: $0["version"].stringValue,
-                                            digest: $0["digest"].stringValue
-                                        )
-                                    )
-                                case "sharedObject":
-                                    return SuiCallArg.sharedObject(
-                                        SharedObjectSuiCallArg(
-                                            type: "object",
-                                            objectType: "sharedObject",
-                                            objectId: $0["objectId"].stringValue,
-                                            initialSharedVersion: $0["initialSharedObject"].stringValue,
-                                            mutable: $0["mutable"].boolValue
-                                        )
-                                    )
-                                default: throw SuiError.notImplemented
-                                }
-                            default: throw SuiError.notImplemented
-                            }
-                        }
-                    )
-                ),
-                sender: tx["sender"].stringValue,
-                gasData: SuiGasData(
-                    payment: tx["gasData"]["payment"].arrayValue.compactMap {
-                        SuiObjectRef(
-                            version: $0["version"].uInt8Value,
-                            objectId: $0["objectId"].stringValue,
-                            digest: $0["digest"].stringValue
-                        )
-                    },
-                    owner: tx["gasData"]["owner"].string,
-                    price: tx["gasData"]["price"].string,
-                    budget: tx["gasData"]["budget"].string
-                )
-            ),
-            txSigntures: result["transaction"]["txSignatures"].arrayValue.map { $0.stringValue },
-            rawTransaction: result["rawTransaction"].stringValue,
-            effects: TransactionEffects(
-                messageVersion: MessageVersion(rawValue: effects["messageVersion"].stringValue) ?? .v1,
-                status: ExecutionStatus(
-                    status: ExecutionStatusType(rawValue: effects["status"]["status"].stringValue) ?? ExecutionStatusType.failure,
-                    error: effects["status"]["error"].string
-                ),
-                executedEpoch: effects["executedEpoch"].stringValue,
-                modifiedAtVersions: effects["modifiedAtVersions"].arrayValue.compactMap {
-                    TransactionEffectsModifiedAtVersions(
-                        objectId: $0["objectId"].stringValue,
-                        sequenceNumber: $0["sequenceNumber"].stringValue
-                    )
-                },
-                gasUsed: GasCostSummary(
-                    computationCost: effects["gasUsed"]["computationCost"].stringValue,
-                    storageCost: effects["gasUsed"]["storageCost"].stringValue,
-                    storageRebate: effects["gasUsed"]["storageRebate"].stringValue,
-                    nonRefundableStorageFee: effects["gasUsed"]["nonRefundableStorageFee"].stringValue
-                ),
-                sharedObjects: effects["sharedObjects"].arrayValue.compactMap {
-                    SuiObjectRef(
-                        version: $0["version"].uInt8Value,
-                        objectId: $0["objectId"].stringValue,
-                        digest: $0["digest"].stringValue
-                    )
-                },
-                transactionDigest: effects["transactionDigest"].stringValue,
-                created: effects["created"].arrayValue.compactMap {
-                    OwnedObjectRef(
-                        owner: ObjectOwner(
-                            addressOwner: AddressOwner(
-                                addressOwner: $0["owner"]["AddressOwner"].stringValue
-                            ),
-                            objectOwner: ObjectOwnerAddress(
-                                objectOwner: $0["owner"]["ObjectOwner"].stringValue
-                            ),
-                            shared: nil
-                        ),
-                        reference: SuiObjectRef(
-                            version: $0["version"].uInt8Value,
-                            objectId: $0["objectId"].stringValue,
-                            digest: $0["digest"].stringValue
-                        )
-                    )
-                },
-                mutated: effects["mutated"].arrayValue.compactMap {
-                    OwnedObjectRef(
-                        owner: ObjectOwner(
-                            addressOwner: AddressOwner(
-                                addressOwner: $0["owner"]["AddressOwner"].stringValue
-                            ),
-                            objectOwner: ObjectOwnerAddress(
-                                objectOwner: $0["owner"]["ObjectOwner"].stringValue
-                            ),
-                            shared: nil
-                        ),
-                        reference: SuiObjectRef(
-                            version: $0["version"].uInt8Value,
-                            objectId: $0["objectId"].stringValue,
-                            digest: $0["digest"].stringValue
-                        )
-                    )
-                },
-                unwrapped: effects["unwrapped"].arrayValue.compactMap {
-                    OwnedObjectRef(
-                        owner: ObjectOwner(
-                            addressOwner: AddressOwner(
-                                addressOwner: $0["owner"]["AddressOwner"].stringValue
-                            ),
-                            objectOwner: ObjectOwnerAddress(
-                                objectOwner: $0["owner"]["ObjectOwner"].stringValue
-                            ),
-                            shared: nil
-                        ),
-                        reference: SuiObjectRef(
-                            version: $0["version"].uInt8Value,
-                            objectId: $0["objectId"].stringValue,
-                            digest: $0["digest"].stringValue
-                        )
-                    )
-                },
-                deleted: effects["deleted"].arrayValue.compactMap {
-                    SuiObjectRef(
-                        version: $0["version"].uInt8Value,
-                        objectId: $0["objectId"].stringValue,
-                        digest: $0["digest"].stringValue
-                    )
-                },
-                unwrappedThenDeleted: effects["unwrappedThenDeleted"].arrayValue.compactMap {
-                    SuiObjectRef(
-                        version: $0["version"].uInt8Value,
-                        objectId: $0["objectId"].stringValue,
-                        digest: $0["digest"].stringValue
-                    )
-                },
-                wrapped: effects["wrapped"].arrayValue.compactMap {
-                    SuiObjectRef(
-                        version: $0["version"].uInt8Value,
-                        objectId: $0["objectId"].stringValue,
-                        digest: $0["digest"].stringValue
-                    )
-                },
-                gasObject: OwnedObjectRef(
-                    owner: ObjectOwner(
-                        addressOwner: AddressOwner(
-                            addressOwner: effects["gasObject"]["owner"]["AddressOwner"].stringValue
-                        ),
-                        objectOwner: ObjectOwnerAddress(
-                            objectOwner: effects["gasObject"]["owner"]["ObjectOwner"].stringValue
-                        ),
-                        shared: nil
-                    ),
-                    reference: SuiObjectRef(
-                        version: effects["gasObject"]["reference"]["version"].uInt8Value,
-                        objectId: effects["gasObject"]["reference"]["objectId"].stringValue,
-                        digest: effects["gasObject"]["reference"]["digest"].stringValue
-                    )
-                ),
-                eventsDigest: effects["eventsDigest"].stringValue,
-                dependencies: effects["dependencies"].arrayValue.compactMap { $0.string }
-            ),
-            objectChanges: try result["objectChanges"].arrayValue.map {
-                return try SuiObjectChange.fromJsonObject($0, $0["type"].stringValue)
-            }
-        )
+        return try self.decodeTransactionResponse(JSON(data))
     }
 
     public func getNormalizedMoveFunction(
@@ -939,6 +741,281 @@ public struct SuiProvider {
         )
         
         return JSON(data)["result"]
+    }
+    
+    public func executeTransactionBlock(
+        _ transactionBlock: String,
+        _ signature: String,
+        _ options: SuiTransactionBlockResponseOptions? = nil,
+        _ requestType: SuiRequestType? = nil
+    ) async throws -> TransactionBlockResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_executeTransactionBlock",
+                [
+                    AnyCodable(transactionBlock),
+                    AnyCodable(signature),
+                    AnyCodable(options),
+                    AnyCodable(requestType)
+                ]
+            )
+        )
+        return try self.decodeTransactionResponse(JSON(data))
+    }
+    
+    public func devInspectTransactionBlock(
+        _ transactionBlock: inout TransactionBlock,
+        _ sender: SuiAddress,
+        _ gasPrice: Int?,
+        _ epoch: String?
+    ) async throws -> DevInspectResults {
+        transactionBlock.setSenderIfNotSet(sender: sender)
+        let devInspectTxBytes = await B64.toB64(
+            try [UInt8](transactionBlock.build(self, true))
+        )
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_devInspectTransactionBlock",
+                [
+                    AnyCodable(sender),
+                    AnyCodable(devInspectTxBytes),
+                    AnyCodable(gasPrice),
+                    AnyCodable(epoch)
+                ]
+            )
+        )
+        
+        let result = JSON(data)["result"]
+        let effects = result["effects"]
+        
+        return DevInspectResults(
+            effects: self.decodeTransactionEffects(effects),
+            events: result["events"].arrayValue.map {
+                SuiEvent(
+                    id: EventId(
+                        txDigest: $0["id"]["txDigest"].stringValue,
+                        eventSeq: $0["id"]["eventSeq"].stringValue
+                    ),
+                    packageId: $0["packageId"].stringValue,
+                    transactionModule: $0["transactionModule"].stringValue,
+                    sender: $0["sender"].stringValue,
+                    type: $0["type"].stringValue,
+                    parsedJson: nil, // TODO: Implement parsedJson parameter
+                    bcs: $0["bcs"].stringValue,
+                    timestampMs: $0["timestampMs"].stringValue
+                )
+            },
+            results: nil, // TODO: Implement results parameter
+            error: result["error"].string
+        )
+    }
+    
+    private func decodeTransactionResponse(_ data: JSON) throws -> TransactionBlockResponse {
+        let result = data["result"]
+        let tx = result["transaction"]["data"]
+        let programmableTx = tx["transaction"]
+        let effects = result["effects"]
+        
+        return TransactionBlockResponse(
+            digest: result["digest"].stringValue,
+            transaction: SuiTransactionBlockData(
+                messageVersion: tx["messageVersion"].stringValue,
+                transaction: SuiTransactionBlockKind.programmableTransaction(
+                    ProgrammableTransaction(
+//                        transactions: try programmableTx["transactions"].arrayValue.map {
+//                            for (txKey, txValue) in $0.dictionaryValue {
+//                                return try SuiTransaction.fromJsonObject(txValue, txKey)
+//                            }
+//                        },
+                        transactions: [],
+                        inputs: try programmableTx["inputs"].arrayValue.map {
+                            let type = $0["type"].stringValue
+                            switch type {
+                            case "pure":
+                                return SuiCallArg.pure(
+                                    PureSuiCallArg(
+                                        type: "pure",
+                                        valueType: $0["valueType"].stringValue,
+                                        value: try SuiJsonValue.fromJSONObject($0["value"])
+                                    )
+                                )
+                            case "object":
+                                let objectType = $0["objectType"].stringValue
+                                switch objectType {
+                                case "immOrOwnedObject":
+                                    return SuiCallArg.ownedObject(
+                                        OwnedObjectSuiCallArg(
+                                            type: "object",
+                                            objectType: "immOrOwnedObject",
+                                            objectId: $0["objectId"].stringValue,
+                                            version: $0["version"].stringValue,
+                                            digest: $0["digest"].stringValue
+                                        )
+                                    )
+                                case "sharedObject":
+                                    return SuiCallArg.sharedObject(
+                                        SharedObjectSuiCallArg(
+                                            type: "object",
+                                            objectType: "sharedObject",
+                                            objectId: $0["objectId"].stringValue,
+                                            initialSharedVersion: $0["initialSharedObject"].stringValue,
+                                            mutable: $0["mutable"].boolValue
+                                        )
+                                    )
+                                default: throw SuiError.notImplemented
+                                }
+                            default: throw SuiError.notImplemented
+                            }
+                        }
+                    )
+                ),
+                sender: tx["sender"].stringValue,
+                gasData: SuiGasData(
+                    payment: tx["gasData"]["payment"].arrayValue.compactMap {
+                        SuiObjectRef(
+                            version: $0["version"].uInt8Value,
+                            objectId: $0["objectId"].stringValue,
+                            digest: $0["digest"].stringValue
+                        )
+                    },
+                    owner: tx["gasData"]["owner"].string,
+                    price: tx["gasData"]["price"].string,
+                    budget: tx["gasData"]["budget"].string
+                )
+            ),
+            txSigntures: result["transaction"]["txSignatures"].arrayValue.map { $0.stringValue },
+            rawTransaction: result["rawTransaction"].stringValue,
+            effects: self.decodeTransactionEffects(effects),
+            objectChanges: try result["objectChanges"].arrayValue.map {
+                return try SuiObjectChange.fromJsonObject($0, $0["type"].stringValue)
+            }
+        )
+    }
+    
+    private func decodeTransactionEffects(_ effects: JSON) -> TransactionEffects {
+        return TransactionEffects(
+            messageVersion: MessageVersion(rawValue: effects["messageVersion"].stringValue) ?? .v1,
+            status: ExecutionStatus(
+                status: ExecutionStatusType(rawValue: effects["status"]["status"].stringValue) ?? ExecutionStatusType.failure,
+                error: effects["status"]["error"].string
+            ),
+            executedEpoch: effects["executedEpoch"].stringValue,
+            modifiedAtVersions: effects["modifiedAtVersions"].arrayValue.compactMap {
+                TransactionEffectsModifiedAtVersions(
+                    objectId: $0["objectId"].stringValue,
+                    sequenceNumber: $0["sequenceNumber"].stringValue
+                )
+            },
+            gasUsed: GasCostSummary(
+                computationCost: effects["gasUsed"]["computationCost"].stringValue,
+                storageCost: effects["gasUsed"]["storageCost"].stringValue,
+                storageRebate: effects["gasUsed"]["storageRebate"].stringValue,
+                nonRefundableStorageFee: effects["gasUsed"]["nonRefundableStorageFee"].stringValue
+            ),
+            sharedObjects: effects["sharedObjects"].arrayValue.compactMap {
+                SuiObjectRef(
+                    version: $0["version"].uInt8Value,
+                    objectId: $0["objectId"].stringValue,
+                    digest: $0["digest"].stringValue
+                )
+            },
+            transactionDigest: effects["transactionDigest"].stringValue,
+            created: effects["created"].arrayValue.compactMap {
+                OwnedObjectRef(
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(
+                            addressOwner: $0["owner"]["AddressOwner"].stringValue
+                        ),
+                        objectOwner: ObjectOwnerAddress(
+                            objectOwner: $0["owner"]["ObjectOwner"].stringValue
+                        ),
+                        shared: nil
+                    ),
+                    reference: SuiObjectRef(
+                        version: $0["version"].uInt8Value,
+                        objectId: $0["objectId"].stringValue,
+                        digest: $0["digest"].stringValue
+                    )
+                )
+            },
+            mutated: effects["mutated"].arrayValue.compactMap {
+                OwnedObjectRef(
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(
+                            addressOwner: $0["owner"]["AddressOwner"].stringValue
+                        ),
+                        objectOwner: ObjectOwnerAddress(
+                            objectOwner: $0["owner"]["ObjectOwner"].stringValue
+                        ),
+                        shared: nil
+                    ),
+                    reference: SuiObjectRef(
+                        version: $0["version"].uInt8Value,
+                        objectId: $0["objectId"].stringValue,
+                        digest: $0["digest"].stringValue
+                    )
+                )
+            },
+            unwrapped: effects["unwrapped"].arrayValue.compactMap {
+                OwnedObjectRef(
+                    owner: ObjectOwner(
+                        addressOwner: AddressOwner(
+                            addressOwner: $0["owner"]["AddressOwner"].stringValue
+                        ),
+                        objectOwner: ObjectOwnerAddress(
+                            objectOwner: $0["owner"]["ObjectOwner"].stringValue
+                        ),
+                        shared: nil
+                    ),
+                    reference: SuiObjectRef(
+                        version: $0["version"].uInt8Value,
+                        objectId: $0["objectId"].stringValue,
+                        digest: $0["digest"].stringValue
+                    )
+                )
+            },
+            deleted: effects["deleted"].arrayValue.compactMap {
+                SuiObjectRef(
+                    version: $0["version"].uInt8Value,
+                    objectId: $0["objectId"].stringValue,
+                    digest: $0["digest"].stringValue
+                )
+            },
+            unwrappedThenDeleted: effects["unwrappedThenDeleted"].arrayValue.compactMap {
+                SuiObjectRef(
+                    version: $0["version"].uInt8Value,
+                    objectId: $0["objectId"].stringValue,
+                    digest: $0["digest"].stringValue
+                )
+            },
+            wrapped: effects["wrapped"].arrayValue.compactMap {
+                SuiObjectRef(
+                    version: $0["version"].uInt8Value,
+                    objectId: $0["objectId"].stringValue,
+                    digest: $0["digest"].stringValue
+                )
+            },
+            gasObject: OwnedObjectRef(
+                owner: ObjectOwner(
+                    addressOwner: AddressOwner(
+                        addressOwner: effects["gasObject"]["owner"]["AddressOwner"].stringValue
+                    ),
+                    objectOwner: ObjectOwnerAddress(
+                        objectOwner: effects["gasObject"]["owner"]["ObjectOwner"].stringValue
+                    ),
+                    shared: nil
+                ),
+                reference: SuiObjectRef(
+                    version: effects["gasObject"]["reference"]["version"].uInt8Value,
+                    objectId: effects["gasObject"]["reference"]["objectId"].stringValue,
+                    digest: effects["gasObject"]["reference"]["digest"].stringValue
+                )
+            ),
+            eventsDigest: effects["eventsDigest"].stringValue,
+            dependencies: effects["dependencies"].arrayValue.compactMap { $0.string }
+        )
     }
     
     private func decodeModuleStruct(_ data: JSON) throws -> [String: SuiMoveNormalizedStruct] {

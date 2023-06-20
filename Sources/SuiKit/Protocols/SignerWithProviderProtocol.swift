@@ -12,7 +12,7 @@ public protocol SignerWithProviderProtocol: SignerProcotol {
     var faucetProvider: FaucetClient { get set }
     
     func getAddress() throws -> String
-    func connect(provider: SuiProvider) throws -> SignerWithProviderProtocol
+    func connect(provider: SuiProvider) throws -> RawSigner
     
-    func requestSuiFromFaucet()
+    func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoinInfo
 }

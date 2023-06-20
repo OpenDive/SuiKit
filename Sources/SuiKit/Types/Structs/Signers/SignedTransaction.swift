@@ -9,5 +9,5 @@ import Foundation
 
 public struct SignedTransaction {
     public let transactionBlockBytes: String
-    public let signature: String
+    public let signature: SignedMessage
 }

@@ -1188,6 +1188,10 @@ public struct TransactionFunctions {
         return data.gasUsed
     }
     
+    public static func getExecutionStatusGasSummary(_ data: TransactionBlockResponse) -> GasCostSummary? {
+        return data.effects.gasUsed
+    }
+    
     public static func getTotalGasUsed(_ data: SuiTransactionBlockResponse) -> BigInt? {
         let gasSummary = getExecutionStatusGasSummary(data)
         
@@ -1220,7 +1224,7 @@ public struct TransactionFunctions {
         return nil
     }
     
-    public static func getTotalGasUsedUpperBound(_ data: SuiTransactionBlockResponse) -> BigInt? {
+    public static func getTotalGasUsedUpperBound(_ data: TransactionBlockResponse) -> BigInt? {
         let gasSummary = getExecutionStatusGasSummary(data)
         
         if let gasSummary {

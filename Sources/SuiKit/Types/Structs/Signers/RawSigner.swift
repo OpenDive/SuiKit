@@ -7,6 +7,7 @@
 
 import Foundation
 import Blake2
+import BigInt
 
 public struct RawSigner: SignerWithProviderProtocol {
     public var provider: SuiProvider
@@ -83,6 +84,29 @@ public struct RawSigner: SignerWithProviderProtocol {
     
     public func getTransactionBlockDigest(_ tx: inout Data) -> String {
         return TransactionBlockDataBuilder.getDigestFromBytes(bytes: tx)
+    }
+    
+    public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> TransactionBlockResponse {
+        transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
+        let dryRunTxBytes = try await transactionBlock.build(self.provider)
+        return try await self.provider.dryRunTransactionBlock([UInt8](dryRunTxBytes))
+    }
+    
+    public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> TransactionBlockResponse {
+        let dryRunTxBytes = B64.fromB64(sBase64: transactionBlock)
+        return try await self.provider.dryRunTransactionBlock(dryRunTxBytes)
+    }
+    
+    public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> TransactionBlockResponse {
+        return try await self.provider.dryRunTransactionBlock([UInt8](transactionBlock))
+    }
+    
+    public func getGasCostEstimation(_ transactionBlock: inout TransactionBlock) async throws -> BigInt {
+        let txEffects = try await self.dryRunTransactionBlock(&transactionBlock)
+        guard let gasEstimation = TransactionFunctions.getTotalGasUsedUpperBound(txEffects) else {
+            throw SuiError.notImplemented
+        }
+        return gasEstimation
     }
 }
 

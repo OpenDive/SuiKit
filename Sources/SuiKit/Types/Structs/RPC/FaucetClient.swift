@@ -34,15 +34,8 @@ public struct FaucetClient {
                 "Content-Type": "application/json"
             ]
             request.httpBody = try JSONSerialization.data(withJSONObject: data)
-            let (result, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse else {
-                throw NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unknown Error"])
-            }
-            
-            if httpResponse.statusCode == 429 {
-                throw FaucetRateLimitError()
-            }
+            request.httpMethod = "POST"
+            let result = try await URLSession.shared.asyncData(with: request)
                 
             let json = try JSONDecoder().decode(JSON.self, from: result)["transferredGasObjects"][0]
             return FaucetCoinInfo(amount: json["amount"].intValue, id: json["id"].stringValue, transferTxDigest: json["transferTxDigest"].stringValue)

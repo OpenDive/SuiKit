@@ -23,7 +23,7 @@ public struct RawSigner: SignerWithProviderProtocol {
     }
     
     public func getAddress() throws -> String {
-        return try wallet.account.publicKey().description
+        return wallet.account.address().description
     }
     
     public func signData(data: Data) throws -> String {

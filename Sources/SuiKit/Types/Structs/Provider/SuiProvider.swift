@@ -761,6 +761,7 @@ public struct SuiProvider {
                 ]
             )
         )
+        print("DATA: \(data)")
         return try self.decodeTransactionResponse(JSON(data))
     }
     

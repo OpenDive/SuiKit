@@ -116,7 +116,7 @@ extension URLSession {
     /// An Async Await wrapper for the older `dataTask` handler.
     /// - Parameter request: `URLRequest` to be fetched from.
     /// - Returns: A Data object fetched from the` URLRequest`.
-    private func asyncData(with request: URLRequest) async throws -> Data {
+    public func asyncData(with request: URLRequest) async throws -> Data {
         try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
             let task = URLSession.shared.dataTask(with: request) { data, _, error in
                 if let error = error {

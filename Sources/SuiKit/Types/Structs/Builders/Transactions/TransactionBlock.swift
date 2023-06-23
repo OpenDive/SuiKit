@@ -139,6 +139,10 @@ public struct TransactionBlock {
         self.blockData?.serializedTransactionDataBuilder.gasConfig.owner = owner
     }
     
+    public var gas: TransactionArgument {
+        return TransactionArgument.gasCoin
+    }
+    
     mutating public func setGasPayment(payments: [SuiObjectRef]) throws {
         guard payments.count < TransactionConstants.MAX_GAS_OBJECTS else {
             throw SuiError.notImplemented
@@ -147,8 +151,14 @@ public struct TransactionBlock {
     }
     
     mutating private func input(type: ValueType, value: SuiJsonValue?) throws -> TransactionBlockInput {
+        if self.blockData == nil {
+            self.blockData = TransactionBlockDataBuilder(
+                serializedTransactionDataBuilder:
+                    SerializedTransactionDataBuilder()
+            )
+        }
         guard let index = self.blockData?.serializedTransactionDataBuilder.inputs.count else {
-            throw SuiError.notImplemented
+            throw SuiError.invalidIndex
         }
         let input = TransactionBlockInput(
             index: index,
@@ -275,23 +285,23 @@ public struct TransactionBlock {
         return try self.input(type: .pure, value: value)
     }
     
-    public mutating func add(transaction: SuiTransaction) throws -> TransactionArgument {
-        self.blockData?.serializedTransactionDataBuilder.transactions.append(transaction)
+    public mutating func add(transaction: SuiTransactionEnumType) throws -> TransactionArgument {
+        self.blockData?.serializedTransactionDataBuilder.transactions.append(SuiTransaction(suiTransaction: transaction))
         guard let index = self.blockData?.serializedTransactionDataBuilder.transactions.count else {
-            throw SuiError.notImplemented
+            throw SuiError.invalidIndex
         }
         guard let result = TransactionResult(index: index - 1)[index - 1] else {
-            throw SuiError.notImplemented
+            throw SuiError.invalidResult
         }
         return result
     }
     
-    public mutating func splitCoin(coin: TransactionBlockInput, amounts: [TransactionBlockInput]) throws -> TransactionArgument {
+    public mutating func splitCoin(coin: TransactionArgument, amounts: [TransactionBlockInput]) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.splitCoins(
+            transaction: SuiTransactionEnumType.splitCoins(
                 Transactions.splitCoins(
                     coins: ObjectTransactionArgument(
-                        argument: TransactionArgument.input(coin)
+                        argument: coin
                     ),
                     amounts: amounts.map { TransactionArgument.input($0) }
                 )
@@ -301,7 +311,7 @@ public struct TransactionBlock {
 
     public mutating func mergeCoin(destination: TransactionBlockInput, sources: [TransactionBlockInput]) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.mergeCoins(
+            transaction: SuiTransactionEnumType.mergeCoins(
                 Transactions.mergeCoins(
                     destination: ObjectTransactionArgument(
                         argument: TransactionArgument.input(destination)
@@ -321,7 +331,7 @@ public struct TransactionBlock {
         dependencies: [objectId]
     ) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.publish(
+            transaction: SuiTransactionEnumType.publish(
                 Transactions.publish(
                     modules: modules.map { [UInt8]($0) },
                     dependencies: dependencies
@@ -337,7 +347,7 @@ public struct TransactionBlock {
         ticket: TransactionBlockInput
     ) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.upgrade(
+            transaction: SuiTransactionEnumType.upgrade(
                 Transactions.upgrade(
                     modules: modules.map { [UInt8]($0) },
                     dependencies: dependencies,
@@ -352,7 +362,7 @@ public struct TransactionBlock {
     
     public mutating func moveCall(target: String, arguments: [TransactionArgument]?, typeArguments: [String]?) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.moveCall(
+            transaction: SuiTransactionEnumType.moveCall(
                 Transactions.moveCall(
                     input: MoveCallTransactionInput(
                         target: target,
@@ -364,13 +374,13 @@ public struct TransactionBlock {
         )
     }
     
-    public mutating func transferObject(objects: [TransactionBlockInput], address: TransactionBlockInput) throws -> TransactionArgument {
+    public mutating func transferObject(objects: [TransactionArgument], address: TransactionBlockInput) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.transferObjects(
+            transaction: SuiTransactionEnumType.transferObjects(
                 Transactions.transferObjects(
                     objects: objects.map {
                         ObjectTransactionArgument(
-                            argument: TransactionArgument.input($0)
+                            argument: $0
                         )
                     },
                     address: PureTransactionArgument(
@@ -384,7 +394,7 @@ public struct TransactionBlock {
     
     public mutating func makeMoveVec(type: String? = nil, objects: [TransactionBlockInput]) throws -> TransactionArgument {
         try self.add(
-            transaction: SuiTransaction.makeMoveVec(
+            transaction: SuiTransactionEnumType.makeMoveVec(
                 Transactions.makeMoveVec(
                     type: type,
                     objects: objects.map {
@@ -429,6 +439,11 @@ public struct TransactionBlock {
             "0x2::sui::SUI"
         )
         
+        print("INPUTS: \(self.blockData?.serializedTransactionDataBuilder.inputs)")
+        print("COINS: \(coins)")
+        
+        throw SuiError.notImplemented
+        
         let paymentCoins = coins.data.filter { coin in
             let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
                 if let value = input.value {
@@ -448,7 +463,7 @@ public struct TransactionBlock {
             }
             
             return matchingInput != nil && !matchingInput!.isEmpty
-        }[0..<TransactionConstants.MAX_GAS_OBJECTS].map { coin in
+        }[0..<TransactionConstants.MAX_GAS_OBJECTS].map { coin in  // ERROR: INDEX OUT OF RANGE
             SuiObjectRef(
                 version: UInt8(Int(coin.version) ?? 0),
                 objectId: coin.coinObjectId,
@@ -491,8 +506,8 @@ public struct TransactionBlock {
         var objectsToResolve: [ObjectsToResolve] = []
         
         try await blockData.transactions.asyncForEach { tx in
-            if tx.kind == "MoveCall" {
-                switch tx {
+            if tx.suiTransaction.kind == "MoveCall" {
+                switch tx.suiTransaction {
                 case .moveCall(let moveCall):
                     let needsResolution = moveCall.arguments.allSatisfy { argument in
                         switch argument {
@@ -557,7 +572,7 @@ public struct TransactionBlock {
                 }
             }
 
-            switch tx {
+            switch tx.suiTransaction {
             case .moveCall(let moveCallTransaction):
                 try moveCallTransaction.arguments.forEach { txArgument in
                     switch txArgument {
@@ -817,34 +832,34 @@ public struct TransactionBlock {
         try await self.prepareGasPrice(provider: provider, onlyTransactionKind: onlyTransactionKind)
         try await self.prepareTransactions(provider: provider)
         
-        if onlyTransactionKind != nil && !(onlyTransactionKind!) {
-            try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
+        if let onlyTxKind = onlyTransactionKind, !onlyTxKind { return }
+
+        try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
+        
+        if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
+            let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build()))
             
-            if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
-                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build()))
-                
-                guard dryRunResult.effects.status.status != .failure else {
-                    throw SuiError.notImplemented
-                }
-                
-                let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
-                    Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
-                )
-                
-                let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
-                
-                let gasBudget =
-                    baseComputationCostWithOverhead +
-                    (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
-                    (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
-                
-                self.setGasBudget(
-                    price:
-                        gasBudget > baseComputationCostWithOverhead ?
-                        BigInt(gasBudget) :
-                        BigInt(baseComputationCostWithOverhead)
-                )
+            guard dryRunResult.effects.status.status != .failure else {
+                throw SuiError.notImplemented
             }
+            
+            let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
+                Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
+            )
+            
+            let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
+            
+            let gasBudget =
+                baseComputationCostWithOverhead +
+                (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
+                (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
+            
+            self.setGasBudget(
+                price:
+                    gasBudget > baseComputationCostWithOverhead ?
+                    BigInt(gasBudget) :
+                    BigInt(baseComputationCostWithOverhead)
+            )
         }
     }
     

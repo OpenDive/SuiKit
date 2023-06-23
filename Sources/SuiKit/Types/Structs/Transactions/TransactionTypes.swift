@@ -112,7 +112,23 @@ public struct MoveCallSuiTransaction: Codable, KeyProtocol {
     }
 }
 
-public enum SuiTransaction: Codable, KeyProtocol, TransactionTypesProtocol {
+public final class SuiTransaction: Codable, KeyProtocol {
+    public init(suiTransaction: SuiTransactionEnumType) {
+        self.suiTransaction = suiTransaction
+    }
+    
+    public var suiTransaction: SuiTransactionEnumType
+    
+    public func serialize(_ serializer: Serializer) throws {
+        try Serializer._struct(serializer, value: self.suiTransaction)
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> SuiTransaction {
+        return SuiTransaction(suiTransaction: try Deserializer._struct(deserializer))
+    }
+}
+
+public enum SuiTransactionEnumType: Codable, KeyProtocol, TransactionTypesProtocol {
     case moveCall(MoveCallTransaction)
     case transferObjects(TransferObjectsTransaction)
     case splitCoins(SplitCoinsTransaction)
@@ -248,36 +264,36 @@ public enum SuiTransaction: Codable, KeyProtocol, TransactionTypesProtocol {
         }
     }
     
-    public static func deserialize(from deserializer: Deserializer) throws -> SuiTransaction {
+    public static func deserialize(from deserializer: Deserializer) throws -> SuiTransactionEnumType {
         let type = try Deserializer.u8(deserializer)
         
         switch type {
         case 0:
-            return SuiTransaction.moveCall(
+            return SuiTransactionEnumType.moveCall(
                 try Deserializer._struct(deserializer)
             )
         case 1:
-            return SuiTransaction.transferObjects(
+            return SuiTransactionEnumType.transferObjects(
                 try Deserializer._struct(deserializer)
             )
         case 2:
-            return SuiTransaction.splitCoins(
+            return SuiTransactionEnumType.splitCoins(
                 try Deserializer._struct(deserializer)
             )
         case 3:
-            return SuiTransaction.mergeCoins(
+            return SuiTransactionEnumType.mergeCoins(
                 try Deserializer._struct(deserializer)
             )
         case 4:
-            return SuiTransaction.publish(
+            return SuiTransactionEnumType.publish(
                 try Deserializer._struct(deserializer)
             )
         case 5:
-            return SuiTransaction.upgrade(
+            return SuiTransactionEnumType.upgrade(
                 try Deserializer._struct(deserializer)
             )
         case 6:
-            return SuiTransaction.makeMoveVec(
+            return SuiTransactionEnumType.makeMoveVec(
                 try Deserializer._struct(deserializer)
             )
         default:

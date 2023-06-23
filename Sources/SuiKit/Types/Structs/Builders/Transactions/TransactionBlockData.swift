@@ -21,7 +21,7 @@ public struct TransactionBlockDataBuilder {
             return TransactionBlockDataBuilder(
                 serializedTransactionDataBuilder: SerializedTransactionDataBuilder(
                     sender: nil,
-                    expiration: .none,
+                    expiration: TransactionExpiration.none,
                     gasConfig: SuiGasData(),
                     inputs: programmableTransaction.inputs.enumerated().map { (idx, value) in
                         switch value {
@@ -120,6 +120,9 @@ public struct TransactionBlockDataBuilder {
         let senderUnwrapped = overrides?.serializedTransactionDataBuilder.sender ?? self.serializedTransactionDataBuilder.sender
         let gasConfig = overrides?.serializedTransactionDataBuilder.gasConfig ?? self.serializedTransactionDataBuilder.gasConfig
         
+//        print(gasConfig.budget)  // Nil
+//        print(gasConfig.payment)  // Nil
+        
         guard
             let sender = senderUnwrapped,
             let budget = gasConfig.budget,
@@ -140,7 +143,7 @@ public struct TransactionBlockDataBuilder {
                 price: price,
                 budget: budget
             ),
-            expiration: expiration
+            expiration: expiration ?? TransactionExpiration.none
         ))
         
         let ser = Serializer()
@@ -176,10 +179,10 @@ public func hashTypedData(typeTag: String, data: Data) -> [UInt8] {
     return Array(hashedData)
 }
 
-public struct SerializedTransactionDataBuilder: Codable {
+public class SerializedTransactionDataBuilder: Codable {
     public var version: UInt8 = 1
     public var sender: SuiAddress?
-    public var expiration: TransactionExpiration
+    public var expiration: TransactionExpiration?
     public var gasConfig: SuiGasData
     public var inputs: [TransactionBlockInput]
     public var transactions: [SuiTransaction]
@@ -194,11 +197,11 @@ public struct SerializedTransactionDataBuilder: Codable {
     }
     
     public init(
-        sender: SuiAddress?,
-        expiration: TransactionExpiration,
-        gasConfig: SuiGasData,
-        inputs: [TransactionBlockInput],
-        transactions: [SuiTransaction]
+        sender: SuiAddress? = nil,
+        expiration: TransactionExpiration? = TransactionExpiration.none,
+        gasConfig: SuiGasData = SuiGasData(),
+        inputs: [TransactionBlockInput] = [],
+        transactions: [SuiTransaction] = []
     ) {
         self.sender = sender
         self.expiration = expiration

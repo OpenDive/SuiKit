@@ -44,6 +44,13 @@ public class TransactionResult {
     }
 }
 
+public let defaultOfflineLimits: [String: Int] = [
+    "maxPureArgumentSize": 16 * 1024,
+    "maxTxGas": 50_000_000_000,
+    "maxGasObjects": 256,
+    "maxTxSizeBytes": 128 * 1024
+]
+
 public struct TransactionConstants {
     public static let MAX_GAS_OBJECTS = 256
     public static let MAX_GAS = 50_000_000_000
@@ -52,8 +59,17 @@ public struct TransactionConstants {
 }
 
 public struct BuildOptions {
-    public let provider: SuiProvider?
-    public let onlyTransactionKind: Bool?
+    public var provider: SuiProvider?
+    public var onlyTransactionKind: Bool?
+    public var limits: Limits?
+    public var protocolConfig: ProtocolConfig?
+    
+    public init(provider: SuiProvider? = nil, onlyTransactionKind: Bool? = nil, limits: Limits? = nil, protocolConfig: ProtocolConfig? = nil) {
+        self.provider = provider
+        self.onlyTransactionKind = onlyTransactionKind
+        self.limits = limits
+        self.protocolConfig = protocolConfig
+    }
 }
 
 public struct TransactionBlock {
@@ -132,6 +148,7 @@ public struct TransactionBlock {
     }
     
     mutating public func setGasBudget(price: Int) {
+        print("DEBUG: \(price)")
         self.blockData?.serializedTransactionDataBuilder.gasConfig.budget = "\(price)"
     }
     
@@ -412,13 +429,43 @@ public struct TransactionBlock {
         return try JSONEncoder().encode(blockData.snapshot())
     }
     
+    public func getConfig(key: LimitsKey, buildOptions: BuildOptions) throws -> Int {
+        if let limits = buildOptions.limits, let keyNumberWrapped = limits[key.rawValue] {
+            if let keyNumber = keyNumberWrapped {
+                return keyNumber
+            }
+        }
+        
+        if buildOptions.protocolConfig == nil {
+            if let defaultValue = defaultOfflineLimits[key.rawValue] {
+                return defaultValue
+            }
+        }
+        
+        if buildOptions.protocolConfig!.attributes[key.rawValue] == nil {
+            throw SuiError.notImplemented
+        }
+        
+        let attribute = buildOptions.protocolConfig!.attributes[key.rawValue]!
+        
+        if attribute == nil {
+            throw SuiError.notImplemented
+        }
+        
+        switch attribute! {
+        case .f64(let f64): return Int(f64)!
+        case .u32(let u32): return Int(u32)!
+        case .u64(let u64): return Int(u64)!
+        }
+    }
+    
     public mutating func build(_ provider: SuiProvider, _ onlyTransactionKind: Bool? = nil) async throws -> Data {
-        try await self.prepare(provider: provider, onlyTransactionKind: onlyTransactionKind)
+        try await self.prepare(BuildOptions(provider: provider, onlyTransactionKind: onlyTransactionKind))
         return try self.blockData?.build(onlyTransactionKind: onlyTransactionKind) ?? Data()
     }
 
     public mutating func getDigest(_ provider: SuiProvider) async throws -> String {
-        try await self.prepare(provider: provider)
+        try await self.prepare(BuildOptions(provider: provider))
         return try self.blockData?.getDigest() ?? ""
     }
     
@@ -439,12 +486,7 @@ public struct TransactionBlock {
             "0x2::sui::SUI"
         )
         
-        print("INPUTS: \(self.blockData?.serializedTransactionDataBuilder.inputs)")
-        print("COINS: \(coins)")
-        
-        throw SuiError.notImplemented
-        
-        let paymentCoins = coins.data.filter { coin in
+        let filteredCoins = coins.data.filter { coin in
             let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
                 if let value = input.value {
                     switch value {
@@ -461,9 +503,12 @@ public struct TransactionBlock {
                 }
                 return false
             }
-            
-            return matchingInput != nil && !matchingInput!.isEmpty
-        }[0..<TransactionConstants.MAX_GAS_OBJECTS].map { coin in  // ERROR: INDEX OUT OF RANGE
+            return matchingInput != nil && matchingInput!.isEmpty
+        }
+        
+        let paymentCoins = filteredCoins[
+            0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
+        ].map { coin in
             SuiObjectRef(
                 version: UInt8(Int(coin.version) ?? 0),
                 objectId: coin.coinObjectId,
@@ -474,7 +519,7 @@ public struct TransactionBlock {
         guard !paymentCoins.isEmpty else {
             throw SuiError.notImplemented
         }
-        
+
         try self.setGasPayment(payments: paymentCoins)
     }
     
@@ -561,7 +606,6 @@ public struct TransactionBlock {
                                 SuiCallArg.pure(
                                     PureSuiCallArg(
                                         type: "pure",
-                                        valueType: nil,
                                         value: value
                                     )
                                 )
@@ -725,7 +769,7 @@ public struct TransactionBlock {
                                 let serType = try self.getPureSerializationType(param, inputValue)
                                 
                                 if let serType {
-                                    input.value = .callArg(.pure(PureSuiCallArg(type: serType, valueType: nil, value: inputValue)))
+                                    input.value = .callArg(.pure(PureSuiCallArg(type: serType, value: inputValue)))
                                     return
                                 }
                                 
@@ -824,42 +868,54 @@ public struct TransactionBlock {
         }
     }
     
-    private mutating func prepare(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
-        if self.isMissingSender(onlyTransactionKind) {
+    private mutating func prepare(_ optionsPassed: BuildOptions) async throws {
+        var options: BuildOptions = optionsPassed
+        
+        guard let provider = options.provider else {
             throw SuiError.notImplemented
         }
         
-        try await self.prepareGasPrice(provider: provider, onlyTransactionKind: onlyTransactionKind)
-        try await self.prepareTransactions(provider: provider)
+        if options.protocolConfig == nil && options.limits == nil {
+            options.protocolConfig = try await provider.getProtocolConfig()
+        }
         
-        if let onlyTxKind = onlyTransactionKind, !onlyTxKind { return }
+        if (options.onlyTransactionKind == nil) || (options.onlyTransactionKind != nil && !(options.onlyTransactionKind!)) {
+            let onlyTransactionKind = options.onlyTransactionKind
+            
+            try await self.prepareGasPrice(provider: provider, onlyTransactionKind: onlyTransactionKind)
+            try await self.prepareTransactions(provider: provider)
 
-        try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
-        
-        if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
-            let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build()))
-            
-            guard dryRunResult.effects.status.status != .failure else {
-                throw SuiError.notImplemented
+            try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
+            print("0")
+            if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
+                print("1")
+                var gasConfig = blockData.serializedTransactionDataBuilder.gasConfig
+                gasConfig.budget = String(try self.getConfig(key: LimitsKey.maxTxGas, buildOptions: options))
+                let txBlockDataBuilder = TransactionBlockDataBuilder(serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig))
+                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder)))
+                print("2")
+                guard dryRunResult.effects.status.status != .failure else {
+                    throw SuiError.notImplemented
+                }
+                print("3")
+                let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
+                    Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
+                )
+                print("4")
+                let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
+                print("5")
+                let gasBudget =
+                    baseComputationCostWithOverhead +
+                    (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
+                    (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
+                print("6")
+                self.setGasBudget(
+                    price:
+                        gasBudget > baseComputationCostWithOverhead ?
+                        BigInt(gasBudget) :
+                        BigInt(baseComputationCostWithOverhead)
+                )
             }
-            
-            let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
-                Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
-            )
-            
-            let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
-            
-            let gasBudget =
-                baseComputationCostWithOverhead +
-                (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
-                (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
-            
-            self.setGasBudget(
-                price:
-                    gasBudget > baseComputationCostWithOverhead ?
-                    BigInt(gasBudget) :
-                    BigInt(baseComputationCostWithOverhead)
-            )
         }
     }
     
@@ -1089,4 +1145,38 @@ public struct ResolvedConstants {
     
     public static let suiTypeArg = "\(ResolvedConstants.suiFrameworkAddress)::sui::SUI"
     public static let validatorsEventQuery = "\(ResolvedConstants.suiSystemAddress)::validator_set::ValidatorEpochInfoEventV2"
+}
+
+public enum ProtocolConfigValue {
+    case u32(String)
+    case u64(String)
+    case f64(String)
+}
+
+public struct ProtocolConfig {
+    public let attributes: [String: ProtocolConfigValue?]
+    public let featureFlags: [String: Bool]
+    public let maxSupportedProtocolVersion: String
+    public let minSupportedProtocolVersion: String
+    public let protocolVersion: String
+}
+
+public let LIMITS: [String: String] = [
+    // The maximum gas that is allowed.
+    "maxTxGas": "max_tx_gas",
+    // The maximum number of gas objects that can be selected for one transaction.
+    "maxGasObjects": "max_gas_payment_objects",
+    // The maximum size (in bytes) that the transaction can be.
+    "maxTxSizeBytes": "max_tx_size_bytes",
+    // The maximum size (in bytes) that pure arguments can be.
+    "maxPureArgumentSize": "max_pure_argument_size"
+]
+
+public typealias Limits = [String: Int?]
+
+public enum LimitsKey: String {
+    case maxTxGas = "max_tx_gas"
+    case maxGasObjects = "max_gas_payment_objects"
+    case maxTxSizeBytes = "max_tx_size_bytes"
+    case maxPureArgumentSize = "max_pure_argument_size"
 }

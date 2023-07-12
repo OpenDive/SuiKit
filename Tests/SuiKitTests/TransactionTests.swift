@@ -23,8 +23,10 @@ final class TransactionTests: XCTestCase {
         
         let provider = SuiProvider(connection: devnetConnection())
 //        let faucetProvider = FaucetClient(connection: devnetConnection())
-        
+
 //        let faucetResult = try await faucetProvider.funcAccount(bobWallet.account.address().description)
+        
+//        try await Task.sleep(nanoseconds: 1_000_000_000)
         
         let signer = RawSigner(wallet: bobWallet, provider: provider)
         var tx = TransactionBlock()

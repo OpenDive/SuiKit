@@ -56,15 +56,15 @@ public enum TransactionArgument: KeyProtocol, Codable {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .input(let transactionBlockInput):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: transactionBlockInput)
         case .gasCoin:
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
         case .result(let result):
-            try Serializer.u8(serializer, 2)
+            try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: result)
         case .nestedResult(let nestedResult):
-            try Serializer.u8(serializer, 3)
+            try Serializer.u8(serializer, UInt8(3))
             try Serializer._struct(serializer, value: nestedResult)
         }
     }
@@ -114,9 +114,9 @@ public enum ValueType: String, KeyProtocol, Codable {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .pure:
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
         case .object:
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
         }
     }
     

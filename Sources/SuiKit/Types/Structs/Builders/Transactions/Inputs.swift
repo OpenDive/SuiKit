@@ -48,10 +48,10 @@ public enum ObjectArg: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .immOrOwned(let immOrOwned):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: immOrOwned)
         case .shared(let sharedArg):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: sharedArg)
         }
     }

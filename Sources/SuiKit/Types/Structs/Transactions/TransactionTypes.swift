@@ -241,25 +241,25 @@ public enum SuiTransactionEnumType: Codable, KeyProtocol, TransactionTypesProtoc
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .moveCall(let moveCallSuiTransaction):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: moveCallSuiTransaction)
         case .transferObjects(let transferObjectsTransaction):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: transferObjectsTransaction)
         case .splitCoins(let splitCoinsTransaction):
-            try Serializer.u8(serializer, 2)
+            try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: splitCoinsTransaction)
         case .mergeCoins(let mergeCoinsTransaction):
-            try Serializer.u8(serializer, 3)
+            try Serializer.u8(serializer, UInt8(3))
             try Serializer._struct(serializer, value: mergeCoinsTransaction)
         case .publish(let publishTransaction):
-            try Serializer.u8(serializer, 4)
+            try Serializer.u8(serializer, UInt8(4))
             try Serializer._struct(serializer, value: publishTransaction)
         case .upgrade(let upgradeTransaction):
-            try Serializer.u8(serializer, 5)
+            try Serializer.u8(serializer, UInt8(5))
             try Serializer._struct(serializer, value: upgradeTransaction)
         case .makeMoveVec(let makeMoveVecTransaction):
-            try Serializer.u8(serializer, 6)
+            try Serializer.u8(serializer, UInt8(6))
             try Serializer._struct(serializer, value: makeMoveVecTransaction)
         }
     }
@@ -309,11 +309,11 @@ public enum PublishType: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .oldType(let suiMovePackage, let array):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: suiMovePackage)
             try serializer.sequence(array, Serializer.str)
         case .newType(let array):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try serializer.sequence(array, Serializer.str)
         }
     }
@@ -344,13 +344,13 @@ public enum UpgradeType: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .oldType(let suiMovePackage, let array, let objectId, let suiArgument):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: suiMovePackage)
             try serializer.sequence(array, Serializer.str)
             try Serializer.str(serializer, objectId)
             try Serializer._struct(serializer, value: suiArgument)
         case .newType(let array, let objectId, let suiArgument):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try serializer.sequence(array, Serializer.str)
             try Serializer.str(serializer, objectId)
             try Serializer._struct(serializer, value: suiArgument)
@@ -388,13 +388,13 @@ public enum SuiCallArg: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .pure(let pureSuiCallArg):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: pureSuiCallArg)
         case .ownedObject(let ownedObjectSuiCallArg):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: ownedObjectSuiCallArg)
         case .sharedObject(let sharedObjectSuiCallArg):
-            try Serializer.u8(serializer, 2)
+            try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: sharedObjectSuiCallArg)
         }
     }
@@ -417,19 +417,16 @@ public enum SuiCallArg: Codable, KeyProtocol {
 
 public struct PureSuiCallArg: Codable, KeyProtocol {
     public let type: String
-    public let valueType: String?
     public let value: SuiJsonValue
     
     public func serialize(_ serializer: Serializer) throws {
         try Serializer.str(serializer, type)
-        if let valueType { try Serializer.str(serializer, valueType) }
         try Serializer._struct(serializer, value: value)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> PureSuiCallArg {
         return PureSuiCallArg(
             type: try Deserializer.string(deserializer),
-            valueType: try Deserializer.string(deserializer),
             value: try Deserializer._struct(deserializer)
         )
     }
@@ -496,25 +493,25 @@ public indirect enum SuiJsonValue: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .boolean(let bool):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer.bool(serializer, bool)
         case .number(let uint64):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer.u64(serializer, uint64)
         case .string(let string):
-            try Serializer.u8(serializer, 2)
+            try Serializer.u8(serializer, UInt8(2))
             try Serializer.str(serializer, string)
         case .callArg(let callArg):
-            try Serializer.u8(serializer, 3)
+            try Serializer.u8(serializer, UInt8(3))
             try Serializer._struct(serializer, value: callArg)
         case .array(let array):
-            try Serializer.u8(serializer, 4)
+            try Serializer.u8(serializer, UInt8(4))
             try serializer.sequence(array, Serializer._struct)
         case .data(let data):
-            try Serializer.u8(serializer, 5)
+            try Serializer.u8(serializer, UInt8(5))
             serializer.fixedBytes(data)
         case .input(let txInput):
-            try Serializer.u8(serializer, 6)
+            try Serializer.u8(serializer, UInt8(6))
             try Serializer._struct(serializer, value: txInput)
         }
     }
@@ -638,16 +635,16 @@ public enum SuiTransactionBlockKind: KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .changeEpoch(let suiChangeEpoch):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: suiChangeEpoch)
         case .consensusCommitPrologue(let suiConsensusCommitPrologue):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: suiConsensusCommitPrologue)
         case .genesis(let genesis):
-            try Serializer.u8(serializer, 2)
+            try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: genesis)
         case .programmableTransaction(let programmableTransaction):
-            try Serializer.u8(serializer, 3)
+            try Serializer.u8(serializer, UInt8(3))
             try Serializer._struct(serializer, value: programmableTransaction)
         }
     }
@@ -676,7 +673,7 @@ public enum TransactionData: KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .V1(let transactionDataV1):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: transactionDataV1)
         }
     }
@@ -763,10 +760,10 @@ public enum GenericAuthoritySignature: KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .authoritySignature(let authoritySignature):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer.str(serializer, authoritySignature)
         case .authoritySignatureArray(let array):
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
             try serializer.sequence(array, Serializer.str)
         }
     }

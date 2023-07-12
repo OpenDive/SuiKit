@@ -40,4 +40,5 @@ public enum SuiError: Swift.Error, Equatable {
     case failedData
     case invalidIndex
     case invalidResult
+    case rpcError(error: RPCErrorValue)
 }

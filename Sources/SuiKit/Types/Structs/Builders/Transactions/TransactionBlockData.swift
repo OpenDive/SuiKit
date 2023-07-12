@@ -120,9 +120,6 @@ public struct TransactionBlockDataBuilder {
         let senderUnwrapped = overrides?.serializedTransactionDataBuilder.sender ?? self.serializedTransactionDataBuilder.sender
         let gasConfig = overrides?.serializedTransactionDataBuilder.gasConfig ?? self.serializedTransactionDataBuilder.gasConfig
         
-//        print(gasConfig.budget)  // Nil
-//        print(gasConfig.payment)  // Nil
-        
         guard
             let sender = senderUnwrapped,
             let budget = gasConfig.budget,
@@ -145,6 +142,8 @@ public struct TransactionBlockDataBuilder {
             ),
             expiration: expiration ?? TransactionExpiration.none
         ))
+        
+        print(transactionData)
         
         let ser = Serializer()
         try transactionData.serialize(ser)
@@ -218,10 +217,10 @@ public enum TransactionExpiration: KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .epoch(let int):
-            try Serializer.u8(serializer, 0)
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer.u64(serializer, UInt64(int))
         case .none:
-            try Serializer.u8(serializer, 1)
+            try Serializer.u8(serializer, UInt8(1))
         }
     }
     

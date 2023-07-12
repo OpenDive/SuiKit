@@ -658,6 +658,7 @@ public struct SuiProvider {
     }
 
     public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> TransactionBlockResponse {
+        print("DEBUG: \(B64.toB64(transactionBlock))")
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -667,6 +668,8 @@ public struct SuiProvider {
                 ]
             )
         )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return try self.decodeTransactionResponse(JSON(data))
     }
 
@@ -761,8 +764,46 @@ public struct SuiProvider {
                 ]
             )
         )
-        print("DATA: \(data)")
+
         return try self.decodeTransactionResponse(JSON(data))
+    }
+    
+    public func getProtocolConfig(_ version: String? = nil) async throws -> ProtocolConfig {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getProtocolConfig",
+                [
+                    AnyCodable(version)
+                ]
+            )
+        )
+        let result = JSON(data)["result"]
+        
+        var attributesDict: [String: ProtocolConfigValue?] = [:]
+        
+        let attributeTypeMap: [String: (String) -> ProtocolConfigValue] = [
+            "u64": { .u64($0) },
+            "u32": { .u32($0) },
+            "f64": { .f64($0) }
+        ]
+
+        for (attribute, details) in result["attributes"].dictionaryValue {
+            for (type, attributeCase) in attributeTypeMap {
+                if let value = details[type].string {
+                    attributesDict[attribute] = attributeCase(value)
+                    break
+                }
+            }
+        }
+        
+        return ProtocolConfig(
+            attributes: attributesDict,
+            featureFlags: result["featureFlags"].dictionaryObject as! [String: Bool],
+            maxSupportedProtocolVersion: result["maxSupportedProtocolVersion"].stringValue,
+            minSupportedProtocolVersion: result["minSupportedProtocolVersion"].stringValue,
+            protocolVersion: result["protocolVersion"].stringValue
+        )
     }
     
     public func devInspectTransactionBlock(
@@ -813,6 +854,21 @@ public struct SuiProvider {
         )
     }
     
+    private func hasErrors(_ data: JSON) -> RPCErrorValue {
+        if data["error"].exists() {
+            return RPCErrorValue(
+                id: data["id"].intValue,
+                error: ErrorMessage(
+                    message: data["error"]["message"].stringValue,
+                    code: data["error"]["code"].intValue
+                ),
+                jsonrpc: data["jsonrpc"].stringValue,
+                hasError: true
+            )
+        }
+        return RPCErrorValue(id: nil, error: nil, jsonrpc: nil, hasError: false)
+    }
+    
     private func decodeTransactionResponse(_ data: JSON) throws -> TransactionBlockResponse {
         let result = data["result"]
         let tx = result["transaction"]["data"]
@@ -838,7 +894,6 @@ public struct SuiProvider {
                                 return SuiCallArg.pure(
                                     PureSuiCallArg(
                                         type: "pure",
-                                        valueType: $0["valueType"].stringValue,
                                         value: try SuiJsonValue.fromJSONObject($0["value"])
                                     )
                                 )
@@ -1138,4 +1193,16 @@ public struct SuiProvider {
             task.resume()
         }
     }
+}
+
+public struct ErrorMessage: Equatable {
+    public let message: String
+    public let code: Int
+}
+
+public struct RPCErrorValue: Equatable {
+    public let id: Int?
+    public let error: ErrorMessage?
+    public let jsonrpc: String?
+    public let hasError: Bool
 }

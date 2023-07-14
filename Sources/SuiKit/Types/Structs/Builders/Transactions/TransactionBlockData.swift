@@ -95,7 +95,8 @@ public struct TransactionBlockDataBuilder {
     
     public func build(
         overrides: TransactionBlockDataBuilder? = nil,
-        onlyTransactionKind: Bool? = nil
+        onlyTransactionKind: Bool? = nil,
+        isCorrect: Bool = false
     ) throws -> Data {
         let inputs = self.serializedTransactionDataBuilder.inputs.compactMap { value in
             switch value.value {
@@ -143,7 +144,9 @@ public struct TransactionBlockDataBuilder {
             expiration: expiration ?? TransactionExpiration.none
         ))
         
-        print(transactionData)
+        if isCorrect {
+            print(transactionData)
+        }
         
         let ser = Serializer()
         try transactionData.serialize(ser)

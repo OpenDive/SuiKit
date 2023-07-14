@@ -892,7 +892,7 @@ public struct TransactionBlock {
                 var gasConfig = blockData.serializedTransactionDataBuilder.gasConfig
                 gasConfig.budget = String(try self.getConfig(key: LimitsKey.maxTxGas, buildOptions: options))
                 let txBlockDataBuilder = TransactionBlockDataBuilder(serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig))
-                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder)))
+                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder, isCorrect: true)))
                 print("2")
                 guard dryRunResult.effects.status.status != .failure else {
                     throw SuiError.notImplemented

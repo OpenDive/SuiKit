@@ -11,6 +11,7 @@ import XCTest
 
 final class TransactionTests: XCTestCase {
     func testThatTransferSuiWorks() async throws {
+        let privateKey = B64.fromB64(sBase64: "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
         let bobWallet = try Wallet(mnemonic: Mnemonic(
             phrase: ["crunch", "card", "stand", "mechanic", "snake", "toss", "test", "chimney", "remove", "miss", "desk", "sell"]
         ))

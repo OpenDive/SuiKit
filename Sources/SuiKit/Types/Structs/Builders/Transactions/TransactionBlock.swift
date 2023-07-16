@@ -103,24 +103,6 @@ public struct TransactionBlock {
         return tx
     }
     
-    public static func from(serialized: String) throws -> TransactionBlock {
-        var tx = TransactionBlock()
-        
-        if serialized.starts(with: "{") {
-            guard let data = serialized.data(using: .utf8) else { throw SuiError.notImplemented }
-            let resultData = try JSONDecoder().decode(
-                SerializedTransactionDataBuilder.self, from: data
-            )
-            tx.blockData = TransactionBlockDataBuilder.restore(data: resultData)
-        } else {
-            tx.blockData = try TransactionBlockDataBuilder.fromBytes(
-                bytes: Data(B64.fromB64(sBase64: serialized))
-            )
-        }
-        
-        return tx
-    }
-    
     mutating public func setSender(sender: SuiAddress) {
         self.blockData?.serializedTransactionDataBuilder.sender = sender
     }
@@ -422,11 +404,6 @@ public struct TransactionBlock {
                 )
             )
         )
-    }
-
-    public func serialize() throws -> Data {
-        guard let blockData = self.blockData else { throw SuiError.notImplemented }
-        return try JSONEncoder().encode(blockData.snapshot())
     }
     
     public func getConfig(key: LimitsKey, buildOptions: BuildOptions) throws -> Int {

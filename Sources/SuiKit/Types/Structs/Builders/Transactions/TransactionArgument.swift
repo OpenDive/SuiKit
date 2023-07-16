@@ -56,32 +56,26 @@ public enum TransactionArgument: KeyProtocol, Codable {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .input(let transactionBlockInput):
-            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: transactionBlockInput)
         case .gasCoin:
-            try Serializer.u8(serializer, UInt8(1))
+            try Serializer.str(serializer, "GasCoin")
         case .result(let result):
-            try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: result)
         case .nestedResult(let nestedResult):
-            try Serializer.u8(serializer, UInt8(3))
             try Serializer._struct(serializer, value: nestedResult)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionArgument {
-        let type = try Deserializer.u8(deserializer)
-        
-        switch type {
-        case 0:
-            return TransactionArgument.input(try Deserializer._struct(deserializer))
-        case 1:
-            return TransactionArgument.gasCoin
-        case 2:
-            return TransactionArgument.result(try Deserializer._struct(deserializer))
-        case 3:
-            return TransactionArgument.nestedResult(try Deserializer._struct(deserializer))
-        default:
+        if let input: TransactionBlockInput = try? Deserializer._struct(deserializer) {
+            return .input(input)
+        } else if let _ = try? Deserializer.string(deserializer) {
+            return .gasCoin
+        } else if let result: Result = try? Deserializer._struct(deserializer) {
+            return .result(result)
+        } else if let nestedResult: NestedResult = try? Deserializer._struct(deserializer) {
+            return .nestedResult(nestedResult)
+        } else {
             throw SuiError.notImplemented
         }
     }
@@ -114,19 +108,19 @@ public enum ValueType: String, KeyProtocol, Codable {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .pure:
-            try Serializer.u8(serializer, UInt8(0))
+            try Serializer.str(serializer, "Pure")
         case .object:
-            try Serializer.u8(serializer, UInt8(1))
+            try Serializer.str(serializer, "Object")
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> ValueType {
-        let type = try Deserializer.u8(deserializer)
+        let type = try Deserializer.string(deserializer)
         
         switch type {
-        case 0:
+        case "Pure":
             return ValueType.pure
-        case 1:
+        case "Object":
             return ValueType.object
         default:
             throw SuiError.notImplemented

@@ -21,20 +21,20 @@ public enum TransactionArgumentKind: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .object:
-            try Serializer.u8(serializer, UInt8(0))
+            try Serializer.str(serializer, "object")
         case .pure(let type):
-            try Serializer.u8(serializer, UInt8(1))
+            try Serializer.str(serializer, "pure")
             try Serializer.str(serializer, type)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionArgumentKind {
-        let type = try Deserializer.u8(deserializer)
+        let type = try Deserializer.string(deserializer)
         
         switch type {
-        case 0:
+        case "object":
             return TransactionArgumentKind.object
-        case 1:
+        case "pure":
             return TransactionArgumentKind.pure(
                 type: try Deserializer.string(deserializer)
             )

@@ -13,9 +13,9 @@ public struct RawSigner: SignerWithProviderProtocol {
     public var provider: SuiProvider
     public var faucetProvider: FaucetClient
     
-    public var wallet: Wallet
+    public var wallet: Account
     
-    public init(wallet: Wallet, provider: SuiProvider) {
+    public init(wallet: Account, provider: SuiProvider) {
         self.provider = provider
         self.faucetProvider = FaucetClient(connection: provider.connection)
         
@@ -23,14 +23,14 @@ public struct RawSigner: SignerWithProviderProtocol {
     }
     
     public func getAddress() throws -> String {
-        return wallet.account.address().description
+        return wallet.address().description
     }
     
     public func signData(data: Data) throws -> String {
         let pubKey = try self.getAddress()
         let digest = try Blake2.hash(.b2b, size: 32, data: data)
-        let signature = try self.wallet.account.privateKey.sign(data: digest)
-        let signatureScheme = self.wallet.account.privateKey.type
+        let signature = try self.wallet.privateKey.sign(data: digest)
+        let signatureScheme = self.wallet.privateKey.type
         return try toSerializedSignature(signature, signatureScheme, pubKey)
     }
     
@@ -44,7 +44,7 @@ public struct RawSigner: SignerWithProviderProtocol {
     
     public func signMessage(_ input: Data) throws -> SignedMessage {
         let signature = try self.signData(data: messageWithIntent(.PersonalMessage, input))
-        return SignedMessage(messageBytes: B64.toB64([UInt8](input)), signature: signature)
+        return SignedMessage(messageBytes: input.base64EncodedString(), signature: signature)
     }
     
     public func prepareTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> Data {
@@ -58,7 +58,7 @@ public struct RawSigner: SignerWithProviderProtocol {
         let signature = try self.signData(data: intentMessage)
         
         return SignedTransaction(
-            transactionBlockBytes: B64.toB64([UInt8](txBlockBytes)),
+            transactionBlockBytes: txBlockBytes.base64EncodedString(),
             signature: signature
         )
     }
@@ -93,8 +93,8 @@ public struct RawSigner: SignerWithProviderProtocol {
     }
     
     public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> TransactionBlockResponse {
-        let dryRunTxBytes = B64.fromB64(sBase64: transactionBlock)
-        return try await self.provider.dryRunTransactionBlock(dryRunTxBytes)
+        guard let dryRunTxBytes = Data.fromBase64(transactionBlock) else { throw SuiError.notImplemented }
+        return try await self.provider.dryRunTransactionBlock([UInt8](dryRunTxBytes))
     }
     
     public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> TransactionBlockResponse {
@@ -159,5 +159,5 @@ public func toSerializedSignature(
         with: try pubKey.bytes
     )
     
-    return B64.toB64([UInt8](serializedSignature))
+    return serializedSignature.base64EncodedString()
 }

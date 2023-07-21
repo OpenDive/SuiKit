@@ -50,16 +50,16 @@ public extension Data {
     }
     
     static func fromBase64(_ encoded: String) -> Data? {
-        // Prefixes padding-character(s) (if needed).
-        var encoded = encoded;
-        let remainder = encoded.count % 4
-        if remainder > 0 {
-            encoded = encoded.padding(
-                toLength: encoded.count + 4 - remainder,
-                withPad: "=", startingAt: 0);
-        }
-        
-        // Finally, decode.
+//        // Prefixes padding-character(s) (if needed).
+//        var encoded = encoded;
+//        let remainder = encoded.count % 4
+//        if remainder > 0 {
+//            encoded = encoded.padding(
+//                toLength: encoded.count + 4 - remainder,
+//                withPad: "=", startingAt: 0);
+//        }
+//        
+//        // Finally, decode.
         return Data(base64Encoded: encoded);
     }
 }

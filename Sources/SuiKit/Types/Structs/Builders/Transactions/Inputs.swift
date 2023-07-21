@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 5/12/23.
 //
@@ -48,18 +48,27 @@ public enum ObjectArg: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .immOrOwned(let immOrOwned):
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: immOrOwned)
         case .shared(let sharedArg):
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: sharedArg)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> ObjectArg {
-        if let immOrOwned: ImmOrOwned = try? Deserializer._struct(deserializer) {
-            return .immOrOwned(immOrOwned)
-        } else if let shared: SharedArg = try? Deserializer._struct(deserializer) {
-            return .shared(shared)
-        } else {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return ObjectArg.immOrOwned(
+                try Deserializer._struct(deserializer)
+            )
+        case 1:
+            return ObjectArg.shared(
+                try Deserializer._struct(deserializer)
+            )
+        default:
             throw SuiError.notImplemented
         }
     }

@@ -16,11 +16,13 @@ public struct TransferObjectsTransaction: KeyProtocol, Codable {
         try Serializer.str(serializer, kind)
         try serializer.sequence(objects, Serializer._struct)
         try Serializer._struct(serializer, value: address)
+        print("DEBUG: TX OBJECT DATA - \([UInt8](serializer.output()))")
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransferObjectsTransaction {
+        let kind = try Deserializer.string(deserializer)
         return TransferObjectsTransaction(
-            kind: try Deserializer.string(deserializer),
+            kind: kind,
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
             address: try Deserializer._struct(deserializer)
         )

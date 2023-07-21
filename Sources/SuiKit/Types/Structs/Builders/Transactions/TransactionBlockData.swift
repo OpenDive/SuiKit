@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 5/13/23.
 //
@@ -50,34 +50,37 @@ public struct TransactionBlockDataBuilder {
     public static func fromBytes(bytes: Data) throws -> TransactionBlockDataBuilder {
         let rawData = try TransactionData.deserialize(from: Deserializer(data: bytes))
         
-        switch rawData.kind {
-        case .programmableTransaction(let programmableTransaction):
-            return TransactionBlockDataBuilder(
-                serializedTransactionDataBuilder: SerializedTransactionDataBuilder(
-                    sender: rawData.sender,
-                    expiration: rawData.expiration,
-                    gasConfig: rawData.gasData,
-                    inputs: programmableTransaction.inputs.enumerated().map { (idx, value) in
-                        switch value {
-                        case .pure(let pureSuiCallArg):
-                            return TransactionBlockInput(
-                                index: idx,
-                                value: pureSuiCallArg.value,
-                                type: .pure
-                            )
-                        default:
-                            return TransactionBlockInput(
-                                index: idx,
-                                value: nil,
-                                type: .object
-                            )
-                        }
-                    },
-                    transactions: programmableTransaction.transactions
+        switch rawData {
+        case .V1(let transactionDataV1):
+            switch transactionDataV1.kind {
+            case .programmableTransaction(let programmableTransaction):
+                return TransactionBlockDataBuilder(
+                    serializedTransactionDataBuilder: SerializedTransactionDataBuilder(
+                        sender: transactionDataV1.sender,
+                        expiration: transactionDataV1.expiration,
+                        gasConfig: transactionDataV1.gasData,
+                        inputs: programmableTransaction.inputs.enumerated().map { (idx, value) in
+                            switch value {
+                            case .pure(let pureSuiCallArg):
+                                return TransactionBlockInput(
+                                    index: idx,
+                                    value: pureSuiCallArg.value,
+                                    type: .pure
+                                )
+                            default:
+                                return TransactionBlockInput(
+                                    index: idx,
+                                    value: nil,
+                                    type: .object
+                                )
+                            }
+                        },
+                        transactions: programmableTransaction.transactions
+                    )
                 )
-            )
-        default:
-            throw SuiError.notImplemented
+            default:
+                throw SuiError.notImplemented
+            }
         }
     }
     
@@ -92,8 +95,7 @@ public struct TransactionBlockDataBuilder {
     
     public func build(
         overrides: TransactionBlockDataBuilder? = nil,
-        onlyTransactionKind: Bool? = nil,
-        isCorrect: Bool = false
+        onlyTransactionKind: Bool? = nil
     ) throws -> Data {
         let inputs = self.serializedTransactionDataBuilder.inputs.compactMap { value in
             switch value.value {
@@ -127,7 +129,7 @@ public struct TransactionBlockDataBuilder {
             throw SuiError.notImplemented
         }
         
-        let transactionData = TransactionData(
+        let transactionData = TransactionData.V1(TransactionDataV1(
             kind: SuiTransactionBlockKind.programmableTransaction(kind),
             sender: prepareSuiAddress(address: sender),
             gasData: SuiGasData(
@@ -139,38 +141,7 @@ public struct TransactionBlockDataBuilder {
                 budget: budget
             ),
             expiration: expiration ?? TransactionExpiration.none(true)
-        )
-        
-//        if isCorrect {
-//            print(transactionData)
-//            switch transactionData {
-//            case .V1(let txV1):
-//                switch txV1.kind {
-//                case .programmableTransaction(let programmableTx):
-//                    for tx in programmableTx.transactions {
-//                        switch tx.suiTransaction {
-//                        case .moveCall(let moveCallTransaction):
-//                            print("DEBUG: MOVE CALL - \(moveCallTransaction)")
-//                        case .transferObjects(let transferObjectsTransaction):
-//                            print("DEBUG: TRANSFER OBJECT - \(transferObjectsTransaction)")
-//                        case .splitCoins(let splitCoinsTransaction):
-//                            print("DEBUG: SPLIT COINS - \(splitCoinsTransaction)")
-//                        case .mergeCoins(let mergeCoinsTransaction):
-//                            print("DEBUG: MERGE COINS - \(mergeCoinsTransaction)")
-//                        case .publish(let publishTransaction):
-//                            print("DEBUG: PUBLISH - \(publishTransaction)")
-//                        case .upgrade(let upgradeTransaction):
-//                            print("DEBUG: UPGRADE - \(upgradeTransaction)")
-//                        case .makeMoveVec(let makeMoveVecTransaction):
-//                            print("DEBUG: MOVE VEC - \(makeMoveVecTransaction)")
-//                        }
-//                    }
-//                default:
-//                    break
-//                }
-//                break
-//            }
-//        }
+        ))
         
         let ser = Serializer()
         try transactionData.serialize(ser)
@@ -244,18 +215,25 @@ public enum TransactionExpiration: KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .epoch(let int):
-            try Serializer.u64(serializer, int)
+            try Serializer.u8(serializer, UInt8(0))
+            try Serializer.u64(serializer, UInt64(int))
         case .none(let bool):
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer.bool(serializer, bool)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionExpiration {
-        if let intReturn = try? Deserializer.u64(deserializer) {
-            return .epoch(intReturn)
-        } else if let boolReturn = try? deserializer.bool() {
-            return .none(boolReturn)
-        } else {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return TransactionExpiration.epoch(
+                try Deserializer.u64(deserializer)
+            )
+        case 1:
+            return TransactionExpiration.none(try deserializer.bool())
+        default:
             throw SuiError.notImplemented
         }
     }

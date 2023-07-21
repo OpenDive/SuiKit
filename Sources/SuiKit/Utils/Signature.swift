@@ -73,7 +73,7 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
         guard let stringSignature = String(data: signatureBytes, encoding: .utf8) else {
             throw SuiError.failedData
         }
-        let bytes = B64.fromB64(sBase64: stringSignature)
+        guard let bytes = Data.fromBase64(stringSignature) else { throw SuiError.notImplemented }
         let signatureScheme = SIGNATURE_FLAG_TO_SCHEME[bytes[0]]
         
         if signatureScheme == "ED25519" {
@@ -99,10 +99,6 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
         serializedSignature.append(signatureFlag)
         serializedSignature.append(contentsOf: self.signature)
         serializedSignature.append(contentsOf: self.publicKey)
-        let b64String = B64.toB64([UInt8](serializedSignature))
-        guard let b64Data = b64String.data(using: .utf8) else {
-            throw SuiError.stringToDataFailure(value: b64String)
-        }
-        try Serializer.toBytes(serializer, b64Data)
+        try Serializer.str(serializer, serializedSignature.base64EncodedString())
     }
 }

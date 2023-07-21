@@ -12,16 +12,16 @@ public class TransactionResult {
     let transactionArgument: TransactionArgument
     var nestedResults: [TransactionArgument]
     
-    public init(index: Int) {
+    public init(index: UInt16) {
         self.transactionArgument = TransactionArgument.result(
             Result(index: index)
         )
         self.nestedResults = []
     }
     
-    public func nestedResultFor(_ resultIndex: Int) -> TransactionArgument? {
-        if nestedResults.indices.contains(resultIndex) {
-            return nestedResults[resultIndex]
+    public func nestedResultFor(_ resultIndex: UInt16) -> TransactionArgument? {
+        if nestedResults.indices.contains(Int(resultIndex)) {
+            return nestedResults[Int(resultIndex)]
         } else {
             switch transactionArgument {
             case .result(let result):
@@ -39,7 +39,7 @@ public class TransactionResult {
         }
     }
     
-    public subscript(index: Int) -> TransactionArgument? {
+    public subscript(index: UInt16) -> TransactionArgument? {
         return nestedResultFor(index)
     }
 }
@@ -76,6 +76,10 @@ public struct TransactionBlock {
     public var transactionBrand: Bool = true
     public var blockData: TransactionBlockDataBuilder?
     
+    public init(_ blockData: TransactionBlockDataBuilder? = nil) {
+        self.blockData = blockData
+    }
+    
     public static func isInstance(_ obj: Any) -> Bool {
         guard let obj = obj as? TransactionBlock else { return false }
         return obj.transactionBrand
@@ -90,17 +94,18 @@ public struct TransactionBlock {
     }
     
     public static func fromKind(serialized: String) throws -> TransactionBlock {
+        guard let bytes = Data.fromBase64(serialized) else { throw SuiError.notImplemented }
         var tx = TransactionBlock()
         tx.blockData = try TransactionBlockDataBuilder.fromKindBytes(
-            bytes: Data(B64.fromB64(sBase64: serialized))
+            bytes: bytes
         )
         return tx
     }
     
     public static func from(serialized: Data) throws -> TransactionBlock {
-        var tx = TransactionBlock()
-        tx.blockData = try TransactionBlockDataBuilder.fromBytes(bytes: serialized)
-        return tx
+        return TransactionBlock(
+            try TransactionBlockDataBuilder.fromBytes(bytes: serialized)
+        )
     }
     
     mutating public func setSender(sender: SuiAddress) {
@@ -289,7 +294,7 @@ public struct TransactionBlock {
         guard let index = self.blockData?.serializedTransactionDataBuilder.transactions.count else {
             throw SuiError.invalidIndex
         }
-        guard let result = TransactionResult(index: index - 1)[index - 1] else {
+        guard let result = TransactionResult(index: UInt16(index - 1))[UInt16(index - 1)] else {
             throw SuiError.invalidResult
         }
         return result
@@ -863,29 +868,24 @@ public struct TransactionBlock {
             try await self.prepareTransactions(provider: provider)
 
             try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
-            print("0")
             if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
-                print("1")
                 var gasConfig = blockData.serializedTransactionDataBuilder.gasConfig
                 gasConfig.budget = String(try self.getConfig(key: LimitsKey.maxTxGas, buildOptions: options))
-                let txBlockDataBuilder = TransactionBlockDataBuilder(serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig))
-                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder, isCorrect: true)))
-                print("2")
+                let txBlockDataBuilder = TransactionBlockDataBuilder(serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig)
+                )
+                let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder)))
+                throw SuiError.notImplemented
                 guard dryRunResult.effects.status.status != .failure else {
                     throw SuiError.notImplemented
                 }
-                print("3")
                 let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
                     Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
                 )
-                print("4")
                 let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
-                print("5")
                 let gasBudget =
                     baseComputationCostWithOverhead +
                     (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
                     (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
-                print("6")
                 self.setGasBudget(
                     price:
                         gasBudget > baseComputationCostWithOverhead ?

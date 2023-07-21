@@ -22,7 +22,7 @@ public struct MakeMoveVecTransaction: KeyProtocol, Codable {
         return MakeMoveVecTransaction(
             kind: try Deserializer.string(deserializer),
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
-            type: try Deserializer.string(deserializer)
+            type: try? Deserializer.string(deserializer)
         )
     }
 }

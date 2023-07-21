@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 5/11/23.
 //
@@ -23,9 +23,9 @@ public enum TransactionArgument: KeyProtocol, Codable {
 //            case result = "Result"
 //            case nestedResult = "NestedResult"
 //        }
-//        
+//
 //        guard let txType = TransactionArgumentType(rawValue: type) else { throw SuiError.notImplemented }
-//        
+//
 //        switch txType {
 //        case .input:
 //            return .input(
@@ -56,26 +56,32 @@ public enum TransactionArgument: KeyProtocol, Codable {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .input(let transactionBlockInput):
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: transactionBlockInput)
         case .gasCoin:
-            try Serializer.str(serializer, "GasCoin")
+            try Serializer.u8(serializer, UInt8(1))
         case .result(let result):
+            try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: result)
         case .nestedResult(let nestedResult):
+            try Serializer.u8(serializer, UInt8(3))
             try Serializer._struct(serializer, value: nestedResult)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionArgument {
-        if let input: TransactionBlockInput = try? Deserializer._struct(deserializer) {
-            return .input(input)
-        } else if let _ = try? Deserializer.string(deserializer) {
-            return .gasCoin
-        } else if let result: Result = try? Deserializer._struct(deserializer) {
-            return .result(result)
-        } else if let nestedResult: NestedResult = try? Deserializer._struct(deserializer) {
-            return .nestedResult(nestedResult)
-        } else {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return TransactionArgument.input(try Deserializer._struct(deserializer))
+        case 1:
+            return TransactionArgument.gasCoin
+        case 2:
+            return TransactionArgument.result(try Deserializer._struct(deserializer))
+        case 3:
+            return TransactionArgument.nestedResult(try Deserializer._struct(deserializer))
+        default:
             throw SuiError.notImplemented
         }
     }
@@ -95,8 +101,8 @@ public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtoco
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionBlockInput {
         return TransactionBlockInput(
             index: Int(try Deserializer.u64(deserializer)),
-            value: try Deserializer._struct(deserializer),
-            type: try Deserializer._struct(deserializer)
+            value: try? Deserializer._struct(deserializer),
+            type: try? Deserializer._struct(deserializer)
         )
     }
 }
@@ -108,19 +114,19 @@ public enum ValueType: String, KeyProtocol, Codable {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .pure:
-            try Serializer.str(serializer, "Pure")
+            try Serializer.u8(serializer, UInt8(0))
         case .object:
-            try Serializer.str(serializer, "Object")
+            try Serializer.u8(serializer, UInt8(1))
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> ValueType {
-        let type = try Deserializer.string(deserializer)
+        let type = try Deserializer.u8(deserializer)
         
         switch type {
-        case "Pure":
+        case 0:
             return ValueType.pure
-        case "Object":
+        case 1:
             return ValueType.object
         default:
             throw SuiError.notImplemented
@@ -129,32 +135,32 @@ public enum ValueType: String, KeyProtocol, Codable {
 }
 
 public struct Result: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public let index: Int
+    public let index: UInt16
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u64(serializer, UInt64(index))
+        try Serializer.u16(serializer, index)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> Result {
         return Result(
-            index: Int(try Deserializer.u64(deserializer))
+            index: try Deserializer.u16(deserializer)
         )
     }
 }
 
 public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public let index: Int
-    public let resultIndex: Int
+    public let index: UInt16
+    public let resultIndex: UInt16
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u64(serializer, UInt64(index))
-        try Serializer.u64(serializer, UInt64(resultIndex))
+        try Serializer.u16(serializer, index)
+        try Serializer.u16(serializer, resultIndex)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> NestedResult {
         return NestedResult(
-            index: Int(try Deserializer.u64(deserializer)),
-            resultIndex: Int(try Deserializer.u64(deserializer))
+            index: try Deserializer.u16(deserializer),
+            resultIndex: try Deserializer.u16(deserializer)
         )
     }
 }

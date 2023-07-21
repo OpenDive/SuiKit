@@ -21,11 +21,15 @@ public struct MoveCallTransaction: Codable, KeyProtocol {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> MoveCallTransaction {
+        let kind = try Deserializer.string(deserializer)
+        let target = try Deserializer.string(deserializer)
+        let typeArguments = try deserializer.sequence(valueDecoder: Deserializer.string)
+        let arguments: [TransactionArgument] = try deserializer.sequence(valueDecoder: Deserializer._struct)
         return MoveCallTransaction(
-            kind: try Deserializer.string(deserializer),
-            target: try Deserializer.string(deserializer),
-            typeArguments: try deserializer.sequence(valueDecoder: Deserializer.string),
-            arguments: try deserializer.sequence(valueDecoder: Deserializer._struct)
+            kind: kind,
+            target: target,
+            typeArguments: typeArguments,
+            arguments: arguments
         )
     }
 }

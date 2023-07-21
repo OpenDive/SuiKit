@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 5/15/23.
 //
@@ -14,18 +14,27 @@ public indirect enum CallArg: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .pure(let pureCallArg):
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: pureCallArg)
         case .object(let objectArg):
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: objectArg)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> CallArg {
-        if let pure: PureSuiCallArg = try? Deserializer._struct(deserializer) {
-            return .pure(pure)
-        } else if let object: ObjectArg = try? Deserializer._struct(deserializer) {
-            return .object(object)
-        } else {
+        let type = try Deserializer.u8(deserializer)
+        
+        switch type {
+        case 0:
+            return CallArg.pure(
+                try Deserializer._struct(deserializer)
+            )
+        case 1:
+            return CallArg.object(
+                try Deserializer._struct(deserializer)
+            )
+        default:
             throw SuiError.notImplemented
         }
     }

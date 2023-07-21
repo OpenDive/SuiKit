@@ -19,8 +19,9 @@ public struct SplitCoinsTransaction: KeyProtocol, Codable {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SplitCoinsTransaction {
+        let kind = try Deserializer.string(deserializer)
         return SplitCoinsTransaction(
-            kind: try Deserializer.string(deserializer),
+            kind: kind,
             coin: try Deserializer._struct(deserializer),
             amounts: try deserializer.sequence(valueDecoder: Deserializer._struct)
         )

@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 5/12/23.
 //
@@ -21,20 +21,20 @@ public enum TransactionArgumentKind: Codable, KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .object:
-            try Serializer.str(serializer, "object")
+            try Serializer.u8(serializer, UInt8(0))
         case .pure(let type):
-            try Serializer.str(serializer, "pure")
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer.str(serializer, type)
         }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionArgumentKind {
-        let type = try Deserializer.string(deserializer)
+        let type = try Deserializer.u8(deserializer)
         
         switch type {
-        case "object":
+        case 0:
             return TransactionArgumentKind.object
-        case "pure":
+        case 1:
             return TransactionArgumentKind.pure(
                 type: try Deserializer.string(deserializer)
             )

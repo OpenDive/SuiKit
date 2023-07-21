@@ -53,7 +53,10 @@ public struct Transactions {
     public static func publish(modules: [String], dependencies: [objectId]) -> PublishTransaction {
         return PublishTransaction(
             kind: "Publish",
-            modules: modules.map { B64.fromB64(sBase64: $0) },
+            modules: modules.compactMap { module in
+                guard let result = Data.fromBase64(module) else { return nil }
+                return [UInt8](result)
+            },
             dependencies: dependencies
         )
     }
@@ -71,7 +74,10 @@ public struct Transactions {
     public static func upgrade(modules: [String], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
         return UpgradeTransaction(
             kind: "Upgrade",
-            modules: modules.map { B64.fromB64(sBase64: $0) },
+            modules: modules.compactMap { module in
+                guard let result = Data.fromBase64(module) else { return nil }
+                return [UInt8](result)
+            },
             dependencies: dependencies,
             packageId: packageId,
             ticket: ticket

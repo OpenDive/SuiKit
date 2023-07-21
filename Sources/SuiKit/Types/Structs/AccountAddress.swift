@@ -56,6 +56,10 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
         return self.hex()
     }
 
+    public func base64() -> String {
+        return address.base64EncodedString()
+    }
+
     /// Gives the hex value of the address
     /// - Returns: A String value represnting the address's hex value
     public func hex() -> String {

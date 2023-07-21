@@ -658,13 +658,14 @@ public struct SuiProvider {
     }
 
     public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> TransactionBlockResponse {
-        print("DEBUG: \(B64.toB64(transactionBlock))")
+        print("DEBUG: \(transactionBlock.toBase64())")
+        print("DEBUG: DESERIALIZER - \(try TransactionBlock.from(serialized: Data(transactionBlock)))")
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "sui_dryRunTransactionBlock",
                 [
-                    AnyCodable(B64.toB64(transactionBlock))
+                    AnyCodable(transactionBlock.toBase64())
                 ]
             )
         )
@@ -813,9 +814,7 @@ public struct SuiProvider {
         _ epoch: String?
     ) async throws -> DevInspectResults {
         transactionBlock.setSenderIfNotSet(sender: sender)
-        let devInspectTxBytes = await B64.toB64(
-            try [UInt8](transactionBlock.build(self, true))
-        )
+        let devInspectTxBytes = try await transactionBlock.build(self, true).base64EncodedString()
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(

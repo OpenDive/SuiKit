@@ -34,10 +34,10 @@ public struct SuiGasData: KeyProtocol, Codable {
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiGasData {
         return SuiGasData(
-            payment: try deserializer.sequence(valueDecoder: Deserializer._struct),
-            owner: try Deserializer.string(deserializer),
-            price: try Deserializer.string(deserializer),
-            budget: try Deserializer.string(deserializer)
+            payment: try? deserializer.sequence(valueDecoder: Deserializer._struct),
+            owner: try? Deserializer.string(deserializer),
+            price: try? Deserializer.string(deserializer),
+            budget: try? Deserializer.string(deserializer)
         )
     }
 }

@@ -7,20 +7,20 @@
 
 import Foundation
 
-public struct MakeMoveVecTransaction: KeyProtocol, Codable {
-    public let kind: String
+public struct MakeMoveVecTransaction: KeyProtocol {
+    public let kind: SuiTransactionKindName
     public let objects: [ObjectTransactionArgument]
     public let type: String?
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.str(serializer, kind)
+        try Serializer._struct(serializer, value: kind)
         try serializer.sequence(objects, Serializer._struct)
         if let type { try Serializer.str(serializer, type) }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> MakeMoveVecTransaction {
         return MakeMoveVecTransaction(
-            kind: try Deserializer.string(deserializer),
+            kind: try Deserializer._struct(deserializer),
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
             type: try? Deserializer.string(deserializer)
         )

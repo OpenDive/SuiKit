@@ -13,13 +13,13 @@ public struct Inputs {
         return PureCallArg(pure: [UInt8](data))
     }
     
-    public static func objectRef(suiObjectRef: SuiObjectRef) -> ObjectCallArg {
+    public static func objectRef(suiObjectRef: SuiObjectRef) throws -> ObjectCallArg {
         return ObjectCallArg(
             object: .immOrOwned(
                 ImmOrOwned(
-                    immOrOwned: SuiObjectRef(
+                    immOrOwned: try SuiObjectRef(
+                        objectId: normalizeSuiAddress(value: suiObjectRef.objectId.toSuiAddress()),
                         version: suiObjectRef.version,
-                        objectId: normalizeSuiAddress(value: suiObjectRef.objectId),
                         digest: suiObjectRef.digest)
                 )
             )
@@ -41,7 +41,7 @@ public struct Inputs {
     }
 }
 
-public enum ObjectArg: Codable, KeyProtocol {
+public enum ObjectArg: KeyProtocol {
     case immOrOwned(ImmOrOwned)
     case shared(SharedArg)
     
@@ -85,7 +85,7 @@ public struct BuilderCallArg {
 
 public let MAX_PURE_ARGUMENT_SIZE = 16 * 1024
 
-public struct ImmOrOwned: Codable, KeyProtocol {
+public struct ImmOrOwned: KeyProtocol {
     public let immOrOwned: SuiObjectRef
     
     public func serialize(_ serializer: Serializer) throws {
@@ -117,10 +117,10 @@ public func getIdFromCallArg(arg: objectId) -> String {
     return normalizeSuiAddress(value: arg)
 }
 
-public func getIdFromCallArg(arg: ObjectCallArg) -> String {
+public func getIdFromCallArg(arg: ObjectCallArg) throws -> String {
     switch arg.object {
     case .immOrOwned(let immOwned):
-        return normalizeSuiAddress(value: immOwned.immOrOwned.objectId)
+        return normalizeSuiAddress(value: try immOwned.immOrOwned.objectId.toSuiAddress())
     case .shared(let shared):
         return normalizeSuiAddress(value: shared.shared.objectId)
     }

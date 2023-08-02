@@ -6,22 +6,31 @@
 //
 
 import Foundation
+import Base58Swift
 
-public struct SuiObjectRef: Codable, KeyProtocol {
-    public let version: UInt8
-    public let objectId: objectId
+public struct SuiObjectRef: KeyProtocol {
+    public let objectId: AccountAddress
+    public let version: UInt64
     public let digest: TransactionDigest
     
+    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) throws {
+        self.objectId = try AccountAddress.fromHex(objectId)
+        self.version = version
+        self.digest = digest
+    }
+    
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u8(serializer, version)
-        try Serializer.str(serializer, objectId)
-        try Serializer.str(serializer, digest)
+        try Serializer._struct(serializer, value: objectId)
+        try Serializer.u64(serializer, version)
+        if let dataDigest = Base58.base58Decode(digest) {
+            try Serializer.toBytes(serializer, Data(dataDigest))
+        }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiObjectRef {
-        return SuiObjectRef(
-            version: try Deserializer.u8(deserializer),
+        return try SuiObjectRef(
             objectId: try Deserializer.string(deserializer),
+            version: try Deserializer.u64(deserializer),
             digest: try Deserializer.string(deserializer)
         )
     }

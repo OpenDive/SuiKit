@@ -7,21 +7,21 @@
 
 import Foundation
 
-public struct MoveCallTransaction: Codable, KeyProtocol {
-    public let kind: String
+public struct MoveCallTransaction: KeyProtocol {
+    public let kind: SuiTransactionKindName
     public let target: String
     public let typeArguments: [String]
     public let arguments: [TransactionArgument]
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.str(serializer, kind)
+        try Serializer._struct(serializer, value: kind)
         try Serializer.str(serializer, target)
         try serializer.sequence(typeArguments, Serializer.str)
         try serializer.sequence(arguments, Serializer._struct)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> MoveCallTransaction {
-        let kind = try Deserializer.string(deserializer)
+        let kind: SuiTransactionKindName = try Deserializer._struct(deserializer)
         let target = try Deserializer.string(deserializer)
         let typeArguments = try deserializer.sequence(valueDecoder: Deserializer.string)
         let arguments: [TransactionArgument] = try deserializer.sequence(valueDecoder: Deserializer._struct)

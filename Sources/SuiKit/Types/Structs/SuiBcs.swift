@@ -7,7 +7,7 @@
 
 import Foundation
 
-public indirect enum CallArg: Codable, KeyProtocol {
+public indirect enum CallArg: KeyProtocol {
     case pure(PureSuiCallArg)
     case object(ObjectArg)
     

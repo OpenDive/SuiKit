@@ -9,9 +9,45 @@ import Foundation
 import AnyCodable
 import SwiftyJSON
 
+public enum TransactionArgumentName: String, KeyProtocol {
+    case gasCoin = "GasCoin"
+    case input = "Input"
+    case result = "Result"
+    case nestedResult = "NestedResult"
+    
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .gasCoin:
+            try Serializer.u8(serializer, UInt8(0))
+        case .input:
+            try Serializer.u8(serializer, UInt8(1))
+        case .result:
+            try Serializer.u8(serializer, UInt8(2))
+        case .nestedResult:
+            try Serializer.u8(serializer, UInt8(3))
+        }
+    }
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> TransactionArgumentName {
+        let result = try Deserializer.u8(deserializer)
+        switch result {
+        case 0:
+            return .gasCoin
+        case 1:
+            return .input
+        case 2:
+            return .result
+        case 3:
+            return .nestedResult
+        default:
+            throw SuiError.notImplemented
+        }
+    }
+}
+
 public enum TransactionArgument: KeyProtocol, Codable {
-    case input(TransactionBlockInput)
     case gasCoin
+    case input(TransactionBlockInput)
     case result(Result)
     case nestedResult(NestedResult)
     
@@ -52,14 +88,27 @@ public enum TransactionArgument: KeyProtocol, Codable {
 //            )
 //        }
 //    }
+    
+    public var kind: TransactionArgumentName {
+        switch self {
+        case .gasCoin:
+            return .gasCoin
+        case .input:
+            return .input
+        case .result:
+            return .result
+        case .nestedResult:
+            return .nestedResult
+        }
+    }
 
     public func serialize(_ serializer: Serializer) throws {
         switch self {
-        case .input(let transactionBlockInput):
-            try Serializer.u8(serializer, UInt8(0))
-            try Serializer._struct(serializer, value: transactionBlockInput)
         case .gasCoin:
+            try Serializer.u8(serializer, UInt8(0))
+        case .input(let transactionBlockInput):
             try Serializer.u8(serializer, UInt8(1))
+            try Serializer._struct(serializer, value: transactionBlockInput)
         case .result(let result):
             try Serializer.u8(serializer, UInt8(2))
             try Serializer._struct(serializer, value: result)
@@ -88,22 +137,16 @@ public enum TransactionArgument: KeyProtocol, Codable {
 }
 
 public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
-    public var index: Int
+    public var index: UInt16
     public var value: SuiJsonValue?
     public var type: ValueType?
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u64(serializer, UInt64(index))
-        if let value { try Serializer._struct(serializer, value: value) }
-        if let type { try Serializer._struct(serializer, value: type) }
+        try Serializer.u16(serializer, index)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionBlockInput {
-        return TransactionBlockInput(
-            index: Int(try Deserializer.u64(deserializer)),
-            value: try? Deserializer._struct(deserializer),
-            type: try? Deserializer._struct(deserializer)
-        )
+        throw SuiError.notImplemented
     }
 }
 
@@ -165,7 +208,7 @@ public struct NestedResult: KeyProtocol, TransactionArgumentTypeProtocol, Codabl
     }
 }
 
-public struct ObjectTransactionArgument: Codable, KeyProtocol {
+public struct ObjectTransactionArgument: KeyProtocol {
     public let argument: TransactionArgument
     public let kind: TransactionArgumentKind
     
@@ -185,32 +228,33 @@ public struct ObjectTransactionArgument: Codable, KeyProtocol {
     }
 }
 
-public struct PureTransactionArgument: Codable, KeyProtocol {
+public struct PureTransactionArgument: KeyProtocol {
     public let argument: TransactionArgument
     public let kind: TransactionArgumentKind
     
-    public init(argument: TransactionArgument, type: String) {
+    public init(argument: TransactionArgument, type: TransactionArgumentTypes) {
         self.argument = argument
         self.kind = .pure(type: type)
     }
     
     public func serialize(_ serializer: Serializer) throws {
+//        try Serializer._struct(serializer, value: kind)
         try Serializer._struct(serializer, value: argument)
-        try Serializer._struct(serializer, value: kind)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> PureTransactionArgument {
-        let argument: TransactionArgument = try Deserializer._struct(deserializer)
-        let kindEnum: TransactionArgumentKind = try Deserializer._struct(deserializer)
-        
-        switch kindEnum {
-        case .pure(let type):
-            return PureTransactionArgument(
-                argument: argument,
-                type: type
-            )
-        default:
-            throw SuiError.notImplemented
-        }
+//        let kindEnum: TransactionArgumentKind = try Deserializer._struct(deserializer)
+//        let argument: TransactionArgument = try Deserializer._struct(deserializer)
+//        
+//        switch kindEnum {
+//        case .pure(let type):
+//            return PureTransactionArgument(
+//                argument: argument,
+//                type: type
+//            )
+//        default:
+//            throw SuiError.notImplemented
+//        }
+        throw SuiError.notImplemented
     }
 }

@@ -165,7 +165,7 @@ public struct TransactionBlock {
             throw SuiError.invalidIndex
         }
         let input = TransactionBlockInput(
-            index: index,
+            index: UInt16(index),
             value: value,
             type: type
         )
@@ -210,7 +210,7 @@ public struct TransactionBlock {
     }
     
     public mutating func object(value: ObjectCallArg) throws -> [TransactionBlockInput] {
-        let id = getIdFromCallArg(arg: value)
+        let id = try getIdFromCallArg(arg: value)
         guard let blockData = self.blockData else { throw SuiError.notImplemented }
         let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
             if input.type == .object {
@@ -248,7 +248,7 @@ public struct TransactionBlock {
                             OwnedObjectSuiCallArg(
                                 type: "object",
                                 objectType: "immOrOwnedObject",
-                                objectId: ownedObj.objectId,
+                                objectId: try ownedObj.objectId.toSuiAddress(),
                                 version: "\(ownedObj.version)",
                                 digest: ownedObj.digest
                             )
@@ -378,8 +378,8 @@ public struct TransactionBlock {
         )
     }
     
-    public mutating func transferObject(objects: [TransactionArgument], address: TransactionBlockInput) throws -> TransactionArgument {
-        try self.add(
+    public mutating func transferObject(objects: [TransactionArgument], address: String) throws -> TransactionArgument {
+        return try self.add(
             transaction: SuiTransactionEnumType.transferObjects(
                 Transactions.transferObjects(
                     objects: objects.map {
@@ -388,8 +388,14 @@ public struct TransactionBlock {
                         )
                     },
                     address: PureTransactionArgument(
-                        argument: TransactionArgument.input(address),
-                        type: "address"
+                        argument: TransactionArgument.input(
+                            self.pure(
+                                value: .callArg(
+                                    .pure(try address.replacingOccurrences(of: "0x", with: "").stringToBytes())
+                                )
+                            )
+                        ),
+                        type: .address
                     )
                 )
             )
@@ -443,6 +449,7 @@ public struct TransactionBlock {
     
     public mutating func build(_ provider: SuiProvider, _ onlyTransactionKind: Bool? = nil) async throws -> Data {
         try await self.prepare(BuildOptions(provider: provider, onlyTransactionKind: onlyTransactionKind))
+        print("DEBUG: BLOCK DATA BUILD - \([UInt8](try self.blockData?.build(onlyTransactionKind: onlyTransactionKind) ?? Data()))")
         return try self.blockData?.build(onlyTransactionKind: onlyTransactionKind) ?? Data()
     }
 
@@ -452,55 +459,70 @@ public struct TransactionBlock {
     }
     
     private mutating func prepareGasPayment(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
-        if self.isMissingSender(onlyTransactionKind) {
-            throw SuiError.notImplemented
-        }
+//        if self.isMissingSender(onlyTransactionKind) {
+//            throw SuiError.notImplemented
+//        }
+//        
+//        guard let gasOwner =
+//            self.blockData?.serializedTransactionDataBuilder.gasConfig.owner ??
+//            self.blockData?.serializedTransactionDataBuilder.sender
+//        else {
+//            throw SuiError.notImplemented
+//        }
+//        
+//        let coins = try await provider.getCoins(
+//            AccountAddress.fromHex(gasOwner),
+//            "0x2::sui::SUI"
+//        )
+//        
+//        print("DEBUG: COINS - \(coins)")
+//        
+//        let filteredCoins = coins.data.filter { coin in
+//            let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
+//                if let value = input.value {
+//                    switch value {
+//                    case .callArg(let callArg):
+//                        switch callArg {
+//                        case .ownedObject(let ownedObject):
+//                            return coin.coinObjectId == ownedObject.objectId
+//                        default:
+//                            return false
+//                        }
+//                    default:
+//                        return false
+//                    }
+//                }
+//                return false
+//            }
+//            return matchingInput != nil && matchingInput!.isEmpty
+//        }
+//        
+//        let paymentCoins = filteredCoins[
+//            0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
+//        ].map { coin in
+//            SuiObjectRef(
+//                objectId: coin.coinObjectId,
+//                version: coin.version,
+//                digest: coin.digest
+//            )
+//        }
+//        
+//        guard !paymentCoins.isEmpty else {
+//            throw SuiError.notImplemented
+//        }
         
-        guard let gasOwner =
-            self.blockData?.serializedTransactionDataBuilder.gasConfig.owner ??
-            self.blockData?.serializedTransactionDataBuilder.sender
-        else {
-            throw SuiError.notImplemented
-        }
-        
-        let coins = try await provider.getCoins(
-            AccountAddress.fromHex(gasOwner),
-            "0x2::sui::SUI"
-        )
-        
-        let filteredCoins = coins.data.filter { coin in
-            let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
-                if let value = input.value {
-                    switch value {
-                    case .callArg(let callArg):
-                        switch callArg {
-                        case .ownedObject(let ownedObject):
-                            return coin.coinObjectId == ownedObject.objectId
-                        default:
-                            return false
-                        }
-                    default:
-                        return false
-                    }
-                }
-                return false
-            }
-            return matchingInput != nil && matchingInput!.isEmpty
-        }
-        
-        let paymentCoins = filteredCoins[
-            0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
-        ].map { coin in
-            SuiObjectRef(
-                version: UInt8(Int(coin.version) ?? 0),
-                objectId: coin.coinObjectId,
-                digest: coin.digest
+        let paymentCoins: [SuiObjectRef] = [
+            try SuiObjectRef(
+                objectId: "0x22fc1d5e19933d1b4395a1a66e855d9d4c6decb2b91f74ac531ad60df3bcaa88",
+                version: UInt64(15),
+                digest: "4MyFLB7dWMPs7ynUEfTCRXBxZzM93PpaguUXq7eZsQQU"
+            ),
+            try SuiObjectRef(
+                objectId: "0x77a08be8b9db9a25ec467c9c22a42a1b448af1effff3595da5f4f69c19691f27",
+                version: UInt64(15),
+                digest: "AUEVXQjGqmDXTq5g9NXqE1bHYGZLsuGt2nAE2Y1wcxXU"
             )
-        }
-        
-        guard !paymentCoins.isEmpty else {
-            throw SuiError.notImplemented
-        }
+        ]
 
         try self.setGasPayment(payments: paymentCoins)
     }
@@ -533,13 +555,13 @@ public struct TransactionBlock {
         var objectsToResolve: [ObjectsToResolve] = []
         
         try await blockData.transactions.asyncForEach { tx in
-            if tx.suiTransaction.kind == "MoveCall" {
+            if tx.suiTransaction.kind == .moveCall {
                 switch tx.suiTransaction {
                 case .moveCall(let moveCall):
                     let needsResolution = moveCall.arguments.allSatisfy { argument in
                         switch argument {
                         case .input(let transactionBlockInput):
-                            switch blockData.inputs[transactionBlockInput.index].value {
+                            switch blockData.inputs[Int(transactionBlockInput.index)].value {
                             case .callArg:
                                 return false
                             default:
@@ -559,16 +581,16 @@ public struct TransactionBlock {
                     break
                 }
             }
-            
+
             func encodeInput(
-                index: Int,
+                index: UInt16,
                 blockData: inout SerializedTransactionDataBuilder,
                 objectsToResolve: inout [ObjectsToResolve]
             ) throws {
                 guard !(blockData.inputs.isEmpty), blockData.inputs.count > index else {
                     throw SuiError.notImplemented
                 }
-                let input = blockData.inputs[index]
+                let input = blockData.inputs[Int(index)]
                 
                 switch input.type {
                 case .object:
@@ -582,15 +604,10 @@ public struct TransactionBlock {
                     }
                 default:
                     if let value = input.value {
-                        blockData.inputs[index] = TransactionBlockInput(
+                        blockData.inputs[Int(index)] = TransactionBlockInput(
                             index: index,
                             value: SuiJsonValue.callArg(
-                                SuiCallArg.pure(
-                                    PureSuiCallArg(
-                                        type: "pure",
-                                        value: value
-                                    )
-                                )
+                                SuiCallArg.pure([UInt8](try value.dataValue()))
                             ),
                             type: .pure
                         )
@@ -741,7 +758,7 @@ public struct TransactionBlock {
                             
                             switch arg {
                             case .input(let blockInputArgument):
-                                var input = blockData.inputs[blockInputArgument.index]
+                                var input = blockData.inputs[Int(blockInputArgument.index)]
                                 switch input.value {
                                 case .callArg: return
                                 default: break
@@ -751,7 +768,7 @@ public struct TransactionBlock {
                                 let serType = try self.getPureSerializationType(param, inputValue)
                                 
                                 if let serType {
-                                    input.value = .callArg(.pure(PureSuiCallArg(type: serType, value: inputValue)))
+                                    input.value = .callArg(.pure([]))  // TODO: Implement proper pure call arg
                                     return
                                 }
                                 
@@ -829,7 +846,7 @@ public struct TransactionBlock {
                                                     )
                                                 )
                                             default:
-                                                if let objRef = self.getObjectReference(object) {
+                                                if let objRef = try self.getObjectReference(object) {
                                                     let txInputs = try objectRef(objectRef: objRef)
                                                     objectToResolve.input.value = SuiJsonValue.array(
                                                         txInputs.map {
@@ -871,10 +888,11 @@ public struct TransactionBlock {
             if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
                 var gasConfig = blockData.serializedTransactionDataBuilder.gasConfig
                 gasConfig.budget = String(try self.getConfig(key: LimitsKey.maxTxGas, buildOptions: options))
-                let txBlockDataBuilder = TransactionBlockDataBuilder(serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig)
+                gasConfig.payment = []
+                let txBlockDataBuilder = TransactionBlockDataBuilder(
+                    serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig)
                 )
                 let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder)))
-                throw SuiError.notImplemented
                 guard dryRunResult.effects.status.status != .failure else {
                     throw SuiError.notImplemented
                 }
@@ -1069,10 +1087,10 @@ public struct TransactionBlock {
         return self.getSharedObjectInput(arg)?.mutable ?? false
     }
     
-    private func getObjectReference(_ resp: SuiObjectResponse) -> SuiObjectRef? {
-        return SuiObjectRef(
-            version: UInt8(resp.version),
+    private func getObjectReference(_ resp: SuiObjectResponse) throws -> SuiObjectRef? {
+        return try SuiObjectRef(
             objectId: resp.objectId,
+            version: resp.version,
             digest: resp.digest
         )
     }

@@ -59,8 +59,6 @@ public struct TypeTag: KeyProtocol, Equatable {
 
     /// UInt256 Type Tag
     public static let u256: Int = 10
-    
-    public static let string: Int = 11
 
     /// The value itself
     let value: any TypeProtocol
@@ -94,8 +92,6 @@ public struct TypeTag: KeyProtocol, Equatable {
             return TypeTag(value: try AccountAddressTag.deserialize(from: deserializer))
         } else if variant == TypeTag._struct {
             return TypeTag(value: try StructTag.deserialize(from: deserializer))
-        } else if variant == TypeTag.string {
-            return TypeTag(value: try StringTag.deserialize(from: deserializer))
         } else {
             throw SuiError.notImplemented
         }

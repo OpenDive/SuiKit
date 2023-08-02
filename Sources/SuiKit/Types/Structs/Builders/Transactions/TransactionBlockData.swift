@@ -27,13 +27,13 @@ public struct TransactionBlockDataBuilder {
                         switch value {
                         case .pure(let pureSuiCallArg):
                             return TransactionBlockInput(
-                                index: idx,
-                                value: pureSuiCallArg.value,
+                                index: UInt16(idx),
+                                value: .data(Data(pureSuiCallArg)),
                                 type: .pure
                             )
                         default:
                             return TransactionBlockInput(
-                                index: idx,
+                                index: UInt16(idx),
                                 value: nil,
                                 type: .object
                             )
@@ -63,13 +63,13 @@ public struct TransactionBlockDataBuilder {
                             switch value {
                             case .pure(let pureSuiCallArg):
                                 return TransactionBlockInput(
-                                    index: idx,
-                                    value: pureSuiCallArg.value,
+                                    index: UInt16(idx),
+                                    value: .data(Data(pureSuiCallArg)),
                                     type: .pure
                                 )
                             default:
                                 return TransactionBlockInput(
-                                    index: idx,
+                                    index: UInt16(idx),
                                     value: nil,
                                     type: .object
                                 )
@@ -105,10 +105,9 @@ public struct TransactionBlockDataBuilder {
                 return nil
             }
         }
-        
         let transactions = self.serializedTransactionDataBuilder.transactions
         
-        let kind = ProgrammableTransaction(transactions: transactions, inputs: inputs)
+        let kind = ProgrammableTransaction(inputs: inputs, transactions: transactions)
         
         if let onlyTransactionKind, onlyTransactionKind {
             let ser = Serializer()
@@ -142,7 +141,6 @@ public struct TransactionBlockDataBuilder {
             ),
             expiration: expiration ?? TransactionExpiration.none(true)
         ))
-        
         let ser = Serializer()
         try transactionData.serialize(ser)
         return ser.output()
@@ -209,17 +207,16 @@ public class SerializedTransactionDataBuilder {
 }
 
 public enum TransactionExpiration: KeyProtocol {
-    case epoch(UInt64)
     case none(Bool)
+    case epoch(UInt64)
     
     public func serialize(_ serializer: Serializer) throws {
         switch self {
-        case .epoch(let int):
+        case .none:
             try Serializer.u8(serializer, UInt8(0))
-            try Serializer.u64(serializer, UInt64(int))
-        case .none(let bool):
+        case .epoch(let int):
             try Serializer.u8(serializer, UInt8(1))
-            try Serializer.bool(serializer, bool)
+            try Serializer.u64(serializer, UInt64(int))
         }
     }
     
@@ -232,7 +229,7 @@ public enum TransactionExpiration: KeyProtocol {
                 try Deserializer.u64(deserializer)
             )
         case 1:
-            return TransactionExpiration.none(try deserializer.bool())
+            return TransactionExpiration.none(true)
         default:
             throw SuiError.notImplemented
         }

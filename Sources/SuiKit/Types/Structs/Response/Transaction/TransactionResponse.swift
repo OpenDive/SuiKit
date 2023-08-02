@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct TransactionResponse: Codable {
+public struct TransactionResponse {
     public let txBytes: String
     public let gas: SuiObjectRef
     public let inputObjects: [String: SuiObjectRef]

@@ -83,6 +83,27 @@ public extension Array where Element == UInt8 {
         }
     }
     
+    mutating func set(_ bytes: [UInt8], offset: Int? = nil) throws {
+        let actualOffset = offset ?? 0
+        
+        guard actualOffset >= 0 else {
+            throw NSError(
+                domain: "Invalid offset",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Offset can't be negative."]
+            )
+        }
+        
+        let end = actualOffset + bytes.count
+        if end > self.count {
+            self += [UInt8](repeating: 0, count: end - self.count)
+        }
+        
+        for i in 0..<bytes.count {
+            self[i + actualOffset] = bytes[i]
+        }
+    }
+    
     func toHexString() -> String {
         lazy.reduce(into: "") {
             var s = String($1, radix: 16)

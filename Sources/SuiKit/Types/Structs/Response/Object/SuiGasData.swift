@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct SuiGasData: KeyProtocol, Codable {
+public struct SuiGasData: KeyProtocol {
     public var payment: [SuiObjectRef]?
     public var owner: String?
     public var price: String?
@@ -27,9 +27,13 @@ public struct SuiGasData: KeyProtocol, Codable {
     
     public func serialize(_ serializer: Serializer) throws {
         if let payment { try serializer.sequence(payment, Serializer._struct) }
-        if let owner { try Serializer.str(serializer, owner) }
-        if let price { try Serializer.str(serializer, price) }
-        if let budget { try Serializer.str(serializer, budget) }
+        if let owner { try serializer.fixedBytes(Data(owner.replacingOccurrences(of: "0x", with: "").stringToBytes())) }
+        if let price, let priceUint64 = UInt64(price) {
+            serializer.fixedBytes(priceUint64.toData())
+        }
+        if let budget, let budgetUint64 = UInt64(budget) {
+            serializer.fixedBytes(budgetUint64.toData())
+        }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiGasData {

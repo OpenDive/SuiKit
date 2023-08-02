@@ -9,7 +9,7 @@ import Foundation
 
 public struct SuiObjectResponse {
     public let objectId: String
-    public let version: Int
+    public let version: UInt64
     public let digest: String
     public let type: String?
     public let owner: ObjectOwner?

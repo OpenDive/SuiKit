@@ -66,6 +66,16 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
         return "0x\(address.hexEncodedString())"
     }
 
+    public func toSuiAddress() throws -> String {
+        var tmp = Data(count: AccountAddress.length + 1)
+        try tmp.set([Signature.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
+        try tmp.set([UInt8](self.address), offset: 1)
+        let result = normalizeSuiAddress(
+            value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<AccountAddress.length * 2]
+        )
+        return result
+    }
+
     /// Create an AccountAddress instance from a hexadecimal string.
     ///
     /// This function creates an AccountAddress instance from a hexadecimal string representing the account address. If the provided hexadecimal string starts with "0x",
@@ -106,10 +116,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible {
     ///
     /// - Throws: An error of type SuiError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
     public static func fromKey(_ key: any PublicKeyProtocol) throws -> AccountAddress {
-        let data = Data([UInt8](Data(count: 1)) + key.key)
-        let result = try Blake2.hash(.b2b, size: 32, data: data)
-
-        return try AccountAddress(address: result)
+        return try AccountAddress(address: key.key)
     }
 
     /// Create an AccountAddress instance from a MultiPublicKey.

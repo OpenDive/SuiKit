@@ -459,70 +459,55 @@ public struct TransactionBlock {
     }
     
     private mutating func prepareGasPayment(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
-//        if self.isMissingSender(onlyTransactionKind) {
-//            throw SuiError.notImplemented
-//        }
-//        
-//        guard let gasOwner =
-//            self.blockData?.serializedTransactionDataBuilder.gasConfig.owner ??
-//            self.blockData?.serializedTransactionDataBuilder.sender
-//        else {
-//            throw SuiError.notImplemented
-//        }
-//        
-//        let coins = try await provider.getCoins(
-//            AccountAddress.fromHex(gasOwner),
-//            "0x2::sui::SUI"
-//        )
-//        
-//        print("DEBUG: COINS - \(coins)")
-//        
-//        let filteredCoins = coins.data.filter { coin in
-//            let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
-//                if let value = input.value {
-//                    switch value {
-//                    case .callArg(let callArg):
-//                        switch callArg {
-//                        case .ownedObject(let ownedObject):
-//                            return coin.coinObjectId == ownedObject.objectId
-//                        default:
-//                            return false
-//                        }
-//                    default:
-//                        return false
-//                    }
-//                }
-//                return false
-//            }
-//            return matchingInput != nil && matchingInput!.isEmpty
-//        }
-//        
-//        let paymentCoins = filteredCoins[
-//            0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
-//        ].map { coin in
-//            SuiObjectRef(
-//                objectId: coin.coinObjectId,
-//                version: coin.version,
-//                digest: coin.digest
-//            )
-//        }
-//        
-//        guard !paymentCoins.isEmpty else {
-//            throw SuiError.notImplemented
-//        }
+        if self.isMissingSender(onlyTransactionKind) {
+            throw SuiError.notImplemented
+        }
         
-        let paymentCoins: [SuiObjectRef] = [
+        guard let gasOwner =
+            self.blockData?.serializedTransactionDataBuilder.gasConfig.owner ??
+            self.blockData?.serializedTransactionDataBuilder.sender
+        else {
+            throw SuiError.notImplemented
+        }
+        
+        let coins = try await provider.getCoins(
+            AccountAddress.fromHex(gasOwner),
+            "0x2::sui::SUI"
+        )
+        
+        let filteredCoins = coins.data.filter { coin in
+            let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
+                if let value = input.value {
+                    switch value {
+                    case .callArg(let callArg):
+                        switch callArg {
+                        case .ownedObject(let ownedObject):
+                            return coin.coinObjectId == ownedObject.objectId
+                        default:
+                            return false
+                        }
+                    default:
+                        return false
+                    }
+                }
+                return false
+            }
+            return matchingInput != nil && matchingInput!.isEmpty
+        }
+        
+        let paymentCoins = try filteredCoins[
+            0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
+        ].map { coin in
             try SuiObjectRef(
-                objectId: "0x22fc1d5e19933d1b4395a1a66e855d9d4c6decb2b91f74ac531ad60df3bcaa88",
-                version: UInt64(15),
-                digest: "4MyFLB7dWMPs7ynUEfTCRXBxZzM93PpaguUXq7eZsQQU"
-            ),
-            try SuiObjectRef(
-                objectId: "0x77a08be8b9db9a25ec467c9c22a42a1b448af1effff3595da5f4f69c19691f27",
-                version: UInt64(15),
-                digest: "AUEVXQjGqmDXTq5g9NXqE1bHYGZLsuGt2nAE2Y1wcxXU"
+                objectId: coin.coinObjectId,
+                version: UInt64(coin.version) ?? UInt64(0),
+                digest: coin.digest
             )
-        ]
+        }
+        
+        guard !paymentCoins.isEmpty else {
+            throw SuiError.notImplemented
+        }
 
         try self.setGasPayment(payments: paymentCoins)
     }

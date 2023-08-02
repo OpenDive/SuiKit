@@ -28,11 +28,8 @@ public struct RawSigner: SignerWithProviderProtocol {
     
     public func signData(data: Data) throws -> String {
         let pubKey = wallet.address().base64()
-        print("DEBUG: DATA - \([UInt8](data))")
         let digest = try Blake2.hash(.b2b, size: 32, data: data)
-        print("DEBUG: DIGEST - \([UInt8](digest))")
         let signature = try self.wallet.privateKey.sign(data: digest)
-        print("DEBUG: SIGNATURE - \([UInt8](signature.data()))")
         let signatureScheme = self.wallet.privateKey.type
         return try toSerializedSignature(signature, signatureScheme, pubKey)
     }
@@ -134,11 +131,19 @@ public func intentWithScope(_ scope: IntentScope) -> Intent {
     return (scope, .V0, .Sui)
 }
 
+public func intentData(_ intent: Intent) -> [UInt8] {
+    return [
+        UInt8(intent.0.rawValue),
+        UInt8(intent.1.rawValue),
+        UInt8(intent.2.rawValue)
+    ]
+}
+
 public func messageWithIntent(_ scope: IntentScope, _ message: Data) -> Data {
     let intent = intentWithScope(scope)
-    let intentData = withUnsafeBytes(of: intent) { Data($0) }
+    let intentData = intentData(intent)
     var intentMessage = Data(capacity: intentData.count + message.count)
-    intentMessage.append(intentData)
+    intentMessage.append(Data(intentData))
     intentMessage.append(message)
     return intentMessage
 }
@@ -148,20 +153,12 @@ public func toSerializedSignature(
     _ signatureScheme: KeyType,
     _ pubKey: String
 ) throws -> String {
-    var serializedSignature = Data(capacity: 1 + signature.signature.count + pubKey.count)
-    try serializedSignature.set([Signature.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] ?? 0x00])
-    print("DEBUG: SERIALIZED SIGNATURE 1 - \([UInt8](serializedSignature))")
-    try serializedSignature.set([UInt8](signature.signature))
-    print("DEBUG: SIGNATURE - \([UInt8](signature.signature))")
-    try serializedSignature.set(pubKey.replacingOccurrences(of: "0x", with: "").stringToBytes())
-    print("DEBUG: SERIALIZED SIGNATURE 3 - \([UInt8](serializedSignature))")
-    
-    print("DEBUG: SERIALIZED SIGNATURE FINAL - \([UInt8](serializedSignature))")
+    guard let pubKeyData = Data(base64Encoded: pubKey) else { throw SuiError.notImplemented }
+    guard let encryptionType = Signature.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else { throw SuiError.notImplemented }
+    var serializedSignature = Data(count: signature.signature.count + pubKeyData.count)
+    serializedSignature[0] = encryptionType
+    serializedSignature[1..<signature.signature.count] = signature.signature
+    serializedSignature[1+signature.signature.count..<1+signature.signature.count+pubKeyData.count] = pubKeyData
 
     return serializedSignature.base64EncodedString()
 }
-
-// [] <- Data, Size: 1 + signature size + public key size
-// [0]
-// [0, <UInt8 Array contents of signature>]
-// [0, <UInt8 Array contents of signature>, <UInt8 Array contents of public key>]

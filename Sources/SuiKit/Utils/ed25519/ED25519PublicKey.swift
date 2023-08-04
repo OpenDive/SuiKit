@@ -25,11 +25,10 @@
 
 import Foundation
 import ed25519swift
+import Blake2
 
 /// The ED25519 Public Key
 public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
-    public var type: KeyType = .ed25519
-    
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
@@ -42,13 +41,21 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         }
         self.key = data
     }
+    
+    public init(hexString: String) {
+        var hexValue = hexString
+        if hexString.hasPrefix("0x") {
+            hexValue = String(hexString.dropFirst(2))
+        }
+        self.key = Data(hex: hexValue)
+    }
 
     public static func == (lhs: ED25519PublicKey, rhs: ED25519PublicKey) -> Bool {
         return lhs.key == rhs.key
     }
 
     public var description: String {
-        return "0x\(key.hexEncodedString())"
+        return self.hex()
     }
 
     /// Verify a digital signature for a given data using Ed25519 algorithm.
@@ -62,12 +69,30 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     /// - Returns: A Boolean value indicating whether the signature is valid or not.
     ///
     /// - Throws: An error of type Ed25519Error.invalidSignature if the signature is invalid or an error occurred during verification.
-    public func verify(data: Data, signature: Signature, _ privateKey: Data) throws -> Bool {
+    public func verify(data: Data, signature: Signature) throws -> Bool {
         return Ed25519.verify(
             signature: [UInt8](signature.signature),
             message: [UInt8](data),
             publicKey: [UInt8](self.key)
         )
+    }
+    
+    public func base64() -> String {
+        return key.base64EncodedString()
+    }
+    
+    public func hex() -> String {
+        return "0x\(key.hexEncodedString())"
+    }
+    
+    public func toSuiAddress() throws -> String {
+        var tmp = Data(count: ED25519PublicKey.LENGTH + 1)
+        try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
+        try tmp.set([UInt8](key), offset: 1)
+        let result = normalizeSuiAddress(
+            value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<ED25519PublicKey.LENGTH * 2]
+        )
+        return result
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> ED25519PublicKey {

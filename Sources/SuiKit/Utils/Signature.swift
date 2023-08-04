@@ -50,16 +50,6 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
     public var description: String {
         return "0x\(signature.hexEncodedString())"
     }
-    
-    public static var SIGNATURE_SCHEME_TO_FLAG: [String: UInt8] = [
-        "ED25519": 0x00,
-        "SECP256K1": 0x01
-    ]
-    
-    public static var SIGNATURE_FLAG_TO_SCHEME: [UInt8: String] = [
-        0x00: "ED25519",
-        0x01: "SECP256K1"
-    ]
 
     func data() -> Data {
         return self.signature
@@ -74,7 +64,7 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
             throw SuiError.failedData
         }
         guard let bytes = Data.fromBase64(stringSignature) else { throw SuiError.notImplemented }
-        let signatureScheme = SIGNATURE_FLAG_TO_SCHEME[bytes[0]]
+        let signatureScheme = SignatureSchemeFlags.SIGNATURE_FLAG_TO_SCHEME[bytes[0]]
         
         if signatureScheme == "ED25519" {
             let signature = Array(bytes[1...(bytes.count - ED25519PublicKey.LENGTH)])
@@ -93,7 +83,7 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
 
     public func serialize(_ serializer: Serializer) throws {
         var serializedSignature = Data(capacity: 1 + signature.count + publicKey.count)
-        guard let signatureFlag = Signature.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {
+        guard let signatureFlag = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {
             throw SuiError.notImplemented
         }
         serializedSignature.append(signatureFlag)
@@ -101,4 +91,16 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
         serializedSignature.append(contentsOf: self.publicKey)
         try Serializer.str(serializer, serializedSignature.base64EncodedString())
     }
+}
+
+public struct SignatureSchemeFlags {
+    public static var SIGNATURE_SCHEME_TO_FLAG: [String: UInt8] = [
+        "ED25519": 0x00,
+        "SECP256K1": 0x01
+    ]
+    
+    public static var SIGNATURE_FLAG_TO_SCHEME: [UInt8: String] = [
+        0x00: "ED25519",
+        0x01: "SECP256K1"
+    ]
 }

@@ -27,11 +27,11 @@ import Foundation
 
 public struct MultiAgentAuthenticator: AuthenticatorProtocol {
     public var sender: Authenticator
-    public var secondarySigner: [(AccountAddress, Authenticator)]
+    public var secondarySigner: [(ED25519PublicKey, Authenticator)]
 
     /// Returns all of the account addresses of the secondary signers.
     /// - Returns: An array of AccountAddress objects
-    public func secondaryAddresses() -> [AccountAddress] {
+    public func secondaryAddresses() -> [ED25519PublicKey] {
         return secondarySigner.map { $0.0 }
     }
 
@@ -44,7 +44,7 @@ public struct MultiAgentAuthenticator: AuthenticatorProtocol {
 
     public static func deserialize(from deserializer: Deserializer) throws -> MultiAgentAuthenticator {
         let sender: Authenticator = try Deserializer._struct(deserializer)
-        let secondaryAddresses = try deserializer.sequence(valueDecoder: AccountAddress.deserialize)
+        let secondaryAddresses = try deserializer.sequence(valueDecoder: ED25519PublicKey.deserialize)
         let secondaryAuthenticator = try deserializer.sequence(valueDecoder: Authenticator.deserialize)
         return MultiAgentAuthenticator(sender: sender, secondarySigner: Array(zip(secondaryAddresses, secondaryAuthenticator)))
     }

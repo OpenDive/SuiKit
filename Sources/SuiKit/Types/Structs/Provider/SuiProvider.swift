@@ -41,11 +41,11 @@ public struct SuiProvider {
         return try JSONDecoder().decode(JSON.self, from: data)["result"]["value"].uInt64Value
     }
     
-    public func getAllBalances(_ account: AccountAddress) async throws -> [CoinBalance] {
+    public func getAllBalances(_ account: Account) async throws -> [CoinBalance] {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getAllBalances", [
-                AnyCodable(account.description)
+                AnyCodable(try account.publicKey.toSuiAddress())
             ])
         )
         var balances: [CoinBalance] = []
@@ -66,11 +66,11 @@ public struct SuiProvider {
         return balances
     }
     
-    public func getBalance(_ account: AccountAddress, _ coinType: String) async throws -> CoinBalance {
+    public func getBalance(_ account: Account, _ coinType: String) async throws -> CoinBalance {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getBalance", [
-                AnyCodable(account.description),
+                AnyCodable(try account.publicKey.toSuiAddress()),
                 AnyCodable(coinType)
             ])
         )
@@ -87,11 +87,11 @@ public struct SuiProvider {
         )
     }
     
-    public func getAllCoins(_ account: AccountAddress, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
+    public func getAllCoins(_ account: any PublicKeyProtocol, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getAllCoins", [
-                AnyCodable(account.description),
+                AnyCodable(try account.toSuiAddress()),
                 AnyCodable(cursor),
                 AnyCodable(limit)
             ])
@@ -117,13 +117,13 @@ public struct SuiProvider {
         )
     }
     
-    public func getCoins(_ account: AccountAddress, _ coinType: String, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
+    public func getCoins(_ account: any PublicKeyProtocol, _ coinType: String, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "suix_getCoins",
                 [
-                    AnyCodable(account.description),
+                    AnyCodable(try account.toSuiAddress()),
                     AnyCodable(coinType),
                     AnyCodable(cursor),
                     AnyCodable(limit)
@@ -326,13 +326,13 @@ public struct SuiProvider {
         )
     }
     
-    public func getOwnedObjects(_ account: AccountAddress, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
+    public func getOwnedObjects(_ account: any PublicKeyProtocol, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "suix_getOwnedObjects",
                 [
-                    AnyCodable(account.description),
+                    AnyCodable(try account.toSuiAddress()),
                     AnyCodable(query),
                     AnyCodable(cursor),
                     AnyCodable(limit)
@@ -369,180 +369,13 @@ public struct SuiProvider {
         return result
     }
     
-    public func pay(_ sender: Account, _ coin: String, _ gasCoin: String, _ receiver: AccountAddress, _ amount: String,  _ gasBudget: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_pay",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable([coin]),
-                    AnyCodable([receiver.description]),
-                    AnyCodable([amount]),
-                    AnyCodable(gasCoin),
-                    AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func paySui(_ sender: Account, _ receiver: AccountAddress, _ amount: String, _ gasBudget: String, _ coin: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_paySui",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable([coin]),
-                    AnyCodable([receiver.description]),
-                    AnyCodable([amount]),
-                    AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func payAllSui(_ sender: Account, _ receiver: AccountAddress, _ inputCoin: String, _ gasBudget: Int) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_payAllSui",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable([inputCoin]),
-                    AnyCodable(receiver.description),
-                    AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func transferSui(_ sender: Account, _ receiver: AccountAddress, _ gasBudget: String, _ amount: String, _ suiObjectId: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_transferSui",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable(suiObjectId),
-                    AnyCodable(gasBudget),
-                    AnyCodable(receiver.description),
-                    AnyCodable(amount)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func transferObject(_ sender: Account, _ objectId: objectId, _ gas: objectId, _ gasBudget: String, _ recipient: AccountAddress) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_transferObject",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable(objectId),
-                    AnyCodable(gas),
-                    AnyCodable(gasBudget),
-                    AnyCodable(recipient.description)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func splitCoin(_ signer: Account, _ coinObjectId: String, _ splitAmount: String, _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_splitCoin",
-                [
-                    AnyCodable(signer.accountAddress.description),
-                    AnyCodable(coinObjectId),
-                    AnyCodable(splitAmount),
-                    AnyCodable(gas),
-                    AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func mergeCoin(_ signer: Account, _ primaryCoin: objectId, _ coinToMerge: objectId, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_mergeCoins",
-                [
-                    AnyCodable(signer.accountAddress.description),
-                    AnyCodable(primaryCoin),
-                    AnyCodable(coinToMerge),
-                    AnyCodable(gas),
-                    AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func publish(_ sender: Account, _ compiledModules: [String], _ dependencies: [String], _ gas: String, _ gasBudget: String) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_publish",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable(compiledModules),
-                    AnyCodable(dependencies),
-                    AnyCodable(gas),
-                    AnyCodable(gasBudget)
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func moveCall(
-        _ sender: Account,
-        _ packageObjectId: String,
-        _ module: String,
-        _ function: String,
-        _ typeArguments: [TypeTag],
-        _ arguments: [String],
-        _ gas: String,
-        _ gasBudget: String,
-        _ executionMode: SuiTransactionBuilderMode
-    ) async throws -> TransactionResponse {
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "unsafe_moveCall",
-                [
-                    AnyCodable(sender.accountAddress.description),
-                    AnyCodable(packageObjectId),
-                    AnyCodable(module),
-                    AnyCodable(function),
-                    AnyCodable(typeArguments),
-                    AnyCodable(arguments),
-                    AnyCodable(gas),
-                    AnyCodable(gasBudget),
-                    AnyCodable(executionMode.asString())
-                ]
-            )
-        )
-        return try self.getTransactionResponse(data)
-    }
-    
-    public func requestAddStake(_ signer: Account, _ coins: [String], _ amount: String, _ validators: SuiAddress, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
+    public func requestAddStake(_ signer: Account, _ coins: [String], _ amount: String, _ validators: SuiAddress, _ gas: objectId, _ gasBudget: String) async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "unsafe_requestAddStake",
                 [
-                    AnyCodable(signer.accountAddress.description),
+                    AnyCodable(try signer.publicKey.toSuiAddress()),
                     AnyCodable(coins),
                     AnyCodable(amount),
                     AnyCodable(validators),
@@ -551,26 +384,26 @@ public struct SuiProvider {
                 ]
             )
         )
-        return try self.getTransactionResponse(data)
+        return JSON(data)["result"]
     }
     
-    public func requestWithdrawStake(_ signer: Account, _ stakedSui: objectId, _ gas: objectId, _ gasBudget: String) async throws -> TransactionResponse {
+    public func requestWithdrawStake(_ signer: Account, _ stakedSui: objectId, _ gas: objectId, _ gasBudget: String) async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "unsafe_requestWithdrawStake",
                 [
-                    AnyCodable(signer.accountAddress.description),
+                    AnyCodable(try signer.publicKey.toSuiAddress()),
                     AnyCodable(stakedSui),
                     AnyCodable(gas),
                     AnyCodable(gasBudget)
                 ]
             )
         )
-        return try self.getTransactionResponse(data)
+        return JSON(data)["result"]
     }
     
-    public func getNormalizedMoveModulesByPackage(_ package: String) async throws -> SuiMoveNormalizedModules {
+    public func getNormalizedMoveModulesByPackage(_ package: String) async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -581,30 +414,7 @@ public struct SuiProvider {
             )
         )
 
-        var modules: SuiMoveNormalizedModules = [:]
-        
-        for (key, subJson): (String, JSON) in JSON(data)["result"].dictionaryValue {
-            let structs: [String: SuiMoveNormalizedStruct] = try self.decodeModuleStruct(subJson["structs"])
-            let exposedFunctions: [String: SuiMoveNormalizedFunction] = try self.decodeModuleFunction(subJson["exposedFunctions"])
-            
-            let normalizedModule = SuiMoveNormalizedModule(
-                fileFormatVersion: subJson["fileFormatVersion"].intValue,
-                address: subJson["address"].stringValue,
-                name: key,
-                friends: subJson["friends"].arrayValue.map {
-                    SuiMoveModuleId(
-                        address: $0["address"].stringValue,
-                        name: $0["name"].stringValue
-                    )
-                },
-                structs: structs,
-                exposedFunctions: exposedFunctions
-            )
-            
-            modules[key] = normalizedModule
-        }
-        
-        return modules
+        return JSON(data)["result"]
     }
     
     // TODO: Finish getNormalizedMoveStruct
@@ -657,8 +467,7 @@ public struct SuiProvider {
         return objectResponses
     }
 
-    public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> TransactionBlockResponse {
-        print("DEBUG: TX BLOCK DATA - \(transactionBlock)")
+    public func dryRunTransactionBlock(_ transactionBlock: [UInt8]) async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -670,7 +479,7 @@ public struct SuiProvider {
         )
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
-        return try self.decodeTransactionResponse(JSON(data))
+        return JSON(data)["result"]
     }
 
     public func getNormalizedMoveFunction(
@@ -709,49 +518,12 @@ public struct SuiProvider {
     
     // TODO: Finish getMoveFunctionArgTypes
     
-    public func executeTransactionBlocks(_ txBlock: TransactionResponse, _ signer: Account) async throws -> JSON {
-        // 1. Create byte array of 3 '0' elements (this is called the intent)
-        let flag: [UInt8] = [0, 0, 0]
-        
-        // 2. Append the base64 tx_bytes decoded to bytes
-        guard let txDecoded = Data.fromBase64(txBlock.txBytes) else {
-            throw SuiError.stringToDataFailure(value: txBlock.txBytes)
-        }
-        let signatureData = Data(flag) + txDecoded
-        
-        // 3. Sign the new extended bytes (this is the 'signature') as a Blake2B hash
-        let hash = try Blake2.hash(.b2b, size: 32, data: signatureData)
-        let signature: Signature = try signer.privateKey.sign(data: hash)
-        
-        // 4. join the key_flag byte (in your case this will be 0 for ed25519) with the signature and then the public key bytes
-        let pubKey = try signer.publicKey().key
-        let finalData = Data([0x00]) + signature.signature + pubKey
-        
-        // 5. Encode using base64
-        let finalB64 = finalData.base64EncodedString()
-        
-        let data = try await self.sendSuiJsonRpc(
-            try self.getServerUrl(),
-            SuiRequest(
-                "sui_executeTransactionBlock",
-                [
-                    AnyCodable(txBlock.txBytes),
-                    AnyCodable([finalB64]),
-                    AnyCodable(TransactionBlockResponseOptions()),
-                    AnyCodable(SuiRequestType.waitForLocalExecution.asString())
-                ]
-            )
-        )
-        
-        return JSON(data)["result"]
-    }
-    
     public func executeTransactionBlock(
         _ transactionBlock: String,
         _ signature: String,
         _ options: SuiTransactionBlockResponseOptions? = nil,
         _ requestType: SuiRequestType? = nil
-    ) async throws -> TransactionBlockResponse {
+    ) async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -765,7 +537,7 @@ public struct SuiProvider {
             )
         )
 
-        return try self.decodeTransactionResponse(JSON(data))
+        return JSON(data)["result"]
     }
     
     public func getProtocolConfig(_ version: String? = nil) async throws -> ProtocolConfig {
@@ -811,7 +583,7 @@ public struct SuiProvider {
         _ sender: SuiAddress,
         _ gasPrice: Int?,
         _ epoch: String?
-    ) async throws -> DevInspectResults {
+    ) async throws -> JSON {
         transactionBlock.setSenderIfNotSet(sender: sender)
         let devInspectTxBytes = try await transactionBlock.build(self, true).base64EncodedString()
         let data = try await self.sendSuiJsonRpc(
@@ -827,29 +599,7 @@ public struct SuiProvider {
             )
         )
         
-        let result = JSON(data)["result"]
-        let effects = result["effects"]
-        
-        return DevInspectResults(
-            effects: try self.decodeTransactionEffects(effects),
-            events: result["events"].arrayValue.map {
-                SuiEvent(
-                    id: EventId(
-                        txDigest: $0["id"]["txDigest"].stringValue,
-                        eventSeq: $0["id"]["eventSeq"].stringValue
-                    ),
-                    packageId: $0["packageId"].stringValue,
-                    transactionModule: $0["transactionModule"].stringValue,
-                    sender: $0["sender"].stringValue,
-                    type: $0["type"].stringValue,
-                    parsedJson: nil, // TODO: Implement parsedJson parameter
-                    bcs: $0["bcs"].stringValue,
-                    timestampMs: $0["timestampMs"].stringValue
-                )
-            },
-            results: nil, // TODO: Implement results parameter
-            error: result["error"].string
-        )
+        return JSON(data)["result"]
     }
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
@@ -865,279 +615,6 @@ public struct SuiProvider {
             )
         }
         return RPCErrorValue(id: nil, error: nil, jsonrpc: nil, hasError: false)
-    }
-    
-    private func decodeTransactionResponse(_ data: JSON) throws -> TransactionBlockResponse {
-        let result = data["result"]
-        let tx = result["transaction"]["data"]
-        let programmableTx = tx["transaction"]
-        let effects = result["effects"]
-        
-        return TransactionBlockResponse(
-            digest: result["digest"].stringValue,
-            transaction: SuiTransactionBlockData(
-                messageVersion: tx["messageVersion"].stringValue,
-                transaction: SuiTransactionBlockKind.programmableTransaction(
-                    ProgrammableTransaction(
-                        inputs: try programmableTx["inputs"].arrayValue.map {
-                            let type = $0["type"].stringValue
-                            switch type {
-                            case "pure":
-                                return SuiCallArg.pure([])  // TODO: Implement proper sui call arg pure
-                            case "object":
-                                let objectType = $0["objectType"].stringValue
-                                switch objectType {
-                                case "immOrOwnedObject":
-                                    return SuiCallArg.ownedObject(
-                                        OwnedObjectSuiCallArg(
-                                            type: "object",
-                                            objectType: "immOrOwnedObject",
-                                            objectId: $0["objectId"].stringValue,
-                                            version: $0["version"].stringValue,
-                                            digest: $0["digest"].stringValue
-                                        )
-                                    )
-                                case "sharedObject":
-                                    return SuiCallArg.sharedObject(
-                                        SharedObjectSuiCallArg(
-                                            type: "object",
-                                            objectType: "sharedObject",
-                                            objectId: $0["objectId"].stringValue,
-                                            initialSharedVersion: $0["initialSharedObject"].stringValue,
-                                            mutable: $0["mutable"].boolValue
-                                        )
-                                    )
-                                default: throw SuiError.notImplemented
-                                }
-                            default: throw SuiError.notImplemented
-                            }
-                        },
-                        //                        transactions: try programmableTx["transactions"].arrayValue.map {
-                        //                            for (txKey, txValue) in $0.dictionaryValue {
-                        //                                return try SuiTransaction.fromJsonObject(txValue, txKey)
-                        //                            }
-                        //                        },
-                        transactions: []
-                    )
-                ),
-                sender: tx["sender"].stringValue,
-                gasData: SuiGasData(
-                    payment: try tx["gasData"]["payment"].arrayValue.compactMap {
-                        try SuiObjectRef(
-                            objectId: $0["objectId"].stringValue,
-                            version: $0["version"].uInt64Value,
-                            digest: $0["digest"].stringValue
-                        )
-                    },
-                    owner: tx["gasData"]["owner"].string,
-                    price: tx["gasData"]["price"].string,
-                    budget: tx["gasData"]["budget"].string
-                )
-            ),
-            txSigntures: result["transaction"]["txSignatures"].arrayValue.map { $0.stringValue },
-            rawTransaction: result["rawTransaction"].stringValue,
-            effects: try self.decodeTransactionEffects(effects),
-            objectChanges: try result["objectChanges"].arrayValue.map {
-                return try SuiObjectChange.fromJsonObject($0, $0["type"].stringValue)
-            }
-        )
-    }
-    
-    private func decodeTransactionEffects(_ effects: JSON) throws -> TransactionEffects {
-        return TransactionEffects(
-            messageVersion: MessageVersion(rawValue: effects["messageVersion"].stringValue) ?? .v1,
-            status: ExecutionStatus(
-                status: ExecutionStatusType(rawValue: effects["status"]["status"].stringValue) ?? ExecutionStatusType.failure,
-                error: effects["status"]["error"].string
-            ),
-            executedEpoch: effects["executedEpoch"].stringValue,
-            modifiedAtVersions: effects["modifiedAtVersions"].arrayValue.compactMap {
-                TransactionEffectsModifiedAtVersions(
-                    objectId: $0["objectId"].stringValue,
-                    sequenceNumber: $0["sequenceNumber"].stringValue
-                )
-            },
-            gasUsed: GasCostSummary(
-                computationCost: effects["gasUsed"]["computationCost"].stringValue,
-                storageCost: effects["gasUsed"]["storageCost"].stringValue,
-                storageRebate: effects["gasUsed"]["storageRebate"].stringValue,
-                nonRefundableStorageFee: effects["gasUsed"]["nonRefundableStorageFee"].stringValue
-            ),
-            sharedObjects: try effects["sharedObjects"].arrayValue.compactMap {
-                try SuiObjectRef(
-                    objectId: $0["objectId"].stringValue,
-                    version: $0["version"].uInt64Value,
-                    digest: $0["digest"].stringValue
-                )
-            },
-            transactionDigest: effects["transactionDigest"].stringValue,
-            created: try effects["created"].arrayValue.compactMap {
-                OwnedObjectRef(
-                    owner: ObjectOwner(
-                        addressOwner: AddressOwner(
-                            addressOwner: $0["owner"]["AddressOwner"].stringValue
-                        ),
-                        objectOwner: ObjectOwnerAddress(
-                            objectOwner: $0["owner"]["ObjectOwner"].stringValue
-                        ),
-                        shared: nil
-                    ),
-                    reference: try SuiObjectRef(
-                        objectId: $0["objectId"].stringValue,
-                        version: $0["version"].uInt64Value,
-                        digest: $0["digest"].stringValue
-                    )
-                )
-            },
-            mutated: try effects["mutated"].arrayValue.compactMap {
-                OwnedObjectRef(
-                    owner: ObjectOwner(
-                        addressOwner: AddressOwner(
-                            addressOwner: $0["owner"]["AddressOwner"].stringValue
-                        ),
-                        objectOwner: ObjectOwnerAddress(
-                            objectOwner: $0["owner"]["ObjectOwner"].stringValue
-                        ),
-                        shared: nil
-                    ),
-                    reference: try SuiObjectRef(
-                        objectId: $0["objectId"].stringValue,
-                        version: $0["version"].uInt64Value,
-                        digest: $0["digest"].stringValue
-                    )
-                )
-            },
-            unwrapped: try effects["unwrapped"].arrayValue.compactMap {
-                OwnedObjectRef(
-                    owner: ObjectOwner(
-                        addressOwner: AddressOwner(
-                            addressOwner: $0["owner"]["AddressOwner"].stringValue
-                        ),
-                        objectOwner: ObjectOwnerAddress(
-                            objectOwner: $0["owner"]["ObjectOwner"].stringValue
-                        ),
-                        shared: nil
-                    ),
-                    reference: try SuiObjectRef(
-                        objectId: $0["objectId"].stringValue,
-                        version: $0["version"].uInt64Value,
-                        digest: $0["digest"].stringValue
-                    )
-                )
-            },
-            deleted: try effects["deleted"].arrayValue.compactMap {
-                try SuiObjectRef(
-                    objectId: $0["objectId"].stringValue,
-                    version: $0["version"].uInt64Value,
-                    digest: $0["digest"].stringValue
-                )
-            },
-            unwrappedThenDeleted: try effects["unwrappedThenDeleted"].arrayValue.compactMap {
-                try SuiObjectRef(
-                    objectId: $0["objectId"].stringValue,
-                    version: $0["version"].uInt64Value,
-                    digest: $0["digest"].stringValue
-                )
-            },
-            wrapped: try effects["wrapped"].arrayValue.compactMap {
-                try SuiObjectRef(
-                    objectId: $0["objectId"].stringValue,
-                    version: $0["version"].uInt64Value,
-                    digest: $0["digest"].stringValue
-                )
-            },
-            gasObject: OwnedObjectRef(
-                owner: ObjectOwner(
-                    addressOwner: AddressOwner(
-                        addressOwner: effects["gasObject"]["owner"]["AddressOwner"].stringValue
-                    ),
-                    objectOwner: ObjectOwnerAddress(
-                        objectOwner: effects["gasObject"]["owner"]["ObjectOwner"].stringValue
-                    ),
-                    shared: nil
-                ),
-                reference: try SuiObjectRef(
-                    objectId: effects["gasObject"]["reference"]["objectId"].stringValue,
-                    version: effects["gasObject"]["reference"]["version"].uInt64Value,
-                    digest: effects["gasObject"]["reference"]["digest"].stringValue
-                )
-            ),
-            eventsDigest: effects["eventsDigest"].stringValue,
-            dependencies: effects["dependencies"].arrayValue.compactMap { $0.string }
-        )
-    }
-    
-    private func decodeModuleStruct(_ data: JSON) throws -> [String: SuiMoveNormalizedStruct] {
-        var structs: [String: SuiMoveNormalizedStruct] = [:]
-        
-        for (keyStructs, structsSubJson): (String, JSON) in data.dictionaryValue {
-            structs[keyStructs] = SuiMoveNormalizedStruct(
-                abilities: SuiMoveAbilitySet(
-                    abilities: structsSubJson["abilities"]["abilities"].arrayValue.map { $0.stringValue }
-                ),
-                typeParameters: structsSubJson["typeParameters"].arrayValue.map {
-                    SuiMoveStructTypeParameter(
-                        constraints: SuiMoveAbilitySet(
-                            abilities: $0["constraints"]["abilities"].arrayValue.map { $0.stringValue }
-                        ),
-                        isPhantom: $0["isPhantom"].boolValue
-                    )
-                },
-                fields: try structsSubJson["fields"].arrayValue.map {
-                    SuiMoveNormalizedField(
-                        name: $0["name"].stringValue,
-                        type: try SuiMoveNormalizedType.decodeNormalizedType($0["type"])
-                    )
-                }
-            )
-        }
-        
-        return structs
-    }
-    
-    private func decodeModuleFunction(_ data: JSON) throws -> [String: SuiMoveNormalizedFunction] {
-        var functions: [String: SuiMoveNormalizedFunction] = [:]
-        
-        for (keyFunctions, functionsSubJson): (String, JSON) in data.dictionaryValue {
-            functions[keyFunctions] = SuiMoveNormalizedFunction(
-                visibility: try SuiMoveVisibility.decodeVisibility(functionsSubJson["visibility"]),
-                isEntry: functionsSubJson["isEntry"].boolValue,
-                typeParameters: functionsSubJson["typeParameters"].arrayValue.map {
-                    SuiMoveAbilitySet(abilities: $0["abilities"].arrayValue.map { $0.stringValue })
-                },
-                parameters: try functionsSubJson["parameters"].arrayValue.map {
-                    try SuiMoveNormalizedType.decodeNormalizedType($0)
-                },
-                returnValues: try functionsSubJson["return"].arrayValue.map {
-                    try SuiMoveNormalizedType.decodeNormalizedType($0)
-                }
-            )
-        }
-        
-        return functions
-    }
-    
-    private func getTransactionResponse(_ data: Data) throws -> TransactionResponse {
-        let json = JSON(data)["result"]
-        var responseObjects: [String: SuiObjectRef] = [:]
-        for objects in JSON(data)["result"]["inputObjects"] {
-            let objDict = objects.1.dictionaryValue
-            let objValue = objDict.values.first!
-            responseObjects["\(objDict.keys.first!)"] = try SuiObjectRef(
-                objectId: objValue["objectId"].stringValue,
-                version: objValue["version"].uInt64Value,
-                digest: objValue["digest"].stringValue
-            )
-        }
-        return TransactionResponse(
-            txBytes: json["txBytes"].stringValue,
-            gas: try SuiObjectRef(
-                objectId: json["gas"][0]["objectId"].stringValue,
-                version: json["gas"][0]["version"].uInt64Value,
-                digest: json["gas"][0]["digest"].stringValue
-            ),
-            inputObjects: responseObjects
-        )
     }
     
     private func getServerUrl() throws -> URL {

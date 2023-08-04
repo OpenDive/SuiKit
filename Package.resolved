@@ -28,6 +28,15 @@
       }
     },
     {
+      "identity" : "bip39.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/Bip39.swift.git",
+      "state" : {
+        "revision" : "ac728b82520e93a17deb1c2af2c9c952274db703",
+        "version" : "0.1.1"
+      }
+    },
+    {
       "identity" : "blake2.swift",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/tesseract-one/Blake2.swift.git",
@@ -59,8 +68,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/GigaBitcoin/secp256k1.swift.git",
       "state" : {
-        "revision" : "37cc6e53e32e614fb9563b4b7d14be0f1b4334f5",
-        "version" : "0.12.0"
+        "revision" : "1a14e189def5eaa92f839afdd2faad8e43b61a6e",
+        "version" : "0.12.2"
       }
     },
     {
@@ -79,6 +88,15 @@
       "state" : {
         "revision" : "1a499a1bf08afd10b9fcd0fd6d90b6dd9196be50",
         "version" : "0.2.2"
+      }
+    },
+    {
+      "identity" : "uncommoncrypto.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/UncommonCrypto.swift.git",
+      "state" : {
+        "revision" : "e089407582e1f2d81dc11ba167362742422b8979",
+        "version" : "0.1.3"
       }
     }
   ],

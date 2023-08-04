@@ -9,12 +9,12 @@ import Foundation
 import Base58Swift
 
 public struct SuiObjectRef: KeyProtocol {
-    public let objectId: AccountAddress
+    public let objectId: any PublicKeyProtocol
     public let version: UInt64
     public let digest: TransactionDigest
     
-    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) throws {
-        self.objectId = try AccountAddress.fromHex(objectId)
+    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) {
+        self.objectId = ED25519PublicKey(hexString: objectId)
         self.version = version
         self.digest = digest
     }
@@ -28,7 +28,7 @@ public struct SuiObjectRef: KeyProtocol {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiObjectRef {
-        return try SuiObjectRef(
+        return SuiObjectRef(
             objectId: try Deserializer.string(deserializer),
             version: try Deserializer.u64(deserializer),
             digest: try Deserializer.string(deserializer)

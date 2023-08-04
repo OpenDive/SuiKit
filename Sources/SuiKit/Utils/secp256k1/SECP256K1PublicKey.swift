@@ -7,12 +7,11 @@
 
 import Foundation
 import secp256k1
+import Blake2
 
 public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
-    
-    public var type: KeyType = .secp256k1
 
     /// The key itself
     public var key: Data
@@ -22,6 +21,14 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
             throw SuiError.invalidPublicKey
         }
         self.key = data
+    }
+    
+    public init(hexString: String) {
+        var hexValue = hexString
+        if hexString.hasPrefix("0x") {
+            hexValue = String(hexString.dropFirst(2))
+        }
+        self.key = Data(hex: hexValue)
     }
 
     public static func == (lhs: SECP256K1PublicKey, rhs: SECP256K1PublicKey) -> Bool {
@@ -44,11 +51,33 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     /// - Returns: A Boolean value indicating whether the signature is valid or not.
     ///
     /// - Throws: An error of type Ed25519Error.invalidSignature if the signature is invalid or an error occurred during verification.
-    public func verify(data: Data, signature: Signature, _ privateKey: Data) throws -> Bool {
-        let secpPrivateKey = try secp256k1.Signing.PrivateKey(rawRepresentation: privateKey)
-        let secpSignature = try secpPrivateKey.signature(for: data)
-        
-        return secpPrivateKey.publicKey.isValidSignature(secpSignature, for: data)
+    public func verify(data: Data, signature: Signature) throws -> Bool {
+        let verifyKey = try secp256k1.Signing.PublicKey(
+            dataRepresentation: self.key,
+            format: .compressed
+        )
+        return try verifyKey.isValidSignature(
+            secp256k1.Signing.ECDSASignature(dataRepresentation: signature.signature),
+            for: data
+        )
+    }
+    
+    public func base64() -> String {
+        return key.base64EncodedString()
+    }
+    
+    public func hex() -> String {
+        return "0x\(key.hexEncodedString())"
+    }
+    
+    public func toSuiAddress() throws -> String {
+        var tmp = Data(count: SECP256K1PublicKey.LENGTH + 1)
+        try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["SECP256K1"]!])
+        try tmp.set([UInt8](key), offset: 1)
+        let result = normalizeSuiAddress(
+            value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<SECP256K1PublicKey.LENGTH * 2]
+        )
+        return result
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> SECP256K1PublicKey {

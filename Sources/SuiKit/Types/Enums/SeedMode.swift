@@ -25,7 +25,7 @@
 
 import Foundation
 
-public enum SeedMode: String {
+public enum SeedMode: String, Equatable {
     case Ed25519Bip32
     case Bip39
 }

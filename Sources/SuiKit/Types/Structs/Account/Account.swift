@@ -25,80 +25,106 @@
 
 import Foundation
 
-/// sui Blockchain Account
-public struct Account: Equatable {
-    /// The account address associated with the account
-    public let accountAddress: AccountAddress
+/// Sui Blockchain Account
+public struct Account: Equatable, Hashable {
+    public let accountType: KeyType
     
-//    public let accountType: AccountType
+    /// The public key associated with the account
+    public let publicKey: any PublicKeyProtocol
 
     /// The private key for the account
-    public let privateKey: any PrivateKeyProtocol
-
-    public static func == (lhs: Account, rhs: Account) -> Bool {
-        return
-            lhs.accountAddress == rhs.accountAddress &&
-            lhs.privateKey.key == rhs.privateKey.key
+    private let privateKey: any PrivateKeyProtocol
+    
+    public init(accountType: KeyType = .ed25519) throws {
+        switch accountType {
+        case .ed25519:
+            let privateKey = ED25519PrivateKey()
+            try self.init(privateKey: privateKey, accountType: accountType)
+        case .secp256k1:
+            let privateKey = try SECP256K1PrivateKey()
+            try self.init(privateKey: privateKey, accountType: accountType)
+        }
     }
-
-    /// Generate a new account instance with a random private key.
-    ///
-    /// This function generates a new private key and derives the associated account address.
-    /// A new account instance is created with the generated address and private key.
-    ///
-    /// - Throws: An error of type Error if there was a problem generating the private key or account address.
-    ///
-    /// - Returns: A new Account instance with a randomly generated private key and associated account address.
-    public static func generate() throws -> Account {
-        let privateKey = try ED25519PrivateKey.random()
-        let accountAddress = try AccountAddress.fromKey(privateKey.publicKey())
-        return Account(accountAddress: accountAddress, privateKey: privateKey)
+    
+    public init(privateKey: Data, accountType: KeyType = .ed25519) throws {
+        switch accountType {
+        case .ed25519:
+            let privateKey = ED25519PrivateKey(key: privateKey)
+            try self.init(privateKey: privateKey, accountType: accountType)
+        case .secp256k1:
+            let privateKey = SECP256K1PrivateKey(key: privateKey)
+            try self.init(privateKey: privateKey, accountType: accountType)
+        }
     }
-
-    /// Load an account from a private key in hex format.
-    ///
-    /// This function takes a private key in hex format and attempts to load it into an account by creating a PrivateKey instance from the hex string and then deriving an AccountAddress from the public key. A new Account instance is created using the derived AccountAddress and the PrivateKey.
-    ///
-    /// - Parameter key: A private key in hex format.
-    ///
-    /// - Throws: An error of type PrivateKeyError if the private key cannot be derived from the hex string, or AccountAddressError if the account address cannot be derived from the private key.
-    ///
-    /// - Returns: An Account instance containing the derived AccountAddress and PrivateKey.
-    public static func loadKey(_ key: String) throws -> Account {
-        let privateKey = ED25519PrivateKey.fromHex(key)
-        let accountAddress = try AccountAddress.fromKey(privateKey.publicKey())
-        return Account(accountAddress: accountAddress, privateKey: privateKey)
+    
+    public init(publicKey: any PublicKeyProtocol, privateKey: any PrivateKeyProtocol, accountType: KeyType = .ed25519) {
+        self.publicKey = publicKey
+        self.privateKey = privateKey
+        self.accountType = accountType
     }
-
-    /// Load an account from a JSON file.
-    ///
-    /// This function loads an account object from a JSON file by reading the file content from the provided path, deserializing the JSON data,
-    /// retrieving the account_address and private_key keys, and then constructing and returning an account object from them.
-    ///
-    /// - Parameters:
-    ///    - path: A string representing the path to the JSON file.
-    ///
-    /// - Throws: An error of type SuiError if the JSON file is invalid, if the account_address key is missing, or if the private_key key is missing.
-    ///
-    /// - Returns: An account object constructed from the account_address and private_key keys in the JSON file.
-    public static func load(_ path: String) throws -> Account {
+    
+    public init(privateKey: any PrivateKeyProtocol, accountType: KeyType = .ed25519) throws {
+        self.privateKey = privateKey
+        self.publicKey = try privateKey.publicKey()
+        self.accountType = accountType
+    }
+    
+    public init(keyType: KeyType = .ed25519, hexString: String) throws {
+        switch keyType {
+        case .ed25519:
+            let privateKey = ED25519PrivateKey(hexString: hexString)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
+            self.accountType = keyType
+        case .secp256k1:
+            let privateKey = SECP256K1PrivateKey(hexString: hexString)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
+            self.accountType = keyType
+        }
+    }
+    
+    public init(keyType: KeyType = .ed25519, path: String) throws {
         let fileURL = URL(fileURLWithPath: path)
         let data = try Data(contentsOf: fileURL)
         guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
             throw SuiError.invalidJsonData
         }
 
-        guard let accountAddressHex = json["account_address"] as? String else {
-            throw SuiError.missingAccountAddressKey
-        }
         guard let privateKeyHex = json["private_key"] as? String else {
             throw SuiError.missingPrivateKey
         }
 
-        let accountAddress = try AccountAddress.fromHex(accountAddressHex)
-        let privateKey = ED25519PrivateKey.fromHex(privateKeyHex)
+        try self.init(
+            keyType: keyType,
+            hexString: privateKeyHex
+        )
+    }
+    
+    public init(_ mnemonics: String, accountType: KeyType = .ed25519) throws {
+        self.accountType = accountType
+        
+        switch accountType {
+        case .ed25519:
+            let privateKey = try ED25519PrivateKey(mnemonics)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
+        case .secp256k1:
+            let privateKey = try SECP256K1PrivateKey(mnemonics)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
+        }
+    }
 
-        return Account(accountAddress: accountAddress, privateKey: privateKey)
+    public static func == (lhs: Account, rhs: Account) -> Bool {
+        return
+            lhs.publicKey.key == rhs.publicKey.key &&
+            lhs.privateKey.key == rhs.privateKey.key
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(self.privateKey.base64())
+        hasher.combine(self.publicKey.base64())
     }
 
     /// Store the account information to a file at the given path.
@@ -112,7 +138,7 @@ public struct Account: Equatable {
     /// - Throws: An error of type SuiError if there is an issue writing to the file.
     public func store(_ path: String) throws {
         let data: [String: String] = [
-            "account_address": self.accountAddress.hex(),
+            "account_address": self.publicKey.hex(),
             "private_key": self.privateKey.hex()
         ]
 
@@ -123,14 +149,8 @@ public struct Account: Equatable {
     
     /// Returns the account's account address.
     /// - Returns: An AccountAddress object
-    public func address() -> AccountAddress {
-        return self.accountAddress
-    }
-    
-    /// Returns the hexadecimal representation of the authorization key for the account
-    /// - Returns: A String object
-    public func authKey() throws -> String {
-        return try AccountAddress.fromKey(self.privateKey.publicKey()).hex()
+    public func address() throws -> String {
+        return try self.publicKey.toSuiAddress()
     }
 
     /// Use the private key to sign the data inputted.
@@ -140,9 +160,24 @@ public struct Account: Equatable {
         return try self.privateKey.sign(data: data)
     }
     
-    /// Returns the public key of the associated account
-    /// - Returns: A PublicKey object
-    public func publicKey() throws -> any PublicKeyProtocol {
-        return try self.privateKey.publicKey()
+    public func verify(_ data: Data, _ signature: Signature) throws -> Bool {
+        return try self.publicKey.verify(data: data, signature: signature)
+    }
+    
+    public func export() -> ExportedAccount {
+        return ExportedAccount(
+            schema: self.accountType,
+            privateKey: privateKey.key.base64EncodedString()
+        )
+    }
+}
+
+public struct ExportedAccount {
+    public let schema: KeyType
+    public let privateKey: String
+    
+    public init(schema: KeyType, privateKey: String) {
+        self.schema = schema
+        self.privateKey = privateKey
     }
 }

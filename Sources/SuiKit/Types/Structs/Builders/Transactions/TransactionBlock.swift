@@ -471,7 +471,7 @@ public struct TransactionBlock {
         }
         
         let coins = try await provider.getCoins(
-            AccountAddress.fromHex(gasOwner),
+            ED25519PublicKey(hexString: gasOwner),
             "0x2::sui::SUI"
         )
         
@@ -752,7 +752,7 @@ public struct TransactionBlock {
                                 
                                 let serType = try self.getPureSerializationType(param, inputValue)
                                 
-                                if let serType {
+                                if serType != nil {
                                     input.value = .callArg(.pure([]))  // TODO: Implement proper pure call arg
                                     return
                                 }
@@ -878,17 +878,17 @@ public struct TransactionBlock {
                     serializedTransactionDataBuilder: SerializedTransactionDataBuilder(gasConfig: gasConfig)
                 )
                 let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder)))
-                guard dryRunResult.effects.status.status != .failure else {
+                guard dryRunResult["effects"]["status"]["status"].stringValue != "failure" else {
                     throw SuiError.notImplemented
                 }
                 let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
                     Int(blockData.serializedTransactionDataBuilder.gasConfig.price ?? "1") ?? 1
                 )
-                let baseComputationCostWithOverhead = Int(dryRunResult.effects.gasUsed.computationCost) ?? 1 + safeOverhead
+                let baseComputationCostWithOverhead = dryRunResult["effects"]["gasUsed"]["computationCost"].intValue + safeOverhead
                 let gasBudget =
                     baseComputationCostWithOverhead +
-                    (Int(dryRunResult.effects.gasUsed.storageCost) ?? 1) -
-                    (Int(dryRunResult.effects.gasUsed.storageRebate) ?? 1)
+                    dryRunResult["effects"]["gasUsed"]["storageCost"].intValue -
+                    dryRunResult["effects"]["gasUsed"]["storageRebate"].intValue
                 self.setGasBudget(
                     price:
                         gasBudget > baseComputationCostWithOverhead ?

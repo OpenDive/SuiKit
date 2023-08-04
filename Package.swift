@@ -19,7 +19,8 @@ let package = Package(
         .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
         .package(url: "https://github.com/GigaBitcoin/secp256k1.swift.git", from: "0.11.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0"),
-        .package(url: "https://github.com/keefertaylor/Base58Swift.git", from: "2.1.0")
+        .package(url: "https://github.com/keefertaylor/Base58Swift.git", from: "2.1.0"),
+        .package(url: "https://github.com/tesseract-one/Bip39.swift.git", from: "0.1.1")
     ],
     targets: [
         .target(
@@ -32,7 +33,8 @@ let package = Package(
                 .product(name: "AnyCodable", package: "AnyCodable"),
                 .product(name: "secp256k1", package: "secp256k1.swift"),
                 .product(name: "BigInt", package: "BigInt"),
-                .product(name: "Base58Swift", package: "Base58Swift")
+                .product(name: "Base58Swift", package: "Base58Swift"),
+                .product(name: "Bip39", package: "Bip39.swift")
             ],
             path: "Sources"
         ),

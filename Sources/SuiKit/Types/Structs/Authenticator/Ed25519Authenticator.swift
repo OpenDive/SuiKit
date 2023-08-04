@@ -30,7 +30,7 @@ public struct Ed25519Authenticator: AuthenticatorProtocol {
     public let signature: Signature
 
     public func verify(_ data: Data) throws -> Bool {
-        return try self.publicKey.verify(data: data, signature: self.signature, Data())
+        return try self.publicKey.verify(data: data, signature: self.signature)
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> Ed25519Authenticator {

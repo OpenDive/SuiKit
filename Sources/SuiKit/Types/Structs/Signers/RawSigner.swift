@@ -8,34 +8,31 @@
 import Foundation
 import Blake2
 import BigInt
+import SwiftyJSON
 
 public struct RawSigner: SignerWithProviderProtocol {
     public var provider: SuiProvider
     public var faucetProvider: FaucetClient
     
-    public var wallet: Account
+    public var account: Account
     
-    public init(wallet: Account, provider: SuiProvider) {
+    public init(account: Account, provider: SuiProvider) {
         self.provider = provider
         self.faucetProvider = FaucetClient(connection: provider.connection)
         
-        self.wallet = wallet
+        self.account = account
     }
     
     public func getAddress() throws -> String {
-        return try wallet.address().toSuiAddress()
+        return try account.publicKey.toSuiAddress()
     }
     
     public func signData(data: Data) throws -> String {
-        let pubKey = wallet.address().base64()
+        let pubKey = self.account.publicKey.base64()
         let digest = try Blake2.hash(.b2b, size: 32, data: data)
-        let signature = try self.wallet.privateKey.sign(data: digest)
-        let signatureScheme = self.wallet.privateKey.type
+        let signature = try self.account.sign(digest)
+        let signatureScheme = self.account.accountType
         return try toSerializedSignature(signature, signatureScheme, pubKey)
-    }
-    
-    public func connect(provider: SuiProvider) throws -> RawSigner {
-        return RawSigner(wallet: self.wallet, provider: provider)
     }
     
     public func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoinInfo {
@@ -67,7 +64,7 @@ public struct RawSigner: SignerWithProviderProtocol {
         _ transactionBlock: inout TransactionBlock,
         _ options: SuiTransactionBlockResponseOptions? = nil,
         _ requestType: SuiRequestType? = nil
-    ) async throws -> TransactionBlockResponse {
+    ) async throws -> JSON {
         let signedTxBlock = try await self.signTransactionBlock(transactionBlock: &transactionBlock)
         return try await self.provider.executeTransactionBlock(
             signedTxBlock.transactionBlockBytes,
@@ -86,28 +83,29 @@ public struct RawSigner: SignerWithProviderProtocol {
         return TransactionBlockDataBuilder.getDigestFromBytes(bytes: tx)
     }
     
-    public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> TransactionBlockResponse {
+    public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> JSON {
         transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
         let dryRunTxBytes = try await transactionBlock.build(self.provider)
         return try await self.provider.dryRunTransactionBlock([UInt8](dryRunTxBytes))
     }
     
-    public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> TransactionBlockResponse {
+    public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> JSON {
         guard let dryRunTxBytes = Data.fromBase64(transactionBlock) else { throw SuiError.notImplemented }
         return try await self.provider.dryRunTransactionBlock([UInt8](dryRunTxBytes))
     }
     
-    public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> TransactionBlockResponse {
+    public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> JSON {
         return try await self.provider.dryRunTransactionBlock([UInt8](transactionBlock))
     }
     
-    public func getGasCostEstimation(_ transactionBlock: inout TransactionBlock) async throws -> BigInt {
-        let txEffects = try await self.dryRunTransactionBlock(&transactionBlock)
-        guard let gasEstimation = TransactionFunctions.getTotalGasUsedUpperBound(txEffects) else {
-            throw SuiError.notImplemented
-        }
-        return gasEstimation
-    }
+// TODO: Implement GetGasCostEstimation
+//    public func getGasCostEstimation(_ transactionBlock: inout TransactionBlock) async throws -> BigInt {
+//        let txEffects = try await self.dryRunTransactionBlock(&transactionBlock)
+//        guard let gasEstimation = TransactionFunctions.getTotalGasUsedUpperBound(txEffects) else {
+//            throw SuiError.notImplemented
+//        }
+//        return gasEstimation
+//    }
 }
 
 public enum IntentScope: Int {
@@ -154,7 +152,9 @@ public func toSerializedSignature(
     _ pubKey: String
 ) throws -> String {
     guard let pubKeyData = Data(base64Encoded: pubKey) else { throw SuiError.notImplemented }
-    guard let encryptionType = Signature.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else { throw SuiError.notImplemented }
+    guard let encryptionType = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {
+        throw SuiError.notImplemented
+    }
     var serializedSignature = Data(count: signature.signature.count + pubKeyData.count)
     serializedSignature[0] = encryptionType
     serializedSignature[1..<signature.signature.count] = signature.signature

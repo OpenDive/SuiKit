@@ -50,15 +50,37 @@ extension String {
         return bytes
     }
     
+    public var hex: [UInt8] {
+        return convertHex(self.unicodeScalars, i: self.unicodeScalars.startIndex, appendTo: [])
+    }
+    
     subscript(bounds: CountableClosedRange<Int>) -> String {
         let start = index(startIndex, offsetBy: bounds.lowerBound)
         let end = index(startIndex, offsetBy: bounds.upperBound)
         return String(self[start...end])
     }
-
+    
     subscript(bounds: CountableRange<Int>) -> String {
         let start = index(startIndex, offsetBy: bounds.lowerBound)
         let end = index(startIndex, offsetBy: bounds.upperBound)
         return String(self[start..<end])
+    }
+}
+
+fileprivate func convertHex(_ s: String.UnicodeScalarView, i: String.UnicodeScalarIndex, appendTo d: [UInt8]) -> [UInt8] {
+    let skipChars = CharacterSet.whitespacesAndNewlines
+    guard i != s.endIndex else { return d }
+    let next1 = s.index(after: i)
+    
+    if skipChars.contains(s[i]) {
+        return convertHex(s, i: next1, appendTo: d)
+    } else {
+        guard next1 != s.endIndex else { return d }
+        
+        let next2 = s.index(after: next1)
+        let sub = String(s[i..<next2])
+        
+        guard let v = UInt8(sub, radix: 16) else { return d }
+        return convertHex(s, i: next2, appendTo: d + [ v ])
     }
 }

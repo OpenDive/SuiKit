@@ -144,4 +144,15 @@ final class Ed25519WalletTest: XCTestCase {
         
         XCTAssertTrue(try wallet.accounts[0].verifyTransactionBlock([UInt8](bytes), serializedSignature))
     }
+    
+    func testThatSigningPersonalMessagesFunctionsAsIntended() throws {
+        let wallet = try Wallet()
+        guard let message = "hello world".data(using: .utf8) else {
+            XCTFail()
+            return
+        }
+        
+        let serializedSignature = try wallet.accounts[0].signPersonalMessage([UInt8](message))
+        XCTAssertTrue(try wallet.accounts[0].verifyPersonalMessage([UInt8](message), serializedSignature))
+    }
 }

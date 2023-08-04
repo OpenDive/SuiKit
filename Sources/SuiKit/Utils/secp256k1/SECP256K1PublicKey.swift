@@ -17,7 +17,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     public var key: Data
 
     public init(data: Data) throws {
-        guard data.count <= SECP256K1PublicKey.LENGTH else {
+        guard data.count == SECP256K1PublicKey.LENGTH else {
             throw SuiError.invalidPublicKey
         }
         self.key = data

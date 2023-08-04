@@ -36,18 +36,29 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     public var key: Data
 
     public init(data: Data) throws {
-        guard data.count <= ED25519PublicKey.LENGTH else {
+        guard data.count == ED25519PublicKey.LENGTH else {
             throw SuiError.invalidPublicKey
         }
         self.key = data
     }
     
-    public init(hexString: String) {
+    public init(hexString: String) throws {
         var hexValue = hexString
         if hexString.hasPrefix("0x") {
             hexValue = String(hexString.dropFirst(2))
         }
+        guard Data(hex: hexValue).count == ED25519PublicKey.LENGTH else {
+            throw SuiError.invalidPublicKey
+        }
         self.key = Data(hex: hexValue)
+    }
+    
+    public init(value: String) throws {
+        guard let result = Data.fromBase64(value) else { throw SuiError.notImplemented }
+        guard result.count == ED25519PublicKey.LENGTH else {
+            throw SuiError.invalidPublicKey
+        }
+        self.key = result
     }
 
     public static func == (lhs: ED25519PublicKey, rhs: ED25519PublicKey) -> Bool {

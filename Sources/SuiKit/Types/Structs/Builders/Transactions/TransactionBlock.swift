@@ -489,10 +489,10 @@ public struct TransactionBlock {
             return matchingInput.isEmpty
         }
         
-        let paymentCoins = filteredCoins[
+        let paymentCoins = try filteredCoins[
             0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
         ].map { coin in
-            SuiObjectRef(
+            try SuiObjectRef(
                 objectId: coin.coinObjectId,
                 version: UInt64(coin.version) ?? UInt64(0),
                 digest: coin.digest
@@ -1050,7 +1050,7 @@ public struct TransactionBlock {
     }
     
     private func getObjectReference(_ resp: SuiObjectResponse) throws -> SuiObjectRef? {
-        return SuiObjectRef(
+        return try SuiObjectRef(
             objectId: resp.objectId,
             version: resp.version,
             digest: resp.digest

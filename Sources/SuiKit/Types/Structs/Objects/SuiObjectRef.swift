@@ -13,8 +13,8 @@ public struct SuiObjectRef: KeyProtocol {
     public let version: UInt64
     public let digest: TransactionDigest
     
-    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) {
-        self.objectId = ED25519PublicKey(hexString: objectId)
+    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) throws {
+        self.objectId = try ED25519PublicKey(hexString: objectId)
         self.version = version
         self.digest = digest
     }
@@ -28,7 +28,7 @@ public struct SuiObjectRef: KeyProtocol {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiObjectRef {
-        return SuiObjectRef(
+        return try SuiObjectRef(
             objectId: try Deserializer.string(deserializer),
             version: try Deserializer.u64(deserializer),
             digest: try Deserializer.string(deserializer)

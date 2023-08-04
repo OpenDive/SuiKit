@@ -40,7 +40,6 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
     public static let pathRegex: String = "^m(\\/[0-9]+')+$"
     public static let curve: String = "ed25519 seed"
     public static let defaultDerivationPath = "m/44'/784'/0'/0'/0'"
-    public static let hardenedPathRegex = "^m\\/44'\\/784'\\/[0-9]+'\\/[0-9]+'\\/[0-9]+'+$"
 
     /// The key itself
     public var key: Data
@@ -62,9 +61,8 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         self.key = Data(privateKeyArray)
     }
     
-    public init(_ mnemonics: String, _ path: String = ED25519PrivateKey.defaultDerivationPath) throws {
-        guard ED25519PrivateKey.isValidHardenedPath(path: path) else { throw SuiError.notImplemented }
-        let key = try ED25519PrivateKey.derivePath(path, ED25519PrivateKey.mnemonicToSeedHex(mnemonics))
+    public init(_ mnemonic: String, _ path: String = ED25519PrivateKey.defaultDerivationPath) throws {
+        let key = try ED25519PrivateKey.derivePath(path, mnemonic)
         self.key = key.key
     }
 
@@ -117,7 +115,7 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
     
     private static func derivePath(
         _ path: String,
-        _ seed: String,
+        _ mnemonic: String,
         _ offset: UInt32 = ED25519PrivateKey.hardenedOffset
     ) throws -> Keys {
         guard ED25519PrivateKey.isValidPath(path) else { throw SuiError.invalidDerivationPath }
@@ -127,8 +125,8 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         }
         
         guard let curveData = ED25519PrivateKey.curve.data(using: .utf8) else { throw SuiError.notImplemented }
-        guard let seedData = seed.data(using: .utf8) else { throw SuiError.notImplemented }
-        
+        let seedData = try ED25519PrivateKey.seed(mnemonic)
+
         var result = try self.hmacSha512(curveData, seedData)
         
         for next in segments {
@@ -155,40 +153,27 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
 
         let il = Data(i[0..<32])
         let ir = Data(i[32...])
-
         return Keys(key: il, chainCode: ir)
     }
     
     private static func isValidPath(_ path: String) -> Bool {
-        let pathRegex = try! NSRegularExpression(pattern: ED25519PrivateKey.pathRegex, options: .caseInsensitive)
-        
-        if pathRegex.firstMatch(
-            in: path,
-            options: [],
-            range: NSRange(location: 0, length: path.utf16.count)
-        ) == nil {
-            return false
-        }
-        
-        let components = path.split(separator: "/").map(String.init)
-        
-        for i in 1..<components.count {
-            let replacedDerive = components[i].replacingOccurrences(of: "'", with: "")
-            if Int(replacedDerive) == nil {
-                return false
-            }
-        }
-        
-        return true
-    }
-    
-    private static func isValidHardenedPath(path: String) -> Bool {
-        let regex = try! NSRegularExpression(pattern: ED25519PrivateKey.hardenedPathRegex, options: [])
+        let regex = try! NSRegularExpression(pattern: ED25519PrivateKey.pathRegex)
         
         let range = NSRange(location: 0, length: path.utf16.count)
-        let match = regex.firstMatch(in: path, options: [], range: range)
-        
-        return match != nil
+
+        if regex.firstMatch(in: path, options: [], range: range) == nil {
+            return false
+        }
+
+        let components = path.split(separator: "/").dropFirst()
+        let valid = components.allSatisfy { component in
+            if let _ = UInt32(component.replacingOccurrences(of: "'", with: "")) {
+                return true
+            }
+            return false
+        }
+
+        return valid
     }
 
     private static func mnemonicToSeedHex(_ mnemonics: String) throws -> String {
@@ -204,6 +189,19 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
             self.key = key
             self.chainCode = chainCode
         }
+    }
+    
+    private static func seed(_ mnemonic: String) throws -> Data {
+        let mnemonicMapping = (mnemonic as NSString).decomposedStringWithCompatibilityMapping
+        let salt = ("mnemonic" as NSString).decomposedStringWithCompatibilityMapping
+        let pbkdf2 = try PKCS5.PBKDF2(
+            password: mnemonicMapping.bytes,
+            salt: salt.bytes,
+            iterations: 2048,
+            keyLength: 64,
+            variant: .sha2(.sha512)
+        ).calculate()
+        return Data(pbkdf2)
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> ED25519PrivateKey {

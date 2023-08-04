@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import Bip39
 
 /// Sui Blockchain Account
 public struct Account: Equatable, Hashable {
@@ -101,16 +102,16 @@ public struct Account: Equatable, Hashable {
         )
     }
     
-    public init(_ mnemonics: String, accountType: KeyType = .ed25519) throws {
+    public init(_ mnemonic: String, accountType: KeyType = .ed25519) throws {
         self.accountType = accountType
         
         switch accountType {
         case .ed25519:
-            let privateKey = try ED25519PrivateKey(mnemonics)
+            let privateKey = try ED25519PrivateKey(mnemonic)
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
         case .secp256k1:
-            let privateKey = try SECP256K1PrivateKey(mnemonics)
+            let privateKey = try SECP256K1PrivateKey(mnemonic)
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
         }

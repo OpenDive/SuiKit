@@ -54,22 +54,12 @@ public class Wallet: Hashable {
     
     public init(mnemonic: Mnemonic, accountType: KeyType = .ed25519, separator: String = " ") throws {
         self.mnemonic = mnemonic
-        switch accountType {
-        case .ed25519:
-            self.accounts = [
-                try Account(
-                    mnemonic.mnemonic().joined(separator: separator),
-                    accountType: accountType
-                )
-            ]
-        case .secp256k1:
-            self.accounts = [
-                try Account(
-                    mnemonic.mnemonic().joined(separator: separator),
-                    accountType: accountType
-                )
-            ]
-        }
+        self.accounts = [
+            try Account(
+                mnemonic.mnemonic().joined(separator: separator),
+                accountType: accountType
+            )
+        ]
     }
     
     public convenience init(

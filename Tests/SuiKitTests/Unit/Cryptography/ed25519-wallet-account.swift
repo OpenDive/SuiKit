@@ -47,54 +47,50 @@ final class Ed25519WalletTest: XCTestCase {
         XCTAssertEqual(account.publicKey.base64(), "Gy9JCW4+Xb0Pz6nAwM2S2as7IVRLNNXdSmXZi4eLmSI=")
     }
     
-//    func testThatWalletSecretKeyFromMnemonicsAndAccountSecretKeyMatchesKeytool() throws {
-//        for testCase in testCases {
-//            // Keypair derived from mnemonic
-//            let wallet = try Wallet(mnemonicString: testCase[0])
-//            XCTAssertEqual(try wallet.accounts[0].publicKey.toSuiAddress(), testCase[2])
-//            
-//            // Keypair derived from 32-byte secret key
-//            guard let raw = Data.fromBase64(testCase[1]) else {
-//                XCTFail("Failed to convert \(testCase[1]) from Base 64 to Data")
-//                return
-//            }
-//            if raw[0] != 0 || raw.count != (privateKeySize + 1) {
-//                XCTFail("Invalid Key")
-//                return
-//            }
-//            let secretKey = ED25519PrivateKey(key: raw.dropFirst())
-//            let imported = try Account(privateKey: secretKey)
-//            XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
-//            
-//            // Exported secret key matches the 32-byte secret key.
-//            let exported = imported.export()
-//            XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
-//        }
-//    }
+    func testThatWalletSecretKeyFromMnemonicsAndAccountSecretKeyMatchesKeytool() throws {
+        for testCase in testCases {
+            // Keypair derived from mnemonic
+            let wallet = try Wallet(mnemonicString: testCase[0])
+            XCTAssertEqual(try wallet.accounts[0].publicKey.toSuiAddress(), testCase[2])
+            
+            // Keypair derived from 32-byte secret key
+            guard let raw = Data.fromBase64(testCase[1]) else {
+                XCTFail("Failed to convert \(testCase[1]) from Base 64 to Data")
+                return
+            }
+            if raw[0] != 0 || raw.count != (self.privateKeySize + 1) {
+                XCTFail("Invalid Key")
+                return
+            }
+            let secretKey = ED25519PrivateKey(key: raw.dropFirst())
+            let imported = try Account(privateKey: secretKey)
+            XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
+            
+            // Exported secret key matches the 32-byte secret key.
+            let exported = imported.export()
+            XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
+        }
+    }
     
-//    func testThatAccountIsCreatedFromRandomSeed() throws {
-//        let privateKey = ED25519PrivateKey(key: Data(Array(repeating: 8, count: privateKeySize)))
-//        let account = Account(
-//            accountAddress: try AccountAddress.fromKey(privateKey.publicKey()),
-//            privateKey: privateKey
-//        )
-//        XCTAssertEqual(account.address().base64(), "E5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8o=")
-//    }
-//    
-//    func testThatSignatureOfDataIsValid() throws {
-//        let account = try Account.generate()
-//        guard let signData = "hello world".data(using: .utf8) else {
-//            XCTFail("Failed to sign data")
-//            return
-//        }
-//        let signature = try account.sign(signData)
-//        let isValid = try account.publicKey().verify(
-//            data: signData,
-//            signature: signature,
-//            account.privateKey.key
-//        )
-//        XCTAssertTrue(isValid)
-//    }
+    func testThatAccountIsCreatedFromRandomSeed() throws {
+        let privateKey = ED25519PrivateKey(key: Data(Array(repeating: 8, count: privateKeySize)))
+        let account = try Account(privateKey: privateKey)
+        XCTAssertEqual(account.publicKey.base64(), "E5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8o=")
+    }
+    
+    func testThatSignatureOfDataIsValid() throws {
+        let account = try Account()
+        guard let signData = "hello world".data(using: .utf8) else {
+            XCTFail("Failed to sign data")
+            return
+        }
+        let signature = try account.sign(signData)
+        let isValid = try account.verify(
+            signData,
+            signature
+        )
+        XCTAssertTrue(isValid)
+    }
 //    
 //    func testThatIncoorectCoinTypeWillThrowForWallet() throws {
 //        func incorrectCoin() throws {

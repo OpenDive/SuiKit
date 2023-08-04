@@ -165,6 +165,30 @@ public struct Account: Equatable, Hashable {
         return try self.publicKey.verify(data: data, signature: signature)
     }
     
+    func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature {
+        return try self.privateKey.signWithIntent(bytes, intent)
+    }
+    
+    func signTransactionBlock(_ bytes: [UInt8]) throws -> Signature {
+        return try self.privateKey.signTransactionBlock(bytes)
+    }
+    
+    func signPersonalMessage(_ bytes: [UInt8]) throws -> Signature {
+        return try self.privateKey.signPersonalMessage(bytes)
+    }
+    
+    func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
+        return try self.publicKey.verifyTransactionBlock(transactionBlock, signature)
+    }
+    
+    func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
+        return try self.publicKey.verifyWithIntent(bytes, signature, intent)
+    }
+    
+    func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool {
+        return try self.publicKey.verifyPersonalMessage(message, signature)
+    }
+    
     public func export() -> ExportedAccount {
         return ExportedAccount(
             schema: self.accountType,

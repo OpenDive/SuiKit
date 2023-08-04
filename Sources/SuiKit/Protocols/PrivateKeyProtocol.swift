@@ -18,6 +18,9 @@ public protocol PrivateKeyProtocol: KeyProtocol, CustomStringConvertible, Hashab
     func base64() -> String
     func publicKey() throws -> PublicKeyType
     func sign(data: Data) throws -> Signature
+    func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature
+    func signTransactionBlock(_ bytes: [UInt8]) throws -> Signature
+    func signPersonalMessage(_ bytes: [UInt8]) throws -> Signature
 }
 
 public enum KeyType: String, Equatable {

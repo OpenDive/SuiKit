@@ -182,7 +182,7 @@ public class SerializedTransactionDataBuilder {
     public var inputs: [TransactionBlockInput]
     public var transactions: [SuiTransaction]
     
-    enum CodingKeys: String, CodingKey {
+    public enum CodingKeys: String, CodingKey {
         case version
         case sender
         case expiration

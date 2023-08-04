@@ -74,10 +74,12 @@ public struct BuildOptions {
 
 public struct TransactionBlock {
     public var transactionBrand: Bool = true
-    public var blockData: TransactionBlockDataBuilder?
+    public var blockData: TransactionBlockDataBuilder
     
     public init(_ blockData: TransactionBlockDataBuilder? = nil) {
-        self.blockData = blockData
+        self.blockData = blockData ?? TransactionBlockDataBuilder(
+            serializedTransactionDataBuilder: SerializedTransactionDataBuilder()
+        )
     }
     
     public static func isInstance(_ obj: Any) -> Bool {
@@ -109,38 +111,37 @@ public struct TransactionBlock {
     }
     
     mutating public func setSender(sender: SuiAddress) {
-        self.blockData?.serializedTransactionDataBuilder.sender = sender
+        self.blockData.serializedTransactionDataBuilder.sender = sender
     }
     
     mutating public func setSenderIfNotSet(sender: SuiAddress) {
-        if ((self.blockData?.serializedTransactionDataBuilder.sender) == nil) {
-            self.blockData?.serializedTransactionDataBuilder.sender = sender
+        if ((self.blockData.serializedTransactionDataBuilder.sender) == nil) {
+            self.blockData.serializedTransactionDataBuilder.sender = sender
         }
     }
     
     mutating public func setExpiration(expiration: TransactionExpiration) {
-        self.blockData?.serializedTransactionDataBuilder.expiration = expiration
+        self.blockData.serializedTransactionDataBuilder.expiration = expiration
     }
     
     mutating public func setGasPrice(price: BigInt) {
-        self.blockData?.serializedTransactionDataBuilder.gasConfig.price = "\(price)"
+        self.blockData.serializedTransactionDataBuilder.gasConfig.price = "\(price)"
     }
     
     mutating public func setGasPrice(price: Int) {
-        self.blockData?.serializedTransactionDataBuilder.gasConfig.price = "\(price)"
+        self.blockData.serializedTransactionDataBuilder.gasConfig.price = "\(price)"
     }
     
     mutating public func setGasBudget(price: BigInt) {
-        self.blockData?.serializedTransactionDataBuilder.gasConfig.budget = "\(price)"
+        self.blockData.serializedTransactionDataBuilder.gasConfig.budget = "\(price)"
     }
     
     mutating public func setGasBudget(price: Int) {
-        print("DEBUG: \(price)")
-        self.blockData?.serializedTransactionDataBuilder.gasConfig.budget = "\(price)"
+        self.blockData.serializedTransactionDataBuilder.gasConfig.budget = "\(price)"
     }
     
     mutating public func setGasOwner(owner: String) {
-        self.blockData?.serializedTransactionDataBuilder.gasConfig.owner = owner
+        self.blockData.serializedTransactionDataBuilder.gasConfig.owner = owner
     }
     
     public var gas: TransactionArgument {
@@ -151,31 +152,23 @@ public struct TransactionBlock {
         guard payments.count < TransactionConstants.MAX_GAS_OBJECTS else {
             throw SuiError.notImplemented
         }
-        self.blockData?.serializedTransactionDataBuilder.gasConfig.payment = payments
+        self.blockData.serializedTransactionDataBuilder.gasConfig.payment = payments
     }
     
     mutating private func input(type: ValueType, value: SuiJsonValue?) throws -> TransactionBlockInput {
-        if self.blockData == nil {
-            self.blockData = TransactionBlockDataBuilder(
-                serializedTransactionDataBuilder:
-                    SerializedTransactionDataBuilder()
-            )
-        }
-        guard let index = self.blockData?.serializedTransactionDataBuilder.inputs.count else {
-            throw SuiError.invalidIndex
-        }
+        let index = self.blockData.serializedTransactionDataBuilder.inputs.count
         let input = TransactionBlockInput(
             index: UInt16(index),
             value: value,
             type: type
         )
-        self.blockData?.serializedTransactionDataBuilder.inputs.append(input)
+        self.blockData.serializedTransactionDataBuilder.inputs.append(input)
         return input
     }
     
     public mutating func object(value: objectId) throws -> [TransactionBlockInput] {
         let id = getIdFromCallArg(arg: value)
-        guard let blockData = self.blockData else { throw SuiError.notImplemented }
+        let blockData = self.blockData
         let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
             if input.type == .object {
                 guard let valueEnum = input.value else { return false }
@@ -211,7 +204,7 @@ public struct TransactionBlock {
     
     public mutating func object(value: ObjectCallArg) throws -> [TransactionBlockInput] {
         let id = try getIdFromCallArg(arg: value)
-        guard let blockData = self.blockData else { throw SuiError.notImplemented }
+        let blockData = self.blockData
         let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
             if input.type == .object {
                 guard let valueEnum = input.value else { return false }
@@ -290,10 +283,8 @@ public struct TransactionBlock {
     }
     
     public mutating func add(transaction: SuiTransactionEnumType) throws -> TransactionArgument {
-        self.blockData?.serializedTransactionDataBuilder.transactions.append(SuiTransaction(suiTransaction: transaction))
-        guard let index = self.blockData?.serializedTransactionDataBuilder.transactions.count else {
-            throw SuiError.invalidIndex
-        }
+        self.blockData.serializedTransactionDataBuilder.transactions.append(SuiTransaction(suiTransaction: transaction))
+        let index = self.blockData.serializedTransactionDataBuilder.transactions.count
         guard let result = TransactionResult(index: UInt16(index - 1))[UInt16(index - 1)] else {
             throw SuiError.invalidResult
         }
@@ -449,13 +440,12 @@ public struct TransactionBlock {
     
     public mutating func build(_ provider: SuiProvider, _ onlyTransactionKind: Bool? = nil) async throws -> Data {
         try await self.prepare(BuildOptions(provider: provider, onlyTransactionKind: onlyTransactionKind))
-        print("DEBUG: BLOCK DATA BUILD - \([UInt8](try self.blockData?.build(onlyTransactionKind: onlyTransactionKind) ?? Data()))")
-        return try self.blockData?.build(onlyTransactionKind: onlyTransactionKind) ?? Data()
+        return try self.blockData.build(onlyTransactionKind: onlyTransactionKind)
     }
 
     public mutating func getDigest(_ provider: SuiProvider) async throws -> String {
         try await self.prepare(BuildOptions(provider: provider))
-        return try self.blockData?.getDigest() ?? ""
+        return try self.blockData.getDigest()
     }
     
     private mutating func prepareGasPayment(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
@@ -463,20 +453,24 @@ public struct TransactionBlock {
             throw SuiError.notImplemented
         }
         
+        if (onlyTransactionKind != nil && onlyTransactionKind!) || self.blockData.serializedTransactionDataBuilder.gasConfig.payment != nil {
+            return
+        }
+        
         guard let gasOwner =
-            self.blockData?.serializedTransactionDataBuilder.gasConfig.owner ??
-            self.blockData?.serializedTransactionDataBuilder.sender
+            self.blockData.serializedTransactionDataBuilder.gasConfig.owner ??
+            self.blockData.serializedTransactionDataBuilder.sender
         else {
             throw SuiError.notImplemented
         }
         
         let coins = try await provider.getCoins(
-            ED25519PublicKey(hexString: gasOwner),
+            gasOwner,
             "0x2::sui::SUI"
         )
         
         let filteredCoins = coins.data.filter { coin in
-            let matchingInput = self.blockData?.serializedTransactionDataBuilder.inputs.filter { input in
+            let matchingInput = self.blockData.serializedTransactionDataBuilder.inputs.filter { input in
                 if let value = input.value {
                     switch value {
                     case .callArg(let callArg):
@@ -492,13 +486,13 @@ public struct TransactionBlock {
                 }
                 return false
             }
-            return matchingInput != nil && matchingInput!.isEmpty
+            return matchingInput.isEmpty
         }
         
-        let paymentCoins = try filteredCoins[
+        let paymentCoins = filteredCoins[
             0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
         ].map { coin in
-            try SuiObjectRef(
+            SuiObjectRef(
                 objectId: coin.coinObjectId,
                 version: UInt64(coin.version) ?? UInt64(0),
                 digest: coin.digest
@@ -525,9 +519,7 @@ public struct TransactionBlock {
     }
 
     private mutating func prepareTransactions(provider: SuiProvider) async throws {
-        guard let blockData = self.blockData?.serializedTransactionDataBuilder else {
-            throw SuiError.notImplemented
-        }
+        let blockData = self.blockData.serializedTransactionDataBuilder
         
         var moveModulesToResolve: [MoveCallTransaction] = []
         
@@ -605,13 +597,11 @@ public struct TransactionBlock {
                 try moveCallTransaction.arguments.forEach { txArgument in
                     switch txArgument {
                     case .input(let transactionBlockInput):
-                        if self.blockData != nil {
-                            try encodeInput(
-                                index: transactionBlockInput.index,
-                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                                objectsToResolve: &objectsToResolve
-                            )
-                        }
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
                     default:
                         break
                     }
@@ -620,13 +610,11 @@ public struct TransactionBlock {
                 try transferObjectsTransaction.objects.forEach { objectArgument in
                     switch objectArgument.argument {
                     case .input(let transactionBlockInput):
-                        if self.blockData != nil {
-                            try encodeInput(
-                                index: transactionBlockInput.index,
-                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                                objectsToResolve: &objectsToResolve
-                            )
-                        }
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
                     default:
                         break
                     }
@@ -635,26 +623,22 @@ public struct TransactionBlock {
                 try splitCoinsTransaction.amounts.forEach { pureTx in
                     switch pureTx.argument {
                     case .input(let transactionBlockInput):
-                        if self.blockData != nil {
-                            try encodeInput(
-                                index: transactionBlockInput.index,
-                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                                objectsToResolve: &objectsToResolve
-                            )
-                        }
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
                     default:
                         break
                     }
                 }
                 switch splitCoinsTransaction.coin.argument {
                 case .input(let transactionBlockInput):
-                    if self.blockData != nil {
-                        try encodeInput(
-                            index: transactionBlockInput.index,
-                            blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                            objectsToResolve: &objectsToResolve
-                        )
-                    }
+                    try encodeInput(
+                        index: transactionBlockInput.index,
+                        blockData: &(self.blockData.serializedTransactionDataBuilder),
+                        objectsToResolve: &objectsToResolve
+                    )
                 default:
                     break
                 }
@@ -662,26 +646,22 @@ public struct TransactionBlock {
                 try mergeCoinsTransaction.sources.forEach { objectTx in
                     switch objectTx.argument {
                     case .input(let transactionBlockInput):
-                        if self.blockData != nil {
-                            try encodeInput(
-                                index: transactionBlockInput.index,
-                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                                objectsToResolve: &objectsToResolve
-                            )
-                        }
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
                     default:
                         break
                     }
                 }
                 switch mergeCoinsTransaction.destination.argument {
                 case .input(let transactionBlockInput):
-                    if self.blockData != nil {
-                        try encodeInput(
-                            index: transactionBlockInput.index,
-                            blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                            objectsToResolve: &objectsToResolve
-                        )
-                    }
+                    try encodeInput(
+                        index: transactionBlockInput.index,
+                        blockData: &(self.blockData.serializedTransactionDataBuilder),
+                        objectsToResolve: &objectsToResolve
+                    )
                 default:
                     break
                 }
@@ -690,13 +670,11 @@ public struct TransactionBlock {
             case .upgrade(let upgradeTransaction):
                 switch upgradeTransaction.ticket.argument {
                 case .input(let transactionBlockInput):
-                    if self.blockData != nil {
-                        try encodeInput(
-                            index: transactionBlockInput.index,
-                            blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                            objectsToResolve: &objectsToResolve
-                        )
-                    }
+                    try encodeInput(
+                        index: transactionBlockInput.index,
+                        blockData: &(self.blockData.serializedTransactionDataBuilder),
+                        objectsToResolve: &objectsToResolve
+                    )
                 default:
                     break
                 }
@@ -704,13 +682,11 @@ public struct TransactionBlock {
                 try makeMoveVecTransaction.objects.forEach { objectTx in
                     switch objectTx.argument {
                     case .input(let transactionBlockInput):
-                        if self.blockData != nil {
-                            try encodeInput(
-                                index: transactionBlockInput.index,
-                                blockData: &(self.blockData!.serializedTransactionDataBuilder),
-                                objectsToResolve: &objectsToResolve
-                            )
-                        }
+                        try encodeInput(
+                            index: transactionBlockInput.index,
+                            blockData: &(self.blockData.serializedTransactionDataBuilder),
+                            objectsToResolve: &objectsToResolve
+                        )
                     default:
                         break
                     }
@@ -870,7 +846,8 @@ public struct TransactionBlock {
             try await self.prepareTransactions(provider: provider)
 
             try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
-            if let blockData = self.blockData, blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
+            if self.blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
+                let blockData = self.blockData
                 var gasConfig = blockData.serializedTransactionDataBuilder.gasConfig
                 gasConfig.budget = String(try self.getConfig(key: LimitsKey.maxTxGas, buildOptions: options))
                 gasConfig.payment = []
@@ -903,7 +880,7 @@ public struct TransactionBlock {
         return
             onlyTransactionKind != nil &&
             !(onlyTransactionKind!) &&
-            self.blockData?.serializedTransactionDataBuilder.sender == nil
+            self.blockData.serializedTransactionDataBuilder.sender == nil
     }
     
     private func isTxcontext(_ param: SuiMoveNormalizedType) -> Bool {
@@ -1073,7 +1050,7 @@ public struct TransactionBlock {
     }
     
     private func getObjectReference(_ resp: SuiObjectResponse) throws -> SuiObjectRef? {
-        return try SuiObjectRef(
+        return SuiObjectRef(
             objectId: resp.objectId,
             version: resp.version,
             digest: resp.digest

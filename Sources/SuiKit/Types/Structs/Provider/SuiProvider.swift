@@ -117,19 +117,30 @@ public struct SuiProvider {
         )
     }
     
-    public func getCoins(_ account: any PublicKeyProtocol, _ coinType: String, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
+    public func getCoins(
+        _ account: any PublicKeyProtocol,
+        _ coinType: String,
+        _ cursor: String? = nil,
+        _ limit: UInt? = nil
+    ) async throws -> PaginatedCoins {
+        return try await self.getCoins(try account.toSuiAddress(), coinType, cursor, limit)
+    }
+    
+    public func getCoins(_ account: String, _ coinType: String, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "suix_getCoins",
                 [
-                    AnyCodable(try account.toSuiAddress()),
+                    AnyCodable(account),
                     AnyCodable(coinType),
                     AnyCodable(cursor),
                     AnyCodable(limit)
                 ]
             )
         )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         var coinPages: [CoinStruct] = []
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for (_, value): (String, JSON) in result["data"] {

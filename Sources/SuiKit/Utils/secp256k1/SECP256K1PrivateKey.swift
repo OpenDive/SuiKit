@@ -10,6 +10,7 @@ import secp256k1
 import Bip39
 import CryptoSwift
 import BigInt
+import Blake2
 
 public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     public typealias PrivateKeyType = SECP256K1PrivateKey
@@ -104,6 +105,24 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
             publickey: try self.publicKey().key,
             signatureScheme: .SECP256K1
         )
+    }
+    
+    public func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature {
+        let intentMessage = messageWithIntent(intent, Data(bytes))
+        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
+        
+        let signature = try self.sign(data: digest)
+        return signature
+    }
+    
+    public func signTransactionBlock(_ bytes: [UInt8]) throws -> Signature {
+        return try self.signWithIntent(bytes, .TransactionData)
+    }
+    
+    public func signPersonalMessage(_ bytes: [UInt8]) throws -> Signature {
+        let ser = Serializer()
+        try ser.sequence(bytes, Serializer.u8)
+        return try self.signWithIntent([UInt8](ser.output()), .PersonalMessage)
     }
     
     private static func isValidBIP32Path(_ path: String) -> Bool {

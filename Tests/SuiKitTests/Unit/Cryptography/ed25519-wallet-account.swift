@@ -7,6 +7,7 @@
 
 import Foundation
 import XCTest
+import Base58Swift
 @testable import SuiKit
 
 final class Ed25519WalletTest: XCTestCase {
@@ -91,14 +92,56 @@ final class Ed25519WalletTest: XCTestCase {
         )
         XCTAssertTrue(isValid)
     }
-//    
-//    func testThatIncoorectCoinTypeWillThrowForWallet() throws {
-//        func incorrectCoin() throws {
-//            
-//        }
-//        
-//        XCTAssertThrowsError(
-//            try incorrectCoin()
-//        )
-//    }
+    
+    // TODO: Implement for fine tuned test (e.g., test for specific error)
+    func testThatIncoorectCoinTypeWillThrowForWallet() throws {
+        func incorrectCoin() throws {
+            let privateKey = try ED25519PrivateKey(testMnemonic, "m/44'/0'/0'/0'/0'")
+        }
+        
+        XCTAssertThrowsError(
+            try incorrectCoin()
+        )
+    }
+    
+    // TODO: Implement for fine tuned test (e.g., test for specific error)
+    func testThatIncoorectPurposeNodeWillThrowForWallet() throws {
+        func incorrectPurposeNode() throws {
+            let privateKey = try ED25519PrivateKey(testMnemonic, "m/54'/784'/0'/0'/0'")
+        }
+        
+        XCTAssertThrowsError(
+            try incorrectPurposeNode()
+        )
+    }
+    
+    func testThatSigningTransactionBlockFunctionsAsIntended() async throws {
+        let wallet = try Wallet()
+        var txBlock = TransactionBlock()
+        let provider = SuiProvider(connection: devnetConnection())
+        
+        txBlock.setSender(sender: try wallet.accounts[0].publicKey.toSuiAddress())
+        txBlock.setGasPrice(price: 5)
+        txBlock.setGasBudget(price: 100)
+        let digest: [UInt8] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        try txBlock.setGasPayment(payments: [
+            SuiObjectRef(
+                objectId: String(
+                    format: "%.0f",
+                    Double.random(in: 0..<100000)
+                ).padding(
+                    toLength: 64,
+                    withPad: "0",
+                    startingAt: 0
+                ),
+                version: UInt64.random(in: 0..<10000),
+                digest: Base58.base58Encode(digest)
+            )
+        ])
+        
+        let bytes = try await txBlock.build(provider)
+        let serializedSignature = try wallet.accounts[0].signTransactionBlock([UInt8](bytes))
+        
+        XCTAssertTrue(try wallet.accounts[0].verifyTransactionBlock([UInt8](bytes), serializedSignature))
+    }
 }

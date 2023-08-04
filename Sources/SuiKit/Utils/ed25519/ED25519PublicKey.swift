@@ -94,6 +94,23 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         )
         return result
     }
+    
+    public func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
+        return try self.verifyWithIntent(transactionBlock, signature, .TransactionData)
+    }
+    
+    public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
+        let intentMessage = messageWithIntent(intent, Data(bytes))
+        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
+        
+        return try self.verify(data: digest, signature: signature)
+    }
+    
+    public func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool {
+        let ser = Serializer()
+        try ser.sequence(message, Serializer.u8)
+        return try self.verifyWithIntent([UInt8](ser.output()), signature, .PersonalMessage)
+    }
 
     public static func deserialize(from deserializer: Deserializer) throws -> ED25519PublicKey {
         let key = try Deserializer.toBytes(deserializer)

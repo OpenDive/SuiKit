@@ -106,6 +106,20 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         return result
     }
     
+    public func toSuiPublicKey() throws -> String {
+        let bytes = try self.toSuiBytes()
+        return bytes.toBase64()
+    }
+    
+    public func toSuiBytes() throws -> [UInt8] {
+        let rawBytes = self.key
+        var suiBytes = Data(count: rawBytes.count + 1)
+        try suiBytes.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
+        try suiBytes.set([UInt8](rawBytes), offset: 1)
+        
+        return [UInt8](suiBytes)
+    }
+    
     public func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
         return try self.verifyWithIntent(transactionBlock, signature, .TransactionData)
     }

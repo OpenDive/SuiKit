@@ -66,4 +66,25 @@ final class ED25519PublicKeyTest: XCTestCase {
         XCTAssertThrowsError(try invalidLengthPublicKeyB64StringIntLong())
         XCTAssertThrowsError(try invalidLengthPublicKeyB64StringIntShort())
     }
+    
+    func testThatVerifiesEd25519PublicKeyIsAbleToDecodeB64Strings() throws {
+        let key = try ED25519PublicKey(value: self.validKeyBase64)
+        XCTAssertEqual(key.base64(), self.validKeyBase64)
+    }
+    
+    func testThatTheRawBytesAndBufferAreCorrect() throws {
+        let key = try ED25519PublicKey(value: self.validKeyBase64)
+        XCTAssertEqual(key.key.count, 32)
+        XCTAssertEqual(try ED25519PublicKey(data: key.key), key)
+    }
+    
+    func testThatSuiPublicKeysAndAddressesCanBeDerivedFromPublicKey() throws {
+        for testCase in self.testCases {
+            let keySuiAddress = try ED25519PublicKey(value: testCase.rawPublicKey)
+            XCTAssertEqual(try keySuiAddress.toSuiAddress(), testCase.suiAddress)
+            
+            let keySuiPublicKey = try ED25519PublicKey(value: testCase.rawPublicKey)
+            XCTAssertEqual(try keySuiPublicKey.toSuiPublicKey(), testCase.suiPublicKey)
+        }
+    }
 }

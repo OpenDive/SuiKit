@@ -65,7 +65,7 @@ final class Secp256k1WalletTest: XCTestCase {
         XCTAssertEqual(account.publicKey.key, publicKey)
         XCTAssertEqual(account.publicKey.base64(), publicKeyB64)
     }
-    
+
     func testThatCreatingSecp256k1AccountFromInvalidSecretKeyWithThrowAnError() throws {
         func invalidKeyThrow() throws {
             let secretKey = Data(self.invalidSecp256k1SecretKey)
@@ -75,5 +75,11 @@ final class Secp256k1WalletTest: XCTestCase {
         XCTAssertThrowsError(
             try invalidKeyThrow()
         )
+    }
+
+    func testThatSecp256k1AccountCanGenerateUsingRandomSeed() throws {
+        let seed = Data(Array(repeating: 8, count: self.privateKeySize))
+        let account = try Account(privateKey: seed, accountType: .secp256k1)
+        XCTAssertEqual(account.publicKey.base64(), "A/mR+UTR4ZVKf8i5v2Lg148BX0wHdi1QXiDmxFJgo2Yb")
     }
 }

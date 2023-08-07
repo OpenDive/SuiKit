@@ -14,13 +14,13 @@ final class Secp256k1WalletTest: XCTestCase {
     let privateKeySize = 32
 
     // Test case from https://github.com/rust-bitcoin/rust-secp256k1/blob/master/examples/sign_verify.rs#L26
-    let validSecp256k1SecretKey = [
+    let validSecp256k1SecretKey: [UInt8] = [
         59, 148, 11, 85, 134, 130, 61, 253, 2, 174, 59, 70, 27, 180, 51, 107, 94, 203, 174, 253, 102, 39,
         170, 146, 46, 252, 4, 143, 236, 12, 136, 28
     ]
 
     // Corresponding to the secret key above.
-    let validSecp256k1PublicKey = [
+    let validSecp256k1PublicKey: [UInt8] = [
         2, 29, 21, 35, 7, 198, 183, 43, 14, 208, 65, 139, 14, 112, 205, 128, 231, 245, 41, 91, 141, 134,
         245, 114, 45, 63, 82, 19, 251, 210, 57, 79, 54
     ]
@@ -54,5 +54,15 @@ final class Secp256k1WalletTest: XCTestCase {
     func testThatSecp256k1AccountCanBeInitialized() throws {
         let account = try Account(accountType: .secp256k1)
         XCTAssertEqual(account.publicKey.key.count, 33)
+    }
+
+    func testThatSecp256k1AccountCanBeCreatedUsingASecretKey() throws {
+        let secretKey = Data(self.validSecp256k1SecretKey)
+        let publicKey = Data(self.validSecp256k1PublicKey)
+        let publicKeyB64 = publicKey.base64EncodedString()
+        let account = try Account(privateKey: secretKey, accountType: .secp256k1)
+        
+        XCTAssertEqual(account.publicKey.key, publicKey)
+        XCTAssertEqual(account.publicKey.base64(), publicKeyB64)
     }
 }

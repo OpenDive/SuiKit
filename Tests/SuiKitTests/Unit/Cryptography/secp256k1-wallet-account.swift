@@ -1,0 +1,58 @@
+//
+//  secp256k1-wallet-account.swift
+//  
+//
+//  Created by Marcus Arnett on 8/7/23.
+//
+
+import Foundation
+import XCTest
+import Base58Swift
+@testable import SuiKit
+
+final class Secp256k1WalletTest: XCTestCase {
+    let privateKeySize = 32
+
+    // Test case from https://github.com/rust-bitcoin/rust-secp256k1/blob/master/examples/sign_verify.rs#L26
+    let validSecp256k1SecretKey = [
+        59, 148, 11, 85, 134, 130, 61, 253, 2, 174, 59, 70, 27, 180, 51, 107, 94, 203, 174, 253, 102, 39,
+        170, 146, 46, 252, 4, 143, 236, 12, 136, 28
+    ]
+
+    // Corresponding to the secret key above.
+    let validSecp256k1PublicKey = [
+        2, 29, 21, 35, 7, 198, 183, 43, 14, 208, 65, 139, 14, 112, 205, 128, 231, 245, 41, 91, 141, 134,
+        245, 114, 45, 63, 82, 19, 251, 210, 57, 79, 54
+    ]
+
+    // Invalid private key with incorrect length
+    let invalidSecp256k1SecretKey: [UInt8] = Array(repeating: 1, count: 32 - 1)
+
+    // Invalid public key with incorrect length
+    let invalidSecp256k1PublicKey: [UInt8] = Array(repeating: 1, count: 32)
+
+    let testCases = [
+        [
+            "film crazy soon outside stand loop subway crumble thrive popular green nuclear struggle pistol arm wife phrase warfare march wheat nephew ask sunny firm",
+            "AQA9EYZoLXirIahsXHQMDfdi5DPQ72wLA79zke4EY6CP",
+            "0x9e8f732575cc5386f8df3c784cd3ed1b53ce538da79926b2ad54dcc1197d2532"
+        ],
+        [
+            "require decline left thought grid priority false tiny gasp angle royal system attack beef setup reward aunt skill wasp tray vital bounce inflict level",
+            "Ae+TTptXI6WaJfzplSrphnrbTD5qgftfMX5kTyca7unQ",
+            "0x9fd5a804ed6b46d36949ff7434247f0fd594673973ece24aede6b86a7b5dae01"
+        ],
+        [
+            "organ crash swim stick traffic remember army arctic mesh slice swear summer police vast chaos cradle squirrel hood useless evidence pet hub soap lake",
+            "AY2iJpGSDMhvGILPjjpyeM1bV4Jky979nUenB5kvQeSj",
+            "0x60287d7c38dee783c2ab1077216124011774be6b0764d62bd05f32c88979d5c5"
+        ]
+    ]
+
+    let testMnemonic = "result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss"
+    
+    func testThatSecp256k1AccountCanBeInitialized() throws {
+        let account = try Account(accountType: .secp256k1)
+        XCTAssertEqual(account.publicKey.key.count, 33)
+    }
+}

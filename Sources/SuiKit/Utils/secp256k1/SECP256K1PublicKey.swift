@@ -11,7 +11,7 @@ import Blake2
 
 public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     /// The length of the key in bytes
-    public static let LENGTH: Int = 32
+    public static let LENGTH: Int = 33
 
     /// The key itself
     public var key: Data

@@ -82,4 +82,15 @@ final class Secp256k1WalletTest: XCTestCase {
         let account = try Account(privateKey: seed, accountType: .secp256k1)
         XCTAssertEqual(account.publicKey.base64(), "A/mR+UTR4ZVKf8i5v2Lg148BX0wHdi1QXiDmxFJgo2Yb")
     }
+
+    func testThatSignatureOfSignedSecp256k1DataIsValid() throws {
+        let account = try Account(accountType: .secp256k1)
+        guard let signedData = "hello world".data(using: .utf8) else {
+            XCTFail("Signed Data failed.")
+            return
+        }
+
+        let signature = try account.sign(signedData)
+        XCTAssertTrue(try account.verify(signedData, signature))
+    }
 }

@@ -103,10 +103,21 @@ final class Secp256k1WalletTest: XCTestCase {
         }
         
         let signature = try account.sign(signedData)
-        
+
+        // Assert the signature is the same as the rust implementation. See https://github.com/MystenLabs/fastcrypto/blob/0436d6ef11684c291b75c930035cb24abbaf581e/fastcrypto/src/tests/secp256k1_tests.rs#L115
         XCTAssertEqual(
             try signature.hex(),
             "25d450f191f6d844bf5760c5c7b94bc67acc88be76398129d7f43abdef32dc7f7f1a65b7d65991347650f3dd3fa3b3a7f9892a0608521cbcf811ded433b31f8b"
         )
+
+        XCTAssertTrue(try account.verify(signedData, signature))
+    }
+
+    func testThatInvalidMnemonicsForSecp256k1AccountInitializationWillThrow() throws {
+        func invalidMnemonics() throws {
+            let _ = try Account("aaa", accountType: .secp256k1)
+        }
+        
+        XCTAssertThrowsError(try invalidMnemonics())
     }
 }

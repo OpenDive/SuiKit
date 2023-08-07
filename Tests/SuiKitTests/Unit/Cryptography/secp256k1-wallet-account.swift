@@ -93,4 +93,20 @@ final class Secp256k1WalletTest: XCTestCase {
         let signature = try account.sign(signedData)
         XCTAssertTrue(try account.verify(signedData, signature))
     }
+    
+    func testThatTheDataIsTheSameAsTheRustImplementation() throws {
+        let secretKey = Data(self.validSecp256k1SecretKey)
+        let account = try Account(privateKey: secretKey, accountType: .secp256k1)
+        guard let signedData = "Hello, world!".data(using: .utf8) else {
+            XCTFail("Signed Data failed.")
+            return
+        }
+        
+        let signature = try account.sign(signedData)
+        
+        XCTAssertEqual(
+            try signature.hex(),
+            "25d450f191f6d844bf5760c5c7b94bc67acc88be76398129d7f43abdef32dc7f7f1a65b7d65991347650f3dd3fa3b3a7f9892a0608521cbcf811ded433b31f8b"
+        )
+    }
 }

@@ -24,9 +24,10 @@
 //
 
 import Foundation
+import secp256k1
 
 /// The ED25519 Signature
-public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
+public struct Signature: Equatable, KeyProtocol {
     /// The length of the key in bytes
     static let LENGTH: Int = 64
 
@@ -47,12 +48,18 @@ public struct Signature: Equatable, KeyProtocol, CustomStringConvertible {
         return lhs.signature == rhs.signature
     }
 
-    public var description: String {
-        return "0x\(signature.hexEncodedString())"
+    public func hex() throws -> String {
+        return try self.data().hexEncodedString()
     }
 
-    func data() -> Data {
-        return self.signature
+    func data() throws -> Data {
+        switch self.signatureScheme {
+        case .ED25519:
+            return self.signature
+        case .SECP256K1:
+            let signatureSecp256k1 = try secp256k1.Signing.ECDSASignature(dataRepresentation: self.signature)
+            return try signatureSecp256k1.compactRepresentation
+        }
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> Signature {

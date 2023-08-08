@@ -178,4 +178,15 @@ final class Secp256k1WalletTest: XCTestCase {
         
         XCTAssertTrue(try account.verifyTransactionBlock([UInt8](bytes), serializedSignature))
     }
+
+    func testThatSigningPersonalMessagesWillWorkForSecp256k1Keys() throws {
+        let account = try Account(accountType: .secp256k1)
+        guard let message = "hello world".data(using: .utf8) else {
+            XCTFail()
+            return
+        }
+
+        let serializedSignature = try account.signPersonalMessage([UInt8](message))
+        XCTAssertTrue(try account.verifyPersonalMessage([UInt8](message), serializedSignature))
+    }
 }

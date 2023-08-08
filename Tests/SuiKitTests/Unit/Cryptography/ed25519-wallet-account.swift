@@ -96,7 +96,7 @@ final class Ed25519WalletTest: XCTestCase {
     // TODO: Implement for fine tuned test (e.g., test for specific error)
     func testThatIncoorectCoinTypeWillThrowForWallet() throws {
         func incorrectCoin() throws {
-            let privateKey = try ED25519PrivateKey(testMnemonic, "m/44'/0'/0'/0'/0'")
+            let _ = try ED25519PrivateKey(testMnemonic, "m/44'/0'/0'/0'/0'")
         }
         
         XCTAssertThrowsError(
@@ -107,7 +107,7 @@ final class Ed25519WalletTest: XCTestCase {
     // TODO: Implement for fine tuned test (e.g., test for specific error)
     func testThatIncoorectPurposeNodeWillThrowForWallet() throws {
         func incorrectPurposeNode() throws {
-            let privateKey = try ED25519PrivateKey(testMnemonic, "m/54'/784'/0'/0'/0'")
+            let _ = try ED25519PrivateKey(testMnemonic, "m/54'/784'/0'/0'/0'")
         }
         
         XCTAssertThrowsError(

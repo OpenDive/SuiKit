@@ -542,7 +542,7 @@ public indirect enum SuiJsonValue: Codable, KeyProtocol {
     }
     
     public func dataValue() throws -> Data {
-        var ser = Serializer()
+        let ser = Serializer()
         switch self {
         case .boolean(let bool):
             try Serializer.bool(ser, bool)

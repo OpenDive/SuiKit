@@ -23,12 +23,23 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         self.key = data
     }
     
-    public init(hexString: String) {
+    public init(hexString: String) throws {
         var hexValue = hexString
         if hexString.hasPrefix("0x") {
             hexValue = String(hexString.dropFirst(2))
         }
+        guard Data(hex: hexValue).count == SECP256K1PublicKey.LENGTH else {
+            throw SuiError.invalidPublicKey
+        }
         self.key = Data(hex: hexValue)
+    }
+
+    public init(value: String) throws {
+        guard let result = Data.fromBase64(value) else { throw SuiError.notImplemented }
+        guard result.count == SECP256K1PublicKey.LENGTH else {
+            throw SuiError.invalidPublicKey
+        }
+        self.key = result
     }
 
     public static func == (lhs: SECP256K1PublicKey, rhs: SECP256K1PublicKey) -> Bool {

@@ -76,4 +76,11 @@ final class SECP256K1PublicKeyTest: XCTestCase {
         let publicKey = try SECP256K1PublicKey(value: pubKeyB64)
         XCTAssertEqual(publicKey.base64(), pubKeyB64)
     }
+
+    func testThatRawBytesForAPublicSecp256k1KeyWillMatch() throws {
+        let pubKeyB64 = self.validSecp256k1PublicKey.toBase64()
+        let publicKey = try SECP256K1PublicKey(value: pubKeyB64)
+        XCTAssertEqual(publicKey.key.count, 33)
+        XCTAssertEqual(try SECP256K1PublicKey(data: publicKey.key), publicKey)
+    }
 }

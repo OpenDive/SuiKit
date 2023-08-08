@@ -70,4 +70,10 @@ final class SECP256K1PublicKeyTest: XCTestCase {
         XCTAssertThrowsError(try invalidKeyHex())
         XCTAssertThrowsError(try invalidString())
     }
+
+    func testThatBase64PublicKeysWillMatch() throws {
+        let pubKeyB64 = self.validSecp256k1PublicKey.toBase64()
+        let publicKey = try SECP256K1PublicKey(value: pubKeyB64)
+        XCTAssertEqual(publicKey.base64(), pubKeyB64)
+    }
 }

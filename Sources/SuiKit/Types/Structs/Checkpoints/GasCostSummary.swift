@@ -13,3 +13,10 @@ public struct GasCostSummary {
     public let storageRebate: String
     public let nonRefundableStorageFee: String
 }
+
+public struct GasCostSummaryCheckpoint: Equatable {
+    public let computationCost: String?
+    public let storageCost: String?
+    public let storageRebate: String?
+    public let nonRefundableStorageFee: String?
+}

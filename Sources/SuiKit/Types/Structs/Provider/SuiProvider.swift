@@ -86,6 +86,14 @@ public struct SuiProvider {
             )
         )
     }
+
+    public func getLatestCheckpointSequenceNumber() async throws -> String {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest("sui_getLatestCheckpointSequenceNumber", [])
+        )
+        return JSON(data)["result"].stringValue
+    }
     
     public func getAllCoins(_ account: any PublicKeyProtocol, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
@@ -236,24 +244,23 @@ public struct SuiProvider {
         )
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
         let epochRollingGasCostSummary = value["epochRollingGasCostSummary"]
-        let gasCostSummary = GasCostSummary(
-            computationCost: epochRollingGasCostSummary["computationCost"].stringValue,
-            storageCost: epochRollingGasCostSummary["storageCost"].stringValue,
-            storageRebate: epochRollingGasCostSummary["storageRebate"].stringValue,
-            nonRefundableStorageFee: epochRollingGasCostSummary["nonRefundableStorageFee"].stringValue
+        let gasCostSummary = GasCostSummaryCheckpoint(
+            computationCost: epochRollingGasCostSummary["computationCost"].string,
+            storageCost: epochRollingGasCostSummary["storageCost"].string,
+            storageRebate: epochRollingGasCostSummary["storageRebate"].string,
+            nonRefundableStorageFee: epochRollingGasCostSummary["nonRefundableStorageFee"].string
         )
         
         return Checkpoint(
-            epoch: value["epoch"].stringValue,
-            sequenceNumber: value["sequenceNumber"].stringValue,
+            epoch: value["epoch"].string,
+            sequenceNumber: value["sequenceNumber"].string,
             digest: value["digest"].stringValue,
-            networkTotalTransactions: value["networkTotalTransactions"].stringValue,
+            networkTotalTransactions: value["networkTotalTransactions"].string,
             previousDigest: value["previousDigest"].string,
-            epochRollingGasCostSummary: gasCostSummary,
-            timestampMs: value["timestampMs"].stringValue,
+            epochRollingGasCostSummary: gasCostSummary.computationCost == nil ? nil : gasCostSummary,
+            timestampMs: value["timestampMs"].string,
             validatorSignature: value["validatorSignature"].stringValue,
-            transactions: value["transactions"].arrayValue.map { $0.stringValue },
-            checkpointComitments: value["transactions"].arrayValue.map { $0.rawValue }
+            transactions: value["transactions"].arrayValue.map { $0.stringValue }
         )
     }
     
@@ -273,25 +280,24 @@ public struct SuiProvider {
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for (_, value): (String, JSON) in result["data"] {
             let epochRollingGasCostSummary = value["epochRollingGasCostSummary"]
-            let gasCostSummary = GasCostSummary(
-                computationCost: epochRollingGasCostSummary["computationCost"].stringValue,
-                storageCost: epochRollingGasCostSummary["storageCost"].stringValue,
-                storageRebate: epochRollingGasCostSummary["storageRebate"].stringValue,
-                nonRefundableStorageFee: epochRollingGasCostSummary["nonRefundableStorageFee"].stringValue
+            let gasCostSummary = GasCostSummaryCheckpoint(
+                computationCost: epochRollingGasCostSummary["computationCost"].string,
+                storageCost: epochRollingGasCostSummary["storageCost"].string,
+                storageRebate: epochRollingGasCostSummary["storageRebate"].string,
+                nonRefundableStorageFee: epochRollingGasCostSummary["nonRefundableStorageFee"].string
             )
             
             checkpointPages.append(
                 Checkpoint(
-                    epoch: value["epoch"].stringValue,
-                    sequenceNumber: value["sequenceNumber"].stringValue,
+                    epoch: value["epoch"].string,
+                    sequenceNumber: value["sequenceNumber"].string,
                     digest: value["digest"].stringValue,
-                    networkTotalTransactions: value["networkTotalTransactions"].stringValue,
+                    networkTotalTransactions: value["networkTotalTransactions"].string,
                     previousDigest: value["previousDigest"].string,
                     epochRollingGasCostSummary: gasCostSummary,
-                    timestampMs: value["timestampMs"].stringValue,
+                    timestampMs: value["timestampMs"].string,
                     validatorSignature: value["validatorSignature"].stringValue,
-                    transactions: value["transactions"].arrayValue.map { $0.stringValue },
-                    checkpointComitments: value["transactions"].arrayValue.map { $0.rawValue }
+                    transactions: value["transactions"].arrayValue.map { $0.stringValue }
                 )
             )
         }

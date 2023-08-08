@@ -121,8 +121,7 @@ extension URLSession {
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 if let response = response as? HTTPURLResponse, response.statusCode == 429 {
                     con.resume(throwing: SuiError.FaucetRateLimitError)
-                }
-                if let error = error {
+                } else if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {
                     con.resume(returning: data)

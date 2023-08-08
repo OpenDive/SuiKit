@@ -68,7 +68,12 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         let key = try ED25519PrivateKey.derivePath(path, mnemonic)
         self.key = key.key
     }
-    
+
+    public init(value: String) throws {
+        guard let data = Data.fromBase64(value) else { throw SuiError.notImplemented }
+        self.key = data
+    }
+
     public static func == (lhs: ED25519PrivateKey, rhs: ED25519PrivateKey) -> Bool {
         return lhs.key == rhs.key
     }

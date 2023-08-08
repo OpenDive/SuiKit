@@ -42,6 +42,11 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         }
         self.key = Data(hex: hexValue)
     }
+
+    public init(value: String) throws {
+        guard let data = Data.fromBase64(value) else { throw SuiError.notImplemented }
+        self.key = data
+    }
     
     public init() throws {
         let privateKeyArray = try secp256k1.Signing.PrivateKey()

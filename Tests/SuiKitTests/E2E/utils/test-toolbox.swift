@@ -16,16 +16,18 @@ internal class TestToolbox {
     let account: Account
     let client: SuiProvider
 
-    init(account: Account, client: SuiProvider) {
+    init(account: Account, client: SuiProvider = SuiProvider(connection: devnetConnection()), _ needsFunds: Bool = true) async throws {
         self.account = account
         self.client = client
+
+        if needsFunds { try await self.setup() }
     }
 
-    init() async throws {
+    init(_ needsFunds: Bool = true) async throws {
         self.account = try Account()
         self.client = SuiProvider(connection: devnetConnection())
 
-        try await self.setup()
+        if needsFunds { try await self.setup() }
     }
 
     func address() throws -> String {
@@ -202,14 +204,16 @@ internal class TestToolbox {
     }
 
     private func setup() async throws {
-        while true {
+        var isInitializing = true
+        while isInitializing {
             do {
                 let faucet = FaucetClient(connection: self.client.connection)
                 let _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
-                return
+                isInitializing = false
             } catch {
                 if let error = error as? SuiError, error == .FaucetRateLimitError {
-                    return
+                    isInitializing = false
+                    throw SuiError.FaucetRateLimitError
                 }
                 print("Retrying requesting from faucet...")
                 try await Task.sleep(nanoseconds: 60_000_000_000)

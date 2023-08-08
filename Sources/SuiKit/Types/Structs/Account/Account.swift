@@ -118,6 +118,21 @@ public struct Account: Equatable, Hashable {
         }
     }
 
+    public init(accountType: KeyType = .ed25519, _ value: String) throws {
+        self.accountType = accountType
+
+        switch accountType {
+        case .ed25519:
+            let privateKey = try ED25519PrivateKey(value: value)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
+        case .secp256k1:
+            let privateKey = try SECP256K1PrivateKey(value: value)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
+        }
+    }
+
     public static func == (lhs: Account, rhs: Account) -> Bool {
         return
             lhs.publicKey.key == rhs.publicKey.key &&

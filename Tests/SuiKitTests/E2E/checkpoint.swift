@@ -11,7 +11,7 @@ import XCTest
 
 final class CheckpointTest: XCTestCase {
     var toolBox: TestToolbox?
-    
+
     override func setUp() async throws {
         self.toolBox = try await TestToolbox(false)
     }
@@ -23,7 +23,7 @@ final class CheckpointTest: XCTestCase {
         }
         return toolBox
     }
-    
+
     func testThatTheLatestCheckpointUpdateIsFetched() async throws {
         let toolBox = try self.fetchToolBox()
         let checkpointSequenceNumber = try await toolBox.client.getLatestCheckpointSequenceNumber()

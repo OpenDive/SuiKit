@@ -43,13 +43,7 @@ internal class TestToolbox {
     }
 
     func publishPackage(_ name: String) async throws -> PublishedPackage {
-        guard let fileUrl = Bundle.main.url(forResource: name, withExtension: "json") else {
-            throw NSError(domain: "package is missing", code: -1)
-        }
-        guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
-            throw NSError(domain: "package is corrupted", code: -1)
-        }
-        let fileData = JSON(fileCompiledData)
+        let fileData = try self.getModule(name)
 
         var txBlock = TransactionBlock()
         let cap = try txBlock.publish(
@@ -87,13 +81,7 @@ internal class TestToolbox {
     }
 
     func upgradePackage(_ packageId: String, _ capId: String, _ name: String) async throws {
-        guard let fileUrl = Bundle.main.url(forResource: name, withExtension: "json") else {
-            throw NSError(domain: "package is missing", code: -1)
-        }
-        guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
-            throw NSError(domain: "package is corrupted", code: -1)
-        }
-        let fileData = JSON(fileCompiledData)
+        let fileData = try self.getModule(name)
 
         var txBlock = TransactionBlock()
         let cap = try txBlock.object(value: capId)
@@ -201,6 +189,16 @@ internal class TestToolbox {
             txns[i] = try await self.paySui(numRecipientsPerTxn, recipients, amounts)
         }
         return txns
+    }
+
+    private func getModule(_ name: String) throws -> JSON {
+        guard let fileUrl = Bundle.test.url(forResource: name, withExtension: "json") else {
+            throw NSError(domain: "package is missing", code: -1)
+        }
+        guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
+            throw NSError(domain: "package is corrupted", code: -1)
+        }
+        return JSON(fileCompiledData)
     }
 
     private func setup() async throws {

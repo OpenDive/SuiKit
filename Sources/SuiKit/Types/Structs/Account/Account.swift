@@ -111,9 +111,10 @@ public struct Account: Equatable, Hashable {
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
         case .secp256k1:
-            let privateKey = try SECP256K1PrivateKey(mnemonic)
-            self.privateKey = privateKey
-            self.publicKey = try privateKey.publicKey()
+            throw SuiError.notImplemented
+//            let privateKey = try SECP256K1PrivateKey(mnemonic)
+//            self.privateKey = privateKey
+//            self.publicKey = try privateKey.publicKey()
         }
     }
 

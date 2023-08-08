@@ -71,15 +71,29 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     }
     
     public func toSuiAddress() throws -> String {
-        var tmp = Data(count: SECP256K1PublicKey.LENGTH + 1)
-        try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["SECP256K1"]!])
-        try tmp.set([UInt8](key), offset: 1)
-        let result = normalizeSuiAddress(
-            value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<SECP256K1PublicKey.LENGTH * 2]
+        return normalizeSuiAddress(
+            value: try Blake2.hash(
+                .b2b,
+                size: 32,
+                data: Data(try self.toSuiBytes())
+            ).hexEncodedString()[0..<(32 * 2)]
         )
-        return result
     }
     
+    public func toSuiPublicKey() throws -> String {
+        let bytes = try self.toSuiBytes()
+        return bytes.toBase64()
+    }
+
+    public func toSuiBytes() throws -> [UInt8] {
+        let rawBytes = self.key
+        var suiBytes = Data(count: rawBytes.count + 1)
+        try suiBytes.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
+        try suiBytes.set([UInt8](rawBytes), offset: 1)
+        
+        return [UInt8](suiBytes)
+    }
+
     public func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
         return try self.verifyWithIntent(transactionBlock, signature, .TransactionData)
     }

@@ -11,6 +11,7 @@ import Bip39
 import CryptoSwift
 import BigInt
 import Blake2
+import CryptoKit
 
 public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     public typealias PrivateKeyType = SECP256K1PrivateKey
@@ -50,7 +51,7 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     public init(_ mnemonics: String, _ path: String = SECP256K1PrivateKey.defaultDerivationPath) throws {
         guard SECP256K1PrivateKey.isValidBIP32Path(path) else { throw SuiError.invalidDerivationPath }
         let seedValue = try SECP256K1PrivateKey.mnemonicToSeed(mnemonics)
-        guard seedValue.count > 128 && seedValue.count < 512 else { throw SuiError.notImplemented }
+        if (seedValue.count * 8) < 128 || (seedValue.count * 8) > 512 { throw SuiError.notImplemented }
         let keys = try SECP256K1PrivateKey.fromMasterKey(seedValue)
         self.key = keys.key
     }
@@ -124,7 +125,7 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         try ser.sequence(bytes, Serializer.u8)
         return try self.signWithIntent([UInt8](ser.output()), .PersonalMessage)
     }
-    
+
     private static func isValidBIP32Path(_ path: String) -> Bool {
         let pattern = "^m\\/(54|74)'\\/784'\\/[0-9]+'\\/[0-9]+\\/[0-9]+$"
         let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
@@ -132,34 +133,31 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         
         return matches?.first != nil
     }
-    
+
     private static func mnemonicToSeed(_ mnemonics: String) throws -> [UInt8] {
         let mnemonic = try Mnemonic(mnemonic: mnemonics.components(separatedBy: " "))
         return mnemonic.seed()
     }
-    
+
     private static func fromMasterKey(_ seed: [UInt8]) throws -> Keys {
-        guard let pathData = SECP256K1PrivateKey.curve.data(using: .utf8) else {
+        guard let pathData = SECP256K1PrivateKey.curve.data(using: .ascii) else {
             throw SuiError.notImplemented
         }
-        
+
         let hmac = HMAC(key: [UInt8](pathData), variant: .sha2(.sha512))
         let hmacBytes = try hmac.authenticate(seed)
         let key = Data(hmacBytes[..<32])
         let chainCode = Data(hmacBytes[32...])
-        
-        let bigIntegerKey = BigUInteger(key)
-        guard bigIntegerKey != BigUInteger(0), bigIntegerKey < SECP256K1PrivateKey.secp256k1CurveOrder else {
-            throw SuiError.notImplemented
-        }
-        let serializedBigIntegerKey = bigIntegerKey.serialize()
-        let privateKey = serializedBigIntegerKey.count == SECP256K1PrivateKey.LENGTH
-        ? serializedBigIntegerKey
-        : [UInt8(0)] + serializedBigIntegerKey
-        
-        return Keys(key: privateKey, chainCode: chainCode)
+
+        return Keys(key: key, chainCode: chainCode)
     }
-    
+
+//    private static func derive(_ keys: Keys, _ path: String) throws -> Keys {
+////        struct keyDerivator:
+//        
+//        let test =
+//    }
+
     public static func deserialize(from deserializer: Deserializer) throws -> SECP256K1PrivateKey {
         let key = try Deserializer.toBytes(deserializer)
         if key.count != SECP256K1PrivateKey.LENGTH {
@@ -167,7 +165,7 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         }
         return SECP256K1PrivateKey(key: key)
     }
-    
+
     private struct Keys {
         public let key: Data
         public let chainCode: Data

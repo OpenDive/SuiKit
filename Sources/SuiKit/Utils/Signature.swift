@@ -52,7 +52,7 @@ public struct Signature: Equatable, KeyProtocol {
         return try self.data().hexEncodedString()
     }
 
-    func data() throws -> Data {
+    public func data() throws -> Data {
         switch self.signatureScheme {
         case .ED25519:
             return self.signature

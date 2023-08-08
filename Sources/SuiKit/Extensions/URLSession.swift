@@ -118,7 +118,10 @@ extension URLSession {
     /// - Returns: A Data object fetched from the` URLRequest`.
     public func asyncData(with request: URLRequest) async throws -> Data {
         try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
-            let task = URLSession.shared.dataTask(with: request) { data, _, error in
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let response = response as? HTTPURLResponse, response.statusCode == 429 {
+                    con.resume(throwing: SuiError.FaucetRateLimitError)
+                }
                 if let error = error {
                     con.resume(throwing: error)
                 } else if let data = data {

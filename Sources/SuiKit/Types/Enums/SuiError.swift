@@ -8,6 +8,7 @@
 import Foundation
 
 public enum SuiError: Swift.Error, Equatable {
+    case FaucetRateLimitError
     case invalidPublicKey
     case lengthMismatch
     case unexpectedValue(value: String)

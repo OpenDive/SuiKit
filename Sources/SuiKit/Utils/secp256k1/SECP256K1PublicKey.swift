@@ -105,6 +105,15 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         return [UInt8](suiBytes)
     }
 
+    public func toSerializedSignature(signature: Signature) throws -> String {
+        var serializedSignature = Data(count: signature.signature.count + self.key.count)
+        serializedSignature[0] = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["SECP256K1"]!
+        serializedSignature[1..<signature.signature.count] = signature.signature
+        serializedSignature[1+signature.signature.count..<1+signature.signature.count+self.key.count] = self.key
+
+        return serializedSignature.base64EncodedString()
+    }
+
     public func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
         return try self.verifyWithIntent(transactionBlock, signature, .TransactionData)
     }

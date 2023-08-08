@@ -49,11 +49,12 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     }
     
     public init(_ mnemonics: String, _ path: String = SECP256K1PrivateKey.defaultDerivationPath) throws {
-        guard SECP256K1PrivateKey.isValidBIP32Path(path) else { throw SuiError.invalidDerivationPath }
-        let seedValue = try SECP256K1PrivateKey.mnemonicToSeed(mnemonics)
-        if (seedValue.count * 8) < 128 || (seedValue.count * 8) > 512 { throw SuiError.notImplemented }
-        let keys = try SECP256K1PrivateKey.fromMasterKey(seedValue)
-        self.key = keys.key
+//        guard SECP256K1PrivateKey.isValidBIP32Path(path) else { throw SuiError.invalidDerivationPath }
+//        let seedValue = try SECP256K1PrivateKey.mnemonicToSeed(mnemonics)
+//        if (seedValue.count * 8) < 128 || (seedValue.count * 8) > 512 { throw SuiError.notImplemented }
+//        let keys = try SECP256K1PrivateKey.fromMasterKey(seedValue)
+//        self.key = keys.key
+        throw SuiError.notImplemented
     }
     
     public static func == (lhs: SECP256K1PrivateKey, rhs: SECP256K1PrivateKey) -> Bool {

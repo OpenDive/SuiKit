@@ -550,6 +550,28 @@ public struct SuiProvider {
 
         return JSON(data)["result"]
     }
+
+    public func executeTransactionBlock(
+        _ transactionBlock: [UInt8],
+        _ signature: String,
+        _ options: SuiTransactionBlockResponseOptions? = nil,
+        _ requestType: SuiRequestType? = nil
+    ) async throws -> JSON {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_executeTransactionBlock",
+                [
+                    AnyCodable(transactionBlock.toBase64()),
+                    AnyCodable([signature]),
+                    AnyCodable(options),
+                    AnyCodable(requestType)
+                ]
+            )
+        )
+
+        return JSON(data)["result"]
+    }
     
     public func getProtocolConfig(_ version: String? = nil) async throws -> ProtocolConfig {
         let data = try await self.sendSuiJsonRpc(
@@ -611,6 +633,24 @@ public struct SuiProvider {
         )
         
         return JSON(data)["result"]
+    }
+
+    public func signAndExecuteTransactionBlock(
+        _ transactionBlock: inout TransactionBlock,
+        _ signer: Account,
+        _ options: SuiTransactionBlockResponseOptions? = nil,
+        _ requestType: SuiRequestType? = nil
+    ) async throws -> JSON {
+        transactionBlock.setSenderIfNotSet(sender: try signer.publicKey.toSuiAddress())
+        let txBytes = try await transactionBlock.build(self)
+
+        let signature = try signer.signTransactionBlock([UInt8](txBytes))
+        return try await self.executeTransactionBlock(
+            [UInt8](txBytes),
+            try signer.toSerializedSignature(signature),
+            options,
+            requestType
+        )
     }
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {

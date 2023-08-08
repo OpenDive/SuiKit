@@ -166,7 +166,7 @@ public struct TransactionBlock {
         return input
     }
     
-    public mutating func object(value: objectId) throws -> [TransactionBlockInput] {
+    public mutating func object(value: objectId) throws -> TransactionBlockInput {
         let id = getIdFromCallArg(arg: value)
         let blockData = self.blockData
         let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
@@ -191,15 +191,13 @@ public struct TransactionBlock {
         }
         
         if !inserted.isEmpty {
-            return inserted
+            return inserted[0]
         }
         
-        return [
-            try self.input(
-                type: .object,
-                value: SuiJsonValue.string(value)
-            )
-        ]
+        return try self.input(
+            type: .object,
+            value: SuiJsonValue.string(value)
+        )
     }
     
     public mutating func object(value: ObjectCallArg) throws -> [TransactionBlockInput] {
@@ -339,7 +337,7 @@ public struct TransactionBlock {
         modules: [Data],
         dependencies: [objectId],
         packageId: objectId,
-        ticket: TransactionBlockInput
+        ticket: TransactionArgument
     ) throws -> TransactionArgument {
         try self.add(
             transaction: SuiTransactionEnumType.upgrade(
@@ -348,14 +346,14 @@ public struct TransactionBlock {
                     dependencies: dependencies,
                     packageId: packageId,
                     ticket: ObjectTransactionArgument(
-                        argument: TransactionArgument.input(ticket)
+                        argument: ticket
                     )
                 )
             )
         )
     }
     
-    public mutating func moveCall(target: String, arguments: [TransactionArgument]?, typeArguments: [String]?) throws -> TransactionArgument {
+    public mutating func moveCall(target: String, arguments: [TransactionArgument]? = nil, typeArguments: [String]? = nil) throws -> TransactionArgument {
         try self.add(
             transaction: SuiTransactionEnumType.moveCall(
                 Transactions.moveCall(

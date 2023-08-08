@@ -83,4 +83,16 @@ final class SECP256K1PublicKeyTest: XCTestCase {
         XCTAssertEqual(publicKey.key.count, 33)
         XCTAssertEqual(try SECP256K1PublicKey(data: publicKey.key), publicKey)
     }
+
+    func testThatSuiAddressForSECP256K1KeysWillMatchTestCases() throws {
+        for testCase in self.testCases {
+            let key = try SECP256K1PublicKey(value: testCase.rawPublicKey)
+
+            // toSuiAddress
+            XCTAssertEqual(try key.toSuiAddress(), testCase.suiAddress)
+
+            // toSuiPublicKey
+            XCTAssertEqual(try key.toSuiPublicKey(), testCase.suiPublicKey)
+        }
+    }
 }

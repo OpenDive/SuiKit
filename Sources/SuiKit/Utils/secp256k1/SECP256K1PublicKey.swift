@@ -99,7 +99,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     public func toSuiBytes() throws -> [UInt8] {
         let rawBytes = self.key
         var suiBytes = Data(count: rawBytes.count + 1)
-        try suiBytes.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
+        try suiBytes.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["SECP256K1"]!])
         try suiBytes.set([UInt8](rawBytes), offset: 1)
         
         return [UInt8](suiBytes)

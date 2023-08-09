@@ -16,7 +16,7 @@ internal class TestToolbox {
     let account: Account
     let client: SuiProvider
 
-    init(account: Account, client: SuiProvider = SuiProvider(connection: devnetConnection()), _ needsFunds: Bool = true) async throws {
+    init(account: Account, client: SuiProvider = SuiProvider(connection: localnetConnection()), _ needsFunds: Bool = true) async throws {
         self.account = account
         self.client = client
 
@@ -25,7 +25,7 @@ internal class TestToolbox {
 
     init(_ needsFunds: Bool = true) async throws {
         self.account = try Account()
-        self.client = SuiProvider(connection: devnetConnection())
+        self.client = SuiProvider(connection: localnetConnection())
 
         if needsFunds { try await self.setup() }
     }
@@ -36,6 +36,10 @@ internal class TestToolbox {
 
     func getAllCoins() async throws -> PaginatedCoins {
         return try await self.client.getAllCoins(self.account.publicKey)
+    }
+
+    func getCoins() async throws -> PaginatedCoins {
+        return try await self.client.getCoins(self.account.publicKey, "0x2::sui::SUI")
     }
 
     func getActiveValidators() async throws -> [JSON] {

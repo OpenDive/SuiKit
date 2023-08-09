@@ -27,7 +27,7 @@ public struct SuiMoveNormalizedTypeParameterType: Codable {
     public let TypeParameter: Int
 }
 
-public struct SuiMoveNormalizedStructType: Codable {
+public struct SuiMoveNormalizedStructType: Codable, Equatable {
     public let address: String
     public let module: String
     public let name: String
@@ -54,7 +54,7 @@ public struct SuiMoveNormalizedStruct: Codable {
     public let fields: [SuiMoveNormalizedField]
 }
 
-public indirect enum SuiMoveNormalizedType: Codable {
+public indirect enum SuiMoveNormalizedType: Codable, Equatable {
     case bool
     case u8
     case u16
@@ -70,7 +70,7 @@ public indirect enum SuiMoveNormalizedType: Codable {
     case vector(SuiMoveNormalizedType)
     case structure(SuiMoveNormalizedStructType)
     
-    public struct TypeParameter: Codable {
+    public struct TypeParameter: Codable, Equatable {
         var typeParameter: UInt16
         
         enum CodingKeys: String, CodingKey {

@@ -67,7 +67,7 @@ public struct SuiProvider {
         return balances
     }
     
-    public func getBalance(_ account: Account, _ coinType: String) async throws -> CoinBalance {
+    public func getBalance(_ account: Account, _ coinType: String? = nil) async throws -> CoinBalance {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getBalance", [
@@ -128,14 +128,14 @@ public struct SuiProvider {
     
     public func getCoins(
         _ account: any PublicKeyProtocol,
-        _ coinType: String,
+        _ coinType: String? = nil,
         _ cursor: String? = nil,
         _ limit: UInt? = nil
     ) async throws -> PaginatedCoins {
         return try await self.getCoins(try account.toSuiAddress(), coinType, cursor, limit)
     }
     
-    public func getCoins(_ account: String, _ coinType: String, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
+    public func getCoins(_ account: String, _ coinType: String? = nil, _ cursor: String? = nil, _ limit: UInt? = nil) async throws -> PaginatedCoins {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(

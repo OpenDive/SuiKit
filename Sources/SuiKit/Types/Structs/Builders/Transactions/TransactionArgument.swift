@@ -51,44 +51,6 @@ public enum TransactionArgument: KeyProtocol, Codable {
     case result(Result)
     case nestedResult(NestedResult)
     
-    // TODO: Implement fromJsonObject function
-//    public static func fromJsonObject(_ data: JSON, _ type: String) throws -> TransactionArgument {
-//        enum TransactionArgumentType: String {
-//            case input = "Input"
-//            case gasCoin = "GasCoin"
-//            case result = "Result"
-//            case nestedResult = "NestedResult"
-//        }
-//
-//        guard let txType = TransactionArgumentType(rawValue: type) else { throw SuiError.notImplemented }
-//
-//        switch txType {
-//        case .input:
-//            return .input(
-//                TransactionBlockInput(
-//                    index: , // Int
-//                    value: , // SuiJsonValue?
-//                    type:  // ValueType?
-//                )
-//            )
-//        case .gasCoin:
-//            return .gasCoin
-//        case .result:
-//            return .result(
-//                Result(
-//                    index:  // Int
-//                )
-//            )
-//        case .nestedResult:
-//            return .nestedResult(
-//                NestedResult(
-//                    index: , // Int
-//                    resultIndex:  // Int
-//                )
-//            )
-//        }
-//    }
-    
     public var kind: TransactionArgumentName {
         switch self {
         case .gasCoin:

@@ -157,4 +157,8 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         try Serializer.toBytes(serializer, self.key)
     }
+
+    public func serializeModule(_ serializer: Serializer) {
+        serializer.fixedBytes(self.key)
+    }
 }

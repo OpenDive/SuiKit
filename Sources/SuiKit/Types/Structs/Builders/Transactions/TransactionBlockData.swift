@@ -141,6 +141,7 @@ public struct TransactionBlockDataBuilder {
             ),
             expiration: expiration ?? TransactionExpiration.none(true)
         ))
+        
         let ser = Serializer()
         try transactionData.serialize(ser)
         return ser.output()

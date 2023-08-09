@@ -188,88 +188,6 @@ public enum SuiTransactionEnumType: KeyProtocol, TransactionTypesProtocol {
     case upgrade(UpgradeTransaction)
     case makeMoveVec(MakeMoveVecTransaction)
     
-//    public static func fromJsonObject(_ data: JSON, _ type: String) throws -> SuiTransaction {
-//        enum SuiTransactionTypes: String {
-//            case moveCall = "MoveCall"
-//            case transferObject = "TransferObject"
-//            case splitCoin = "SplitCoin"
-//            case mergeCoin = "MergeCoin"
-//            case publish = "Publish"
-//            case upgrade = "Upgrade"
-//            case makeMoveVec = "MakeMoveVec"
-//        }
-//
-//        guard let txType = SuiTransactionTypes(rawValue: type) else { throw SuiError.notImplemented }
-//
-//        switch txType {
-//        case .moveCall:
-//            return .moveCall(
-//                Transactions.moveCall(
-//                    input: MoveCallTransactionInput(
-//                        target: "\(data["package"].stringValue)::\(data["module"].stringValue)::\(data["function"].stringValue)",
-//                        arguments: try data["arguments"].arrayValue.map {
-//                            try TransactionArgument.fromJsonObject($0, $0.dictionaryValue.keys.first!)
-//                        },
-//                        typeArguments: data["type_arguments"].arrayValue.map { $0.stringValue }
-//                    )
-//                )
-//            )
-//        case .transferObject:
-//            return .transferObjects(
-//                Transactions.transferObjects(
-//                    objects: try data[0].arrayValue.map {
-//                        ObjectTransactionArgument(
-//                            argument: try TransactionArgument.fromJsonObject($0, $0.dictionaryValue.keys.first!)
-//                        )
-//                    },
-//                    address: PureTransactionArgument(
-//                        argument: try TransactionArgument.fromJsonObject(
-//                            data[1].dictionaryValue.values.first!,
-//                            data[1].dictionaryValue.keys.first!
-//                        ),
-//                        type: "Address"
-//                    )
-//                )
-//            )
-//        case .splitCoin:
-//            return .splitCoins(
-//                Transactions.splitCoins(
-//                    coins: ,  // ObjectTransactionArgument
-//                    amounts:  // [TransactionArgument]
-//                )
-//            )
-//        case .mergeCoin:
-//            return .mergeCoins(
-//                Transactions.mergeCoins(
-//                    destination: , // ObjectTransactionArgument
-//                    sources:  // [ObjectTransactionArgument]
-//                )
-//            )
-//        case .publish:
-//            return .publish(
-//                Transactions.publish(
-//                    modules: , // [[UInt8]]
-//                    dependencies:  // [String]
-//                )
-//            )
-//        case .upgrade:
-//            return .upgrade(
-//                Transactions.upgrade(
-//                    modules: , // [[UInt8]]
-//                    dependencies: , // [String]
-//                    packageId: , // String
-//                    ticket:  // ObjectTransactionArgument
-//                )
-//            )
-//        case .makeMoveVec:
-//            return .makeMoveVec(
-//                Transactions.makeMoveVec(
-//                    objects:  // [ObjectTransactionArgument]
-//                )
-//            )
-//        }
-//    }
-    
     public var kind: SuiTransactionKindName {
         switch self {
         case .moveCall:
@@ -1157,7 +1075,7 @@ public struct SuiTransactionBlockResponse {
     public let errors: [String]?
 }
 
-public struct SuiTransactionBlockResponseOptions {
+public struct SuiTransactionBlockResponseOptions: Codable {
     public let showInput: Bool?
     public let showEffects: Bool?
     public let showEvents: Bool?

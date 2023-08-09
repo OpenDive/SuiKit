@@ -9,6 +9,7 @@ import Foundation
 import SwiftyJSON
 import AnyCodable
 import Blake2
+import Base58Swift
 
 public struct SuiProvider {
     public var connection: any ConnectionProtcol
@@ -658,6 +659,44 @@ public struct SuiProvider {
             requestType
         )
     }
+
+    public func getTransactionBlock(_ digest: String, _ options: SuiTransactionBlockResponseOptions? = nil) async throws -> JSON {
+        guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
+
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getTransactionBlock",
+                [
+                    AnyCodable(digest),
+                    AnyCodable(options)
+                ]
+            )
+        )
+
+        return JSON(data)["result"]
+    }
+
+    public func waitForTransaction(_ tx: String) async throws {
+        var count = 0
+
+        repeat {
+            if count >= 20 {
+                throw SuiError.notImplemented
+            }
+            try await Task.sleep(nanoseconds: 1_000_000_000)
+            count += 1
+        } while await self.isValidTransactionBlock(tx)
+    }
+
+    private func isValidTransactionBlock(_ digest: String) async -> Bool {
+        do {
+            let _ = try await self.getTransactionBlock(digest)
+            return true
+        } catch {
+            return false
+        }
+    }
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
         if data["error"].exists() {
@@ -672,6 +711,11 @@ public struct SuiProvider {
             )
         }
         return RPCErrorValue(id: nil, error: nil, jsonrpc: nil, hasError: false)
+    }
+
+    private func isValidTransactionDigest(_ value: String) -> Bool {
+        guard let buffer = Base58.base58CheckDecode(value) else { return false }
+        return buffer.count == 32
     }
     
     private func getServerUrl() throws -> URL {

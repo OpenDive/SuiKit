@@ -40,6 +40,7 @@ public class TransactionResult {
     }
     
     public subscript(index: UInt16) -> TransactionArgument? {
+        guard index > 0 else { return self.transactionArgument }
         return nestedResultFor(index)
     }
 }
@@ -327,6 +328,20 @@ public struct TransactionBlock {
             transaction: SuiTransactionEnumType.publish(
                 Transactions.publish(
                     modules: modules.map { [UInt8]($0) },
+                    dependencies: dependencies
+                )
+            )
+        )
+    }
+
+    public mutating func publish(
+        modules: [String],
+        dependencies: [objectId]
+    ) throws -> TransactionArgument {
+        try self.add(
+            transaction: SuiTransactionEnumType.publish(
+                Transactions.publish(
+                    modules: modules,
                     dependencies: dependencies
                 )
             )

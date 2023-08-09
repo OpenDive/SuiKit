@@ -14,8 +14,7 @@ final class CoinMetadataTest: XCTestCase {
     var packageId: String?
 
     override func setUp() async throws {
-        let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
-        self.toolBox = try await TestToolbox(account: account, false)
+        self.toolBox = try await TestToolbox(true)
         self.packageId = try await self.fetchToolBox().publishPackage("coin-metadata").packageId
     }
 

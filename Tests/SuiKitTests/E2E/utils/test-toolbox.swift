@@ -47,7 +47,7 @@ internal class TestToolbox {
 
         var txBlock = TransactionBlock()
         let cap = try txBlock.publish(
-            modules: fileData["modules"].arrayObject as! [Data],
+            modules: fileData["modules"].arrayObject as! [String],
             dependencies: fileData["dependencies"].arrayObject as! [String]
         )
 
@@ -64,6 +64,7 @@ internal class TestToolbox {
                 showBalanceChanges: false
             )
         )
+        try await self.client.waitForTransaction(publishTxBlock["digest"].stringValue)
 
         guard publishTxBlock["effects"]["status"]["status"].stringValue == "success" else {
             throw SuiError.notImplemented
@@ -192,7 +193,7 @@ internal class TestToolbox {
     }
 
     private func getModule(_ name: String) throws -> JSON {
-        guard let fileUrl = Bundle.test.url(forResource: name, withExtension: "json") else {
+        guard let fileUrl = Bundle.test.resourceURL?.appending(component: "Resources/\(name).json") else {
             throw NSError(domain: "package is missing", code: -1)
         }
         guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
@@ -206,8 +207,9 @@ internal class TestToolbox {
         while isInitializing {
             do {
                 let faucet = FaucetClient(connection: self.client.connection)
-                let _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
+                let result = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
                 isInitializing = false
+                try await self.client.waitForTransaction(result.transferTxDigest)
             } catch {
                 if let error = error as? SuiError, error == .FaucetRateLimitError {
                     isInitializing = false

@@ -40,17 +40,15 @@ public struct Transactions {
         )
     }
     
-    public static func publish(modules: [[UInt8]], dependencies: [objectId]) -> PublishTransaction {
-        return PublishTransaction(
-            kind: .publish,
+    public static func publish(modules: [[UInt8]], dependencies: [objectId]) throws -> PublishTransaction {
+        return try PublishTransaction(
             modules: modules,
             dependencies: dependencies
         )
     }
     
-    public static func publish(modules: [String], dependencies: [objectId]) -> PublishTransaction {
-        return PublishTransaction(
-            kind: .publish,
+    public static func publish(modules: [String], dependencies: [objectId]) throws -> PublishTransaction {
+        return try PublishTransaction(
             modules: modules.compactMap { module in
                 guard let result = Data.fromBase64(module) else { return nil }
                 return [UInt8](result)

@@ -9,7 +9,7 @@ import Foundation
 import Base58Swift
 
 public struct SuiObjectRef: KeyProtocol {
-    public let objectId: any PublicKeyProtocol
+    public let objectId: ED25519PublicKey
     public let version: UInt64
     public let digest: TransactionDigest
     
@@ -20,7 +20,7 @@ public struct SuiObjectRef: KeyProtocol {
     }
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: objectId)
+        self.objectId.serializeModule(serializer)
         try Serializer.u64(serializer, version)
         if let dataDigest = Base58.base58Decode(digest) {
             try Serializer.toBytes(serializer, Data(dataDigest))

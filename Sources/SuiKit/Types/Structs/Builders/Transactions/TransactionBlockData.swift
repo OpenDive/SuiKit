@@ -19,16 +19,16 @@ public struct TransactionBlockDataBuilder {
         switch kind {
         case .programmableTransaction(let programmableTransaction):
             return TransactionBlockDataBuilder(
-                serializedTransactionDataBuilder: SerializedTransactionDataBuilder(
+                serializedTransactionDataBuilder: try SerializedTransactionDataBuilder(
                     sender: nil,
                     expiration: TransactionExpiration.none(true),
                     gasConfig: SuiGasData(),
                     inputs: programmableTransaction.inputs.enumerated().map { (idx, value) in
-                        switch value {
-                        case .pure(let pureSuiCallArg):
+                        switch value.type {
+                        case .pure(let pure):
                             return TransactionBlockInput(
                                 index: UInt16(idx),
-                                value: .data(Data(pureSuiCallArg)),
+                                value: .data(Data(pure)),
                                 type: .pure
                             )
                         default:
@@ -55,12 +55,12 @@ public struct TransactionBlockDataBuilder {
             switch transactionDataV1.kind {
             case .programmableTransaction(let programmableTransaction):
                 return TransactionBlockDataBuilder(
-                    serializedTransactionDataBuilder: SerializedTransactionDataBuilder(
+                    serializedTransactionDataBuilder: try SerializedTransactionDataBuilder(
                         sender: transactionDataV1.sender,
                         expiration: transactionDataV1.expiration,
                         gasConfig: transactionDataV1.gasData,
                         inputs: programmableTransaction.inputs.enumerated().map { (idx, value) in
-                            switch value {
+                            switch value.type {
                             case .pure(let pureSuiCallArg):
                                 return TransactionBlockInput(
                                     index: UInt16(idx),
@@ -101,12 +101,13 @@ public struct TransactionBlockDataBuilder {
             switch value.value {
             case .callArg(let callArg):
                 return callArg
+            case .input(let input):
+                return input
             default:
                 return nil
             }
         }
         let transactions = self.serializedTransactionDataBuilder.transactions
-        
         let kind = ProgrammableTransaction(inputs: inputs, transactions: transactions)
         
         if let onlyTransactionKind, onlyTransactionKind {
@@ -131,10 +132,10 @@ public struct TransactionBlockDataBuilder {
         let transactionData = TransactionData.V1(TransactionDataV1(
             kind: SuiTransactionBlockKind.programmableTransaction(kind),
             sender: prepareSuiAddress(address: sender),
-            gasData: SuiGasData(
+            gasData: try SuiGasData(
                 payment: payment,
                 owner: prepareSuiAddress(
-                    address: self.serializedTransactionDataBuilder.gasConfig.owner ?? sender
+                    address: self.serializedTransactionDataBuilder.gasConfig.owner?.hex() ?? sender
                 ),
                 price: price,
                 budget: budget
@@ -195,13 +196,13 @@ public class SerializedTransactionDataBuilder {
     public init(
         sender: SuiAddress? = nil,
         expiration: TransactionExpiration? = TransactionExpiration.none(true),
-        gasConfig: SuiGasData = SuiGasData(),
+        gasConfig: SuiGasData? = nil,
         inputs: [TransactionBlockInput] = [],
         transactions: [SuiTransaction] = []
-    ) {
+    ) throws {
         self.sender = sender
         self.expiration = expiration
-        self.gasConfig = gasConfig
+        self.gasConfig = try gasConfig ?? SuiGasData()
         self.inputs = inputs
         self.transactions = transactions
     }

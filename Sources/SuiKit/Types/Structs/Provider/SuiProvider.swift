@@ -340,11 +340,12 @@ public struct SuiProvider {
                 type: value["content"]["type"].stringValue,
                 fields: fields,
                 hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
-            )
+            ), 
+            error: value["error"].stringValue == "" ? nil : value["error"].stringValue
         )
     }
     
-    public func getOwnedObjects(_ account: any PublicKeyProtocol, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
+    public func getOwnedObjects(_ account: any PublicKeyProtocol, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -353,7 +354,9 @@ public struct SuiProvider {
                     AnyCodable(try account.toSuiAddress()),
                     AnyCodable(query),
                     AnyCodable(cursor),
-                    AnyCodable(limit)
+                    AnyCodable(limit),
+                    AnyCodable(filter),
+                    AnyCodable(options)
                 ]
             )
         )
@@ -380,13 +383,133 @@ public struct SuiProvider {
                         type: value["content"]["type"].stringValue,
                         fields: fields,
                         hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
-                    )
+                    ),
+                    error: value["error"].stringValue == "" ? nil : value["error"].stringValue
                 )
             )
         }
         return result
     }
-    
+
+    public func getDynamicFields(_ parentId: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ limit: Int? = nil, _ cursor: String? = nil) async throws -> DynamicFieldPage {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getDynamicFields",
+                [
+                    AnyCodable(parentId),
+                    AnyCodable(cursor),
+                    AnyCodable(limit),
+                    AnyCodable(filter),
+                    AnyCodable(options)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        var dynamicFields: [DynamicFieldInfo] = []
+
+        for fieldInfo in result["data"].arrayValue {
+            dynamicFields.append(
+                DynamicFieldInfo(
+                    bcsName: fieldInfo["bcsName"].stringValue,
+                    digest: fieldInfo["digest"].stringValue,
+                    name: DynamicFieldName(
+                        type: fieldInfo["name"]["type"].stringValue,
+                        value: fieldInfo["name"]["value"].stringValue
+                    ),
+                    objectId: fieldInfo["objectId"].stringValue,
+                    objectType: fieldInfo["objectType"].stringValue,
+                    type: DynamicFieldType(rawValue: fieldInfo["type"].stringValue)!,
+                    version: fieldInfo["version"].stringValue
+                )
+            )
+        }
+
+        return DynamicFieldPage(
+            data: dynamicFields,
+            nextCursor: result["nextCursor"].string,
+            hasNextPage: result["hasNextPage"].boolValue
+        )
+    }
+
+    public func getDynamicFieldObject(_ parentId: String, _ name: String) async throws -> SuiObjectResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getDynamicFieldObject",
+                [
+                    AnyCodable(parentId),
+                    AnyCodable(name),
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        guard let fields = result["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
+        return SuiObjectResponse(
+            objectId: result["objectId"].stringValue,
+            version: result["version"].uInt64Value,
+            digest: result["digest"].stringValue,
+            type: result["type"].stringValue,
+            owner: ObjectOwner(
+                addressOwner: AddressOwner(addressOwner: result["owner"]["AddressOwner"].stringValue),
+                objectOwner: ObjectOwnerAddress(objectOwner: result["owner"]["ObjectOwner"].stringValue),
+                shared: Shared(
+                    shared: InitialSharedVersion(initialSharedVersion: result["owner"]["Shared"]["InitialSharedVersion"].intValue)
+                )
+            ),
+            previousTransaction: result["previousTransaction"].stringValue,
+            storageRebate: result["storageRebate"].intValue,
+            content: SuiMoveObject(
+                type: result["content"]["type"].stringValue,
+                fields: fields,
+                hasPublicTransfer: result["content"]["hasPublicTransfer"].boolValue
+            ),
+            error: result["error"].stringValue == "" ? nil : result["error"].stringValue
+        )
+    }
+
+    public func getDynamicFieldObject(_ parentId: String, name: DynamicFieldName) async throws -> SuiObjectResponse {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getDynamicFieldObject",
+                [
+                    AnyCodable(parentId),
+                    AnyCodable(name),
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]["data"]
+        guard let fields = result["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
+        return SuiObjectResponse(
+            objectId: result["objectId"].stringValue,
+            version: result["version"].uInt64Value,
+            digest: result["digest"].stringValue,
+            type: result["type"].stringValue,
+            owner: ObjectOwner(
+                addressOwner: AddressOwner(addressOwner: result["owner"]["AddressOwner"].stringValue),
+                objectOwner: ObjectOwnerAddress(objectOwner: result["owner"]["ObjectOwner"].stringValue),
+                shared: Shared(
+                    shared: InitialSharedVersion(initialSharedVersion: result["owner"]["Shared"]["InitialSharedVersion"].intValue)
+                )
+            ),
+            previousTransaction: result["previousTransaction"].stringValue,
+            storageRebate: result["storageRebate"].intValue,
+            content: SuiMoveObject(
+                type: result["content"]["type"].stringValue,
+                fields: fields,
+                hasPublicTransfer: result["content"]["hasPublicTransfer"].boolValue
+            ),
+            error: result["error"].stringValue == "" ? nil : result["error"].stringValue
+        )
+    }
+
     public func requestAddStake(_ signer: Account, _ coins: [String], _ amount: String, _ validators: SuiAddress, _ gas: objectId, _ gasBudget: String) async throws -> JSON {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -450,10 +573,10 @@ public struct SuiProvider {
                 ]
             )
         )
-        
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         let jsonResponse = JSON(data)["result"]
         var objectResponses: [SuiObjectResponse] = []
-        
         try jsonResponse.arrayValue.forEach { jsonData in
             let value = jsonData["data"]
             guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
@@ -477,7 +600,8 @@ public struct SuiProvider {
                         type: value["content"]["type"].stringValue,
                         fields: fields,
                         hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
-                    )
+                    ),
+                    error: value["error"].stringValue == "" ? nil : value["error"].stringValue
                 )
             )
         }
@@ -516,9 +640,9 @@ public struct SuiProvider {
                 ]
             )
         )
-        
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         let result = JSON(data)["result"]
-        
         return SuiMoveNormalizedFunction(
             visibility: try SuiMoveVisibility.decodeVisibility(result["visibility"]),
             isEntry: result["isEntry"].boolValue,
@@ -621,11 +745,12 @@ public struct SuiProvider {
     public func devInspectTransactionBlock(
         _ transactionBlock: inout TransactionBlock,
         _ sender: SuiAddress,
-        _ gasPrice: Int?,
-        _ epoch: String?
+        _ gasPrice: Int? = nil,
+        _ epoch: String? = nil
     ) async throws -> JSON {
         transactionBlock.setSenderIfNotSet(sender: sender)
-        let devInspectTxBytes = try await transactionBlock.build(self, true).base64EncodedString()
+        let result = try await transactionBlock.build(self, true)
+        let devInspectTxBytes = result.base64EncodedString()
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -638,7 +763,8 @@ public struct SuiProvider {
                 ]
             )
         )
-        
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return JSON(data)["result"]
     }
 
@@ -661,7 +787,7 @@ public struct SuiProvider {
     }
 
     public func getTransactionBlock(_ digest: String, _ options: SuiTransactionBlockResponseOptions? = nil) async throws -> JSON {
-        guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
+         guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
 
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -776,4 +902,59 @@ public struct RPCErrorValue: Equatable {
     public let error: ErrorMessage?
     public let jsonrpc: String?
     public let hasError: Bool
+}
+
+public enum SuiObjectDataFilter: Codable {
+    case MatchAll([SuiObjectDataFilter])
+    case MatchAny([SuiObjectDataFilter])
+    case MatchNone([SuiObjectDataFilter])
+    case Package(String)
+    case MoveModule(MoveModuleFilter)
+    case StructType(String)
+    case AddressOwner(String)
+    case ObjectOwner(String)
+    case ObjectId(String)
+    case ObjectIds([String])
+    case Version(String)
+}
+
+public struct MoveModuleFilter: Codable {
+    public var module: String
+    public var package: String
+}
+
+public struct SuiObjectDataOptions: Codable {
+    public var showBcs: Bool?
+    public var showContent: Bool?
+    public var showDisplay: Bool?
+    public var showOwner: Bool?
+    public var showPreviousTransaction: Bool?
+    public var showStorageRebate: Bool?
+    public var showType: Bool?
+}
+
+public struct DynamicFieldPage {
+    public var data: [DynamicFieldInfo]
+    public var nextCursor: String?
+    public var hasNextPage: Bool
+}
+
+public struct DynamicFieldInfo {
+    public var bcsName: String
+    public var digest: String
+    public var name: DynamicFieldName
+    public var objectId: String
+    public var objectType: String
+    public var type: DynamicFieldType
+    public var version: String
+}
+
+public struct DynamicFieldName: Codable {
+    public var type: String
+    public var value: String
+}
+
+public enum DynamicFieldType: String {
+    case dynamicField = "DynamicField"
+    case dynamicObject = "DynamicObject"
 }

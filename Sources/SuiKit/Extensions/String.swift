@@ -29,16 +29,28 @@ extension String {
     var urlEncoded: String {
         return self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? self
     }
+
+    public func toModule() throws -> SuiMoveNormalizedStructType {
+        let callArguments = self.components(separatedBy: "::")
+        guard callArguments.count == 3 else { throw SuiError.notImplemented }
+        return SuiMoveNormalizedStructType(
+            address: callArguments[0],
+            module: callArguments[1],
+            name: callArguments[2],
+            typeArguments: []
+        )
+    }
     
-    public func stringToBytes() throws -> [UInt8] {
+    public func stringToBytes(_ includeLength: Bool = true) throws -> [UInt8] {
         let length = self.count
         if length & 1 != 0 {
             throw SuiError.notImplemented
         }
         var bytes = [UInt8]()
-        bytes.reserveCapacity(length/2)
+        bytes.reserveCapacity((length/2) + (includeLength ? 1 : 0))
+        if includeLength { bytes.append(UInt8(32)) }
         var index = self.startIndex
-        for _ in 0..<length/2 {
+        for _ in (includeLength ? 1 : 0)..<(includeLength ? ((length/2) + 1) : (length/2)) {
             let nextIndex = self.index(index, offsetBy: 2)
             if let b = UInt8(self[index..<nextIndex], radix: 16) {
                 bytes.append(b)

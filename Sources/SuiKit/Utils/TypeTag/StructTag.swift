@@ -26,7 +26,7 @@
 import Foundation
 
 /// Struct Type Tag
-public struct StructTag: TypeProtcol, Equatable {
+public struct StructTag: TypeProtocol, Equatable {
     let value: StructTagValue
 
     public static func ==(lhs: StructTag, rhs: StructTag) -> Bool {
@@ -46,12 +46,16 @@ public struct StructTag: TypeProtcol, Equatable {
     public static func fromStr(_ typeTag: String) throws -> StructTag {
         var name = ""
         var index = 0
+        var nestedValue: StructTag? = nil
 
         while index < typeTag.count {
             let letter = typeTag[typeTag.index(typeTag.startIndex, offsetBy: index)]
             index += 1
             if letter == "<" {
-                throw AptosError.notImplemented
+                nestedValue = try StructTag.fromStr(typeTag[index..<typeTag.count])
+                break
+            } else if letter == ">" {
+                break
             } else {
                 name.append(letter)
             }
@@ -62,7 +66,7 @@ public struct StructTag: TypeProtcol, Equatable {
                 address: AccountAddress.fromHex(String(split[0])),
                 module: String(split[1]),
                 name: String(split[2]),
-                typeArgs: []
+                typeArgs: nestedValue != nil ? [TypeTag(value: nestedValue!)] : []
             )
         )
     }
@@ -88,6 +92,7 @@ public struct StructTag: TypeProtcol, Equatable {
     }
 
     public func serialize(_ serializer: Serializer) throws {
+        try serializer.uleb128(UInt(self.variant()))
         try self.value.address.serialize(serializer)
         try Serializer.str(serializer, self.value.module)
         try Serializer.str(serializer, self.value.name)

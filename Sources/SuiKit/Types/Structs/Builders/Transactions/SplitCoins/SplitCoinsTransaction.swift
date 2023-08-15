@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct SplitCoinsTransaction: KeyProtocol {
-    public let coin: ObjectTransactionArgument
-    public let amounts: [PureTransactionArgument]
+public struct SplitCoinsTransaction: KeyProtocol, TransactionProtocol {
+    public var coin: ObjectTransactionArgument
+    public var amounts: [PureTransactionArgument]
     
     public func serialize(_ serializer: Serializer) throws {
         try Serializer._struct(serializer, value: coin)
@@ -21,5 +21,12 @@ public struct SplitCoinsTransaction: KeyProtocol {
             coin: ObjectTransactionArgument(argument: .gasCoin),
             amounts: try deserializer.sequence(valueDecoder: Deserializer._struct)
         )
+    }
+
+    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        try self.amounts.forEach { argument in
+            try argument.argument.encodeInput(objects: &objects, inputs: &inputs)
+        }
+        try self.coin.argument.encodeInput(objects: &objects, inputs: &inputs)
     }
 }

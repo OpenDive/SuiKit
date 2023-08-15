@@ -9,18 +9,19 @@ import Foundation
 import Base58Swift
 
 public struct SuiObjectRef: KeyProtocol {
-    public let objectId: ED25519PublicKey
+    public let objectId: String
     public let version: UInt64
     public let digest: TransactionDigest
     
-    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) throws {
-        self.objectId = try ED25519PublicKey(hexString: objectId)
+    public init(objectId: objectId, version: UInt64, digest: TransactionDigest) {
+        self.objectId = objectId
         self.version = version
         self.digest = digest
     }
     
     public func serialize(_ serializer: Serializer) throws {
-        self.objectId.serializeModule(serializer)
+        let publicKey = try ED25519PublicKey(hexString: objectId)
+        publicKey.serializeModule(serializer)
         try Serializer.u64(serializer, version)
         if let dataDigest = Base58.base58Decode(digest) {
             try Serializer.toBytes(serializer, Data(dataDigest))
@@ -28,7 +29,7 @@ public struct SuiObjectRef: KeyProtocol {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiObjectRef {
-        return try SuiObjectRef(
+        return SuiObjectRef(
             objectId: try Deserializer.string(deserializer),
             version: try Deserializer.u64(deserializer),
             digest: try Deserializer.string(deserializer)

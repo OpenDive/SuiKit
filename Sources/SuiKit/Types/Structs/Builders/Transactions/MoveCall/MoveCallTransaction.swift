@@ -7,29 +7,48 @@
 
 import Foundation
 
-public struct MoveCallTransaction: KeyProtocol {
-    public let kind: SuiTransactionKindName
+public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     public let target: String
     public let typeArguments: [String]
     public let arguments: [TransactionArgument]
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: kind)
-        try Serializer.str(serializer, target)
-        try serializer.sequence(typeArguments, Serializer.str)
+        let normalizedModule = Coin.getCoinStructTag(coinTypeArg: self.target)
+        let address = try ED25519PublicKey(hexString: normalizedModule.address)
+        address.serializeModule(serializer)
+        try Serializer.str(serializer, normalizedModule.module)
+        try Serializer.str(serializer, normalizedModule.name)
+        let structs = try typeArguments.map { try StructTag.fromStr($0) }
+        try serializer.sequence(structs, Serializer._struct)
         try serializer.sequence(arguments, Serializer._struct)
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> MoveCallTransaction {
-        let kind: SuiTransactionKindName = try Deserializer._struct(deserializer)
-        let target = try Deserializer.string(deserializer)
-        let typeArguments = try deserializer.sequence(valueDecoder: Deserializer.string)
-        let arguments: [TransactionArgument] = try deserializer.sequence(valueDecoder: Deserializer._struct)
-        return MoveCallTransaction(
-            kind: kind,
-            target: target,
-            typeArguments: typeArguments,
-            arguments: arguments
-        )
+        throw SuiError.notImplemented
+    }
+
+    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        return
+    }
+
+    public func addToResolve(list: inout [MoveCallTransaction], inputs: [TransactionBlockInput]) throws {
+        let needsResolution = self.arguments.contains { argument in
+            switch argument {
+            case .input(let transactionBlockInput):
+                guard let value = inputs[Int(transactionBlockInput.index)].value else { return false }
+                switch value {
+                case .callArg:
+                    return false
+                default:
+                    return true
+                }
+            default:
+                return false
+            }
+        }
+
+        if needsResolution {
+            list.append(self)
+        }
     }
 }

@@ -56,7 +56,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
         self.address = address
 
         if address.count != AccountAddress.length {
-            throw AptosError.invalidAddressLength
+            throw SuiError.invalidAddressLength
         }
     }
 
@@ -109,7 +109,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
     /// - Returns: An AccountAddress instance created from the provided PublicKey.
     ///
     /// - Throws: An error of type AptosError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
-    public static func fromKey(_ key: PublicKey) throws -> AccountAddress {
+    public static func fromKey(_ key: any PublicKeyProtocol) throws -> AccountAddress {
         var addressBytes = Data(count: key.key.count + 1)
         addressBytes[0..<key.key.count] = key.key[0..<key.key.count]
         addressBytes[key.key.count] = AuthKeyScheme.ed25519
@@ -228,13 +228,13 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
     /// - Throws: An error of type AptosError.stringToDataFailure if collectionName, tokenName, or "::" can't be converted into Data.
     public static func forNamedToken(_ creator: AccountAddress, _ collectionName: String, _ tokenName: String) throws -> AccountAddress {
         guard let collectionData = collectionName.data(using: .utf8) else {
-            throw AptosError.stringToDataFailure(value: "\(collectionName)")
+            throw SuiError.stringToDataFailure(value: "\(collectionName)")
         }
         guard let tokenData = tokenName.data(using: .utf8) else {
-            throw AptosError.stringToDataFailure(value: "\(tokenName)")
+            throw SuiError.stringToDataFailure(value: "\(tokenName)")
         }
         guard let seperatorData = "::".data(using: .utf8) else {
-            throw AptosError.stringToDataFailure(value: "::")
+            throw SuiError.stringToDataFailure(value: "::")
         }
         return try AccountAddress.forNamedObject(creator, seed: collectionData + seperatorData + tokenData)
     }
@@ -256,7 +256,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
     /// - Returns: An AccountAddress that represents the named collection.
     public static func forNamedCollection(_ creator: AccountAddress, _ collectionName: String) throws -> AccountAddress {
         guard let collectionData = collectionName.data(using: .utf8) else {
-            throw AptosError.stringToDataFailure(value: "\(collectionName)")
+            throw SuiError.stringToDataFailure(value: "\(collectionName)")
         }
         return try AccountAddress.forNamedObject(creator, seed: collectionData)
     }

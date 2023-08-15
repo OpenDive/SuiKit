@@ -61,9 +61,9 @@ public struct TypeTag: KeyProtocol, Equatable {
     public static let u256: Int = 10
 
     /// The value itself
-    let value: any TypeProtcol
+    let value: any TypeProtocol
 
-    public init(value: any TypeProtcol) {
+    public init(value: any TypeProtocol) {
         self.value = value
     }
 
@@ -93,12 +93,11 @@ public struct TypeTag: KeyProtocol, Equatable {
         } else if variant == TypeTag._struct {
             return TypeTag(value: try StructTag.deserialize(from: deserializer))
         } else {
-            throw AptosError.notImplemented
+            throw SuiError.notImplemented
         }
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try serializer.uleb128(UInt(self.value.variant()))
         try Serializer._struct(serializer, value: self.value)
     }
 }

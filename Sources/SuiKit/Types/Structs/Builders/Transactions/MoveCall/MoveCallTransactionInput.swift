@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct MoveCallTransactionInput: Codable {
+public struct MoveCallTransactionInput {
     let target: String
     var arguments: [TransactionArgument]?
     var typeArguments: [String]?

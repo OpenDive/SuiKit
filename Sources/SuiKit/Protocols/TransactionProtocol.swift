@@ -6,3 +6,7 @@
 //
 
 import Foundation
+
+public protocol TransactionProtocol: KeyProtocol {
+    func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws
+}

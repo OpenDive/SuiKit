@@ -7,22 +7,25 @@
 
 import Foundation
 
-public struct MakeMoveVecTransaction: KeyProtocol {
-    public let kind: SuiTransactionKindName
+public struct MakeMoveVecTransaction: KeyProtocol, TransactionProtocol {
     public let objects: [ObjectTransactionArgument]
     public let type: String?
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: kind)
         try serializer.sequence(objects, Serializer._struct)
         if let type { try Serializer.str(serializer, type) }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> MakeMoveVecTransaction {
         return MakeMoveVecTransaction(
-            kind: try Deserializer._struct(deserializer),
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
             type: try? Deserializer.string(deserializer)
         )
+    }
+
+    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        try self.objects.forEach { argument in
+            try argument.argument.encodeInput(objects: &objects, inputs: &inputs)
+        }
     }
 }

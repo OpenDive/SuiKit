@@ -26,7 +26,7 @@
 import Foundation
 
 /// UInt64 Type Tag
-public struct U64Tag: TypeProtcol, Equatable {
+public struct U64Tag: TypeProtocol, Equatable {
     /// The value itself
     let value: Int
 

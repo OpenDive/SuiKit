@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PublishTransaction: KeyProtocol {
+public struct PublishTransaction: KeyProtocol, TransactionProtocol {
     public let modules: [[UInt8]]
     public let dependencies: [ED25519PublicKey]
     
@@ -29,5 +29,9 @@ public struct PublishTransaction: KeyProtocol {
             modules: (try deserializer.sequence(valueDecoder: Deserializer.toBytes)).map { [UInt8]($0) },
             dependencies: try deserializer.sequence(valueDecoder: Deserializer.string)
         )
+    }
+
+    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        return
     }
 }

@@ -9,7 +9,7 @@ import Foundation
 
 public struct SuiGasData: KeyProtocol {
     public var payment: [SuiObjectRef]?
-    public var owner: String?
+    public var owner: ED25519PublicKey?
     public var price: String?
     public var budget: String?
     
@@ -18,16 +18,16 @@ public struct SuiGasData: KeyProtocol {
         owner: String? = nil,
         price: String? = nil,
         budget: String? = nil
-    ) {
+    ) throws {
         self.payment = payment
-        self.owner = owner
+        self.owner = try owner != nil ? ED25519PublicKey(hexString: owner!) : nil
         self.price = price
         self.budget = budget
     }
     
     public func serialize(_ serializer: Serializer) throws {
         if let payment { try serializer.sequence(payment, Serializer._struct) }
-        if let owner { try serializer.fixedBytes(Data(owner.replacingOccurrences(of: "0x", with: "").stringToBytes())) }
+        if let owner { owner.serializeModule(serializer) }
         if let price, let priceUint64 = UInt64(price) {
             serializer.fixedBytes(priceUint64.toData())
         }
@@ -37,11 +37,12 @@ public struct SuiGasData: KeyProtocol {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiGasData {
-        return SuiGasData(
-            payment: try? deserializer.sequence(valueDecoder: Deserializer._struct),
-            owner: try? Deserializer.string(deserializer),
-            price: try? Deserializer.string(deserializer),
-            budget: try? Deserializer.string(deserializer)
-        )
+//        return SuiGasData(
+//            payment: try? deserializer.sequence(valueDecoder: Deserializer._struct),
+//            owner: try? Deserializer.string(deserializer),
+//            price: try? Deserializer.string(deserializer),
+//            budget: try? Deserializer.string(deserializer)
+//        )
+        throw SuiError.notImplemented
     }
 }

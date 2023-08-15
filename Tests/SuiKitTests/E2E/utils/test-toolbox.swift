@@ -49,7 +49,7 @@ internal class TestToolbox {
     func publishPackage(_ name: String) async throws -> PublishedPackage {
         let fileData = try self.getModule(name)
 
-        var txBlock = TransactionBlock()
+        var txBlock = try TransactionBlock()
         let cap = try txBlock.publish(
             modules: fileData["modules"].arrayObject as! [String],
             dependencies: fileData["dependencies"].arrayObject as! [String]
@@ -88,7 +88,7 @@ internal class TestToolbox {
     func upgradePackage(_ packageId: String, _ capId: String, _ name: String) async throws {
         let fileData = try self.getModule(name)
 
-        var txBlock = TransactionBlock()
+        var txBlock = try TransactionBlock()
         let cap = try txBlock.object(value: capId)
         let ticket = try txBlock.moveCall(
             target: "0x2::package::authorize_upgrade",
@@ -134,7 +134,7 @@ internal class TestToolbox {
         _ amounts: [Int]? = nil,
         _ coinId: String? = nil
     ) async throws -> JSON {
-        var txBlock = TransactionBlock()
+        var txBlock = try TransactionBlock()
 
         let recipientsTx = try recipients ?? self.getRandomAddresses(numRecipients)
         let amountsTx = amounts ?? (0..<numRecipients).map { _ in self.defaultSendAmount }

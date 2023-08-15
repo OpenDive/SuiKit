@@ -7,15 +7,13 @@
 
 import Foundation
 
-public struct UpgradeTransaction: KeyProtocol {
-    public let kind: SuiTransactionKindName
+public struct UpgradeTransaction: KeyProtocol, TransactionProtocol {
     public let modules: [[UInt8]]
     public let dependencies: [objectId]
     public let packageId: objectId
     public let ticket: ObjectTransactionArgument
     
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: kind)
         try Serializer.toBytes(serializer, modules.map { Data($0) })
         try serializer.sequence(dependencies, Serializer.str)
         try Serializer.str(serializer, packageId)
@@ -24,11 +22,14 @@ public struct UpgradeTransaction: KeyProtocol {
     
     public static func deserialize(from deserializer: Deserializer) throws -> UpgradeTransaction {
         return UpgradeTransaction(
-            kind: try Deserializer._struct(deserializer),
             modules: (try deserializer.sequence(valueDecoder: Deserializer.toBytes)).map { [UInt8]($0) },
             dependencies: try deserializer.sequence(valueDecoder: Deserializer.string),
             packageId: try Deserializer.string(deserializer),
             ticket: try Deserializer._struct(deserializer)
         )
+    }
+
+    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        try ticket.argument.encodeInput(objects: &objects, inputs: &inputs)
     }
 }

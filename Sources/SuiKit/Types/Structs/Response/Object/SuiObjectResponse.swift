@@ -16,4 +16,20 @@ public struct SuiObjectResponse {
     public let previousTransaction: String?
     public let storageRebate: Int?
     public let content: SuiMoveObject
+    public let error: String?
+
+    public func getSharedObjectInitialVersion() -> Int? {
+        if let owner = self.owner, let initialSharedVersion = owner.shared?.shared.initialSharedVersion, initialSharedVersion != 0 {
+            return initialSharedVersion
+        }
+        return nil
+    }
+
+    public func getObjectReference() -> SuiObjectRef {
+        return SuiObjectRef(
+            objectId: self.objectId,
+            version: self.version,
+            digest: self.digest
+        )
+    }
 }

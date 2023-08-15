@@ -7,9 +7,9 @@
 
 import Foundation
 
-public struct TransferObjectsTransaction: KeyProtocol {
-    public let objects: [ObjectTransactionArgument]
-    public let address: PureTransactionArgument
+public struct TransferObjectsTransaction: KeyProtocol, TransactionProtocol {
+    public var objects: [ObjectTransactionArgument]
+    public var address: PureTransactionArgument
     
     public func serialize(_ serializer: Serializer) throws {
         try serializer.sequence(objects, Serializer._struct)
@@ -21,5 +21,12 @@ public struct TransferObjectsTransaction: KeyProtocol {
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
             address: try Deserializer._struct(deserializer)
         )
+    }
+    
+    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        try self.objects.forEach { argument in
+            try argument.argument.encodeInput(objects: &objects, inputs: &inputs)
+        }
+        try self.address.argument.encodeInput(objects: &objects, inputs: &inputs)
     }
 }

@@ -45,7 +45,7 @@ public enum TransactionArgumentName: String, KeyProtocol {
     }
 }
 
-public enum TransactionArgument: KeyProtocol, Codable {
+public enum TransactionArgument: KeyProtocol {
     case gasCoin
     case input(TransactionBlockInput)
     case result(Result)
@@ -61,6 +61,15 @@ public enum TransactionArgument: KeyProtocol, Codable {
             return .result
         case .nestedResult:
             return .nestedResult
+        }
+    }
+
+    public func encodeInput(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+        switch self {
+        case .input(let transactionBlockInput):
+            try self.encodeInput(with: &(inputs[Int(transactionBlockInput.index)]), objects: &objects)
+        default:
+            return
         }
     }
 
@@ -96,9 +105,35 @@ public enum TransactionArgument: KeyProtocol, Codable {
             throw SuiError.notImplemented
         }
     }
+
+    private func encodeInput(
+        with input: inout TransactionBlockInput,
+        objects: inout [ObjectsToResolve]
+    ) throws {
+        guard let value = input.value, let type = input.type else { throw SuiError.notImplemented }
+
+        switch value {
+        case .callArg:
+            return
+        case .string(let str):
+            switch type {
+            case .object:
+                objects.append(ObjectsToResolve(id: str, input: input, normalizedType: nil))
+            default:
+                input.value = .input(Inputs.pure(data: try value.dataValue()))
+            }
+        default:
+            switch type {
+            case .pure:
+                input.value = .input(Inputs.pure(data: try value.dataValue()))
+            case .object:
+                throw SuiError.notImplemented
+            }
+        }
+    }
 }
 
-public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol, Codable {
+public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtocol {
     public var index: UInt16
     public var value: SuiJsonValue?
     public var type: ValueType?
@@ -112,7 +147,7 @@ public struct TransactionBlockInput: KeyProtocol, TransactionArgumentTypeProtoco
     }
 }
 
-public enum ValueType: String, KeyProtocol, Codable {
+public enum ValueType: KeyProtocol, Codable {
     case pure
     case object
     

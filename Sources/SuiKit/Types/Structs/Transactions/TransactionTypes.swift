@@ -397,6 +397,11 @@ public indirect enum SuiJsonValue: KeyProtocol {
             try Serializer.u64(ser, uInt64)
             return ser.output()
         case .string(let string):
+            if containsNonASCIICharacters(string) {
+                try ser.uleb128(UInt(string.utf8.count + 1))
+            } else {
+                try ser.uleb128(UInt(string.count + 1))
+            }
             try Serializer.str(ser, string)
             return ser.output()
         case .address(let address):
@@ -407,6 +412,24 @@ public indirect enum SuiJsonValue: KeyProtocol {
         case .input(let input):
             try Serializer._struct(ser, value: input)
             return ser.output()
+        case .array(let array):
+            try ser.uleb128(UInt(array.count))
+            for value in array {
+                switch value {
+                case .string(let str):
+                    if containsNonASCIICharacters(str) {
+                        try ser.uleb128(UInt(str.utf8.count))
+                    } else {
+                        try ser.uleb128(UInt(str.count))
+                    }
+                    try Serializer.fixedStr(ser, str)
+                default:
+                    throw SuiError.notImplemented
+                }
+            }
+            let ser2 = Serializer()
+            try Serializer.toBytes(ser2, ser.output())
+            return ser2.output()
         default:
             throw SuiError.notImplemented
         }
@@ -1239,4 +1262,13 @@ public struct TransactionFunctions {
         }
         return publishedChanges ?? []
     }
+}
+
+internal func containsNonASCIICharacters(_ string: String) -> Bool {
+    for scalar in string.unicodeScalars {
+        if scalar.value > 127 {
+            return true
+        }
+    }
+    return false
 }

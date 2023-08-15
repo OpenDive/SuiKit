@@ -700,7 +700,7 @@ public struct SuiProvider {
                 ]
             )
         )
-
+        
         return JSON(data)["result"]
     }
     
@@ -776,7 +776,6 @@ public struct SuiProvider {
     ) async throws -> JSON {
         transactionBlock.setSenderIfNotSet(sender: try signer.publicKey.toSuiAddress())
         let txBytes = try await transactionBlock.build(self)
-
         let signature = try signer.signTransactionBlock([UInt8](txBytes))
         return try await self.executeTransactionBlock(
             [UInt8](txBytes),

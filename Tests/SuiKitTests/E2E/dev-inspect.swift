@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 8/9/23.
 //
@@ -14,8 +14,7 @@ final class DevInspectTest: XCTestCase {
     var packageId: String?
 
     override func setUp() async throws {
-        let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
-        self.toolBox = try await TestToolbox(account: account)
+        self.toolBox = try await TestToolbox(true)
         self.packageId = try await self.fetchToolBox().publishPackage("serializer").packageId
     }
 
@@ -94,7 +93,7 @@ final class DevInspectTest: XCTestCase {
         )
     }
 
-    // Failed test
+    // Passed test
     func testThatVerifiesIncorrectMoveCallsWillFail() async throws {
         let toolBox = try self.fetchToolBox()
         var tx = try TransactionBlock()

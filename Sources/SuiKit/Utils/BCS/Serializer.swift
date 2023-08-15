@@ -213,6 +213,16 @@ public class Serializer {
         }
     }
 
+    public static func fixedStr<T: EncodingContainer>(_ serializer: Serializer, _ value: T) throws {
+        if let str = value as? String {
+            serializer.fixedBytes(String(str).data(using: .utf8)!)
+        } else if let strArray = value as? [String] {
+            try serializer.sequence(strArray, Serializer.str)
+        } else {
+            throw SuiError.invalidDataValue(supportedType: "String or [String]")
+        }
+    }
+
     /// Serialize a UInt8 value or an array of UInt8 values using a custom Serializer.
     ///
     /// This function takes a custom Serializer and a generic value conforming to the EncodingContainer protocol,

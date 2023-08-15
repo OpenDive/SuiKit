@@ -557,7 +557,7 @@ public struct TransactionBlock {
 
                     switch arg {
                     case .input(let blockInputArgument):
-                        var input = blockData.inputs[Int(blockInputArgument.index)]
+                        let input = blockData.inputs[Int(blockInputArgument.index)]
                         switch input.value {
                         case .callArg: return
                         default: break
@@ -565,7 +565,7 @@ public struct TransactionBlock {
                         guard let inputValue = input.value else { return }
                         let serType = try param.getPureSerializationType(inputValue)
                         if serType != nil {
-                            input.value = .input(
+                            blockData.inputs[Int(blockInputArgument.index)].value = .input(
                                 Inputs.pure(data: try inputValue.dataValue())
                             )
                             return

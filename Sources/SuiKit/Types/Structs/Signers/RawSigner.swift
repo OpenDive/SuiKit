@@ -79,8 +79,8 @@ public struct RawSigner: SignerWithProviderProtocol {
         return try await tx.getDigest(self.provider)
     }
     
-    public func getTransactionBlockDigest(_ tx: inout Data) -> String {
-        return TransactionBlockDataBuilder.getDigestFromBytes(bytes: tx)
+    public func getTransactionBlockDigest(_ tx: inout Data) throws -> String {
+        return try TransactionBlockDataBuilder.getDigestFromBytes(bytes: tx)
     }
     
     public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> JSON {

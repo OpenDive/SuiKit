@@ -9,6 +9,7 @@ import Foundation
 import BigInt
 import CryptoKit
 import Base58Swift
+import Blake2
 
 public struct TransactionBlockDataBuilder {
     public var serializedTransactionDataBuilder: SerializedTransactionDataBuilder
@@ -84,8 +85,8 @@ public struct TransactionBlockDataBuilder {
         }
     }
     
-    public static func getDigestFromBytes(bytes: Data) -> String {
-        let hash = hashTypedData(typeTag: "TransactionData", data: bytes)
+    public static func getDigestFromBytes(bytes: Data) throws -> String {
+        let hash = try hashTypedData(typeTag: "TransactionData", data: bytes)
         return Base58.base58Encode(hash)
     }
     
@@ -150,7 +151,7 @@ public struct TransactionBlockDataBuilder {
     
     public func getDigest() throws -> String {
         let bytes = try self.build()
-        return TransactionBlockDataBuilder.getDigestFromBytes(bytes: bytes)
+        return try TransactionBlockDataBuilder.getDigestFromBytes(bytes: bytes)
     }
     
     public func snapshot() -> SerializedTransactionDataBuilder {
@@ -164,14 +165,14 @@ public func prepareSuiAddress(address: String) -> String {
     return normalizeSuiAddress(value: address).replacingOccurrences(of: "0x", with: "")
 }
 
-public func hashTypedData(typeTag: String, data: Data) -> [UInt8] {
+public func hashTypedData(typeTag: String, data: Data) throws -> [UInt8] {
     let typeTagBytes = Array(typeTag.utf8) + Array("::".utf8)
     
     var dataWithTag = [UInt8]()
     dataWithTag.append(contentsOf: typeTagBytes)
     dataWithTag.append(contentsOf: data)
     
-    let hashedData = SHA256.hash(data: Data(dataWithTag))
+    let hashedData = try Blake2.hash(.b2b, size: 32, data: Data(dataWithTag))
     
     return Array(hashedData)
 }

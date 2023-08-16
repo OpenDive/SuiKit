@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Marcus Arnett on 5/15/23.
 //
@@ -76,6 +76,8 @@ public struct BuildOptions {
 public struct TransactionBlock {
     public var transactionBrand: Bool = true
     public var blockData: TransactionBlockDataBuilder
+    
+    private var isPreparred: Bool = false
     
     public init(_ blockData: TransactionBlockDataBuilder? = nil) throws {
         self.blockData = try blockData ?? TransactionBlockDataBuilder(
@@ -236,7 +238,7 @@ public struct TransactionBlock {
                     type: .object,
                     value: .callArg(
                         ObjectCallArg(
-                            object: .immOrOwned(immOrOwned), 
+                            object: .immOrOwned(immOrOwned),
                             type: .immOrOwned(immOrOwned)
                         )
                     )
@@ -257,7 +259,7 @@ public struct TransactionBlock {
             ]
         }
     }
-
+    
     public mutating func objectRef(objectRef: SuiObjectRef) throws -> [TransactionBlockInput] {
         return try self.object(value: Inputs.objectRef(suiObjectRef: objectRef))
     }
@@ -265,7 +267,7 @@ public struct TransactionBlock {
     public mutating func shredObjectRef(sharedObjectRef: SharedObjectRef) throws -> [TransactionBlockInput] {
         return try self.object(value: Inputs.sharedObjectRef(sharedObjectRef: sharedObjectRef))
     }
-
+    
     public mutating func pure(value: SuiJsonValue) throws -> TransactionBlockInput {
         return try self.input(type: .pure, value: value)
     }
@@ -292,7 +294,7 @@ public struct TransactionBlock {
             name: .splitCoins
         )
     }
-
+    
     public mutating func mergeCoin(destination: TransactionBlockInput, sources: [TransactionBlockInput]) throws -> TransactionArgument {
         try self.add(
             transaction: Transactions.mergeCoins(
@@ -308,7 +310,7 @@ public struct TransactionBlock {
             name: .mergeCoins
         )
     }
-
+    
     public mutating func publish(
         modules: [Data],
         dependencies: [objectId]
@@ -321,7 +323,7 @@ public struct TransactionBlock {
             name: .publish
         )
     }
-
+    
     public mutating func publish(
         modules: [String],
         dependencies: [objectId]
@@ -440,7 +442,7 @@ public struct TransactionBlock {
         try await self.prepare(BuildOptions(provider: provider, onlyTransactionKind: onlyTransactionKind))
         return try self.blockData.build(onlyTransactionKind: onlyTransactionKind)
     }
-
+    
     public mutating func getDigest(_ provider: SuiProvider) async throws -> String {
         try await self.prepare(BuildOptions(provider: provider))
         return try self.blockData.getDigest()
@@ -466,13 +468,19 @@ public struct TransactionBlock {
             gasOwner,
             "0x2::sui::SUI"
         )
-        
         let filteredCoins = coins.data.filter { coin in
             let matchingInput = self.blockData.serializedTransactionDataBuilder.inputs.filter { input in
                 if let value = input.value {
                     switch value {
                     case .callArg(let callArg):
                         switch callArg.type {
+                        case .immOrOwned(let immOrOwned):
+                            return coin.coinObjectId == immOrOwned.immOrOwned.objectId
+                        default:
+                            return false
+                        }
+                    case .input(let input):
+                        switch input.type {
                         case .immOrOwned(let immOrOwned):
                             return coin.coinObjectId == immOrOwned.immOrOwned.objectId
                         default:
@@ -500,7 +508,7 @@ public struct TransactionBlock {
         guard !paymentCoins.isEmpty else {
             throw SuiError.notImplemented
         }
-
+        
         try self.setGasPayment(payments: paymentCoins)
     }
     
@@ -515,7 +523,7 @@ public struct TransactionBlock {
             )
         )
     }
-
+    
     private mutating func prepareTransactions(provider: SuiProvider) async throws {
         let blockData = self.blockData.serializedTransactionDataBuilder
         
@@ -537,24 +545,24 @@ public struct TransactionBlock {
         if !(moveModulesToResolve.isEmpty) {
             try await moveModulesToResolve.asyncForEach { moveCallTx in
                 let moveCallArguments = try moveCallTx.target.toModule()
-
+                
                 let packageId = moveCallArguments.address
                 let moduleName = moveCallArguments.module
                 let functionName = moveCallArguments.name
-
+                
                 let normalized = try await provider.getNormalizedMoveFunction(
                     normalizeSuiAddress(value: packageId),
                     moduleName,
                     functionName
                 )
-
+                
                 let hasTxContext = normalized.hasTxContext()
                 let params = hasTxContext ? normalized.parameters.dropLast() : normalized.parameters
                 guard params.count == moveCallTx.arguments.count else { throw SuiError.notImplemented }
-
+                
                 try params.enumerated().forEach { (idx, param) in
                     let arg = moveCallTx.arguments[idx]
-
+                    
                     switch arg {
                     case .input(let blockInputArgument):
                         let input = blockData.inputs[Int(blockInputArgument.index)]
@@ -572,7 +580,7 @@ public struct TransactionBlock {
                         }
                         guard param.extractStructTag() != nil || param.type == "TypeParameter" else { throw SuiError.notImplemented }
                         guard inputValue.kind == .string else { throw SuiError.notImplemented }
-
+                        
                         switch inputValue {
                         case .string(let string):
                             objectsToResolve.append(
@@ -590,7 +598,7 @@ public struct TransactionBlock {
                 }
             }
         }
-
+        
         if !(objectsToResolve.isEmpty) {
             let dedupedIds = objectsToResolve.map { $0.id }
             let objectChunks = dedupedIds.chunked(into: TransactionConstants.MAX_OBJECTS_PER_FETCH)
@@ -603,7 +611,7 @@ public struct TransactionBlock {
             }
             
             let objectsById = Dictionary(uniqueKeysWithValues: zip(dedupedIds, objects))
-
+            
             let invalidObjects = objectsById.filter { _, obj in obj.error != nil }.map { key, _ in key }
             guard invalidObjects.isEmpty else { throw SuiError.notImplemented }
             for i in objectsToResolve.indices {
@@ -636,7 +644,7 @@ public struct TransactionBlock {
                     )
                 )
             }
-
+            
             for objectToResolve in objectsToResolve {
                 self.blockData.serializedTransactionDataBuilder.inputs[Int(objectToResolve.input.index)] = objectToResolve.input
             }
@@ -644,6 +652,7 @@ public struct TransactionBlock {
     }
     
     private mutating func prepare(_ optionsPassed: BuildOptions) async throws {
+        guard !(self.isPreparred) else { return }
         var options: BuildOptions = optionsPassed
         
         guard let provider = options.provider else {
@@ -653,13 +662,13 @@ public struct TransactionBlock {
         if options.protocolConfig == nil && options.limits == nil {
             options.protocolConfig = try await provider.getProtocolConfig()
         }
-
+        
         try await self.prepareGasPrice(provider: provider, onlyTransactionKind: options.onlyTransactionKind ?? false)
         try await self.prepareTransactions(provider: provider)
-
+        
         if (options.onlyTransactionKind == nil) || (options.onlyTransactionKind != nil && !(options.onlyTransactionKind!)) {
             let onlyTransactionKind = options.onlyTransactionKind
-
+            
             try await self.prepareGasPayment(provider: provider, onlyTransactionKind: onlyTransactionKind)
             if self.blockData.serializedTransactionDataBuilder.gasConfig.budget == nil {
                 let blockData = self.blockData
@@ -678,17 +687,18 @@ public struct TransactionBlock {
                 )
                 let baseComputationCostWithOverhead = dryRunResult["effects"]["gasUsed"]["computationCost"].intValue + safeOverhead
                 let gasBudget =
-                    baseComputationCostWithOverhead +
-                    dryRunResult["effects"]["gasUsed"]["storageCost"].intValue -
-                    dryRunResult["effects"]["gasUsed"]["storageRebate"].intValue
+                baseComputationCostWithOverhead +
+                dryRunResult["effects"]["gasUsed"]["storageCost"].intValue -
+                dryRunResult["effects"]["gasUsed"]["storageRebate"].intValue
                 self.setGasBudget(
                     price:
                         gasBudget > baseComputationCostWithOverhead ?
-                        BigInt(gasBudget) :
+                    BigInt(gasBudget) :
                         BigInt(baseComputationCostWithOverhead)
                 )
             }
         }
+        self.isPreparred = true
     }
     
     private func isMissingSender(_ onlyTransactionKind: Bool? = nil) -> Bool {
@@ -826,7 +836,7 @@ public struct TransactionBlock {
         let regex = try! NSRegularExpression(pattern: "^(0x|0X)?[a-fA-F0-9]+$")
         let range = NSRange(location: 0, length: value.utf16.count)
         let match = regex.firstMatch(in: value, options: [], range: range)
-
+        
         return match != nil && value.count % 2 == 0
     }
     

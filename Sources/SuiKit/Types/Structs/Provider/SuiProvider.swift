@@ -700,7 +700,8 @@ public struct SuiProvider {
                 ]
             )
         )
-        
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return JSON(data)["result"]
     }
     
@@ -825,6 +826,7 @@ public struct SuiProvider {
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
         if data["error"].exists() {
+            print(data)
             return RPCErrorValue(
                 id: data["id"].intValue,
                 error: ErrorMessage(

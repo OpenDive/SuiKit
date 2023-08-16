@@ -214,5 +214,5 @@ public func normalizeSuiAddress(value: String, forceAdd0x: Bool = false) -> SuiA
     if !forceAdd0x && address.hasPrefix("0x") {
         address = String(address.dropFirst(2))
     }
-    return "0x" + address.padding(toLength: SUI_ADDRESS_LENGTH * 2, withPad: "0", startingAt: 0)
+    return "0x" + String().padding(toLength: ((SUI_ADDRESS_LENGTH * 2) - address.count), withPad: "0", startingAt: 0) + address
 }

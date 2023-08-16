@@ -12,6 +12,7 @@ import SwiftyJSON
 internal class TestToolbox {
     let defaultGasBudget = 10_000_000
     let defaultSendAmount = 1_000
+    let defaultRecipient = "0x0c567ffdf8162cb6d51af74be0199443b92e823d4ba6ced24de5c6c463797d46"
 
     let account: Account
     let client: SuiProvider
@@ -206,14 +207,13 @@ internal class TestToolbox {
         return JSON(fileCompiledData)
     }
 
-    private func setup() async throws {
+    internal func setup() async throws {
         var isInitializing = true
         while isInitializing {
             do {
                 let faucet = FaucetClient(connection: self.client.connection)
-                let result = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
+                let _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
                 isInitializing = false
-                try await self.client.waitForTransaction(result.transferTxDigest)
             } catch {
                 if let error = error as? SuiError, error == .FaucetRateLimitError {
                     isInitializing = false

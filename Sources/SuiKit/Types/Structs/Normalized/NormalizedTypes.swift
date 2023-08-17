@@ -238,11 +238,11 @@ public indirect enum SuiMoveNormalizedType: Equatable {
                     )
                 )
             }
-            if data["Reference"].exists() {
-                return .reference(try decodeNormalizedType(data["Reference"]))
-            }
             if data["MutableReference"].exists() {
                 return .mutableReference(try decodeNormalizedType(data["MutableReference"]))
+            }
+            if data["Reference"].exists() {
+                return .reference(try decodeNormalizedType(data["Reference"]))
             }
             throw SuiError.notImplemented
         }

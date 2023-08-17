@@ -9,9 +9,9 @@ import Foundation
 import Base58Swift
 
 public struct SuiObjectRef: KeyProtocol {
-    public let objectId: String
-    public let version: UInt64
-    public let digest: TransactionDigest
+    public var objectId: String
+    public var version: UInt64
+    public var digest: TransactionDigest
     
     public init(objectId: objectId, version: UInt64, digest: TransactionDigest) {
         self.objectId = objectId
@@ -27,7 +27,7 @@ public struct SuiObjectRef: KeyProtocol {
             try Serializer.toBytes(serializer, Data(dataDigest))
         }
     }
-    
+
     public static func deserialize(from deserializer: Deserializer) throws -> SuiObjectRef {
         return SuiObjectRef(
             objectId: try Deserializer.string(deserializer),

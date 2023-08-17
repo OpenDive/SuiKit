@@ -72,12 +72,13 @@ public enum ObjectArg: KeyProtocol {
     case shared(SharedArg)
     
     public func serialize(_ serializer: Serializer) throws {
+        try Serializer.u8(serializer, UInt8(1))
         switch self {
         case .immOrOwned(let immOrOwned):
-            try Serializer.u8(serializer, UInt8(1))
+            try Serializer.u8(serializer, UInt8(0))
             try Serializer._struct(serializer, value: immOrOwned)
         case .shared(let sharedArg):
-            try Serializer.u8(serializer, UInt8(2))
+            try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: sharedArg)
         }
     }
@@ -121,10 +122,10 @@ public struct BuilderCallArg {
 public let MAX_PURE_ARGUMENT_SIZE = 16 * 1024
 
 public struct ImmOrOwned: KeyProtocol {
-    public let immOrOwned: SuiObjectRef
+    public var immOrOwned: SuiObjectRef
     
     public func serialize(_ serializer: Serializer) throws {
-        try serializer.uleb128(0)
+//        try serializer.uleb128(0)
         try Serializer._struct(serializer, value: immOrOwned)
     }
     
@@ -139,10 +140,10 @@ public struct SharedArg: KeyProtocol {
     public let shared: SharedObjectArg
     
     public func serialize(_ serializer: Serializer) throws {
-        try serializer.uleb128(1)
+//        try serializer.uleb128(1)
         try Serializer._struct(serializer, value: shared)
     }
-    
+
     public static func deserialize(from deserializer: Deserializer) throws -> SharedArg {
         return SharedArg(
             shared: try Deserializer._struct(deserializer)
@@ -165,10 +166,10 @@ public func getIdFromCallArg(arg: ObjectCallArg) throws -> String {
 
 public struct SharedObjectArg: KeyProtocol {
     public let objectId: String
-    public let initialSharedVersion: UInt8
+    public let initialSharedVersion: UInt64
     public let mutable: Bool
 
-    public init(objectId: objectId, initialSharedVersion: UInt8, mutable: Bool) throws {
+    public init(objectId: objectId, initialSharedVersion: UInt64, mutable: Bool) throws {
         self.objectId = objectId
         self.initialSharedVersion = initialSharedVersion
         self.mutable = mutable
@@ -177,7 +178,7 @@ public struct SharedObjectArg: KeyProtocol {
     public func serialize(_ serializer: Serializer) throws {
         let publicKey = try ED25519PublicKey(hexString: objectId)
         publicKey.serializeModule(serializer)
-        try Serializer.u8(serializer, initialSharedVersion)
+        try Serializer.u64(serializer, initialSharedVersion)
         try Serializer.bool(serializer, mutable)
     }
     

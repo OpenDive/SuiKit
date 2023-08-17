@@ -190,23 +190,22 @@ final class TXBuilderTest: XCTestCase {
         )
     }
 
-//    func testThatMoveSharedObjectCallWithMixedUsageOfMutableAndImmutableReferencesWorksAsIntended() async throws {
-//        let toolBox = try self.fetchToolBox()
-//        print("DEBUG: OBJECT ID - \(try self.fetchSharedObjectId())")
-//        try await toolBox.setup()
-//        var tx = try TransactionBlock()
-//        let _ = try tx.moveCall(
-//            target: "\(try self.fetchPackageId())::serializer_tests::value",
-//            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
-//        )
-//        let _ = try tx.moveCall(
-//            target: "\(try self.fetchPackageId())::serializer_tests::set_value",
-//            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
-//        )
-//        try await self.validateTransaction(
-//            client: toolBox.client,
-//            account: toolBox.account,
-//            tx: &tx
-//        )
-//    }
+    func testThatMoveSharedObjectCallWithMixedUsageOfMutableAndImmutableReferencesWorksAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        var tx = try TransactionBlock()
+        let _ = try tx.moveCall(
+            target: "\(try self.fetchPackageId())::serializer_tests::value",
+            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+        )
+        let _ = try tx.moveCall(
+            target: "\(try self.fetchPackageId())::serializer_tests::set_value",
+            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+        )
+        try await self.validateTransaction(
+            client: toolBox.client,
+            account: toolBox.account,
+            tx: &tx
+        )
+    }
 }

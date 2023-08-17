@@ -185,18 +185,27 @@ public struct TransactionBlock {
                     case .sharedObject(let object):
                         return id == object.objectId
                     }
+                case .input(let input):
+                    switch input.type {
+                    case .pure:
+                        return false
+                    case .immOrOwned(let object):
+                        return id == object.immOrOwned.objectId
+                    case .sharedObject(let object):
+                        return id == object.objectId
+                    }
+                case .string(let str):
+                    return getIdFromCallArg(arg: str) == id
                 default:
                     return false
                 }
             }
-            
             return false
         }
-        
         if !inserted.isEmpty {
             return inserted[0]
         }
-        
+
         return try self.input(
             type: .object,
             value: SuiJsonValue.string(value)
@@ -555,14 +564,14 @@ public struct TransactionBlock {
                     moduleName,
                     functionName
                 )
-                
+
                 let hasTxContext = normalized.hasTxContext()
                 let params = hasTxContext ? normalized.parameters.dropLast() : normalized.parameters
                 guard params.count == moveCallTx.arguments.count else { throw SuiError.notImplemented }
-                
+
                 try params.enumerated().forEach { (idx, param) in
                     let arg = moveCallTx.arguments[idx]
-                    
+
                     switch arg {
                     case .input(let blockInputArgument):
                         let input = blockData.inputs[Int(blockInputArgument.index)]
@@ -580,7 +589,7 @@ public struct TransactionBlock {
                         }
                         guard param.extractStructTag() != nil || param.type == "TypeParameter" else { throw SuiError.notImplemented }
                         guard inputValue.kind == .string else { throw SuiError.notImplemented }
-                        
+
                         switch inputValue {
                         case .string(let string):
                             objectsToResolve.append(
@@ -598,7 +607,7 @@ public struct TransactionBlock {
                 }
             }
         }
-        
+
         if !(objectsToResolve.isEmpty) {
             let dedupedIds = objectsToResolve.map { $0.id }
             let objectChunks = dedupedIds.chunked(into: TransactionConstants.MAX_OBJECTS_PER_FETCH)
@@ -610,43 +619,62 @@ public struct TransactionBlock {
                 objects.append(contentsOf: result)
             }
             
-            let objectsById = Dictionary(uniqueKeysWithValues: zip(dedupedIds, objects))
-            
+            var objectsById: [String : SuiObjectResponse] = [:]
+            zip(dedupedIds, objects).forEach { (id, object) in
+                objectsById[id] = object
+            }
             let invalidObjects = objectsById.filter { _, obj in obj.error != nil }.map { key, _ in key }
             guard invalidObjects.isEmpty else { throw SuiError.notImplemented }
+            var resolvedIds: [String: Range<Array<ObjectsToResolve>.Index>.Element] = [:]
             for i in objectsToResolve.indices {
-                let objectToResolve = objectsToResolve[i]
-                guard let object = objectsById[objectToResolve.id] else { continue }
-                guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
-                    let objRef = object.getObjectReference()
-                    objectsToResolve[i].input.value = .input(
-                        try Inputs.objectRef(suiObjectRef: objRef)
-                    )
-                    continue
-                }
+                var idx = i
                 var mutable: Bool = false
+                var objectToResolve = objectsToResolve[idx]
                 switch objectToResolve.input.value {
                 case .callArg(let callArg):
-                    mutable = callArg.isMutableSharedObjectInput() || (
-                        objectToResolve.normalizedType != nil &&
-                        objectToResolve.normalizedType!.extractMutableReference() != nil
-                    )
+                    mutable = callArg.isMutableSharedObjectInput()
+                case .input(let input):
+                    mutable = input.isMutableSharedObjectInput()
                 default:
                     break
                 }
-                objectsToResolve[i].input.value = .input(
+                mutable = mutable || (
+                    objectToResolve.normalizedType != nil &&
+                    objectToResolve.normalizedType!.extractMutableReference() != nil
+                )
+                guard let object = objectsById[objectToResolve.id] else { continue }
+                if resolvedIds[objectToResolve.id] != nil {
+                    idx = resolvedIds[objectToResolve.id]!
+                    objectToResolve = objectsToResolve[idx]
+                }
+                guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
+                    let objRef = object.getObjectReference()
+                    objectsToResolve[idx].input.value = .input(
+                        try Inputs.objectRef(suiObjectRef: objRef)
+                    )
+                    resolvedIds[objectToResolve.id] = idx
+                    continue
+                }
+                objectsToResolve[idx].input.value = .input(
                     try Inputs.sharedObjectRef(
                         sharedObjectRef: SharedObjectRef(
                             objectId: objectToResolve.id,
-                            initialSharedVersion: UInt8(initialSharedVersion),
+                            initialSharedVersion: UInt64(initialSharedVersion),
                             mutable: mutable
                         )
                     )
                 )
+                resolvedIds[objectToResolve.id] = idx
             }
-            
-            for objectToResolve in objectsToResolve {
-                self.blockData.serializedTransactionDataBuilder.inputs[Int(objectToResolve.input.index)] = objectToResolve.input
+            if self.blockData.serializedTransactionDataBuilder.inputs.count != objectsToResolve.count {
+                self.blockData.serializedTransactionDataBuilder.inputs = []
+                for object in objectsToResolve {
+                    self.blockData.serializedTransactionDataBuilder.inputs.append(object.input)
+                }
+            } else {
+                for objectToResolve in objectsToResolve {
+                    self.blockData.serializedTransactionDataBuilder.inputs[Int(objectToResolve.input.index)] = objectToResolve.input
+                }
             }
         }
     }

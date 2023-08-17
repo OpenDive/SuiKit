@@ -591,7 +591,7 @@ public struct SuiProvider {
                         addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
                         objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
                         shared: Shared(
-                            shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["InitialSharedVersion"].intValue)
+                            shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["initial_shared_version"].intValue)
                         )
                     ),
                     previousTransaction: value["previousTransaction"].stringValue,
@@ -826,7 +826,6 @@ public struct SuiProvider {
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
         if data["error"].exists() {
-            print(data)
             return RPCErrorValue(
                 id: data["id"].intValue,
                 error: ErrorMessage(

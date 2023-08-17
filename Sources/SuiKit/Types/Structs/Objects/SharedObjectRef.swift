@@ -9,6 +9,6 @@ import Foundation
 
 public struct SharedObjectRef {
     public let objectId: String
-    public let initialSharedVersion: UInt8
+    public let initialSharedVersion: UInt64
     public let mutable: Bool
 }

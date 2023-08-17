@@ -41,7 +41,7 @@ public struct Inputs {
     public static func objectRef(suiObjectRef: SuiObjectRef) throws -> ObjectCallArg {
         let immOrOwned = ImmOrOwned(
             immOrOwned: SuiObjectRef(
-                objectId: normalizeSuiAddress(value: suiObjectRef.objectId),
+                objectId: try normalizeSuiAddress(value: suiObjectRef.objectId),
                 version: suiObjectRef.version,
                 digest: suiObjectRef.digest
             )
@@ -151,16 +151,16 @@ public struct SharedArg: KeyProtocol {
     }
 }
 
-public func getIdFromCallArg(arg: objectId) -> String {
-    return normalizeSuiAddress(value: arg)
+public func getIdFromCallArg(arg: objectId) throws -> String {
+    return try normalizeSuiAddress(value: arg)
 }
 
 public func getIdFromCallArg(arg: ObjectCallArg) throws -> String {
     switch arg.object {
     case .immOrOwned(let immOwned):
-        return normalizeSuiAddress(value: immOwned.immOrOwned.objectId)
+        return try normalizeSuiAddress(value: immOwned.immOrOwned.objectId)
     case .shared(let shared):
-        return normalizeSuiAddress(value: shared.shared.objectId)
+        return try normalizeSuiAddress(value: shared.shared.objectId)
     }
 }
 
@@ -210,7 +210,8 @@ public struct PureCallArg: InputProtocol {
 
 public let SUI_ADDRESS_LENGTH = 32
 
-public func normalizeSuiAddress(value: String, forceAdd0x: Bool = false) -> SuiAddress {
+public func normalizeSuiAddress(value: String, forceAdd0x: Bool = false) throws -> SuiAddress {
+    guard value.count <= (SUI_ADDRESS_LENGTH * 2) else { throw SuiError.notImplemented }
     var address = value.lowercased()
     if !forceAdd0x && address.hasPrefix("0x") {
         address = String(address.dropFirst(2))

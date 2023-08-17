@@ -170,9 +170,9 @@ public struct TransactionBlock {
     }
     
     public mutating func object(value: objectId) throws -> TransactionBlockInput {
-        let id = getIdFromCallArg(arg: value)
+        let id = try getIdFromCallArg(arg: value)
         let blockData = self.blockData
-        let inserted = blockData.serializedTransactionDataBuilder.inputs.filter { input in
+        let inserted = try blockData.serializedTransactionDataBuilder.inputs.filter { input in
             if input.type == .object {
                 guard let valueEnum = input.value else { return false }
                 switch valueEnum {
@@ -195,7 +195,7 @@ public struct TransactionBlock {
                         return id == object.objectId
                     }
                 case .string(let str):
-                    return getIdFromCallArg(arg: str) == id
+                    return try getIdFromCallArg(arg: str) == id
                 default:
                     return false
                 }

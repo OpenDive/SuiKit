@@ -13,10 +13,11 @@ import SwiftyJSON
 final class GovernanceTest: XCTestCase {
     var toolBox: TestToolbox?
     let defaultStakeAmount = 1_000_000_000
-    let stateObjectId = normalizeSuiAddress(value: "0x5")
+    var stateObjectId: String = ""
 
     override func setUp() async throws {
         self.toolBox = try await TestToolbox(true)
+        self.stateObjectId = try normalizeSuiAddress(value: "0x5")
     }
 
     private func fetchToolBox() throws -> TestToolbox {

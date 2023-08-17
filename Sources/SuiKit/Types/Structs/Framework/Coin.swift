@@ -17,7 +17,7 @@ public struct Coin {
     public static let suiTypeArg = "0x2::sui::SUI"
     public static let validatorsEventQuery = "0x3::validator_set::ValidatorEpochInfoEventV2"
 
-    public static let suiClockObjectId = normalizeSuiAddress(value: "0x6")
+    public static let suiClockObjectId: String = "0x6"
 
     public static let payModuleName = "pay"
     public static let paySplitCoinVecFuncName = "split_vec"
@@ -46,9 +46,9 @@ public struct Coin {
         return coinTypeArg
     }
 
-    public static func getCoinStructTag(coinTypeArg: String) -> SuiMoveNormalizedStructType {
+    public static func getCoinStructTag(coinTypeArg: String) throws -> SuiMoveNormalizedStructType {
         return SuiMoveNormalizedStructType(
-            address: normalizeSuiAddress(value: coinTypeArg.components(separatedBy: "::").first ?? ""),
+            address: try normalizeSuiAddress(value: coinTypeArg.components(separatedBy: "::").first ?? ""),
             module: coinTypeArg.components(separatedBy: "::").dropFirst().first ?? "",
             name: coinTypeArg.components(separatedBy: "::").dropFirst(2).first ?? "",
             typeArguments: []

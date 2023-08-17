@@ -132,7 +132,7 @@ public struct TransactionBlockDataBuilder {
         
         let transactionData = TransactionData.V1(TransactionDataV1(
             kind: SuiTransactionBlockKind.programmableTransaction(kind),
-            sender: prepareSuiAddress(address: sender),
+            sender: try prepareSuiAddress(address: sender),
             gasData: try SuiGasData(
                 payment: payment,
                 owner: prepareSuiAddress(
@@ -161,8 +161,8 @@ public struct TransactionBlockDataBuilder {
 
 public let TRANSACTION_DATA_MAX_SIZE = 128 * 1024
 
-public func prepareSuiAddress(address: String) -> String {
-    return normalizeSuiAddress(value: address).replacingOccurrences(of: "0x", with: "")
+public func prepareSuiAddress(address: String) throws -> String {
+    return try normalizeSuiAddress(value: address).replacingOccurrences(of: "0x", with: "")
 }
 
 public func hashTypedData(typeTag: String, data: Data) throws -> [UInt8] {

@@ -21,7 +21,7 @@ final class DynamicFieldsTest: XCTestCase {
         // TODO: Fix options for types
         let ownedObjects = try await self.fetchToolBox()
             .client.getOwnedObjects(
-                self.fetchToolBox().account.publicKey, 
+                try self.fetchToolBox().account.publicKey.toSuiAddress(),
                 SuiObjectDataFilter.StructType(
                     "\(try self.fetchPackageId())::dynamic_fields_test::Test"
                 ),

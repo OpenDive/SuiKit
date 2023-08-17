@@ -310,6 +310,7 @@ public struct SuiProvider {
     }
     
     public func getObject(_ objectId: String, _ options: GetObject = GetObject()) async throws -> SuiObjectResponse {
+        guard isValidSuiAddress(try normalizeSuiAddress(value: objectId)) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -345,13 +346,14 @@ public struct SuiProvider {
         )
     }
     
-    public func getOwnedObjects(_ account: any PublicKeyProtocol, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
+    public func getOwnedObjects(_ owner: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
+        guard isValidSuiAddress(owner) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
                 "suix_getOwnedObjects",
                 [
-                    AnyCodable(try account.toSuiAddress()),
+                    AnyCodable(owner),
                     AnyCodable(query),
                     AnyCodable(cursor),
                     AnyCodable(limit),
@@ -392,6 +394,7 @@ public struct SuiProvider {
     }
 
     public func getDynamicFields(_ parentId: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ limit: Int? = nil, _ cursor: String? = nil) async throws -> DynamicFieldPage {
+        guard isValidSuiAddress(try normalizeSuiAddress(value: parentId)) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -562,7 +565,8 @@ public struct SuiProvider {
     
     // TODO: Finish getNormalizedMoveModule
     
-    public func getMultiObjects(_ ids: [objectId], _ options: GetObject?) async throws -> [SuiObjectResponse] {
+    public func getMultiObjects(_ ids: [objectId], _ options: GetObject? = nil) async throws -> [SuiObjectResponse] {
+        for object in ids { guard isValidSuiAddress(try normalizeSuiAddress(value: object)) else { throw SuiError.notImplemented } }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -906,8 +910,7 @@ public struct SuiProvider {
     }
 
     public func getTransactionBlock(_ digest: String, _ options: SuiTransactionBlockResponseOptions? = nil) async throws -> JSON {
-         guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
-
+        guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -918,8 +921,29 @@ public struct SuiProvider {
                 ]
             )
         )
-
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return JSON(data)["result"]
+    }
+
+    public func multiGetTransactionBlocks(_ digests: [String], _ options: SuiTransactionBlockResponseOptions? = nil) async throws -> [JSON] {
+        for digest in digests {
+            guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
+        }
+        guard digests.count == Set(digests).count else { throw SuiError.notImplemented }
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_multiGetTransactionBlocks",
+                [
+                    AnyCodable(digests),
+                    AnyCodable(options)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        return JSON(data)["result"].arrayValue
     }
 
     public func waitForTransaction(_ tx: String) async throws {
@@ -959,7 +983,8 @@ public struct SuiProvider {
     }
 
     private func isValidTransactionDigest(_ value: String) -> Bool {
-        guard let buffer = Base58.base58CheckDecode(value) else { return false }
+        guard !value.isEmpty else { return false }
+        guard let buffer = Base58.base58Decode(value) else { return false }
         return buffer.count == 32
     }
     
@@ -1007,6 +1032,26 @@ public struct SuiProvider {
             }
 
             task.resume()
+        }
+    }
+
+    private func isValidSuiAddress(_ value: String) -> Bool {
+        return isHex(value) && self.getHexByteLength(value) == 32
+    }
+
+    private func isHex(_ value: String) -> Bool {
+        let regex = try! NSRegularExpression(pattern: "^(0x|0X)?[a-fA-F0-9]+$")
+        let range = NSRange(location: 0, length: value.utf16.count)
+        let match = regex.firstMatch(in: value, options: [], range: range)
+        
+        return match != nil && value.count % 2 == 0
+    }
+    
+    private func getHexByteLength(_ value: String) -> Int {
+        if value.hasPrefix("0x") || value.hasPrefix("0X") {
+            return (value.count - 2) / 2
+        } else {
+            return value.count / 2
         }
     }
 }

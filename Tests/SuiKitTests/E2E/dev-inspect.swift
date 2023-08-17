@@ -50,7 +50,6 @@ final class DevInspectTest: XCTestCase {
         }
     }
 
-    // Passing test
     func testThatDevInspectSplitAndTransferWorkAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         var txBlock = try TransactionBlock()

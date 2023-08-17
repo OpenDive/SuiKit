@@ -17,7 +17,7 @@ final class TXBuilderTest: XCTestCase {
     var publishTxn: JSON?
     var sharedObjectId: String?
 
-    let suiClockObjectId = normalizeSuiAddress(value: "0x6")
+    var suiClockObjectId: String = ""
 
     override func setUp() async throws {
         let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
@@ -29,6 +29,7 @@ final class TXBuilderTest: XCTestCase {
             return object["owner"]["Shared"]["initial_shared_version"].int != nil
         }
         self.sharedObjectId = sharedObject[0]["reference"]["objectId"].stringValue
+        self.suiClockObjectId = try normalizeSuiAddress(value: "0x6")
     }
 
     private func fetchToolBox() throws -> TestToolbox {

@@ -13,7 +13,7 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     public let arguments: [TransactionArgument]
     
     public func serialize(_ serializer: Serializer) throws {
-        let normalizedModule = Coin.getCoinStructTag(coinTypeArg: self.target)
+        let normalizedModule = try Coin.getCoinStructTag(coinTypeArg: self.target)
         let address = try ED25519PublicKey(hexString: normalizedModule.address)
         address.serializeModule(serializer)
         try Serializer.str(serializer, normalizedModule.module)

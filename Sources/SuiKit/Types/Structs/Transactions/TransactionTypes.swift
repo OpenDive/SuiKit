@@ -344,6 +344,21 @@ public indirect enum SuiJsonValue: KeyProtocol {
     case data(Data)
     case input(any InputProtocol)
     case address(ED25519PublicKey)  // TODO: Implement generic
+
+    public func stringType() throws -> String {
+        switch self {
+        case .boolean(let bool):
+            return "\(bool)"
+        case .number(let uInt64):
+            return "\(uInt64)"
+        case .string(let string):
+            return string
+        case .address(let eD25519PublicKey):
+            return eD25519PublicKey.hex()
+        default:
+            throw SuiError.notImplemented
+        }
+    }
     
     public static func fromJSONObject(_ data: JSON) throws -> SuiJsonValue {
         if let boolData = data.bool {
@@ -405,7 +420,7 @@ public indirect enum SuiJsonValue: KeyProtocol {
             try Serializer.str(ser, string)
             return ser.output()
         case .address(let address):
-            address.serializeModule(ser)
+            try Serializer._struct(ser, value: address)
             return ser.output()
         case .data(let data):
             return data

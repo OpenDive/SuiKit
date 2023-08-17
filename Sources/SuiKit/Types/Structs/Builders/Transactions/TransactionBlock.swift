@@ -535,11 +535,11 @@ public struct TransactionBlock {
     
     private mutating func prepareTransactions(provider: SuiProvider) async throws {
         let blockData = self.blockData.serializedTransactionDataBuilder
-        
+
         var moveModulesToResolve: [MoveCallTransaction] = []
-        
+
         var objectsToResolve: [ObjectsToResolve] = []
-        
+
         try blockData.transactions.forEach { transaction in
             if transaction.name == .moveCall {
                 try (transaction.suiTransaction as! MoveCallTransaction).addToResolve(
@@ -550,7 +550,7 @@ public struct TransactionBlock {
                 try transaction.suiTransaction.executeTransaction(objects: &objectsToResolve, inputs: &(blockData.inputs))
             }
         }
-        
+
         if !(moveModulesToResolve.isEmpty) {
             try await moveModulesToResolve.asyncForEach { moveCallTx in
                 let moveCallArguments = try moveCallTx.target.toModule()
@@ -666,7 +666,7 @@ public struct TransactionBlock {
                 )
                 resolvedIds[objectToResolve.id] = idx
             }
-            if self.blockData.serializedTransactionDataBuilder.inputs.count != objectsToResolve.count {
+            if resolvedIds.count != objectsToResolve.count {
                 self.blockData.serializedTransactionDataBuilder.inputs = []
                 for object in objectsToResolve {
                     self.blockData.serializedTransactionDataBuilder.inputs.append(object.input)

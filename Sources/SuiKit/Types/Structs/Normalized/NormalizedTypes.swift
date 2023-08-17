@@ -103,13 +103,7 @@ public indirect enum SuiMoveNormalizedType: Equatable {
             try self.expectType("number", argVal)
             return self.type.lowercased()
         case .address, .signer:
-            try self.expectType("string", argVal)
-            switch argVal {
-            case .string(let str):
-                guard self.isValidSuiAddress(str) else { throw SuiError.notImplemented }
-            default:
-                throw SuiError.notImplemented
-            }
+            try self.expectType("string", .string(try argVal.stringType()))
             return self.type.lowercased()
         case .vector(let normalizedTypeVector):
             if argVal.kind == .string, normalizedTypeVector.type == "U8" {

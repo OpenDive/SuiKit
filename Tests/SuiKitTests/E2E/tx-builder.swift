@@ -17,6 +17,8 @@ final class TXBuilderTest: XCTestCase {
     var publishTxn: JSON?
     var sharedObjectId: String?
 
+    let suiClockObjectId = normalizeSuiAddress(value: "0x6")
+
     override func setUp() async throws {
         let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
         self.toolBox = try await TestToolbox(account: account, true)
@@ -201,6 +203,21 @@ final class TXBuilderTest: XCTestCase {
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::set_value",
             arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+        )
+        try await self.validateTransaction(
+            client: toolBox.client,
+            account: toolBox.account,
+            tx: &tx
+        )
+    }
+
+    func testThatImmutableClockFunctionsAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        var tx = try TransactionBlock()
+        let _ = try tx.moveCall(
+            target: "\(try self.fetchPackageId())::serializer_tests::use_clock",
+            arguments: [.input(tx.object(value: suiClockObjectId))]
         )
         try await self.validateTransaction(
             client: toolBox.client,

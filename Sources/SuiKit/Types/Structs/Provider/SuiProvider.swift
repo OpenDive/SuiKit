@@ -624,6 +624,125 @@ public struct SuiProvider {
         return JSON(data)["result"]
     }
 
+    public func getStakes(_ owner: String) async throws -> [DelegatedStake] {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getStakes",
+                [
+                    AnyCodable(owner)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        var stakes: [DelegatedStake] = []
+        for value in result.arrayValue {
+            let stakeJson = value["stakes"].arrayValue
+            var stakesInner: [StakeStatus] = []
+            for stakeInner in stakeJson {
+                let finalStake = StakeObject(
+                    principal: stakeInner["principal"].stringValue,
+                    stakeActiveEpoch: stakeInner["stakeActiveEpoch"].stringValue,
+                    stakeRequestEpoch: stakeInner["stakeRequestEpoch"].stringValue,
+                    stakeSuiId: stakeInner["stakedSuiId"].stringValue
+                )
+                switch stakeInner["status"].stringValue {
+                case "Active":
+                    stakesInner.append(.active(finalStake))
+                case "Pending":
+                    stakesInner.append(.pending(finalStake))
+                case "Unstaked":
+                    stakesInner.append(.unstaked(finalStake))
+                default:
+                    throw SuiError.notImplemented
+                }
+            }
+            stakes.append(
+                DelegatedStake(
+                    stakes: stakesInner,
+                    stakingPool: value["stakingPool"].stringValue,
+                    validatorAddress: value["validatorAddress"].stringValue
+                )
+            )
+        }
+        return stakes
+    }
+
+    public func getStakesByIds(_ stakes: [String]) async throws -> [DelegatedStake] {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getStakesByIds",
+                [
+                    AnyCodable(stakes)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        var stakes: [DelegatedStake] = []
+        for value in result.arrayValue {
+            let stakeJson = value["stakes"].arrayValue
+            var stakesInner: [StakeStatus] = []
+            for stakeInner in stakeJson {
+                let finalStake = StakeObject(
+                    principal: stakeInner["principal"].stringValue,
+                    stakeActiveEpoch: stakeInner["stakeActiveEpoch"].stringValue,
+                    stakeRequestEpoch: stakeInner["stakeRequestEpoch"].stringValue,
+                    stakeSuiId: stakeInner["stakedSuiId"].stringValue
+                )
+                switch stakeInner["status"].stringValue {
+                case "Active":
+                    stakesInner.append(.active(finalStake))
+                case "Pending":
+                    stakesInner.append(.pending(finalStake))
+                case "Unstaked":
+                    stakesInner.append(.unstaked(finalStake))
+                default:
+                    throw SuiError.notImplemented
+                }
+            }
+            stakes.append(
+                DelegatedStake(
+                    stakes: stakesInner,
+                    stakingPool: value["stakingPool"].stringValue,
+                    validatorAddress: value["validatorAddress"].stringValue
+                )
+            )
+        }
+        return stakes
+    }
+
+    public func getCommitteeInfo(_ epoch: String) async throws -> CommitteeInfo {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_getCommitteeInfo",
+                [
+                    AnyCodable(epoch)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        var validators: [[String]] = [[]]
+        for validator in result["validators"].arrayValue {
+            var innerValidators: [String] = []
+            for innerValidator in validator.arrayValue {
+                innerValidators.append(innerValidator.stringValue)
+            }
+            validators.append(innerValidators)
+        }
+        return CommitteeInfo(
+            epoch: result["epoch"].stringValue,
+            validators: validators
+        )
+    }
+
     public func getNormalizedMoveFunction(
         _ package: String,
         _ moduleName: String,
@@ -957,4 +1076,39 @@ public struct DynamicFieldName: Codable {
 public enum DynamicFieldType: String {
     case dynamicField = "DynamicField"
     case dynamicObject = "DynamicObject"
+}
+
+public struct DelegatedStake {
+    public var stakes: [StakeStatus]
+    public var stakingPool: String
+    public var validatorAddress: String
+}
+
+public struct StakeObject: Equatable {
+    public var principal: String
+    public var stakeActiveEpoch: String
+    public var stakeRequestEpoch: String
+    public var stakeSuiId: String
+}
+
+public enum StakeStatus: Equatable {
+    case pending(StakeObject)
+    case active(StakeObject)
+    case unstaked(StakeObject)
+
+    public func getStakeObject() -> StakeObject {
+        switch self {
+        case .pending(let stakeObject):
+            return stakeObject
+        case .active(let stakeObject):
+            return stakeObject
+        case .unstaked(let stakeObject):
+            return stakeObject
+        }
+    }
+}
+
+public struct CommitteeInfo {
+    public var epoch: String
+    public var validators: [[String]]
 }

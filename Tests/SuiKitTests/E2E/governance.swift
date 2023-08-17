@@ -62,4 +62,27 @@ final class GovernanceTest: XCTestCase {
             return
         }
     }
+
+    func testThatGettingDelegatedStakesWorksAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        let _ = try await self.addStake(toolBox.client, toolBox.account)
+        let stakes = try await toolBox.client.getStakes(try toolBox.address())
+        let stakesById = try await toolBox.client.getStakesByIds(
+            [stakes[0].stakes[0].getStakeObject().stakeSuiId]
+        )
+        XCTAssertGreaterThan(stakes.count, 0)
+        XCTAssertEqual(stakesById[0].stakes[0], stakes[0].stakes[0])
+    }
+
+    func testThatFetchingValidatorsFunctionsAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        let committeeInfo = try await toolBox.client.getCommitteeInfo("0")
+        XCTAssertGreaterThan(committeeInfo.validators.count, 0)
+    }
+
+    func testThatGettingLatestSuiSystemStateWorksAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        let _ = try await toolBox.client.info()
+    }
 }

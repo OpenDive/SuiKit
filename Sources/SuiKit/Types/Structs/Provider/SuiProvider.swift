@@ -357,6 +357,24 @@ public struct SuiProvider {
         )
     }
 
+    public func tryGetPastObject(id: String, version: Int, options: SuiObjectDataOptions? = nil) async throws -> ObjectRead? {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_tryGetPastObject",
+                [
+                    AnyCodable(id),
+                    AnyCodable(version),
+                    AnyCodable(options)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        return self.parseObjectRead(result)
+    }
+
     public func getDynamicFields(_ parentId: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ limit: Int? = nil, _ cursor: String? = nil) async throws -> DynamicFieldPage {
         guard isValidSuiAddress(try normalizeSuiAddress(value: parentId)) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
@@ -520,7 +538,7 @@ public struct SuiProvider {
         return try self.parseNormalizedModule(input: result)
     }
     
-    public func getMultiObjects(_ ids: [objectId], _ options: GetObject? = nil) async throws -> [SuiObjectResponse] {
+    public func getMultiObjects(_ ids: [objectId], _ options: SuiObjectDataOptions? = nil) async throws -> [SuiObjectResponse] {
         for object in ids { guard isValidSuiAddress(try normalizeSuiAddress(value: object)) else { throw SuiError.notImplemented } }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -1002,19 +1020,55 @@ public struct SuiProvider {
         let data = input["data"]
         return SuiObjectResponse(
             error: error,
-            data: SuiObjectData(
-                bcs: RawData.parseJSON(data["bcs"]),
-                content: SuiParsedData.parseJSON(data["content"]),
-                digest: data["digest"].stringValue,
-                display: DisplayFieldsResponse.parseJSON(data["display"]),
-                objectId: data["objectId"].stringValue,
-                owner: ObjectOwner.parseJSON(data["owner"]),
-                previousTransaction: data["previousTransaction"].stringValue,
-                storageRebate: data["storageRebate"].int,
-                type: data["type"].string,
-                version: data["version"].uInt64Value
-            )
+            data: self.parseObjectData(data: data)
         )
+    }
+
+    private func parseObjectData(data: JSON) -> SuiObjectData {
+        return SuiObjectData(
+            bcs: RawData.parseJSON(data["bcs"]),
+            content: SuiParsedData.parseJSON(data["content"]),
+            digest: data["digest"].stringValue,
+            display: DisplayFieldsResponse.parseJSON(data["display"]),
+            objectId: data["objectId"].stringValue,
+            owner: ObjectOwner.parseJSON(data["owner"]),
+            previousTransaction: data["previousTransaction"].stringValue,
+            storageRebate: data["storageRebate"].int,
+            type: data["type"].string,
+            version: data["version"].uInt64Value
+        )
+    }
+
+    private func parseObjectRef(data: JSON) -> SuiObjectRef {
+        return SuiObjectRef(
+            objectId: data["objectId"].stringValue,
+            version: data["version"].uInt64Value,
+            digest: data["digest"].stringValue
+        )
+    }
+
+    private func parseObjectRead(_ data: JSON) -> ObjectRead? {
+        switch data["status"].stringValue {
+        case "VersionFound":
+            return .versionFound(self.parseObjectData(data: data["details"]))
+        case "ObjectNotExists":
+            return .objectNotExists(data["details"].stringValue)
+        case "ObjectDeleted":
+            return .objectDeleted(self.parseObjectRef(data: data["details"]))
+        case "VersionNotFound":
+            return .versionNotFound(
+                data["details"].arrayValue[0].stringValue,
+                data["details"].arrayValue[1].stringValue
+            )
+        case "VersionTooHigh":
+            return .versionTooHigh(
+                askedVersion: data["details"]["askedVersion"].stringValue,
+                latestVersion: data["details"]["latestVersion"].stringValue,
+                objectId: data["details"]["objectId"].stringValue
+            )
+        default:
+            return nil
+        }
     }
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
@@ -1300,6 +1354,29 @@ public enum ObjectResponseError: Error, Equatable {
             return .displayError(error: input["error"].stringValue)
         default:
             return nil
+        }
+    }
+}
+
+public enum ObjectRead {
+    case versionFound(SuiObjectData)
+    case objectNotExists(String)
+    case objectDeleted(SuiObjectRef)
+    case versionNotFound(String, String)
+    case versionTooHigh(askedVersion: String, latestVersion: String, objectId: String)
+
+    public func status() -> String {
+        switch self {
+        case .versionFound:
+            return "VersionFound"
+        case .objectNotExists:
+            return "ObjectNotExists"
+        case .objectDeleted:
+            return "ObjectDeleted"
+        case .versionNotFound:
+            return "VersionNotFound"
+        case .versionTooHigh:
+            return "VersionTooHigh"
         }
     }
 }

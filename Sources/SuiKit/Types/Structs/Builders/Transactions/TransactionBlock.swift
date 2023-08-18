@@ -615,7 +615,7 @@ public struct TransactionBlock {
             var objects: [SuiObjectResponse] = []
             
             try await objectChunks.asyncForEach {
-                let result = try await provider.getMultiObjects($0, GetObject(showOwner: true))
+                let result = try await provider.getMultiObjects($0, SuiObjectDataOptions(showOwner: true))
                 objects.append(contentsOf: result)
             }
             

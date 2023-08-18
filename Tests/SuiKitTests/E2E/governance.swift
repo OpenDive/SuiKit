@@ -44,7 +44,7 @@ final class GovernanceTest: XCTestCase {
         )
         let coinObjects = try await client.getMultiObjects(
             coins.data.map { $0.coinObjectId },
-            GetObject(showOwner: true)
+            SuiObjectDataOptions(showOwner: true)
         )
         try tx.setGasPayment(payments: coinObjects.map { $0.getObjectReference()! })
         return try await client.signAndExecuteTransactionBlock(

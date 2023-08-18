@@ -211,7 +211,6 @@ public struct PureCallArg: InputProtocol {
 public let SUI_ADDRESS_LENGTH = 32
 
 public func normalizeSuiAddress(value: String, forceAdd0x: Bool = false) throws -> SuiAddress {
-    guard value.count <= (SUI_ADDRESS_LENGTH * 2) else { throw SuiError.notImplemented }
     var address = value.lowercased()
     if !forceAdd0x && address.hasPrefix("0x") {
         address = String(address.dropFirst(2))

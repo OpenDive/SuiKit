@@ -46,7 +46,10 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
     /// The key itself
     public var key: Data
     
-    public init(key: Data) {
+    public init(key: Data) throws {
+        guard key.count == Self.LENGTH else {
+            throw SuiError.invalidLength
+        }
         self.key = key
     }
     
@@ -243,7 +246,7 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         if key.count != ED25519PrivateKey.LENGTH {
             throw SuiError.lengthMismatch
         }
-        return ED25519PrivateKey(key: key)
+        return try ED25519PrivateKey(key: key)
     }
     
     public func serialize(_ serializer: Serializer) throws {

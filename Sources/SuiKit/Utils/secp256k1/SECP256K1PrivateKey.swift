@@ -6,12 +6,13 @@
 //
 
 import Foundation
-import secp256k1
 import Bip39
 import CryptoSwift
 import BigInt
 import Blake2
 import CryptoKit
+import Web3Core
+import secp256k1
 
 public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     public typealias PrivateKeyType = SECP256K1PrivateKey
@@ -31,7 +32,10 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     /// The key itself
     public var key: Data
     
-    public init(key: Data) {
+    public init(key: Data) throws {
+        guard key.count == Self.LENGTH else {
+            throw SuiError.invalidLength
+        }
         self.key = key
     }
     
@@ -49,17 +53,18 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     }
     
     public init() throws {
-        let privateKeyArray = try secp256k1.Signing.PrivateKey()
-        self.key = privateKeyArray.dataRepresentation
+        guard let privateKeyArray = SECP256K1.generatePrivateKey() else { throw SuiError.notImplemented }
+        self.key = privateKeyArray
     }
     
     public init(_ mnemonics: String, _ path: String = SECP256K1PrivateKey.defaultDerivationPath) throws {
-//        guard SECP256K1PrivateKey.isValidBIP32Path(path) else { throw SuiError.invalidDerivationPath }
-//        let seedValue = try SECP256K1PrivateKey.mnemonicToSeed(mnemonics)
-//        if (seedValue.count * 8) < 128 || (seedValue.count * 8) > 512 { throw SuiError.notImplemented }
-//        let keys = try SECP256K1PrivateKey.fromMasterKey(seedValue)
-//        self.key = keys.key
-        throw SuiError.notImplemented
+        guard SECP256K1PrivateKey.isValidBIP32Path(path) else { throw SuiError.invalidDerivationPath }
+        let seedValue = try SECP256K1PrivateKey.mnemonicToSeed(mnemonics)
+        if (seedValue.count * 8) < 128 || (seedValue.count * 8) > 512 { throw SuiError.notImplemented }
+        guard let node = HDNode(seed: Data(seedValue))?.derive(path: path, derivePrivateKey: true), let privateKey = node.privateKey else {
+            throw SuiError.notImplemented
+        }
+        self.key = privateKey
     }
     
     public static func == (lhs: SECP256K1PrivateKey, rhs: SECP256K1PrivateKey) -> Bool {
@@ -91,8 +96,22 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     ///
     /// - Note: The private key is converted into a UInt8 array and passed to the calcPublicKey function of the Ed25519 implementation. The resulting public key is then used to create a new PublicKey instance.
     public func publicKey() throws -> SECP256K1PublicKey {
-        let key = try secp256k1.Signing.PrivateKey(dataRepresentation: self.key)
-        return try SECP256K1PublicKey(data: key.publicKey.dataRepresentation)
+        guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)) else { throw SuiError.notImplemented }
+        var pubKeyObject: secp256k1_pubkey = secp256k1_pubkey()
+        let pubKeyResult = self.key.withUnsafeBytes { (rawUnsafePubkeyPtr: UnsafeRawBufferPointer) -> Int32? in
+            if let rawPubKey = rawUnsafePubkeyPtr.baseAddress, rawUnsafePubkeyPtr.count > 0 {
+                let pubKeyPtr = rawPubKey.assumingMemoryBound(to: UInt8.self)
+                return withUnsafeMutablePointer(to: &pubKeyObject) { (mutablePubKey: UnsafeMutablePointer<secp256k1_pubkey>) -> Int32? in
+                    let res = secp256k1_ec_pubkey_create(ctx, mutablePubKey, pubKeyPtr)
+                    return res
+                }
+            } else {
+                return nil
+            }
+        }
+        guard let _ = pubKeyResult else { throw SuiError.notImplemented }
+        guard let result = SECP256K1.serializePublicKey(publicKey: &pubKeyObject, compressed: true) else { throw SuiError.notImplemented }
+        return try SECP256K1PublicKey(data: result)
     }
     
     /// Signs a message using this private key and the Ed25519 algorithm.
@@ -105,15 +124,58 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     ///
     /// - Note: The input message is converted into a UInt8 array and passed to the sign function of the Ed25519 implementation along with the private key converted into a UInt8 array. The resulting signature is then used to create a new Signature instance.
     public func sign(data: Data) throws -> Signature {
-        let privateKey = try secp256k1.Signing.PrivateKey(dataRepresentation: self.key)
-        let signedMessage = try privateKey.signature(for: data)
+        let hash = data.sha256
+        guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)) else { throw SuiError.notImplemented }
+        var signatureReturned: secp256k1_ecdsa_signature = secp256k1_ecdsa_signature()
+        let result = hash.withUnsafeBytes { hashRBPointer -> Int32? in
+            if let hashRPointer = hashRBPointer.baseAddress, hashRBPointer.count > 0 {
+                let hashPointer = hashRPointer.assumingMemoryBound(to: UInt8.self)
+                return self.key.withUnsafeBytes { privateKeyRBPointer -> Int32? in
+                    if let privateKeyRPointer = privateKeyRBPointer.baseAddress, privateKeyRBPointer.count > 0 {
+                        let privateKeyPointer = privateKeyRPointer.assumingMemoryBound(to: UInt8.self)
+                        return withUnsafeMutablePointer(
+                            to: &signatureReturned
+                        ) { (recSignaturePtr: UnsafeMutablePointer<secp256k1_ecdsa_signature>) -> Int32? in
+                            let res = secp256k1_ecdsa_sign(ctx, recSignaturePtr, hashPointer, privateKeyPointer, nil, nil)
+                            return res
+                        }
+                    } else {
+                        return nil
+                    }
+                }
+            } else {
+                return nil
+            }
+        }
+        guard result != nil, result != 0 else { throw SuiError.notImplemented }
+        var serializedSignature = Data(repeating: 0x00, count: 64)
+        let compactResult = serializedSignature.withUnsafeMutableBytes { (signatureRBPtr: UnsafeMutableRawBufferPointer) -> Int32? in
+            if let signatureRP = signatureRBPtr.baseAddress, signatureRBPtr.count > 0 {
+                let typedSignaturePtr = signatureRP.assumingMemoryBound(to: UInt8.self)
+                return withUnsafePointer(to: &signatureReturned) { (signaturePtr: UnsafePointer<secp256k1_ecdsa_signature>) -> Int32 in
+                    let res = secp256k1_ecdsa_signature_serialize_compact(ctx, typedSignaturePtr, signaturePtr)
+                    return res
+                }
+            } else {
+                return nil
+            }
+        }
+        guard compactResult != nil, compactResult != 0 else { throw SuiError.notImplemented }
         return Signature(
-            signature: Data(signedMessage.dataRepresentation),
+            signature: serializedSignature,
             publickey: try self.publicKey().key,
             signatureScheme: .SECP256K1
         )
+//        let signedMessage = SECP256K1.signForRecovery(hash: hash, privateKey: self.key)
+//        guard let serializedSignature = signedMessage.serializedSignature else { throw SuiError.notImplemented }
+//        return Signature(
+//            signature: serializedSignature,
+//            publickey: try self.publicKey().key,
+//            signatureScheme: .SECP256K1,
+//            signedMessage.rawSignature
+//        )
     }
-    
+
     public func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature {
         let intentMessage = messageWithIntent(intent, Data(bytes))
         let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
@@ -158,18 +220,12 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return Keys(key: key, chainCode: chainCode)
     }
 
-//    private static func derive(_ keys: Keys, _ path: String) throws -> Keys {
-////        struct keyDerivator:
-//        
-//        let test =
-//    }
-
     public static func deserialize(from deserializer: Deserializer) throws -> SECP256K1PrivateKey {
         let key = try Deserializer.toBytes(deserializer)
         if key.count != SECP256K1PrivateKey.LENGTH {
             throw SuiError.lengthMismatch
         }
-        return SECP256K1PrivateKey(key: key)
+        return try SECP256K1PrivateKey(key: key)
     }
 
     private struct Keys {

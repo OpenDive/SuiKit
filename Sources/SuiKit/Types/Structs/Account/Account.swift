@@ -50,10 +50,10 @@ public struct Account: Equatable, Hashable {
     public init(privateKey: Data, accountType: KeyType = .ed25519) throws {
         switch accountType {
         case .ed25519:
-            let privateKey = ED25519PrivateKey(key: privateKey)
+            let privateKey = try ED25519PrivateKey(key: privateKey)
             try self.init(privateKey: privateKey, accountType: accountType)
         case .secp256k1:
-            let privateKey = SECP256K1PrivateKey(key: privateKey)
+            let privateKey = try SECP256K1PrivateKey(key: privateKey)
             try self.init(privateKey: privateKey, accountType: accountType)
         }
     }
@@ -111,10 +111,9 @@ public struct Account: Equatable, Hashable {
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
         case .secp256k1:
-            throw SuiError.notImplemented
-//            let privateKey = try SECP256K1PrivateKey(mnemonic)
-//            self.privateKey = privateKey
-//            self.publicKey = try privateKey.publicKey()
+            let privateKey = try SECP256K1PrivateKey(mnemonic)
+            self.privateKey = privateKey
+            self.publicKey = try privateKey.publicKey()
         }
     }
 

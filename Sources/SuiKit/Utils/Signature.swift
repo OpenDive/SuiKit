@@ -25,29 +25,37 @@
 
 import Foundation
 import secp256k1
+import Web3Core
 
-/// The ED25519 Signature
+/// The Crypto Signature
 public struct Signature: Equatable, KeyProtocol {
     /// The length of the key in bytes
-    static let LENGTH: Int = 64
-
+    public let LENGTH: Int
+    
     /// The signature itself
     var signature: Data
     
     var publicKey: Data
     
     var signatureScheme: SignatureScheme
-
+    
     init(signature: Data, publickey: Data, signatureScheme: SignatureScheme = .ED25519) {
         self.signature = signature
         self.publicKey = publickey
         self.signatureScheme = signatureScheme
+        
+        switch signatureScheme {
+        case .ED25519:
+            self.LENGTH = 64
+        case .SECP256K1:
+            self.LENGTH = 65
+        }
     }
-
+    
     public static func == (lhs: Signature, rhs: Signature) -> Bool {
         return lhs.signature == rhs.signature
     }
-
+    
     public func hex() throws -> String {
         return try self.data().hexEncodedString()
     }
@@ -57,14 +65,13 @@ public struct Signature: Equatable, KeyProtocol {
         case .ED25519:
             return self.signature
         case .SECP256K1:
-            let signatureSecp256k1 = try secp256k1.Signing.ECDSASignature(dataRepresentation: self.signature)
-            return try signatureSecp256k1.compactRepresentation
+            return self.signature
         }
     }
-
+    
     public static func deserialize(from deserializer: Deserializer) throws -> Signature {
         let signatureBytes = try Deserializer.toBytes(deserializer)
-        if signatureBytes.count != LENGTH {
+        if signatureBytes.count != 64 || signatureBytes.count != 65 {
             throw SuiError.lengthMismatch
         }
         guard let stringSignature = String(data: signatureBytes, encoding: .utf8) else {
@@ -87,7 +94,7 @@ public struct Signature: Equatable, KeyProtocol {
             throw SuiError.notImplemented
         }
     }
-
+    
     public func serialize(_ serializer: Serializer) throws {
         var serializedSignature = Data(capacity: 1 + signature.count + publicKey.count)
         guard let signatureFlag = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {

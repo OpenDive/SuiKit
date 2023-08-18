@@ -50,7 +50,7 @@ final class Secp256k1WalletTest: XCTestCase {
     ]
 
     let testMnemonic = "result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss"
-    
+
     func testThatSecp256k1AccountCanBeInitialized() throws {
         let account = try Account(accountType: .secp256k1)
         XCTAssertEqual(account.publicKey.key.count, 33)
@@ -93,7 +93,7 @@ final class Secp256k1WalletTest: XCTestCase {
         let signature = try account.sign(signedData)
         XCTAssertTrue(try account.verify(signedData, signature))
     }
-    
+
     func testThatTheDataIsTheSameAsTheRustImplementation() throws {
         let secretKey = Data(self.validSecp256k1SecretKey)
         let account = try Account(privateKey: secretKey, accountType: .secp256k1)
@@ -101,7 +101,7 @@ final class Secp256k1WalletTest: XCTestCase {
             XCTFail("Signed Data failed.")
             return
         }
-        
+
         let signature = try account.sign(signedData)
 
         // Assert the signature is the same as the rust implementation. See https://github.com/MystenLabs/fastcrypto/blob/0436d6ef11684c291b75c930035cb24abbaf581e/fastcrypto/src/tests/secp256k1_tests.rs#L115
@@ -121,31 +121,30 @@ final class Secp256k1WalletTest: XCTestCase {
         XCTAssertThrowsError(try invalidMnemonics())
     }
 
-    // TODO: Implement Secp256K1 Mnemonic Function
-//    func testThatCreatingSecp256k1AccountFromSecretKeyAndMnemonicsMatchesTheTestCases() throws {
-//        for testCase in self.testCases {
-//            let account = try Account(testCase[0], accountType: .secp256k1)
-//            XCTAssertEqual(try account.publicKey.toSuiAddress(), testCase[2])
-//
-//            guard let raw = Data.fromBase64(testCase[1]) else {
-//                XCTFail("Failed to decrypt raw Base64 String")
-//                return
-//            }
-//
-//            if raw[0] != 1 || raw.count != self.privateKeySize + 1 {
-//                XCTFail("Invalid Key")
-//                return
-//            }
-//
-//            let imported = try Account(privateKey: raw.dropFirst(), accountType: .secp256k1)
-//            XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
-//
-//            let exported = imported.export()
-//            let exportedAccount = account.export()
-//            XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
-//            XCTAssertEqual(exportedAccount.privateKey, raw.dropFirst().base64EncodedString())
-//        }
-//    }
+    func testThatCreatingSecp256k1AccountFromSecretKeyAndMnemonicsMatchesTheTestCases() throws {
+        for testCase in self.testCases {
+            let account = try Account(testCase[0], accountType: .secp256k1)
+            XCTAssertEqual(try account.publicKey.toSuiAddress(), testCase[2])
+
+            guard let raw = Data.fromBase64(testCase[1]) else {
+                XCTFail("Failed to decrypt raw Base64 String")
+                return
+            }
+
+            if raw[0] != 1 || raw.count != self.privateKeySize + 1 {
+                XCTFail("Invalid Key")
+                return
+            }
+
+            let imported = try Account(privateKey: raw.dropFirst(), accountType: .secp256k1)
+            XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
+
+            let exported = imported.export()
+            let exportedAccount = account.export()
+            XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
+            XCTAssertEqual(exportedAccount.privateKey, raw.dropFirst().base64EncodedString())
+        }
+    }
 
     // TODO: Implement Derivation Path checks
 

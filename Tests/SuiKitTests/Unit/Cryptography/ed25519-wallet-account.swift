@@ -63,7 +63,7 @@ final class Ed25519WalletTest: XCTestCase {
                 XCTFail("Invalid Key")
                 return
             }
-            let secretKey = ED25519PrivateKey(key: raw.dropFirst())
+            let secretKey = try ED25519PrivateKey(key: raw.dropFirst())
             let imported = try Account(privateKey: secretKey)
             XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
             
@@ -74,7 +74,7 @@ final class Ed25519WalletTest: XCTestCase {
     }
     
     func testThatAccountIsCreatedFromRandomSeed() throws {
-        let privateKey = ED25519PrivateKey(key: Data(Array(repeating: 8, count: privateKeySize)))
+        let privateKey = try ED25519PrivateKey(key: Data(Array(repeating: 8, count: privateKeySize)))
         let account = try Account(privateKey: privateKey)
         XCTAssertEqual(account.publicKey.base64(), "E5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8o=")
     }

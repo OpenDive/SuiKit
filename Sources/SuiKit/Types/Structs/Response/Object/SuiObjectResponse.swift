@@ -8,28 +8,37 @@
 import Foundation
 
 public struct SuiObjectResponse {
-    public let objectId: String
-    public let version: UInt64
+    public var error: ObjectResponseError?
+    public var data: SuiObjectData?
+    public func getSharedObjectInitialVersion() -> Int? {
+        guard let owner = self.data?.owner else { return nil }
+        switch owner {
+        case .shared(let shared):
+            return shared
+        default:
+            return nil
+        }
+    }
+
+    public func getObjectReference() -> SuiObjectRef? {
+        guard let data = self.data else { return nil }
+        return SuiObjectRef(
+            objectId: data.objectId,
+            version: data.version,
+            digest: data.digest
+        )
+    }
+}
+
+public struct SuiObjectData {
+    public let bcs: RawData?
+    public let content: SuiParsedData?
     public let digest: String
-    public let type: String?
+    public let display: DisplayFieldsResponse?
+    public let objectId: String
     public let owner: ObjectOwner?
     public let previousTransaction: String?
     public let storageRebate: Int?
-    public let content: SuiMoveObject
-    public let error: String?
-
-    public func getSharedObjectInitialVersion() -> Int? {
-        if let owner = self.owner, let initialSharedVersion = owner.shared?.shared.initialSharedVersion, initialSharedVersion != 0 {
-            return initialSharedVersion
-        }
-        return nil
-    }
-
-    public func getObjectReference() -> SuiObjectRef {
-        return SuiObjectRef(
-            objectId: self.objectId,
-            version: self.version,
-            digest: self.digest
-        )
-    }
+    public let type: String?
+    public let version: UInt64
 }

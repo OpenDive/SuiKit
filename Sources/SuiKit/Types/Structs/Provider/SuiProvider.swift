@@ -309,7 +309,7 @@ public struct SuiProvider {
         )
     }
     
-    public func getObject(_ objectId: String, _ options: GetObject = GetObject()) async throws -> SuiObjectResponse {
+    public func getObject(_ objectId: String, _ options: SuiObjectDataOptions? = nil) async throws -> SuiObjectResponse {
         guard isValidSuiAddress(try normalizeSuiAddress(value: objectId)) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -321,32 +321,11 @@ public struct SuiProvider {
                 ]
             )
         )
-        let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
-        return SuiObjectResponse(
-            objectId: value["objectId"].stringValue,
-            version: value["version"].uInt64Value,
-            digest: value["digest"].stringValue,
-            type: value["type"].stringValue,
-            owner: ObjectOwner(
-                addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
-                objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
-                shared: Shared(
-                    shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["InitialSharedVersion"].intValue)
-                )
-            ),
-            previousTransaction: value["previousTransaction"].stringValue,
-            storageRebate: value["storageRebate"].intValue,
-            content: SuiMoveObject(
-                type: value["content"]["type"].stringValue,
-                fields: fields,
-                hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
-            ), 
-            error: value["error"].stringValue == "" ? nil : value["error"].stringValue
-        )
+        let value = JSON(data)["result"]
+        return try self.parseObject(input: value)
     }
     
-    public func getOwnedObjects(_ owner: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ query: GetOwnedObjects = GetOwnedObjects(), _ cursor: String? = nil, _ limit: Int? = nil) async throws -> [SuiObjectResponse] {
+    public func getOwnedObjects(_ owner: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ cursor: String? = nil, _ limit: Int? = nil) async throws -> PaginatedObjectsResponse {
         guard isValidSuiAddress(owner) else { throw SuiError.notImplemented }
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
@@ -354,43 +333,28 @@ public struct SuiProvider {
                 "suix_getOwnedObjects",
                 [
                     AnyCodable(owner),
-                    AnyCodable(query),
+                    AnyCodable(
+                        SuiObjectResponseQuery(
+                            filter: filter,
+                            options: options
+                        )
+                    ),
                     AnyCodable(cursor),
-                    AnyCodable(limit),
-                    AnyCodable(filter),
-                    AnyCodable(options)
+                    AnyCodable(limit)
                 ]
             )
         )
-        var result: [SuiObjectResponse] = []
-        for (_, val):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
-            let value = val["data"]
-            guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields", code: -1) }
-            result.append(
-                SuiObjectResponse(
-                    objectId: value["objectId"].stringValue,
-                    version: value["version"].uInt64Value,
-                    digest: value["digest"].stringValue,
-                    type: value["type"].stringValue,
-                    owner: ObjectOwner(
-                        addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
-                        objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
-                        shared: Shared(
-                            shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["InitialSharedVersion"].intValue)
-                        )
-                    ),
-                    previousTransaction: value["previousTransaction"].stringValue,
-                    storageRebate: value["storageRebate"].intValue,
-                    content: SuiMoveObject(
-                        type: value["content"]["type"].stringValue,
-                        fields: fields,
-                        hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
-                    ),
-                    error: value["error"].stringValue == "" ? nil : value["error"].stringValue
-                )
-            )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)
+        let objects: [SuiObjectResponse] = try result["result"]["data"].arrayValue.map {
+            try self.parseObject(input: $0)
         }
-        return result
+        return PaginatedObjectsResponse(
+            data: objects,
+            hasNextPage: result["hasNextPage"].boolValue,
+            nextCursor: result["nextCursor"].string
+        )
     }
 
     public func getDynamicFields(_ parentId: String, _ filter: SuiObjectDataFilter? = nil, _ options: SuiObjectDataOptions? = nil, _ limit: Int? = nil, _ cursor: String? = nil) async throws -> DynamicFieldPage {
@@ -451,28 +415,7 @@ public struct SuiProvider {
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         let result = JSON(data)["result"]
-        guard let fields = result["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
-        return SuiObjectResponse(
-            objectId: result["objectId"].stringValue,
-            version: result["version"].uInt64Value,
-            digest: result["digest"].stringValue,
-            type: result["type"].stringValue,
-            owner: ObjectOwner(
-                addressOwner: AddressOwner(addressOwner: result["owner"]["AddressOwner"].stringValue),
-                objectOwner: ObjectOwnerAddress(objectOwner: result["owner"]["ObjectOwner"].stringValue),
-                shared: Shared(
-                    shared: InitialSharedVersion(initialSharedVersion: result["owner"]["Shared"]["InitialSharedVersion"].intValue)
-                )
-            ),
-            previousTransaction: result["previousTransaction"].stringValue,
-            storageRebate: result["storageRebate"].intValue,
-            content: SuiMoveObject(
-                type: result["content"]["type"].stringValue,
-                fields: fields,
-                hasPublicTransfer: result["content"]["hasPublicTransfer"].boolValue
-            ),
-            error: result["error"].stringValue == "" ? nil : result["error"].stringValue
-        )
+        return try self.parseObject(input: result)
     }
 
     public func getDynamicFieldObject(_ parentId: String, name: DynamicFieldName) async throws -> SuiObjectResponse {
@@ -488,29 +431,8 @@ public struct SuiProvider {
         )
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
-        let result = JSON(data)["result"]["data"]
-        guard let fields = result["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
-        return SuiObjectResponse(
-            objectId: result["objectId"].stringValue,
-            version: result["version"].uInt64Value,
-            digest: result["digest"].stringValue,
-            type: result["type"].stringValue,
-            owner: ObjectOwner(
-                addressOwner: AddressOwner(addressOwner: result["owner"]["AddressOwner"].stringValue),
-                objectOwner: ObjectOwnerAddress(objectOwner: result["owner"]["ObjectOwner"].stringValue),
-                shared: Shared(
-                    shared: InitialSharedVersion(initialSharedVersion: result["owner"]["Shared"]["InitialSharedVersion"].intValue)
-                )
-            ),
-            previousTransaction: result["previousTransaction"].stringValue,
-            storageRebate: result["storageRebate"].intValue,
-            content: SuiMoveObject(
-                type: result["content"]["type"].stringValue,
-                fields: fields,
-                hasPublicTransfer: result["content"]["hasPublicTransfer"].boolValue
-            ),
-            error: result["error"].stringValue == "" ? nil : result["error"].stringValue
-        )
+        let result = JSON(data)["result"]
+        return try self.parseObject(input: result)
     }
 
     public func requestAddStake(_ signer: Account, _ coins: [String], _ amount: String, _ validators: SuiAddress, _ gas: objectId, _ gasBudget: String) async throws -> JSON {
@@ -615,34 +537,8 @@ public struct SuiProvider {
         let jsonResponse = JSON(data)["result"]
         var objectResponses: [SuiObjectResponse] = []
         try jsonResponse.arrayValue.forEach { jsonData in
-            let value = jsonData["data"]
-            guard let fields = value["content"]["fields"].dictionaryObject else { throw NSError(domain: "Unable to unwrap fields.", code: -1) }
-            
-            objectResponses.append(
-                SuiObjectResponse(
-                    objectId: value["objectId"].stringValue,
-                    version: value["version"].uInt64Value,
-                    digest: value["digest"].stringValue,
-                    type: value["type"].stringValue,
-                    owner: ObjectOwner(
-                        addressOwner: AddressOwner(addressOwner: value["owner"]["AddressOwner"].stringValue),
-                        objectOwner: ObjectOwnerAddress(objectOwner: value["owner"]["ObjectOwner"].stringValue),
-                        shared: Shared(
-                            shared: InitialSharedVersion(initialSharedVersion: value["owner"]["Shared"]["initial_shared_version"].intValue)
-                        )
-                    ),
-                    previousTransaction: value["previousTransaction"].stringValue,
-                    storageRebate: value["storageRebate"].intValue,
-                    content: SuiMoveObject(
-                        type: value["content"]["type"].stringValue,
-                        fields: fields,
-                        hasPublicTransfer: value["content"]["hasPublicTransfer"].boolValue
-                    ),
-                    error: value["error"].stringValue == "" ? nil : value["error"].stringValue
-                )
-            )
+            objectResponses.append(try self.parseObject(input: jsonData))
         }
-        
         return objectResponses
     }
 
@@ -1010,7 +906,7 @@ public struct SuiProvider {
         var count = 0
 
         repeat {
-            if count >= 20 {
+            if count >= 60 {
                 throw SuiError.notImplemented
             }
             try await Task.sleep(nanoseconds: 1_000_000_000)
@@ -1020,8 +916,8 @@ public struct SuiProvider {
 
     private func isValidTransactionBlock(_ digest: String) async -> Bool {
         do {
-            let _ = try await self.getTransactionBlock(digest)
-            return true
+            let result = try await self.getTransactionBlock(digest)
+            return result["effects"]["status"]["status"].stringValue == "success"
         } catch {
             return false
         }
@@ -1095,6 +991,29 @@ public struct SuiProvider {
             },
             structs: structs,
             exposedFunctions: exposedFunctions
+        )
+    }
+
+    private func parseObject(input: JSON) throws -> SuiObjectResponse {
+        var error: ObjectResponseError? = nil
+        if input["error"].exists() {
+            error = ObjectResponseError.parseJSON(input["error"])
+        }
+        let data = input["data"]
+        return SuiObjectResponse(
+            error: error,
+            data: SuiObjectData(
+                bcs: RawData.parseJSON(data["bcs"]),
+                content: SuiParsedData.parseJSON(data["content"]),
+                digest: data["digest"].stringValue,
+                display: DisplayFieldsResponse.parseJSON(data["display"]),
+                objectId: data["objectId"].stringValue,
+                owner: ObjectOwner.parseJSON(data["owner"]),
+                previousTransaction: data["previousTransaction"].stringValue,
+                storageRebate: data["storageRebate"].int,
+                type: data["type"].string,
+                version: data["version"].uInt64Value
+            )
         )
     }
     
@@ -1211,6 +1130,34 @@ public enum SuiObjectDataFilter: Codable {
     case ObjectId(String)
     case ObjectIds([String])
     case Version(String)
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .MatchAll(let array):
+            try container.encode(array, forKey: .MatchAll)
+        case .MatchAny(let array):
+            try container.encode(array, forKey: .MatchAny)
+        case .MatchNone(let array):
+            try container.encode(array, forKey: .MatchNone)
+        case .Package(let string):
+            try container.encode(string, forKey: .Package)
+        case .MoveModule(let moveModuleFilter):
+            try container.encode(moveModuleFilter, forKey: .MoveModule)
+        case .StructType(let string):
+            try container.encode(string, forKey: .StructType)
+        case .AddressOwner(let string):
+            try container.encode(string, forKey: .AddressOwner)
+        case .ObjectOwner(let string):
+            try container.encode(string, forKey: .ObjectOwner)
+        case .ObjectId(let string):
+            try container.encode(string, forKey: .ObjectId)
+        case .ObjectIds(let array):
+            try container.encode(array, forKey: .ObjectId)
+        case .Version(let string):
+            try container.encode(string, forKey: .Version)
+        }
+    }
 }
 
 public struct MoveModuleFilter: Codable {
@@ -1298,4 +1245,61 @@ public enum ObjectValueKind: String, Equatable {
     case byImmutableReference = "ByImmutableReference"
     case byMutableReference = "ByMutableReference"
     case byValue = "ByValue"
+}
+
+public struct SuiObjectResponseQuery: Codable {
+    public var filter: SuiObjectDataFilter?
+    public var options: SuiObjectDataOptions?
+}
+
+public struct PaginatedObjectsResponse {
+    public var data: [SuiObjectResponse]
+    public var hasNextPage: Bool
+    public var nextCursor: String?
+}
+
+public struct DisplayFieldsResponse {
+    public var data: [String: String]?
+    public var error: ObjectResponseError?
+
+    public static func parseJSON(_ input: JSON) -> DisplayFieldsResponse? {
+        var error: ObjectResponseError? = nil
+        if input["error"].exists() {
+            error = ObjectResponseError.parseJSON(input["error"])
+        }
+        var data: [String: String] = [:]
+        for (key, value) in input["data"].dictionaryValue {
+            data[key] = value.stringValue
+        }
+        return DisplayFieldsResponse(data: data, error: error)
+    }
+}
+
+public enum ObjectResponseError: Error, Equatable {
+    case notExist(objectId: String)
+    case dynamicFieldNotFound(parentObjectId: String)
+    case deleted(digest: String, objectId: String, version: String)
+    case unknown
+    case displayError(error: String)
+
+    public static func parseJSON(_ input: JSON) -> ObjectResponseError? {
+        switch input["code"].stringValue {
+        case "notExist":
+            return .notExist(objectId: input["objectId"].stringValue)
+        case "dynamicFieldNotFound":
+            return .dynamicFieldNotFound(parentObjectId: input["parentObjectId"].stringValue)
+        case "deleted":
+            return .deleted(
+                digest: input["digest"].stringValue,
+                objectId: input["objectId"].stringValue,
+                version: input["version"].stringValue
+            )
+        case "unknown":
+            return .unknown
+        case "displayError":
+            return .displayError(error: input["error"].stringValue)
+        default:
+            return nil
+        }
+    }
 }

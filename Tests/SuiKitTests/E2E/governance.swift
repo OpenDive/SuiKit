@@ -46,7 +46,7 @@ final class GovernanceTest: XCTestCase {
             coins.data.map { $0.coinObjectId },
             GetObject(showOwner: true)
         )
-        try tx.setGasPayment(payments: coinObjects.map { $0.getObjectReference() })
+        try tx.setGasPayment(payments: coinObjects.map { $0.getObjectReference()! })
         return try await client.signAndExecuteTransactionBlock(
             &tx,
             account,

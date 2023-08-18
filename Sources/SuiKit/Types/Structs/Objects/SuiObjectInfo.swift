@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 public struct SuiObjectInfo {
     public let suiObjectRef: SuiObjectRef
@@ -14,24 +15,25 @@ public struct SuiObjectInfo {
     public let previousTransaction: TransactionDigest
 }
 
-public struct ObjectOwner {
-    public let addressOwner: AddressOwner
-    public let objectOwner: ObjectOwnerAddress?
-    public let shared: Shared?
-}
+public enum ObjectOwner {
+    case addressOwner(String)
+    case objectOwner(String)
+    case shared(Int)
+    case immutable
 
-public struct AddressOwner {
-    public let addressOwner: SuiAddress
-}
+    public static func parseJSON(_ input: JSON) -> ObjectOwner? {
+        if let addressOwner = input["AddressOwner"].string {
+            return .addressOwner(addressOwner)
+        }
 
-public struct ObjectOwnerAddress {
-    public let objectOwner: SuiAddress
-}
+        if let objectOwner = input["ObjectOwner"].string {
+            return .objectOwner(objectOwner)
+        }
 
-public struct Shared {
-    public let shared: InitialSharedVersion
-}
+        if let initialSharedVersion = input["Shared"]["initial_shared_version"].int {
+            return .shared(initialSharedVersion)
+        }
 
-public struct InitialSharedVersion {
-    public let initialSharedVersion: Int
+        return nil
+    }
 }

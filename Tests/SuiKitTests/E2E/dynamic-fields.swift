@@ -18,7 +18,6 @@ final class DynamicFieldsTest: XCTestCase {
         self.toolBox = try await TestToolbox(true)
         self.packageId = try await self.fetchToolBox().publishPackage("dynamic-fields").packageId
 
-        // TODO: Fix options for types
         let ownedObjects = try await self.fetchToolBox()
             .client.getOwnedObjects(
                 try self.fetchToolBox().account.publicKey.toSuiAddress(),
@@ -27,9 +26,7 @@ final class DynamicFieldsTest: XCTestCase {
                 ),
                 SuiObjectDataOptions(showType: true)
             )
-        self.parentObjectId = try ownedObjects.filter { object in
-            object.type == "\(try self.fetchPackageId())::dynamic_fields_test::Test"
-        }[0].objectId
+        self.parentObjectId = ownedObjects.data[0].data!.objectId
     }
 
     private func fetchToolBox() throws -> TestToolbox {
@@ -88,7 +85,7 @@ final class DynamicFieldsTest: XCTestCase {
             let objectName = field.name
 
             let object = try await toolBox.client.getDynamicFieldObject(try self.fetchParentObjectId(), name: objectName)
-            XCTAssertEqual(object.objectId, field.objectId)
+            XCTAssertEqual(object.data!.objectId, field.objectId)
         }
     }
 }

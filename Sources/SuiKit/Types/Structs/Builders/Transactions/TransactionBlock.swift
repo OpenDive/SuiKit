@@ -650,7 +650,7 @@ public struct TransactionBlock {
                 guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
                     let objRef = object.getObjectReference()
                     objectsToResolve[idx].input.value = .input(
-                        try Inputs.objectRef(suiObjectRef: objRef)
+                        try Inputs.objectRef(suiObjectRef: objRef!)
                     )
                     resolvedIds[objectToResolve.id] = idx
                     continue
@@ -883,13 +883,6 @@ public struct TransactionBlock {
             lhs.name == rhs.name
     }
     
-    private func getSharedObjectInitialVersion(_ resp: SuiObjectResponse) -> Int? {
-        if let owner = resp.owner, let initialSharedVersion = owner.shared?.shared.initialSharedVersion {
-            return initialSharedVersion
-        }
-        return nil
-    }
-    
     private func getSharedObjectInput(_ arg: SuiCallArg) -> SharedObjectSuiCallArg? {
         switch arg {
         case .sharedObject(let sharedObjectSuiCallArg):
@@ -900,14 +893,6 @@ public struct TransactionBlock {
     
     private func isMutableSharedObjectInput(_ arg: SuiCallArg) -> Bool {
         return self.getSharedObjectInput(arg)?.mutable ?? false
-    }
-    
-    private func getObjectReference(_ resp: SuiObjectResponse) -> SuiObjectRef? {
-        return SuiObjectRef(
-            objectId: resp.objectId,
-            version: resp.version,
-            digest: resp.digest
-        )
     }
 }
 

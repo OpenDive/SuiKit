@@ -27,7 +27,6 @@ internal class TestToolbox {
     init(_ needsFunds: Bool = true) async throws {
         self.account = try Account()
         self.client = SuiProvider(connection: localnetConnection())
-
         if needsFunds { try await self.setup() }
     }
 

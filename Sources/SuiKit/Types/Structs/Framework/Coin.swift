@@ -25,7 +25,7 @@ public struct Coin {
     public static let coinTypeArgRegex = "/^0x2::coin::Coin<(.+)>$/"
 
     public static func isCoin(data: SuiObjectResponse) -> Bool {
-        guard let type = data.type else { return false }
+        guard let type = data.data?.type else { return false }
 
         let regex = try! NSRegularExpression(pattern: Coin.coinTypeArgRegex)
         let range = NSRange(location: 0, length: type.utf16.count)
@@ -35,7 +35,7 @@ public struct Coin {
     }
 
     public static func isSUI(data: SuiObjectResponse) -> Bool {
-        guard let type = data.type else { return false }
+        guard let type = data.data?.type else { return false }
         return Coin.getCoinSymbol(coinTypeArg: type) == "SUI"
     }
 

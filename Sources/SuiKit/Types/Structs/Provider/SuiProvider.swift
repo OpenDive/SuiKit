@@ -203,32 +203,45 @@ public struct SuiProvider {
                 ]
             )
         )
-        var eventPages: [SuiMoveEvent] = []
-        let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        for (_, value): (String, JSON) in result["data"] {
-            let cursor = value["id"]
-            eventPages.append(
-                SuiMoveEvent(
-                    bcs: value["bcs"].stringValue,
-                    parsedJson: value["parsedJson"].dictionaryValue,
-                    packageId: value["packageId"].stringValue,
-                    sender: value["sender"].stringValue,
-                    transactionModule: value["transactionModule"].stringValue,
-                    type: value["type"].stringValue,
-                    id: Cursor(
-                        txDigest: cursor["txDigest"].stringValue,
-                        eventSeq: cursor["eventSeq"].stringValue
-                    )
-                )
-            )
+        var eventPages: [SuiEvent] = []
+        let result = JSON(data)["result"]
+        for event in result.arrayValue {
+            eventPages.append(self.parseEvent(event))
         }
         let cursor = result["nextCursor"]
         return PaginatedSuiMoveEvent(
             data: eventPages,
-            nextCursor: Cursor(
-                txDigest: cursor["txDigest"].stringValue,
-                eventSeq: cursor["eventSeq"].stringValue
-            ),
+            nextCursor: EventId.parseJSON(result["nextCursor"]),
+            hasNextPage: result["hasNextPage"].boolValue
+        )
+    }
+
+    public func queryEvents(
+        query: SuiEventFilter? = nil,
+        cursor: EventId? = nil,
+        limit: Int? = nil,
+        order: SortOrder? = nil
+    ) async throws -> PaginatedSuiMoveEvent {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_queryEvents",
+                [
+                    AnyCodable(query == nil ? SuiEventFilter.all([]) : query),
+                    AnyCodable(cursor),
+                    AnyCodable(limit),
+                    AnyCodable(order == .descending ? true : false)
+                ]
+            )
+        )
+        var eventPages: [SuiEvent] = []
+        let result = JSON(data)["result"]
+        for event in result["data"].arrayValue {
+            eventPages.append(self.parseEvent(event))
+        }
+        return PaginatedSuiMoveEvent(
+            data: eventPages,
+            nextCursor: EventId.parseJSON(result["nextCursor"]),
             hasNextPage: result["hasNextPage"].boolValue
         )
     }
@@ -1070,6 +1083,19 @@ public struct SuiProvider {
             return nil
         }
     }
+
+    private func parseEvent(_ data: JSON) -> SuiEvent {
+        return SuiEvent(
+            id: EventId.parseJSON(data["id"]),
+            packageId: data["packageId"].stringValue,
+            transactionModule: data["transactionModule"].stringValue,
+            sender: data["sender"].stringValue,
+            type: data["type"].stringValue,
+            parsedJson: data["parsedJson"],
+            bcs: data["bcs"].stringValue,
+            timestampMs: data["timestampMs"].string
+        )
+    }
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
         if data["error"].exists() {
@@ -1170,6 +1196,76 @@ public struct RPCErrorValue: Equatable {
     public let error: ErrorMessage?
     public let jsonrpc: String?
     public let hasError: Bool
+}
+
+public enum SuiEventFilter: Codable {
+    private enum CodingKeys: String, CodingKey {
+        case sender = "Sender"
+        case transaction = "Transaction"
+        case package = "Package"
+        case moveModule = "MoveModule"
+        case moveEventType = "MoveEventType"
+        case moveEventModule = "MoveEventModule"
+        case moveEventField = "MoveEventField"
+        case timeRange = "TimeRange"
+        case any = "Any"
+        case all = "All"
+        case and = "And"
+        case or = "Or"
+    }
+
+    case sender(String)
+    case transaction(String)
+    case package(String)
+    case moveModule(MoveModuleFilter)
+    case moveEventType(String)
+    case moveEventModule(MoveModuleFilter)
+    case moveEventField(MoveEventField)
+    case timeRange(TimeRange)
+    case any([SuiEventFilter])
+    case all([SuiEventFilter])
+    case and([SuiEventFilter])
+    case or([SuiEventFilter])
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        switch self {
+        case .sender(let string):
+            try container.encode(string, forKey: .sender)
+        case .transaction(let string):
+            try container.encode(string, forKey: .transaction)
+        case .package(let string):
+            try container.encode(string, forKey: .package)
+        case .moveModule(let moveModuleFilter):
+            try container.encode(moveModuleFilter, forKey: .moveModule)
+        case .moveEventType(let string):
+            try container.encode(string, forKey: .moveEventType)
+        case .moveEventModule(let moveModuleFilter):
+            try container.encode(moveModuleFilter, forKey: .moveEventModule)
+        case .moveEventField(let moveEventField):
+            try container.encode(moveEventField, forKey: .moveEventField)
+        case .timeRange(let timeRange):
+            try container.encode(timeRange, forKey: .timeRange)
+        case .any(let array):
+            try container.encode(array, forKey: .any)
+        case .all(let array):
+            try container.encode(array, forKey: .all)
+        case .and(let array):
+            try container.encode(array, forKey: .and)
+        case .or(let array):
+            try container.encode(array, forKey: .or)
+        }
+    }
+}
+
+public struct TimeRange: Codable {
+    public var endTime: String
+    public var startTime: String
+}
+
+public struct MoveEventField: Codable {
+    public var path: String
+    public var value: AnyCodable
 }
 
 public enum SuiObjectDataFilter: Codable {
@@ -1379,4 +1475,9 @@ public enum ObjectRead {
             return "VersionTooHigh"
         }
     }
+}
+
+public enum SortOrder: String, Codable {
+    case ascending
+    case descending
 }

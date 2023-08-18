@@ -8,8 +8,8 @@
 import Foundation
 
 public struct PaginatedSuiMoveEvent {
-    public let data: [SuiMoveEvent]
-    public let nextCursor: Cursor
+    public let data: [SuiEvent]
+    public let nextCursor: EventId
     public let hasNextPage: Bool
 }
 

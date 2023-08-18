@@ -547,7 +547,7 @@ public struct SuiProvider {
         return JSON(data)["result"]
     }
     
-    public func getNormalizedMoveModulesByPackage(_ package: String) async throws -> JSON {
+    public func getNormalizedMoveModulesByPackage(_ package: String) async throws -> SuiMoveNormalizedModules {
         let data = try await self.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -557,13 +557,46 @@ public struct SuiProvider {
                 ]
             )
         )
-
-        return JSON(data)["result"]
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        return try self.parseNormalizedModules(result: result)
     }
-    
-    // TODO: Finish getNormalizedMoveStruct
-    
-    // TODO: Finish getNormalizedMoveModule
+
+    public func getNormalizedMoveStruct(package: String, module: String, structure: String) async throws -> SuiMoveNormalizedStruct {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getNormalizedMoveStruct",
+                [
+                    AnyCodable(package),
+                    AnyCodable(module),
+                    AnyCodable(structure)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        return try self.parseNormalizedStruct(input: result)
+    }
+
+    public func getNormalizedModuleModule(package: String, module: String) async throws -> SuiMoveNormalizedModule {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getNormalizedMoveModule",
+                [
+                    AnyCodable(package),
+                    AnyCodable(module)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        return try self.parseNormalizedModule(input: result)
+    }
     
     public func getMultiObjects(_ ids: [objectId], _ options: GetObject? = nil) async throws -> [SuiObjectResponse] {
         for object in ids { guard isValidSuiAddress(try normalizeSuiAddress(value: object)) else { throw SuiError.notImplemented } }
@@ -780,9 +813,35 @@ public struct SuiProvider {
             }
         )
     }
-    
-    // TODO: Finish getMoveFunctionArgTypes
-    
+
+    public func getMoveFunctionArgTypes(package: String, module: String, function: String) async throws -> [SuiMoveFunctionArgType] {
+        let data = try await self.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "sui_getMoveFunctionArgTypes",
+                [
+                    AnyCodable(package),
+                    AnyCodable(module),
+                    AnyCodable(function)
+                ]
+            )
+        )
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        let result = JSON(data)["result"]
+        var argTypes: [SuiMoveFunctionArgType] = []
+        for arg in result.arrayValue {
+            if arg.stringValue == "Pure" {
+                argTypes.append(.pure)
+            } else {
+                if let object = ObjectValueKind(rawValue: arg["Object"].stringValue) {
+                    argTypes.append(.object(object))
+                }
+            }
+        }
+        return argTypes
+    }
+
     public func executeTransactionBlock(
         _ transactionBlock: String,
         _ signature: String,
@@ -801,7 +860,8 @@ public struct SuiProvider {
                 ]
             )
         )
-
+        let errorValue = self.hasErrors(JSON(data))
+        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return JSON(data)["result"]
     }
 
@@ -965,6 +1025,77 @@ public struct SuiProvider {
         } catch {
             return false
         }
+    }
+
+    private func parseNormalizedModules(result: JSON) throws -> SuiMoveNormalizedModules {
+        var modules: SuiMoveNormalizedModules = [:]
+        for (key, value) in result.dictionaryValue {
+            modules[key] = try self.parseNormalizedModule(input: value)
+        }
+        return modules
+    }
+
+    private func parseNormalizedStruct(input: JSON) throws -> SuiMoveNormalizedStruct {
+        let abilities = input["abilities"]["abilities"].arrayValue
+        let typeParameters = input["typeParameters"].arrayValue
+        let fields = input["fields"].arrayValue
+        return SuiMoveNormalizedStruct(
+            abilities: SuiMoveAbilitySet(abilities: abilities.map { $0.stringValue }),
+            typeParameters: typeParameters.map {
+                SuiMoveStructTypeParameter(
+                    constraints: SuiMoveAbilitySet(
+                        abilities: $0["isPhantom"]["abilities"].arrayValue.map { $0.stringValue }
+                    ),
+                    isPhantom: $0["isPhantom"].boolValue
+                )
+            },
+            fields: try fields.map {
+                SuiMoveNormalizedField(
+                    name: $0["name"].stringValue,
+                    type: try SuiMoveNormalizedType.decodeNormalizedType($0["type"])
+                )
+            }
+        )
+    }
+
+    private func parseNormalizedFunction(input: JSON) throws -> SuiMoveNormalizedFunction {
+        let typeParameters = input["typeParameters"].arrayValue
+        let parameters = input["parameters"].arrayValue
+        let returnValues = input["return"].arrayValue
+        return SuiMoveNormalizedFunction(
+            visibility: SuiMoveVisibility(rawValue: input["visibility"].stringValue)!,
+            isEntry: input["isEntry"].boolValue,
+            typeParameters: typeParameters.map { param in
+                let abilities = param["abilities"].arrayValue
+                return SuiMoveAbilitySet(abilities: abilities.map { $0.stringValue })
+            },
+            parameters: try parameters.map { try SuiMoveNormalizedType.decodeNormalizedType($0) },
+            returnValues: try returnValues.map { try SuiMoveNormalizedType.decodeNormalizedType($0) }
+        )
+    }
+
+    private func parseNormalizedModule(input: JSON) throws -> SuiMoveNormalizedModule {
+        var structs: [String: SuiMoveNormalizedStruct] = [:]
+        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
+        for (structKey, structValue) in input["structs"].dictionaryValue {
+            structs[structKey] = try self.parseNormalizedStruct(input: structValue)
+        }
+        for (exposedKey, exposedValue) in input["exposedFunctions"].dictionaryValue {
+            exposedFunctions[exposedKey] = try self.parseNormalizedFunction(input: exposedValue)
+        }
+        return SuiMoveNormalizedModule(
+            fileFormatVersion: input["fileFormatVersion"].intValue,
+            address: input["address"].stringValue,
+            name: input["name"].stringValue,
+            friends: input["friends"].arrayValue.map {
+                SuiMoveModuleId(
+                    address: $0["address"].stringValue,
+                    name: $0["name"].stringValue
+                )
+            },
+            structs: structs,
+            exposedFunctions: exposedFunctions
+        )
     }
     
     private func hasErrors(_ data: JSON) -> RPCErrorValue {
@@ -1156,4 +1287,15 @@ public enum StakeStatus: Equatable {
 public struct CommitteeInfo {
     public var epoch: String
     public var validators: [[String]]
+}
+
+public enum SuiMoveFunctionArgType: Equatable {
+    case pure
+    case object(ObjectValueKind)
+}
+
+public enum ObjectValueKind: String, Equatable {
+    case byImmutableReference = "ByImmutableReference"
+    case byMutableReference = "ByMutableReference"
+    case byValue = "ByValue"
 }

@@ -12,6 +12,7 @@ public struct MakeMoveVecTransaction: KeyProtocol, TransactionProtocol {
     public let type: String?
     
     public func serialize(_ serializer: Serializer) throws {
+        try serializer.uleb128(0)
         try serializer.sequence(objects, Serializer._struct)
         if let type { try Serializer.str(serializer, type) }
     }

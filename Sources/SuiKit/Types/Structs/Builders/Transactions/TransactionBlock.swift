@@ -708,6 +708,7 @@ public struct TransactionBlock {
                 )
                 let dryRunResult = try await provider.dryRunTransactionBlock([UInt8](blockData.build(overrides: txBlockDataBuilder)))
                 guard dryRunResult["effects"]["status"]["status"].stringValue != "failure" else {
+                    print("DEBUG: FAILED TX - \(dryRunResult)")
                     throw SuiError.notImplemented
                 }
                 let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (

@@ -97,13 +97,10 @@ public indirect enum SuiMoveNormalizedType: Equatable {
     public func getPureSerializationType(_ argVal: SuiJsonValue) throws -> String? {
         switch self {
         case .bool:
-            try self.expectType("boolean", argVal)
             return self.type.lowercased()
         case .u8, .u16, .u32, .u64, .u128, .u256:
-            try self.expectType("number", argVal)
             return self.type.lowercased()
         case .address, .signer:
-            try self.expectType("string", .string(try argVal.stringType()))
             return self.type.lowercased()
         case .vector(let normalizedTypeVector):
             if argVal.kind == .string, normalizedTypeVector.type == "U8" {
@@ -238,15 +235,6 @@ public indirect enum SuiMoveNormalizedType: Equatable {
             if data["Reference"].exists() {
                 return .reference(try decodeNormalizedType(data["Reference"]))
             }
-            throw SuiError.notImplemented
-        }
-    }
-
-    private func expectType(_ typeName: String, _ argVal: SuiJsonValue) throws {
-        if SuiJsonValueType(rawValue: typeName) == nil {
-            throw SuiError.notImplemented
-        }
-        if (SuiJsonValueType(rawValue: typeName))! != argVal.kind {
             throw SuiError.notImplemented
         }
     }

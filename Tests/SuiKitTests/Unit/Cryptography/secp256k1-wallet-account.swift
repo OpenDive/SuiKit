@@ -167,7 +167,7 @@ final class Secp256k1WalletTest: XCTestCase {
                     withPad: "0",
                     startingAt: 0
                 ),
-                version: UInt64.random(in: 0..<10000),
+                version: "\(UInt64.random(in: 0..<10000))",
                 digest: Base58.base58Encode(digest)
             )
         ])

@@ -14,8 +14,7 @@ public struct OwnedObjectRef {
 
     public init?(input: JSON) {
         guard let owner = ObjectOwner.parseJSON(input["owner"]) else { return nil }
-        guard let reference = SuiObjectRef(input: input["reference"]) else { return nil }
         self.owner = owner
-        self.reference = reference
+        self.reference = SuiObjectRef(input: input["reference"])
     }
 }

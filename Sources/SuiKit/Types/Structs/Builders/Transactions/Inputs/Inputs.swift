@@ -26,13 +26,14 @@
 import Foundation
 
 public struct Inputs {
-    public static func pure(data: Data) throws -> PureCallArg {
-        let der = Deserializer(data: data)
-        return PureCallArg(value: try SuiJsonValue.deserialize(from: der))
+    public static func pure(data: Data) -> PureCallArg {
+        return PureCallArg(value: data)
     }
 
-    public static func pure(json: SuiJsonValue) -> PureCallArg {
-        return PureCallArg(value: json)
+    public static func pure(json: SuiJsonValue) throws -> PureCallArg {
+        let ser = Serializer()
+        try Serializer._struct(ser, value: json)
+        return PureCallArg(value: ser.output())
     }
 
     public static func immOrOwnedRef(suiObjectRef: SuiObjectRef) throws -> ObjectArg {

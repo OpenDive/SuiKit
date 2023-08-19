@@ -411,3 +411,10 @@ func < (lhs: Data, rhs: Data) -> Bool {
     let rhsString = rhs.reduce("", { $0 + String(format: "%02x", $1) })
     return lhsString < rhsString
 }
+
+public extension Serializer {
+    func addLength() {
+        let length = self._output.count
+        self._output = ([UInt8(length)] + self._output)
+    }
+}

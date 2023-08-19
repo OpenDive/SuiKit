@@ -26,14 +26,14 @@ public struct CoinStruct {
             previousTransaction: self.previousTransaction,
             storageRebate: nil,
             type: nil,
-            version: UInt64(self.version) ?? 0
+            version: self.version
         )
     }
 
     public func toSuiObjectRef() -> SuiObjectRef {
         return SuiObjectRef(
             objectId: self.coinObjectId,
-            version: UInt64(self.version) ?? 0,
+            version: self.version,
             digest: self.digest
         )
     }

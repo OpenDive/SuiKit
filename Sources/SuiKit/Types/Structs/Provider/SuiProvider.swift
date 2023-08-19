@@ -40,6 +40,7 @@ public struct SuiProvider {
                 ]
             )
         )
+//        print("DEBUG: TX BLOCK DEV INSPECT - \([UInt8](result))")
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return DevInspectResults(input: JSON(data)["result"])

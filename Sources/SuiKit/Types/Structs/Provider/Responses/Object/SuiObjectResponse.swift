@@ -8,10 +8,6 @@
 import Foundation
 import SwiftyJSON
 
-//public let objectId: String
-//public let initialSharedVersion: UInt64
-//public let mutable: Bool
-
 public struct SuiObjectResponse {
     public var error: ObjectResponseError?
     public var data: SuiObjectData?
@@ -60,7 +56,7 @@ public struct SuiObjectData {
     public let previousTransaction: String?
     public let storageRebate: Int?
     public let type: String?
-    public let version: UInt64
+    public let version: String
 
     public init(
         bcs: RawData?,
@@ -72,7 +68,7 @@ public struct SuiObjectData {
         previousTransaction: String?,
         storageRebate: Int?,
         type: String?,
-        version: UInt64
+        version: String
     ) {
         self.bcs = bcs
         self.content = content
@@ -96,6 +92,6 @@ public struct SuiObjectData {
         self.previousTransaction = data["previousTransaction"].stringValue
         self.storageRebate = data["storageRebate"].int
         self.type = data["type"].string
-        self.version = data["version"].uInt64Value
+        self.version = data["version"].stringValue
     }
 }

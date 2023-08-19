@@ -350,3 +350,9 @@ public class Deserializer {
         }
     }
 }
+
+public extension Deserializer {
+    func removeLength() {
+        self.input = self.input.dropFirst()
+    }
+}

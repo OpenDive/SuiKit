@@ -118,7 +118,7 @@ public enum TransactionArgument: KeyProtocol {
                 input.value = .callArg(
                     Input(
                         type: .pure(
-                            Inputs.pure(json: value)
+                            try Inputs.pure(json: value)
                         )
                     )
                 )
@@ -127,7 +127,7 @@ public enum TransactionArgument: KeyProtocol {
             switch type {
             case .pure:
                 input.value = .callArg(
-                    Input(type: .pure(Inputs.pure(json: value)))
+                    Input(type: .pure(try Inputs.pure(json: value)))
                 )
             case .object:
                 throw SuiError.notImplemented

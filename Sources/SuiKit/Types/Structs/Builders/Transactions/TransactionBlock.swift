@@ -355,8 +355,8 @@ public class TransactionBlock {
                         self.pure(
                             value: .callArg(
                                 Input(
-                                    type: .pure(Inputs.pure(data: Data([UInt8](try address.replacingOccurrences(of: "0x", with: "").stringToBytes())))
-                                               )
+                                    type: .pure(Inputs.pure(json: .address(try AccountAddress.fromHex(address)))
+                                    )
                                 )
                             )
                         )
@@ -471,7 +471,7 @@ public class TransactionBlock {
         ].map { coin in
             SuiObjectRef(
                 objectId: coin.coinObjectId,
-                version: UInt64(coin.version) ?? UInt64(0),
+                version: coin.version,
                 digest: coin.digest
             )
         }
@@ -507,12 +507,12 @@ public class TransactionBlock {
             case .moveCall(let moveCall):
                 try moveCall.addToResolve(
                     list: &moveModulesToResolve,
-                    inputs: blockData.inputs
+                    inputs: self.blockData.builder.inputs
                 )
             default:
                 try transaction.transaction().executeTransaction(
                     objects: &objectsToResolve,
-                    inputs: &(blockData.inputs)
+                    inputs: &(self.blockData.builder.inputs)
                 )
             }
         }
@@ -549,7 +549,7 @@ public class TransactionBlock {
                         let serType = try param.getPureSerializationType(inputValue)
                         if serType != nil {
                             blockData.inputs[Int(blockInputArgument.index)].value = .callArg(
-                                Input(type: .pure(Inputs.pure(json: inputValue)))
+                                Input(type: .pure(try Inputs.pure(json: inputValue)))
                             )
                             return
                         }
@@ -687,7 +687,7 @@ public class TransactionBlock {
                     transactionBlock: [UInt8](blockData.build(overrides: txBlockDataBuilder))
                 )
                 guard dryRunResult["effects"]["status"]["status"].stringValue != "failure" else {
-                    print("DEBUG: FAILED TX - \(dryRunResult)")
+//                    print("DEBUG: FAILED TX - \(dryRunResult)")
                     throw SuiError.notImplemented
                 }
                 let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (

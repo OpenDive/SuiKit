@@ -23,8 +23,7 @@ public enum ObjectRead {
         case "ObjectNotExists":
             return .objectNotExists(data["details"].stringValue)
         case "ObjectDeleted":
-            guard let objectDeleted = SuiObjectRef(input: data["details"]) else { return nil }
-            return .objectDeleted(objectDeleted)
+            return .objectDeleted(SuiObjectRef(input: data["details"]))
         case "VersionNotFound":
             return .versionNotFound(
                 data["details"].arrayValue[0].stringValue,

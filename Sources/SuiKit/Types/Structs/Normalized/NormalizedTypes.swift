@@ -55,6 +55,14 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         self.name = name
         self.typeArguments = typeArguments
     }
+
+    public init(input: String) throws {
+        let typeTag = try StructTag.fromStr(input)
+        self.address = typeTag.value.address
+        self.module = typeTag.value.module
+        self.name = typeTag.value.name
+        self.typeArguments = []
+    }
     
     public init?(input: JSON) {
         guard let address = try? AccountAddress.fromHex(input["package"].stringValue) else { return nil }
@@ -68,7 +76,7 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         try Serializer._struct(serializer, value: self.address)
         try Serializer.str(serializer, self.module)
         try Serializer.str(serializer, self.name)
-        try serializer.sequence(self.typeArguments, Serializer._struct)
+        if !self.typeArguments.isEmpty { try serializer.sequence(self.typeArguments, Serializer._struct) }
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> SuiMoveNormalizedStructType {
@@ -76,7 +84,7 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
             address: try Deserializer._struct(deserializer),
             module: try Deserializer.string(deserializer),
             name: try Deserializer.string(deserializer),
-            typeArguments: try deserializer.sequence(valueDecoder: Deserializer._struct)
+            typeArguments: (try? deserializer.sequence(valueDecoder: Deserializer._struct)) ?? []
         )
     }
 }

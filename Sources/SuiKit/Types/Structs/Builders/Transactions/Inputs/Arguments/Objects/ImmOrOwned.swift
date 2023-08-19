@@ -33,9 +33,8 @@ public struct ImmOrOwned: KeyProtocol {
         self.ref = ref
     }
 
-    public init?(input: JSON) {
-        guard let ref = SuiObjectRef(input: input) else { return nil }
-        self.ref = ref
+    public init(input: JSON) {
+        self.ref = SuiObjectRef(input: input)
     }
 
     public func serialize(_ serializer: Serializer) throws {

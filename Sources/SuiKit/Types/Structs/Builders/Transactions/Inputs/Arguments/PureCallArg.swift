@@ -27,24 +27,30 @@ import Foundation
 import SwiftyJSON
 
 public struct PureCallArg: KeyProtocol {
-    public var value: SuiJsonValue
+    public var value: [UInt8]
 
-    public init(value: SuiJsonValue) {
+    public init(value: [UInt8]) {
         self.value = value
+    }
+
+    public init(value: Data) {
+        self.value = [UInt8](value)
     }
 
     public init?(input: JSON) {
         guard let value = SuiJsonValue.fromJSON(input["value"]) else { return nil }
-        self.value = value
+        let ser = Serializer()
+        guard ((try? Serializer._struct(ser, value: value)) != nil) else { return nil }
+        self.value = [UInt8](ser.output())
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: self.value)
+        try serializer.sequence(self.value, Serializer.u8)
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> PureCallArg {
         return PureCallArg(
-            value: try Deserializer._struct(deserializer)
+            value: try deserializer.sequence(valueDecoder: Deserializer.u8)
         )
     }
 }

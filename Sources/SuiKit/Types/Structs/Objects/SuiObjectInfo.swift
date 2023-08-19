@@ -25,15 +25,12 @@ public enum ObjectOwner {
         if let addressOwner = input["AddressOwner"].string {
             return .addressOwner(addressOwner)
         }
-
         if let objectOwner = input["ObjectOwner"].string {
             return .objectOwner(objectOwner)
         }
-
         if let initialSharedVersion = input["Shared"]["initial_shared_version"].int {
             return .shared(initialSharedVersion)
         }
-
         return nil
     }
 }

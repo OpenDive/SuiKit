@@ -47,7 +47,7 @@ extension String {
             throw SuiError.notImplemented
         }
         var bytes = [UInt8]()
-        bytes.reserveCapacity(length/2)
+        bytes.reserveCapacity(includeLength ? ((length/2) + 1) : length/2)
         var index = self.startIndex
         for _ in 0..<(length/2) {
             let nextIndex = self.index(index, offsetBy: 2)

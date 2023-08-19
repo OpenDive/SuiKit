@@ -33,8 +33,7 @@ public enum ObjectArg: KeyProtocol {
     public static func fromJSON(_ input: JSON) -> ObjectArg? {
         switch input["objectType"].stringValue {
         case "immOrOwnedObject":
-            guard let imm = ImmOrOwned(input: input) else { return nil }
-            return .immOrOwned(imm)
+            return .immOrOwned(ImmOrOwned(input: input))
         case "sharedObject":
             guard let shared = SharedObjectArg(input: input) else { return nil }
             return .shared(shared)

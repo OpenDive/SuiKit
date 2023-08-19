@@ -150,10 +150,10 @@ final class Secp256k1WalletTest: XCTestCase {
 
     func testThatSigningTransactionBlocksWillWorkForSecp256k1Keys() async throws {
         let account = try Account(accountType: .secp256k1)
-        var txBlock = try TransactionBlock()
+        let txBlock = try TransactionBlock()
         let provider = SuiProvider(connection: devnetConnection())
         
-        txBlock.setSender(sender: try account.publicKey.toSuiAddress())
+        try txBlock.setSender(sender: try account.publicKey.toSuiAddress())
         txBlock.setGasPrice(price: 5)
         txBlock.setGasBudget(price: 100)
         let digest: [UInt8] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]

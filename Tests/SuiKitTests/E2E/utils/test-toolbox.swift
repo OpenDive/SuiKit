@@ -35,11 +35,14 @@ internal class TestToolbox {
     }
 
     func getAllCoins() async throws -> PaginatedCoins {
-        return try await self.client.getAllCoins(self.account.publicKey)
+        return try await self.client.getAllCoins(account: self.account.publicKey)
     }
 
     func getCoins() async throws -> PaginatedCoins {
-        return try await self.client.getCoins(self.account.publicKey, "0x2::sui::SUI")
+        return try await self.client.getCoins(
+            account: try self.account.publicKey.toSuiAddress(),
+            coinType: "0x2::sui::SUI"
+        )
     }
 
     func getActiveValidators() async throws -> [JSON] {
@@ -58,9 +61,9 @@ internal class TestToolbox {
         let _ = try txBlock.transferObject(objects: [cap], address: try self.address())
 
         let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
-            &txBlock,
-            self.account,
-            SuiTransactionBlockResponseOptions(
+            transactionBlock: &txBlock,
+            signer: self.account,
+            options: SuiTransactionBlockResponseOptions(
                 showInput: false,
                 showEffects: true,
                 showEvents: false,
@@ -108,9 +111,9 @@ internal class TestToolbox {
         )
 
         let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
-            &txBlock,
-            self.account,
-            SuiTransactionBlockResponseOptions(
+            transactionBlock: &txBlock,
+            signer: self.account,
+            options: SuiTransactionBlockResponseOptions(
                 showInput: false,
                 showEffects: true,
                 showEvents: false,
@@ -144,8 +147,8 @@ internal class TestToolbox {
         var coinIdTx = coinId
         if coinIdTx == nil {
             coinIdTx = try await self.client.getCoins(
-                try self.account.publicKey.toSuiAddress(),
-                "0x2::sui::SUI"
+                account: try self.account.publicKey.toSuiAddress(),
+                coinType: "0x2::sui::SUI"
             ).data[0].coinObjectId
         }
         guard let coinIdTx = coinIdTx else { throw SuiError.notImplemented }
@@ -165,9 +168,9 @@ internal class TestToolbox {
         }
 
         let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
-            &txBlock,
-            self.account,
-            SuiTransactionBlockResponseOptions(
+            transactionBlock: &txBlock,
+            signer: self.account,
+            options: SuiTransactionBlockResponseOptions(
                 showInput: false,
                 showEffects: true,
                 showEvents: false,

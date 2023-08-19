@@ -38,13 +38,13 @@ final class DevInspectTest: XCTestCase {
         _ client: SuiProvider,
         _ signer: Account,
         _ transactionBlock: inout TransactionBlock,
-        _ status: String
+        _ status: ExecutionStatusType
     ) async throws {
         let result = try await client.devInspectTransactionBlock(
-            &transactionBlock,
-            try signer.publicKey.toSuiAddress()
+            transactionBlock: &transactionBlock,
+            sender: signer
         )
-        guard status == result["effects"]["status"]["status"].stringValue else {
+        guard status == result?.effects.status.status else {
             XCTFail("Status does not match")
             return
         }
@@ -62,11 +62,10 @@ final class DevInspectTest: XCTestCase {
             toolBox.client,
             toolBox.account,
             &txBlock,
-            "success"
+            .success
         )
     }
 
-    // Passed test
     func testThatMoveCallsThatReturnStructsWorkAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         let coins = try await toolBox.getCoins()
@@ -88,11 +87,10 @@ final class DevInspectTest: XCTestCase {
             toolBox.client,
             toolBox.account,
             &tx,
-            "success"
+            .success
         )
     }
 
-    // Passed test
     func testThatVerifiesIncorrectMoveCallsWillFail() async throws {
         let toolBox = try self.fetchToolBox()
         var tx = try TransactionBlock()
@@ -102,6 +100,6 @@ final class DevInspectTest: XCTestCase {
             typeArguments: []
         )
 
-        try await self.validateDevInspectTransaction(toolBox.client, toolBox.account, &tx, "failure")
+        try await self.validateDevInspectTransaction(toolBox.client, toolBox.account, &tx, .failure)
     }
 }

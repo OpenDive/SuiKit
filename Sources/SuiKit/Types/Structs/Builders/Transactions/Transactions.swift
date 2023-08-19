@@ -9,43 +9,62 @@ import Foundation
 import AnyCodable
 
 public struct Transactions {
-    public static func moveCall(input: MoveCallTransactionInput) -> MoveCallTransaction {
-        return MoveCallTransaction(
-            target: input.target,
-            typeArguments: input.typeArguments ?? [],
-            arguments: input.arguments ?? []
+    public static func moveCall(
+        target: String,
+        typeArguments: [String]? = nil,
+        arguments: [TransactionArgument]? = nil
+    ) throws -> MoveCallTransaction {
+        return try MoveCallTransaction(
+            target: target,
+            typeArguments: typeArguments ?? [],
+            arguments: arguments ?? []
         )
     }
-    
-    public static func transferObjects(objects: [ObjectTransactionArgument], address: PureTransactionArgument) -> TransferObjectsTransaction {
+
+    public static func transferObjects(
+        objects: [TransactionArgument],
+        address: TransactionArgument
+    ) -> TransferObjectsTransaction {
         return TransferObjectsTransaction(
             objects: objects,
             address: address
         )
     }
-    
-    public static func splitCoins(coins: ObjectTransactionArgument, amounts: [TransactionArgument]) -> SplitCoinsTransaction {
+
+    public static func splitCoins(
+        coins: TransactionArgument,
+        amounts: [TransactionArgument]
+    ) -> SplitCoinsTransaction {
         return SplitCoinsTransaction(
             coin: coins,
-            amounts: amounts.map { PureTransactionArgument(argument: $0, type: .u64) }
+            amounts: amounts
         )
     }
-    
-    public static func mergeCoins(destination: ObjectTransactionArgument, sources: [ObjectTransactionArgument]) -> MergeCoinsTransaction {
+
+    public static func mergeCoins(
+        destination: TransactionArgument,
+        sources: [TransactionArgument]
+    ) -> MergeCoinsTransaction {
         return MergeCoinsTransaction(
             destination: destination,
             sources: sources
         )
     }
-    
-    public static func publish(modules: [[UInt8]], dependencies: [objectId]) throws -> PublishTransaction {
+
+    public static func publish(
+        modules: [[UInt8]],
+        dependencies: [objectId]
+    ) throws -> PublishTransaction {
         return try PublishTransaction(
             modules: modules,
             dependencies: dependencies
         )
     }
-    
-    public static func publish(modules: [String], dependencies: [objectId]) throws -> PublishTransaction {
+
+    public static func publish(
+        modules: [String],
+        dependencies: [objectId]
+    ) throws -> PublishTransaction {
         return try PublishTransaction(
             modules: modules.compactMap { module in
                 guard let result = Data.fromBase64(module) else { return nil }
@@ -54,8 +73,13 @@ public struct Transactions {
             dependencies: dependencies
         )
     }
-    
-    public static func upgrade(modules: [[UInt8]], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
+
+    public static func upgrade(
+        modules: [[UInt8]],
+        dependencies: [objectId],
+        packageId: objectId,
+        ticket: TransactionArgument
+    ) -> UpgradeTransaction {
         return UpgradeTransaction(
             modules: modules,
             dependencies: dependencies,
@@ -63,8 +87,13 @@ public struct Transactions {
             ticket: ticket
         )
     }
-    
-    public static func upgrade(modules: [String], dependencies: [objectId], packageId: objectId, ticket: ObjectTransactionArgument) -> UpgradeTransaction {
+
+    public static func upgrade(
+        modules: [String],
+        dependencies: [objectId],
+        packageId: objectId,
+        ticket: TransactionArgument
+    ) -> UpgradeTransaction {
         return UpgradeTransaction(
             modules: modules.compactMap { module in
                 guard let result = Data.fromBase64(module) else { return nil }
@@ -75,8 +104,11 @@ public struct Transactions {
             ticket: ticket
         )
     }
-    
-    public static func makeMoveVec(type: String? = nil, objects: [ObjectTransactionArgument]) -> MakeMoveVecTransaction {
+
+    public static func makeMoveVec(
+        type: String? = nil,
+        objects: [TransactionArgument]
+    ) -> MakeMoveVecTransaction {
         return MakeMoveVecTransaction(
             objects: objects,
             type: type

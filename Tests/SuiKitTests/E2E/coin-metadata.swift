@@ -37,7 +37,7 @@ final class CoinMetadataTest: XCTestCase {
     func testThatAccessingCoinMetadataFunctionsAsExpected() async throws {
         let toolBox = try self.fetchToolBox()
         let coinMetadata = try await toolBox.client.getCoinMetadata(
-            "\(try self.fetchPackageId())::test::TEST"
+            coinType: "\(try self.fetchPackageId())::test::TEST"
         )
 
         XCTAssertEqual(coinMetadata.decimals, 2)

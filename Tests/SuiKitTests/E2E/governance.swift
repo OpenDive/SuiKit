@@ -17,7 +17,7 @@ final class GovernanceTest: XCTestCase {
 
     override func setUp() async throws {
         self.toolBox = try await TestToolbox(true)
-        self.stateObjectId = try normalizeSuiAddress(value: "0x5")
+        self.stateObjectId = try Inputs.normalizeSuiAddress(value: "0x5")
     }
 
     private func fetchToolBox() throws -> TestToolbox {
@@ -29,7 +29,7 @@ final class GovernanceTest: XCTestCase {
     }
 
     private func addStake(_ client: SuiProvider, _ account: Account) async throws -> JSON {
-        let coins = try await client.getCoins(try account.publicKey.toSuiAddress(), "0x2::sui::SUI")
+        let coins = try await client.getCoins(account: try account.publicKey.toSuiAddress(), coinType: "0x2::sui::SUI")
         let system = try await client.info()
         let activeValidator = system["activeValidators"].arrayValue[0]["suiAddress"].stringValue
         var tx = try TransactionBlock()
@@ -39,18 +39,18 @@ final class GovernanceTest: XCTestCase {
             arguments: [
                 .input(tx.object(value: stateObjectId)),
                 coinsTx,
-                .input(tx.pure(value: .address(try ED25519PublicKey(hexString: activeValidator))))
+                .input(tx.pure(value: .string(activeValidator)))
             ]
         )
         let coinObjects = try await client.getMultiObjects(
-            coins.data.map { $0.coinObjectId },
-            SuiObjectDataOptions(showOwner: true)
+            ids: coins.data.map { $0.coinObjectId },
+            options: SuiObjectDataOptions(showOwner: true)
         )
         try tx.setGasPayment(payments: coinObjects.map { $0.getObjectReference()! })
         return try await client.signAndExecuteTransactionBlock(
-            &tx,
-            account,
-            SuiTransactionBlockResponseOptions(showEffects: true)
+            transactionBlock: &tx,
+            signer: account,
+            options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
     }
 
@@ -68,9 +68,9 @@ final class GovernanceTest: XCTestCase {
         let toolBox = try self.fetchToolBox()
         try await toolBox.setup()
         let _ = try await self.addStake(toolBox.client, toolBox.account)
-        let stakes = try await toolBox.client.getStakes(try toolBox.address())
+        let stakes = try await toolBox.client.getStakes(owner: try toolBox.address())
         let stakesById = try await toolBox.client.getStakesByIds(
-            [stakes[0].stakes[0].getStakeObject().stakeSuiId]
+            stakes: [stakes[0].stakes[0].getStakeObject().stakeSuiId]
         )
         XCTAssertGreaterThan(stakes.count, 0)
         XCTAssertEqual(stakesById[0].stakes[0], stakes[0].stakes[0])
@@ -78,7 +78,7 @@ final class GovernanceTest: XCTestCase {
 
     func testThatFetchingValidatorsFunctionsAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let committeeInfo = try await toolBox.client.getCommitteeInfo("0")
+        let committeeInfo = try await toolBox.client.getCommitteeInfo(epoch: "0")
         XCTAssertGreaterThan(committeeInfo.validators.count, 0)
     }
 

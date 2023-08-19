@@ -82,7 +82,16 @@ public extension Array where Element == UInt8 {
             append(b)
         }
     }
-    
+
+    internal func bytesToString(includeLength: Bool = true) -> String {
+        var startIndex = 0
+        if includeLength { startIndex = 1 }
+
+        return self[startIndex...].reduce("") { result, byte in
+            return result + String(format: "%02x", byte)
+        }
+    }
+
     mutating func set(_ bytes: [UInt8], offset: Int? = nil) throws {
         let actualOffset = offset ?? 0
         

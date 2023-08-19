@@ -14,7 +14,6 @@ final class ObjectVectorTest: XCTestCase {
     var packageId: String?
 
     override func setUp() async throws {
-        let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
         self.toolBox = try await TestToolbox(true)
         self.packageId = try await self.fetchToolBox().publishPackage("entry-point-vector").packageId
     }
@@ -42,9 +41,9 @@ final class ObjectVectorTest: XCTestCase {
             arguments: [.input(tx.pure(value: .number(UInt64(val))))]
         )
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
-            &tx,
-            toolBox.account,
-            SuiTransactionBlockResponseOptions(showEffects: true)
+            transactionBlock: &tx,
+            signer: toolBox.account,
+            options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
         guard "success" == result["effects"]["status"]["status"].stringValue else {
             XCTFail("Status does not match")
@@ -64,9 +63,9 @@ final class ObjectVectorTest: XCTestCase {
             arguments: [vec]
         )
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
-            &tx,
-            toolBox.account,
-            SuiTransactionBlockResponseOptions(showEffects: true)
+            transactionBlock: &tx,
+            signer: toolBox.account,
+            options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
         guard "success" == result["effects"]["status"]["status"].stringValue else {
             XCTFail("Status does not match")
@@ -108,9 +107,9 @@ final class ObjectVectorTest: XCTestCase {
         )
         try tx.setGasPayment(payments: [coin.toSuiObjectRef()])
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
-            &tx,
-            toolBox.account,
-            SuiTransactionBlockResponseOptions(showEffects: true)
+            transactionBlock: &tx,
+            signer: toolBox.account,
+            options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
         guard "success" == result["effects"]["status"]["status"].stringValue else {
             XCTFail("Status does not match")

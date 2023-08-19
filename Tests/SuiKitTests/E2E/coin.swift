@@ -20,7 +20,7 @@ final class CoinTest: XCTestCase {
     func testThatGetCoinStructTagWorksAsIntended() async throws {
         let toolbox = try await TestToolbox(true)
         let suiStructTag = SuiMoveNormalizedStructType(
-            address: try normalizeSuiAddress(value: "0x2"),
+            address: try AccountAddress.fromHex(try Inputs.normalizeSuiAddress(value: "0x2")),
             module: "sui",
             name: "SUI",
             typeArguments: []

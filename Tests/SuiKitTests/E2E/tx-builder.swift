@@ -20,8 +20,7 @@ final class TXBuilderTest: XCTestCase {
     var suiClockObjectId: String = ""
 
     override func setUp() async throws {
-        let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
-        self.toolBox = try await TestToolbox(account: account, true)
+        self.toolBox = try await TestToolbox(true)
         let packageResult = try await self.fetchToolBox().publishPackage("serializer")
         self.packageId = packageResult.packageId
         self.publishTxn = packageResult.publishedTx
@@ -29,7 +28,7 @@ final class TXBuilderTest: XCTestCase {
             return object["owner"]["Shared"]["initial_shared_version"].int != nil
         }
         self.sharedObjectId = sharedObject[0]["reference"]["objectId"].stringValue
-        self.suiClockObjectId = try normalizeSuiAddress(value: "0x6")
+        self.suiClockObjectId = try Inputs.normalizeSuiAddress(value: "0x6")
     }
 
     private func fetchToolBox() throws -> TestToolbox {
@@ -65,12 +64,12 @@ final class TXBuilderTest: XCTestCase {
     }
 
     private func validateTransaction(client: SuiProvider, account: Account, tx: inout TransactionBlock) async throws {
-        tx.setSenderIfNotSet(sender: try account.publicKey.toSuiAddress())
+        try tx.setSenderIfNotSet(sender: try account.publicKey.toSuiAddress())
         let localDigest = try await tx.getDigest(client)
         let result = try await client.signAndExecuteTransactionBlock(
-            &tx,
-            account,
-            SuiTransactionBlockResponseOptions(
+            transactionBlock: &tx,
+            signer: account,
+            options: SuiTransactionBlockResponseOptions(
                 showInput: false,
                 showEffects: true,
                 showEvents: false,

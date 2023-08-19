@@ -114,7 +114,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     }
     
     public func toSuiAddress() throws -> String {
-        return try normalizeSuiAddress(
+        return try Inputs.normalizeSuiAddress(
             value: try Blake2.hash(
                 .b2b,
                 size: 32,

@@ -20,11 +20,11 @@ final class DynamicFieldsTest: XCTestCase {
 
         let ownedObjects = try await self.fetchToolBox()
             .client.getOwnedObjects(
-                try self.fetchToolBox().account.publicKey.toSuiAddress(),
-                SuiObjectDataFilter.StructType(
+                owner: try self.fetchToolBox().account.publicKey.toSuiAddress(),
+                filter: SuiObjectDataFilter.StructType(
                     "\(try self.fetchPackageId())::dynamic_fields_test::Test"
                 ),
-                SuiObjectDataOptions(showType: true)
+                options: SuiObjectDataOptions(showType: true)
             )
         self.parentObjectId = ownedObjects.data[0].data!.objectId
     }
@@ -55,37 +55,37 @@ final class DynamicFieldsTest: XCTestCase {
 
     func testThatMakesSureWeGetAllOfTheDynamicFields() async throws {
         let toolBox = try self.fetchToolBox()
-        let dynamicFields = try await toolBox.client.getDynamicFields(try self.fetchParentObjectId())
+        let dynamicFields = try await toolBox.client.getDynamicFields(parentId: try self.fetchParentObjectId())
         XCTAssertEqual(dynamicFields.data.count, 2)
     }
 
     func testThatLimitingResponseInPagesWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let dynamicFields = try await toolBox.client.getDynamicFields(try self.fetchParentObjectId(), nil, nil, 1)
+        let dynamicFields = try await toolBox.client.getDynamicFields(parentId: try self.fetchParentObjectId(), filter: nil, options: nil, limit: 1)
         XCTAssertEqual(dynamicFields.data.count, 1)
         XCTAssertNotNil(dynamicFields.nextCursor)
     }
 
     func testThatGoingToTheNextCursorWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let dynamicFields = try await toolBox.client.getDynamicFields(try self.fetchParentObjectId(), nil, nil, 1)
+        let dynamicFields = try await toolBox.client.getDynamicFields(parentId: try self.fetchParentObjectId(), filter: nil, options: nil, limit: 1)
         XCTAssertNotNil(dynamicFields.nextCursor)
 
         let dynamicFieldCursor = try await toolBox.client.getDynamicFields(
-            try self.fetchParentObjectId(), nil, nil, nil, dynamicFields.nextCursor
+            parentId: try self.fetchParentObjectId(), filter: nil, options: nil, limit: nil, cursor: dynamicFields.nextCursor
         )
         XCTAssertGreaterThan(dynamicFieldCursor.data.count, 0)
     }
 
     func testThatGettingDynamicObjectFieldWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let dynamicFields = try await toolBox.client.getDynamicFields(try self.fetchParentObjectId())
+        let dynamicFields = try await toolBox.client.getDynamicFields(parentId: try self.fetchParentObjectId())
 
         for field in dynamicFields.data {
             let objectName = field.name
 
-            let object = try await toolBox.client.getDynamicFieldObject(try self.fetchParentObjectId(), name: objectName)
-            XCTAssertEqual(object.data!.objectId, field.objectId)
+            let object = try await toolBox.client.getDynamicFieldObject(parentId: try self.fetchParentObjectId(), name: objectName)
+            XCTAssertEqual(object!.data!.objectId, field.objectId)
         }
     }
 }

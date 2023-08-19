@@ -41,36 +41,45 @@ final class NormalizedModuleTest: XCTestCase {
 
     func testThatGettingNormalizedModulesByPackageWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let modules = try await toolBox.client.getNormalizedMoveModulesByPackage(self.defaultPackage)
+        let modules = try await toolBox.client.getNormalizedMoveModulesByPackage(package: self.defaultPackage)
         XCTAssertTrue(modules.keys.contains(self.defaultModule))
     }
 
     func testThatGettingNormalizedModuleModulesWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let normalized = try await toolBox.client.getNormalizedModuleModule(
+        guard let normalized = try await toolBox.client.getNormalizedModuleModule(
             package: self.defaultPackage,
             module: self.defaultModule
-        )
+        ) else {
+            XCTFail("Failed to unwrap normalized module")
+            return
+        }
         XCTAssertTrue(normalized.exposedFunctions.keys.contains(self.defaultFunction))
     }
 
     func testThatGettingNormalizedMoveFunctionsWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let normalized = try await toolBox.client.getNormalizedMoveFunction(
-            self.defaultPackage,
-            self.defaultModule,
-            self.defaultFunction
-        )
+        guard let normalized = try await toolBox.client.getNormalizedMoveFunction(
+            package: self.defaultPackage,
+            moduleName: self.defaultModule,
+            functionName: self.defaultFunction
+        ) else {
+            XCTFail("Failed to unwrap normalized module")
+            return
+        }
         XCTAssertFalse(normalized.isEntry)
     }
 
     func testThatGettingNormalizedMoveStructsWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let structure = try await toolBox.client.getNormalizedMoveStruct(
+        guard let structure = try await toolBox.client.getNormalizedMoveStruct(
             package: self.defaultPackage,
             module: self.defaultModule,
             structure: self.defaultStruct
-        )
+        )  else {
+            XCTFail("Failed to unwrap structure")
+            return
+        }
         XCTAssertGreaterThan(structure.fields.count, 1)
     }
 }

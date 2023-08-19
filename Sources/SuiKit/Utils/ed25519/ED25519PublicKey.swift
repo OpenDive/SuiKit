@@ -100,7 +100,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         var tmp = Data(count: ED25519PublicKey.LENGTH + 1)
         try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
         try tmp.set([UInt8](self.key), offset: 1)
-        let result = try normalizeSuiAddress(
+        let result = try Inputs.normalizeSuiAddress(
             value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<ED25519PublicKey.LENGTH * 2]
         )
         return result

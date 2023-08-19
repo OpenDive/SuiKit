@@ -44,9 +44,9 @@ final class EntryPointStringTest: XCTestCase {
             ]
         )
         let result = try await self.fetchToolBox().client.signAndExecuteTransactionBlock(
-            &tx,
-            try self.fetchToolBox().account,
-            SuiTransactionBlockResponseOptions(
+            transactionBlock: &tx,
+            signer: try self.fetchToolBox().account,
+            options: SuiTransactionBlockResponseOptions(
                 showInput: false,
                 showEffects: true,
                 showEvents: false,
@@ -71,9 +71,9 @@ final class EntryPointStringTest: XCTestCase {
             ]
         )
         let result = try await self.fetchToolBox().client.signAndExecuteTransactionBlock(
-            &tx,
-            try self.fetchToolBox().account,
-            SuiTransactionBlockResponseOptions(
+            transactionBlock: &tx,
+            signer: try self.fetchToolBox().account,
+            options: SuiTransactionBlockResponseOptions(
                 showInput: false,
                 showEffects: true,
                 showEvents: false,

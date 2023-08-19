@@ -45,7 +45,7 @@ public struct RawSigner: SignerWithProviderProtocol {
     }
     
     public func prepareTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> Data {
-        transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
+        try transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
         return try await transactionBlock.build(self.provider)
     }
     
@@ -64,18 +64,18 @@ public struct RawSigner: SignerWithProviderProtocol {
         _ transactionBlock: inout TransactionBlock,
         _ options: SuiTransactionBlockResponseOptions? = nil,
         _ requestType: SuiRequestType? = nil
-    ) async throws -> JSON {
+    ) async throws -> SuiTransactionBlockResponse {
         let signedTxBlock = try await self.signTransactionBlock(transactionBlock: &transactionBlock)
         return try await self.provider.executeTransactionBlock(
-            signedTxBlock.transactionBlockBytes,
-            signedTxBlock.signature,
-            options,
-            requestType
+            transactionBlock: signedTxBlock.transactionBlockBytes,
+            signature: signedTxBlock.signature,
+            options: options,
+            requestType: requestType
         )
     }
     
     public func getTransactionBlockDigest(_ tx: inout TransactionBlock) async throws -> String {
-        tx.setSenderIfNotSet(sender: try self.getAddress())
+        try tx.setSenderIfNotSet(sender: try self.getAddress())
         return try await tx.getDigest(self.provider)
     }
     
@@ -84,18 +84,18 @@ public struct RawSigner: SignerWithProviderProtocol {
     }
     
     public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> JSON {
-        transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
+        try transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
         let dryRunTxBytes = try await transactionBlock.build(self.provider)
-        return try await self.provider.dryRunTransactionBlock([UInt8](dryRunTxBytes))
+        return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](dryRunTxBytes))
     }
     
     public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> JSON {
         guard let dryRunTxBytes = Data.fromBase64(transactionBlock) else { throw SuiError.notImplemented }
-        return try await self.provider.dryRunTransactionBlock([UInt8](dryRunTxBytes))
+        return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](dryRunTxBytes))
     }
     
     public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> JSON {
-        return try await self.provider.dryRunTransactionBlock([UInt8](transactionBlock))
+        return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](transactionBlock))
     }
     
 // TODO: Implement GetGasCostEstimation

@@ -48,7 +48,7 @@ public struct Coin {
 
     public static func getCoinStructTag(coinTypeArg: String) throws -> SuiMoveNormalizedStructType {
         return SuiMoveNormalizedStructType(
-            address: try normalizeSuiAddress(value: coinTypeArg.components(separatedBy: "::").first ?? ""),
+            address: try AccountAddress.fromHex(try Inputs.normalizeSuiAddress(value: coinTypeArg.components(separatedBy: "::").first ?? "")),
             module: coinTypeArg.components(separatedBy: "::").dropFirst().first ?? "",
             name: coinTypeArg.components(separatedBy: "::").dropFirst(2).first ?? "",
             typeArguments: []

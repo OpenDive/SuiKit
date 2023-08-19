@@ -13,6 +13,8 @@ final class IdEntryArgsTest: XCTestCase {
     var toolBox: TestToolbox?
     var packageId: String?
 
+    let defaultAddress = "0x000000000000000000000000c2b5625c221264078310a084df0a3137956d20ee"
+
     override func setUp() async throws {
         self.toolBox = try await TestToolbox(true)
         self.packageId = try await self.fetchToolBox().publishPackage("id-entry-args").packageId
@@ -41,14 +43,14 @@ final class IdEntryArgsTest: XCTestCase {
             target: "\(try self.fetchPackageId())::test::test_id",
             arguments: [
                 .input(
-                    tx.pure(value: .address(try ED25519PublicKey(hexString: "0x000000000000000000000000c2b5625c221264078310a084df0a3137956d20ee")))
+                    tx.pure(value: .address(try AccountAddress.fromHex(self.defaultAddress)))
                 )
             ]
         )
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
-            &tx,
-            toolBox.account,
-            SuiTransactionBlockResponseOptions(showEffects: true)
+            transactionBlock: &tx,
+            signer: toolBox.account,
+            options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
         guard "success" == result["effects"]["status"]["status"].stringValue else {
             XCTFail("Status does not match")
@@ -63,14 +65,14 @@ final class IdEntryArgsTest: XCTestCase {
             target: "\(try self.fetchPackageId())::test::test_id_non_mut",
             arguments: [
                 .input(
-                    tx.pure(value: .address(try ED25519PublicKey(hexString: "0x000000000000000000000000c2b5625c221264078310a084df0a3137956d20ee")))
+                    tx.pure(value: .address(try AccountAddress.fromHex(self.defaultAddress)))
                 )
             ]
         )
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
-            &tx,
-            toolBox.account,
-            SuiTransactionBlockResponseOptions(showEffects: true)
+            transactionBlock: &tx,
+            signer: toolBox.account,
+            options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
         guard "success" == result["effects"]["status"]["status"].stringValue else {
             XCTFail("Status does not match")

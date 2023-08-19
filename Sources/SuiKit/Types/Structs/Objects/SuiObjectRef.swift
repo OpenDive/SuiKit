@@ -7,6 +7,7 @@
 
 import Foundation
 import Base58Swift
+import SwiftyJSON
 
 public struct SuiObjectRef: KeyProtocol {
     public var objectId: String
@@ -14,6 +15,20 @@ public struct SuiObjectRef: KeyProtocol {
     public var digest: TransactionDigest
     
     public init(objectId: objectId, version: UInt64, digest: TransactionDigest) {
+        self.objectId = objectId
+        self.version = version
+        self.digest = digest
+    }
+
+    public init?(input: JSON) {
+        guard
+            let objectId = input["objectId"].string,
+            let versionString = input["version"].string,
+            let digest = input["digest"].string,
+            let version = UInt64(versionString)
+        else {
+            return nil
+        }
         self.objectId = objectId
         self.version = version
         self.digest = digest

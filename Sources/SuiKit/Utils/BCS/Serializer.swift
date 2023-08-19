@@ -205,17 +205,11 @@ public class Serializer {
     /// if the provided value does not match either a String object or an array of String objects.
     public static func str<T: EncodingContainer>(_ serializer: Serializer, _ value: T) throws {
         if let str = value as? String {
-            try Serializer.toBytes(serializer, String(str).data(using: .utf8)!)
-        } else if let strArray = value as? [String] {
-            try serializer.sequence(strArray, Serializer.str)
-        } else {
-            throw SuiError.invalidDataValue(supportedType: "String or [String]")
-        }
-    }
-
-    public static func fixedStr<T: EncodingContainer>(_ serializer: Serializer, _ value: T) throws {
-        if let str = value as? String {
-            serializer.fixedBytes(String(str).data(using: .utf8)!)
+            if Self.containsNonASCIICharacters(str) {
+                try Serializer.toBytes(serializer, Data(str.utf8))
+            } else {
+                try Serializer.toBytes(serializer, str.data(using: .ascii)!)
+            }
         } else if let strArray = value as? [String] {
             try serializer.sequence(strArray, Serializer.str)
         } else {
@@ -379,6 +373,15 @@ public class Serializer {
         var _value = value
         let valueData = withUnsafeBytes(of: &_value) { Data($0) }
         self._output.append(valueData.prefix(length))
+    }
+
+    private static func containsNonASCIICharacters(_ string: String) -> Bool {
+        for scalar in string.unicodeScalars {
+            if scalar.value > 127 {
+                return true
+            }
+        }
+        return false
     }
 }
 

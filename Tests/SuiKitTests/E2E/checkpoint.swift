@@ -32,7 +32,7 @@ final class CheckpointTest: XCTestCase {
 
     func testThatCheckpointCanBeReceivedById() async throws {
         let toolBox = try self.fetchToolBox()
-        let resp = try await toolBox.client.getCheckpoint("0")
+        let resp = try await toolBox.client.getCheckpoint(id: "0")
         XCTAssertGreaterThan(resp.digest.count, 0)
         XCTAssertGreaterThan(resp.transactions.count, 0)
         XCTAssertNotNil(resp.epoch)
@@ -44,21 +44,21 @@ final class CheckpointTest: XCTestCase {
 
     func testThatCheckpointContentsAreReceivedByDigest() async throws {
         let toolBox = try self.fetchToolBox()
-        let checkpointResp = try await toolBox.client.getCheckpoint("0")
+        let checkpointResp = try await toolBox.client.getCheckpoint(id: "0")
         let digest = checkpointResp.digest
-        let resp = try await toolBox.client.getCheckpoint(digest)
+        let resp = try await toolBox.client.getCheckpoint(id: digest)
         XCTAssertEqual(resp, checkpointResp)
     }
 
     func testThatBulkGetCheckpointsWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let checkpoints = try await toolBox.client.getCheckpoints(nil, 1, false)
+        let checkpoints = try await toolBox.client.getCheckpoints(cursor: nil, limit: 1, order: .ascending)
 
         XCTAssertEqual(checkpoints.nextCursor, "0")
         XCTAssertEqual(checkpoints.data.count, 1)
         XCTAssertTrue(checkpoints.hasNextPage)
 
-        let checkpoints1 = try await toolBox.client.getCheckpoints(checkpoints.nextCursor, 1, false)
+        let checkpoints1 = try await toolBox.client.getCheckpoints(cursor: checkpoints.nextCursor, limit: 1, order: .ascending)
 
         XCTAssertEqual(checkpoints1.nextCursor, "1")
         XCTAssertEqual(checkpoints1.data.count, 1)

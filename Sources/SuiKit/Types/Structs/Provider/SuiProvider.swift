@@ -48,7 +48,8 @@ public struct SuiProvider {
 
     public func dryRunTransactionBlock(
         transactionBlock: [UInt8]
-    ) async throws -> JSON {
+    ) async throws -> SuiTransactionBlockResponse {
+//        print("DEBUG: DRY RUN BYTES - \(transactionBlock)")
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -60,7 +61,8 @@ public struct SuiProvider {
         )
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
-        return JSON(data)["result"]
+//        print("DEBUG: DRY RUN TX RESULT - \(JSON(data)["result"])")
+        return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
     public func signAndExecuteTransactionBlock(
@@ -68,7 +70,7 @@ public struct SuiProvider {
         signer: Account,
         options: SuiTransactionBlockResponseOptions? = nil,
         requestType: SuiRequestType? = nil
-    ) async throws -> JSON {
+    ) async throws -> SuiTransactionBlockResponse {
         try transactionBlock.setSenderIfNotSet(sender: try signer.publicKey.toSuiAddress())
         let txBytes = try await transactionBlock.build(self)
         let signature = try signer.signTransactionBlock([UInt8](txBytes))
@@ -108,7 +110,8 @@ public struct SuiProvider {
         signature: String,
         options: SuiTransactionBlockResponseOptions? = nil,
         requestType: SuiRequestType? = nil
-    ) async throws -> JSON {
+    ) async throws -> SuiTransactionBlockResponse {
+//        print("DEBUG: TRANSACTION BLOCK BYTES - \(transactionBlock)")
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -121,9 +124,10 @@ public struct SuiProvider {
                 ]
             )
         )
+//        print("DEBUG: RESULT - \(JSON(data))")
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
-        return JSON(data)["result"]
+        return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
     public func getChainIdentifier() async throws -> String {

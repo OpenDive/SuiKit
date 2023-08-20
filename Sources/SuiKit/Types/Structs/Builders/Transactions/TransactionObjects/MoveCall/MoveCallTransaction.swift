@@ -11,7 +11,7 @@ import SwiftyJSON
 public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     public let target: SuiMoveNormalizedStructType
     public let typeArguments: [StructTag]
-    public let arguments: [TransactionArgument]
+    public var arguments: [TransactionArgument]
 
     public init(target: SuiMoveNormalizedStructType, typeArguments: [StructTag], arguments: [TransactionArgument]) {
         self.target = target
@@ -39,10 +39,14 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> MoveCallTransaction {
+        let target: SuiMoveNormalizedStructType = try Deserializer._struct(deserializer)
+        let typeArgument: [StructTag] = try deserializer.sequence(valueDecoder: Deserializer._struct)
+        let arguments: [TransactionArgument] = try deserializer.sequence(valueDecoder: Deserializer._struct)
+
         return MoveCallTransaction(
-            target: try Deserializer._struct(deserializer),
-            typeArguments: try deserializer.sequence(valueDecoder: Deserializer._struct),
-            arguments: try deserializer.sequence(valueDecoder: Deserializer._struct)
+            target: target,
+            typeArguments: typeArgument,
+            arguments: arguments
         )
     }
 
@@ -50,7 +54,7 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
         return
     }
 
-    public func addToResolve(list: inout [MoveCallTransaction], inputs: [TransactionBlockInput]) throws {
+    public mutating func addToResolve(list: inout [MoveCallTransaction], inputs: [TransactionBlockInput]) throws {
         let needsResolution = self.arguments.contains { argument in
             switch argument {
             case .input(let transactionBlockInput):
@@ -67,6 +71,25 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
         }
 
         if needsResolution {
+            list.forEach { moveCall in
+                for (idxOuter, argumentOuter) in self.arguments.enumerated() {
+                    for (idxInner, argumentInner) in moveCall.arguments.enumerated() {
+                        switch argumentOuter {
+                        case .input(let outerInput):
+                            switch argumentInner {
+                            case .input(let innerInput):
+                                if outerInput.value == innerInput.value && outerInput.index != innerInput.index {
+                                    self.arguments[idxOuter] = moveCall.arguments[idxInner]
+                                }
+                            default:
+                                break
+                            }
+                        default:
+                            break
+                        }
+                    }
+                }
+            }
             list.append(self)
         }
     }

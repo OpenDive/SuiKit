@@ -38,8 +38,9 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
     }
     
     public func isSameStruct(_ rhs: any ResolvedProtocol) -> Bool {
+        guard let rhsAddress = try? Inputs.normalizeSuiAddress(value: rhs.address) else { return false }
         return
-            self.address.hex() == rhs.address &&
+            self.address.hex() == rhsAddress &&
             self.module == rhs.module &&
             self.name == rhs.name
     }
@@ -65,10 +66,10 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
     }
     
     public init?(input: JSON) {
-        guard let address = try? AccountAddress.fromHex(input["package"].stringValue) else { return nil }
+        guard let address = try? AccountAddress.fromHex(input["address"].stringValue) else { return nil }
         self.address = address
         self.module = input["module"].stringValue
-        self.name = input["function"].stringValue
+        self.name = input["name"].stringValue
         self.typeArguments = input["arguments"].arrayValue.compactMap { SuiMoveNormalizedType.parseJSON($0) }
     }
     
@@ -84,7 +85,7 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
             address: try Deserializer._struct(deserializer),
             module: try Deserializer.string(deserializer),
             name: try Deserializer.string(deserializer),
-            typeArguments: (try? deserializer.sequence(valueDecoder: Deserializer._struct)) ?? []
+            typeArguments: []
         )
     }
 }
@@ -299,6 +300,14 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
         case "Signer":
             return .signer
         default:
+            if data["MutableReference"].exists() {
+                guard let mutableReference = Self.parseJSON(data["MutableReference"]) else { return nil }
+                return .mutableReference(mutableReference)
+            }
+            if data["Reference"].exists() {
+                guard let reference = Self.parseJSON(data["Reference"]) else { return nil }
+                return .reference(reference)
+            }
             if data["Struct"].exists() {
                 guard let structure = SuiMoveNormalizedStructType(input: data["Struct"]) else { return nil }
                 return .structure(
@@ -306,7 +315,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
                 )
             }
             if data["Vector"].exists() {
-                guard let vector = parseJSON(data["Vector"]) else { return nil }
+                guard let vector = Self.parseJSON(data["Vector"]) else { return nil }
                 return .vector(vector)
             }
             if data["TypeParameter"].exists() {
@@ -316,18 +325,10 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
                     )
                 )
             }
-            if data["MutableReference"].exists() {
-                guard let mutableReference = parseJSON(data["MutableReference"]) else { return nil }
-                return .mutableReference(mutableReference)
-            }
-            if data["Reference"].exists() {
-                guard let reference = parseJSON(data["Reference"]) else { return nil }
-                return .reference(reference)
-            }
             return nil
         }
     }
-    
+
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .bool:
@@ -365,7 +366,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             try Serializer._struct(serializer, value: suiMoveNormalizedStructType)
         }
     }
-    
+
     public static func deserialize(from deserializer: Deserializer) throws -> SuiMoveNormalizedType {
         let value = try Deserializer.u8(deserializer)
         
@@ -439,13 +440,13 @@ public struct SuiMoveNormalizedFunction {
         self.returnValues = input["returnValues"].arrayValue.compactMap { SuiMoveNormalizedType.parseJSON($0) }
     }
 
-    public func hasTxContext() -> Bool {
+    public func hasTxContext() throws -> Bool {
         guard !(parameters.isEmpty) else { return false }
         let possiblyTxContext = parameters.last!
         guard let structTag = possiblyTxContext.extractStructTag() else { return false }
         
         return
-            structTag.address.hex() == "0x2" &&
+            try structTag.address.hex() == Inputs.normalizeSuiAddress(value: "0x2") &&
             structTag.module == "tx_context" &&
             structTag.name == "TxContext"
     }

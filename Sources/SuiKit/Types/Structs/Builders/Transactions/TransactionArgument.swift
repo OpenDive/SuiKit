@@ -87,9 +87,9 @@ public enum TransactionArgument: KeyProtocol {
         
         switch type {
         case 0:
-            return TransactionArgument.input(try Deserializer._struct(deserializer))
-        case 1:
             return TransactionArgument.gasCoin
+        case 1:
+            return TransactionArgument.input(try Deserializer._struct(deserializer))
         case 2:
             return TransactionArgument.result(try Deserializer._struct(deserializer))
         case 3:

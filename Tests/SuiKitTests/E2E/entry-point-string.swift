@@ -54,8 +54,8 @@ final class EntryPointStringTest: XCTestCase {
                 showBalanceChanges: false
             )
         )
-        try await self.fetchToolBox().client.waitForTransaction(result["digest"].stringValue)
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
+        try await self.fetchToolBox().client.waitForTransaction(result.digest)
+        guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")
             return
         }
@@ -81,8 +81,8 @@ final class EntryPointStringTest: XCTestCase {
                 showBalanceChanges: false
             )
         )
-        try await self.fetchToolBox().client.waitForTransaction(result["digest"].stringValue)
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
+        try await self.fetchToolBox().client.waitForTransaction(result.digest)
+        guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")
             return
         }

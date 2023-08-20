@@ -48,7 +48,7 @@ let MAX_U256 = UInt256.max
 public class Deserializer {
     /// The input data itself
     private var input: Data
-    
+
     /// Meant for determining how many bytes are left to deserialize
     private var position: Int = 0
     
@@ -59,7 +59,7 @@ public class Deserializer {
     public func output() -> Data {
         return self.input
     }
-    
+
     /// Calculate the remaining number of bytes in the input data buffer.
     ///
     /// This function returns the number of bytes remaining in the Serializer's input data buffer
@@ -69,7 +69,7 @@ public class Deserializer {
     public func remaining() -> Int {
         return input.count - position
     }
-    
+
     /// Deserialize a boolean value from the Serializer's input data buffer.
     ///
     /// This function reads an integer of length 1 byte from the input data buffer,
@@ -90,7 +90,7 @@ public class Deserializer {
             throw SuiError.unexpectedValue(value: "\(value)")
         }
     }
-    
+
     /// Deserialize a Data object from the Deserializer's input data buffer.
     ///
     /// This function reads the length of the data as a ULEB128-encoded integer, followed by
@@ -105,7 +105,7 @@ public class Deserializer {
         let length = try deserializer.uleb128()
         return try deserializer.read(length: Int(length))
     }
-    
+
     /// Deserialize a fixed-length Data object from the Deserializer's input data buffer.
     ///
     /// This function reads the specified number of bytes from the input data buffer
@@ -119,7 +119,7 @@ public class Deserializer {
     public func fixedBytes(length: Int) throws -> Data {
         return try read(length: length)
     }
-    
+
     /// Deserialize a dictionary of key-value pairs from the Deserializer's input data buffer.
     ///
     /// This function first reads the length of the dictionary as a ULEB128-encoded integer.
@@ -143,7 +143,7 @@ public class Deserializer {
         }
         return values
     }
-    
+
     /// Deserialize a sequence of values from the Deserializer's input data buffer.
     ///
     /// This function first reads the length of the sequence as a ULEB128-encoded integer.
@@ -163,7 +163,7 @@ public class Deserializer {
         }
         return values
     }
-    
+
     /// Deserialize a string from the Deserializer's input data buffer.
     ///
     /// This function first calls Deserializer.toBytes(_:) to read the raw bytes for the string.
@@ -181,7 +181,7 @@ public class Deserializer {
         }
         return result
     }
-    
+
     /// Deserialize a structure that conforms to the KeyProtocol from the Deserializer's input data buffer.
     ///
     /// This function uses the type's deserialize(from:) method, passing the current Deserializer instance,
@@ -195,7 +195,7 @@ public class Deserializer {
     public static func _struct<T: KeyProtocol>(_ deserializer: Deserializer) throws -> T {
         return try T.deserialize(from: deserializer)
     }
-    
+
     /// Deserialize a UInt8 value from the Deserializer's input data buffer.
     ///
     /// This function reads an 8-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
@@ -208,7 +208,7 @@ public class Deserializer {
     public static func u8(_ deserializer: Deserializer) throws -> UInt8 {
         return UInt8(try deserializer.readInt(length: 1))
     }
-    
+
     /// Deserialize a UInt16 value from the Deserializer's input data buffer.
     ///
     /// This function reads a 16-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
@@ -221,7 +221,7 @@ public class Deserializer {
     public static func u16(_ deserializer: Deserializer) throws -> UInt16 {
         return UInt16(try deserializer.readInt(length: 2))
     }
-    
+
     /// Deserialize a UInt32 value from the Deserializer's input data buffer.
     ///
     /// This function reads a 32-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
@@ -234,7 +234,7 @@ public class Deserializer {
     public static func u32(_ deserializer: Deserializer) throws -> UInt32 {
         return UInt32(try deserializer.readInt(length: 4))
     }
-    
+
     /// Deserialize a UInt64 value from the Deserializer's input data buffer.
     ///
     /// This function reads a 64-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
@@ -247,7 +247,7 @@ public class Deserializer {
     public static func u64(_ deserializer: Deserializer) throws -> UInt64 {
         return UInt64(try deserializer.readInt(length: 8))
     }
-    
+
     /// Deserialize a UInt128 value from the Deserializer's input data buffer.
     ///
     /// This function reads a 128-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
@@ -260,7 +260,7 @@ public class Deserializer {
     public static func u128(_ deserializer: Deserializer) throws -> UInt128 {
         return UInt128(try deserializer.readInt(length: 16))
     }
-    
+
     /// Deserialize a UInt256 value from the Deserializer's input data buffer.
     ///
     /// This function reads a 256-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:). It then attempts to convert the result into a UInt256 instance.
@@ -277,7 +277,15 @@ public class Deserializer {
         }
         return result
     }
-    
+
+    public func _optional<T>(valueDecoder: (Deserializer) throws -> T) throws -> T? {
+        let isNil = try self.readInt(length: 1)
+        if UInt8(isNil) != 0 {
+            return try valueDecoder(self)
+        }
+        return nil
+    }
+
     /// Deserialize an unsigned LEB128-encoded integer from the Deserializer's input data buffer.
     ///
     /// This function reads bytes from the input data buffer and reconstructs the original unsigned integer using LEB128 encoding. LEB128 is a compact representation for variable-length integers, particularly for small values.
@@ -304,7 +312,7 @@ public class Deserializer {
         
         return value
     }
-    
+
     /// Reads a specified number of bytes from the input data and advances the current position by that amount.
     ///
     /// - Parameter length: The number of bytes to read from the input data.
@@ -322,7 +330,7 @@ public class Deserializer {
         position += length
         return value
     }
-    
+
     /// Reads a specified number of bytes from the input data and interprets the bytes as an unsigned integer of a specified bit width.
     ///
     /// - Parameter length: The number of bytes to read from the input data. This determines the bit width of the unsigned integer that will be returned.
@@ -348,11 +356,5 @@ public class Deserializer {
         } else {
             throw SuiError.invalidLength
         }
-    }
-}
-
-public extension Deserializer {
-    func removeLength() {
-        self.input = self.input.dropFirst()
     }
 }

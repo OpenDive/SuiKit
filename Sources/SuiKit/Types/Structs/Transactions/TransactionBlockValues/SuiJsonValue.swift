@@ -17,7 +17,21 @@ public enum SuiJsonValueType: String {
     case address = "Address"
 }
 
-public indirect enum SuiJsonValue: KeyProtocol {
+public indirect enum SuiJsonValue: KeyProtocol, Equatable {
+    public static func == (lhs: SuiJsonValue, rhs: SuiJsonValue) -> Bool {
+        let ser1 = Serializer()
+        let ser2 = Serializer()
+
+        do {
+            try Serializer._struct(ser1, value: lhs)
+            try Serializer._struct(ser2, value: rhs)
+
+            return ser1.output() == ser2.output()
+        } catch {
+            return false
+        }
+    }
+
     case boolean(Bool)
     case number(UInt64)
     case string(String)

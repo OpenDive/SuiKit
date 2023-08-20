@@ -28,9 +28,11 @@ public struct ProgrammableTransaction: KeyProtocol {
     }
     
     public static func deserialize(from deserializer: Deserializer) throws -> ProgrammableTransaction {
+        let inputs: [Input] = try deserializer.sequence(valueDecoder: Deserializer._struct)
+        let transactions: [SuiTransaction] = try deserializer.sequence(valueDecoder: Deserializer._struct)
         return ProgrammableTransaction(
-            inputs: try deserializer.sequence(valueDecoder: Deserializer._struct),
-            transactions: try deserializer.sequence(valueDecoder: Deserializer._struct)
+            inputs: inputs,
+            transactions: transactions
         )
     }
 }

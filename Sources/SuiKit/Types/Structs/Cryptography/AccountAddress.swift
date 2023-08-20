@@ -141,6 +141,10 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> AccountAddress {
+        if deserializer.output()[0] == Self.length {
+            let data = try Deserializer.toBytes(deserializer)
+            return try AccountAddress(address: data)
+        }
         return try AccountAddress(address: deserializer.fixedBytes(length: AccountAddress.length))
     }
 

@@ -496,15 +496,15 @@ public class TransactionBlock {
     }
     
     private func prepareTransactions(provider: SuiProvider) async throws {
-        var blockData = self.blockData.builder
+        let blockData = self.blockData.builder
         
         var moveModulesToResolve: [MoveCallTransaction] = []
         
         var objectsToResolve: [ObjectsToResolve] = []
         
-        try blockData.transactions.forEach { transaction in
+        try self.blockData.builder.transactions.forEach { transaction in
             switch transaction {
-            case .moveCall(let moveCall):
+            case .moveCall(var moveCall):
                 try moveCall.addToResolve(
                     list: &moveModulesToResolve,
                     inputs: self.blockData.builder.inputs
@@ -516,7 +516,7 @@ public class TransactionBlock {
                 )
             }
         }
-        
+
         if !(moveModulesToResolve.isEmpty) {
             try await moveModulesToResolve.asyncForEach { moveCallTx in
                 let moveCallArguments = moveCallTx.target
@@ -531,7 +531,7 @@ public class TransactionBlock {
                     functionName: functionName
                 ) else { return }
                 
-                let hasTxContext = normalized.hasTxContext()
+                let hasTxContext = try normalized.hasTxContext()
                 let params = hasTxContext ? normalized.parameters.dropLast() : normalized.parameters
                 guard params.count == moveCallTx.arguments.count else { throw SuiError.notImplemented }
                 
@@ -548,7 +548,7 @@ public class TransactionBlock {
                         guard let inputValue = input.value else { return }
                         let serType = try param.getPureSerializationType(inputValue)
                         if serType != nil {
-                            blockData.inputs[Int(blockInputArgument.index)].value = .callArg(
+                            self.blockData.builder.inputs[Int(blockInputArgument.index)].value = .callArg(
                                 Input(type: .pure(try Inputs.pure(json: inputValue)))
                             )
                             return
@@ -573,7 +573,7 @@ public class TransactionBlock {
                 }
             }
         }
-        
+
         if !(objectsToResolve.isEmpty) {
             let dedupedIds = objectsToResolve.map { $0.id }
             let objectChunks = dedupedIds.chunked(into: TransactionConstants.MAX_OBJECTS_PER_FETCH)
@@ -632,7 +632,7 @@ public class TransactionBlock {
                     Input(
                         type: .object(
                             .shared(
-                                try SharedObjectArg(
+                                SharedObjectArg(
                                     objectId: objectsToResolve[idx].id,
                                     initialSharedVersion: UInt64(initialSharedVersion),
                                     mutable: mutable
@@ -647,6 +647,26 @@ public class TransactionBlock {
                 self.blockData.builder.inputs = []
                 for object in objectsToResolve {
                     self.blockData.builder.inputs.append(object.input)
+                }
+                self.blockData.builder.transactions.enumerated().forEach { (idx, transaction) in
+                    switch transaction {
+                    case .moveCall(var moveCall):
+                        for (idxArgument, argument) in moveCall.arguments.enumerated() {
+                            for object in objectsToResolve {
+                                switch argument {
+                                case .input(let txInput):
+                                    if object.input.value == txInput.value && object.input.index != txInput.index {
+                                        moveCall.arguments[idxArgument] = .input(object.input)
+                                        self.blockData.builder.transactions[idx] = .moveCall(moveCall)
+                                    }
+                                default:
+                                    break
+                                }
+                            }
+                        }
+                    default:
+                        break
+                    }
                 }
             } else {
                 for objectToResolve in objectsToResolve {
@@ -686,18 +706,17 @@ public class TransactionBlock {
                 let dryRunResult = try await provider.dryRunTransactionBlock(
                     transactionBlock: [UInt8](blockData.build(overrides: txBlockDataBuilder))
                 )
-                guard dryRunResult["effects"]["status"]["status"].stringValue != "failure" else {
-//                    print("DEBUG: FAILED TX - \(dryRunResult)")
+                guard dryRunResult.effects?.status.status != .failure else {
                     throw SuiError.notImplemented
                 }
                 let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
-                    Int(blockData.builder.gasConfig.price ?? "1") ?? 1
+                    Int(blockData.builder.gasConfig.price ?? "1")!
                 )
-                let baseComputationCostWithOverhead = dryRunResult["effects"]["gasUsed"]["computationCost"].intValue + safeOverhead
+                let baseComputationCostWithOverhead = (Int(dryRunResult.effects?.gasUsed.computationCost ?? "0")!) + safeOverhead
                 let gasBudget =
-                baseComputationCostWithOverhead +
-                dryRunResult["effects"]["gasUsed"]["storageCost"].intValue -
-                dryRunResult["effects"]["gasUsed"]["storageRebate"].intValue
+                    baseComputationCostWithOverhead +
+                    (Int(dryRunResult.effects?.gasUsed.storageCost ?? "0")!) -
+                    (Int(dryRunResult.effects?.gasUsed.storageRebate ?? "0")!)
                 self.setGasBudget(
                     price:
                         gasBudget > baseComputationCostWithOverhead ?

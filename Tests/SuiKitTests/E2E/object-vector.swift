@@ -45,11 +45,14 @@ final class ObjectVectorTest: XCTestCase {
             signer: toolBox.account,
             options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
-            XCTFail("Status does not match")
-            return ""
+        guard
+            result.effects?.status.status == .success,
+            let returnValue = result.effects?.created?[0].reference.objectId
+        else {
+            XCTFail("Transaction Failed")
+            throw SuiError.notImplemented
         }
-        return result["effects"]["created"].arrayValue[0]["reference"]["objectId"].stringValue
+        return returnValue
     }
 
     private func destroyObjects(objects: [String], withType: Bool = false, toolBox: TestToolbox) async throws {
@@ -67,14 +70,15 @@ final class ObjectVectorTest: XCTestCase {
             signer: toolBox.account,
             options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
-            XCTFail("Status does not match")
+        guard result.effects?.status.status == .success else {
+            XCTFail("Transaction Failed")
             return
         }
     }
 
     func testThatVectorObjectsAreAbleToBeInitialized() async throws {
         let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
         try await self.destroyObjects(
             objects: [
                 (try await self.mintObject(val: 7, toolBox: toolBox)),
@@ -111,8 +115,8 @@ final class ObjectVectorTest: XCTestCase {
             signer: toolBox.account,
             options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
-            XCTFail("Status does not match")
+        guard result.effects?.status.status == .success else {
+            XCTFail("Transaction Failed")
             return
         }
     }

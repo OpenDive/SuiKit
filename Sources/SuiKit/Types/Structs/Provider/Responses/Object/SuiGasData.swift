@@ -57,16 +57,16 @@ public struct SuiGasData: KeyProtocol {
         if let payment { try serializer.sequence(payment, Serializer._struct) }
         if let owner { try Serializer._struct(serializer, value: owner) }
         if let price, let priceUint64 = UInt64(price) {
-            serializer.fixedBytes(priceUint64.toData())
+            try Serializer.u64(serializer, priceUint64)
         }
         if let budget, let budgetUint64 = UInt64(budget) {
-            serializer.fixedBytes(budgetUint64.toData())
+            try Serializer.u64(serializer, budgetUint64)
         }
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> SuiGasData {
         return SuiGasData(
-            payment: try? deserializer.sequence(valueDecoder: Deserializer._struct),
+            payment: (try? deserializer.sequence(valueDecoder: Deserializer._struct)) ?? [],
             owner: try? Deserializer._struct(deserializer),
             price: try? "\(Deserializer.u64(deserializer))",
             budget: try? "\(Deserializer.u64(deserializer))"

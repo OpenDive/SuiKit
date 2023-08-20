@@ -20,14 +20,20 @@ final class TXBuilderTest: XCTestCase {
     var suiClockObjectId: String = ""
 
     override func setUp() async throws {
-        self.toolBox = try await TestToolbox(true)
+        let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
+        self.toolBox = try await TestToolbox(account: account, true)
         let packageResult = try await self.fetchToolBox().publishPackage("serializer")
         self.packageId = packageResult.packageId
-        self.publishTxn = packageResult.publishedTx
-        let sharedObject = packageResult.publishedTx["effects"]["created"].arrayValue.filter { object in
-            return object["owner"]["Shared"]["initial_shared_version"].int != nil
+        guard let createdObjects = packageResult.publishedTx.effects?.created else { throw SuiError.notImplemented }
+        let sharedObject = createdObjects.filter { object in
+            switch object.owner {
+            case .shared:
+                return true
+            default:
+                return false
+            }
         }
-        self.sharedObjectId = sharedObject[0]["reference"]["objectId"].stringValue
+        self.sharedObjectId = sharedObject[0].reference.objectId
         self.suiClockObjectId = try Inputs.normalizeSuiAddress(value: "0x6")
     }
 
@@ -78,8 +84,8 @@ final class TXBuilderTest: XCTestCase {
             )
         )
         try await self.fetchToolBox().client.waitForTransaction(localDigest)
-        XCTAssertEqual(localDigest, result["digest"].stringValue)
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
+        XCTAssertEqual(localDigest, result.digest)
+        guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")
             return
         }

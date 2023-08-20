@@ -23,7 +23,6 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
     public init?(bytes: Data) {
         let der = Deserializer(data: bytes)
         guard let transactionData: TransactionData = try? Deserializer._struct(der) else { return nil }
-
         switch transactionData {
         case .V1(let v1Data):
             guard let builder = SerializedTransactionDataBuilder(v1Transaction: v1Data) else { return nil }

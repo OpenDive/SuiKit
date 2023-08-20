@@ -58,11 +58,11 @@ public enum ObjectArg: KeyProtocol {
 
         switch type {
         case 0:
-            return ObjectArg.shared(
+            return ObjectArg.immOrOwned(
                 try Deserializer._struct(deserializer)
             )
         case 1:
-            return ObjectArg.immOrOwned(
+            return ObjectArg.shared(
                 try Deserializer._struct(deserializer)
             )
         default:

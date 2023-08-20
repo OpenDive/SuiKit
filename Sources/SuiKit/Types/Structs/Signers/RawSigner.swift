@@ -83,18 +83,18 @@ public struct RawSigner: SignerWithProviderProtocol {
         return try TransactionBlockDataBuilder.getDigestFromBytes(bytes: tx)
     }
     
-    public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> JSON {
+    public func dryRunTransactionBlock(_ transactionBlock: inout TransactionBlock) async throws -> SuiTransactionBlockResponse {
         try transactionBlock.setSenderIfNotSet(sender: try self.getAddress())
         let dryRunTxBytes = try await transactionBlock.build(self.provider)
         return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](dryRunTxBytes))
     }
     
-    public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> JSON {
+    public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> SuiTransactionBlockResponse {
         guard let dryRunTxBytes = Data.fromBase64(transactionBlock) else { throw SuiError.notImplemented }
         return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](dryRunTxBytes))
     }
     
-    public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> JSON {
+    public func dryRunTransactionBlock(_ transactionBlock: Data) async throws -> SuiTransactionBlockResponse {
         return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](transactionBlock))
     }
     

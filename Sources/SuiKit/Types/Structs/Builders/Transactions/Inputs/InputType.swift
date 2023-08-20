@@ -55,7 +55,7 @@ public indirect enum InputType: KeyProtocol {
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> InputType {
-        let value = try deserializer.uleb128()
+        let value = try Deserializer.u8(deserializer)
         switch value {
         case 0:
             return .pure(try Deserializer._struct(deserializer))

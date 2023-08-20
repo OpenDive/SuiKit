@@ -176,7 +176,7 @@ public class Serializer {
     /// value cannot be encoded.
     ///
     /// - Throws: This function may throw an error from the valueEncoder closure when encoding a value fails.
-    func sequence<T>(
+    public func sequence<T>(
         _ values: [T],
         _ valueEncoder: (Serializer, T) throws -> ()
     ) throws {
@@ -185,6 +185,20 @@ public class Serializer {
             do {
                 let bytes = try encoder(value, valueEncoder)
                 self.fixedBytes(bytes)
+            } catch {
+                continue
+            }
+        }
+    }
+
+    public func optionalSequence<T: EncodingProtocol>(
+        _ values: [T?],
+        _ valueEncoder: (Serializer, T) throws -> ()
+    ) throws {
+        try self.uleb128(UInt(values.count))
+        for value in values {
+            do {
+                try self._optional(value, valueEncoder)
             } catch {
                 continue
             }
@@ -343,6 +357,18 @@ public class Serializer {
         }
     }
 
+    public func _optional<T: EncodingContainer>(
+        _ value: T?,
+        _ valueEncoder: (Serializer, T) throws -> ()
+    ) throws {
+        if let value {
+            let bytes = try encoder(value, valueEncoder)
+            self.fixedBytes(bytes)
+        } else {
+            try Serializer.u8(self, 0)
+        }
+    }
+
     /// Serialize a given UInt value as a ULEB128 (Unsigned Little Endian Base 128) encoded integer.
     ///
     /// This function takes a UInt value and encodes it using the ULEB128 variable-length integer encoding.
@@ -410,11 +436,4 @@ func < (lhs: Data, rhs: Data) -> Bool {
     let lhsString = lhs.reduce("", { $0 + String(format: "%02x", $1) })
     let rhsString = rhs.reduce("", { $0 + String(format: "%02x", $1) })
     return lhsString < rhsString
-}
-
-public extension Serializer {
-    func addLength() {
-        let length = self._output.count
-        self._output = ([UInt8(length)] + self._output)
-    }
 }

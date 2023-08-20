@@ -28,7 +28,7 @@ final class GovernanceTest: XCTestCase {
         return toolBox
     }
 
-    private func addStake(_ client: SuiProvider, _ account: Account) async throws -> JSON {
+    private func addStake(_ client: SuiProvider, _ account: Account) async throws -> SuiTransactionBlockResponse {
         let coins = try await client.getCoins(account: try account.publicKey.toSuiAddress(), coinType: "0x2::sui::SUI")
         let system = try await client.info()
         let activeValidator = system["activeValidators"].arrayValue[0]["suiAddress"].stringValue
@@ -39,7 +39,7 @@ final class GovernanceTest: XCTestCase {
             arguments: [
                 .input(tx.object(value: stateObjectId)),
                 coinsTx,
-                .input(tx.pure(value: .string(activeValidator)))
+                .input(tx.pure(value: .address(try AccountAddress.fromHex(activeValidator))))
             ]
         )
         let coinObjects = try await client.getMultiObjects(
@@ -58,7 +58,7 @@ final class GovernanceTest: XCTestCase {
         let toolBox = try self.fetchToolBox()
         try await toolBox.setup()
         let result = try await self.addStake(toolBox.client, toolBox.account)
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
+        guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")
             return
         }

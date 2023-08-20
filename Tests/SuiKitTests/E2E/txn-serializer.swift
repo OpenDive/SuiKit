@@ -13,7 +13,7 @@ import SwiftyJSON
 final class TxSerializerTest: XCTestCase {
     var toolBox: TestToolbox?
     var packageId: String?
-    var publishTxn: JSON?
+    var publishTxn: SuiTransactionBlockResponse?
     var sharedObjectId: String?
 
     override func setUp() async throws {
@@ -22,10 +22,16 @@ final class TxSerializerTest: XCTestCase {
         let packageResult = try await self.fetchToolBox().publishPackage("serializer")
         self.packageId = packageResult.packageId
         self.publishTxn = packageResult.publishedTx
-        let sharedObject = packageResult.publishedTx["effects"]["created"].arrayValue.filter { object in
-            return object["owner"]["Shared"]["initial_shared_version"].int != nil
+        guard let createdObjects = packageResult.publishedTx.effects?.created else { throw SuiError.notImplemented }
+        let sharedObject = createdObjects.filter { object in
+            switch object.owner {
+            case .shared:
+                return true
+            default:
+                return false
+            }
         }
-        self.sharedObjectId = sharedObject[0]["reference"]["objectId"].stringValue
+        self.sharedObjectId = sharedObject[0].reference.objectId
     }
 
     private func fetchToolBox() throws -> TestToolbox {
@@ -44,7 +50,7 @@ final class TxSerializerTest: XCTestCase {
         return packageId
     }
 
-    private func fetchPublishedTx() throws -> JSON {
+    private func fetchPublishedTx() throws -> SuiTransactionBlockResponse {
         guard let publishTxn = self.publishTxn else {
             XCTFail("Failed to get Published Txn")
             throw NSError(domain: "Failed to get Published Txn", code: -1)
@@ -84,7 +90,8 @@ final class TxSerializerTest: XCTestCase {
             }
         }
         XCTAssertEqual(mutableCompare, mutable)
-        let reserializedTxnBytes = try deserialiZedTxnBuilder.build()
+        let reserializedTx = try TransactionBlock(deserialiZedTxnBuilder)
+        let reserializedTxnBytes = try await reserializedTx.build(toolBox.client)
         XCTAssertEqual(reserializedTxnBytes, transactionBlockBytes)
     }
 
@@ -97,5 +104,28 @@ final class TxSerializerTest: XCTestCase {
             ]
         )
         try await self.serializeAndDeserialize(tx: &tx, mutable: [false])
+    }
+
+    func testThatMoveSharedObjectCallWithMixedUsageOfMutableAndImmutableReferencesWillDeserializeAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        var tx = try TransactionBlock()
+        let _ = try tx.moveCall(
+            target: "\(try self.fetchPackageId())::serializer_tests::value",
+            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+        )
+        let _ = try tx.moveCall(
+            target: "\(try self.fetchPackageId())::serializer_tests::set_value",
+            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+        )
+        try await self.serializeAndDeserialize(tx: &tx, mutable: [true])
+    }
+
+    func testThatTransactionsWithExpirationsWillDeserializeCorrectly() async throws {
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        var tx = try TransactionBlock()
+        tx.setExpiration(expiration: .epoch(100))
+        try await self.serializeAndDeserialize(tx: &tx, mutable: [])
     }
 }

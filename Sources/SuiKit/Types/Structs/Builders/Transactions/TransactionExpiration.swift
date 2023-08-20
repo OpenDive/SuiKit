@@ -26,11 +26,11 @@ public enum TransactionExpiration: KeyProtocol {
         
         switch type {
         case 0:
+            return TransactionExpiration.none(true)
+        case 1:
             return TransactionExpiration.epoch(
                 try Deserializer.u64(deserializer)
             )
-        case 1:
-            return TransactionExpiration.none(true)
         default:
             throw SuiError.notImplemented
         }

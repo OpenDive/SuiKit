@@ -71,17 +71,23 @@ internal class TestToolbox {
                 showBalanceChanges: false
             )
         )
-        try await self.client.waitForTransaction(publishTxBlock["digest"].stringValue)
+        try await self.client.waitForTransaction(publishTxBlock.digest)
 
-        guard publishTxBlock["effects"]["status"]["status"].stringValue == "success" else {
+        guard 
+            publishTxBlock.effects?.status.status == .success,
+            let objectChanges = publishTxBlock.objectChanges
+        else {
             throw SuiError.notImplemented
         }
 
-        let packageId = publishTxBlock["objectChanges"].arrayValue.filter {
-            $0["type"].stringValue == "published"
-        }[0]["packageId"]
-            .stringValue
-            .replacingOccurrences(of: "^(0x)(0+)", with: "0x", options: .regularExpression)
+        let packageId = objectChanges.compactMap {
+            switch $0 {
+            case .published(let published):
+                return published
+            default:
+                return nil
+            }
+        }[0].packageId.replacingOccurrences(of: "^(0x)(0+)", with: "0x", options: .regularExpression)
 
         print("Published package \(packageId) from address \(try self.address()).")
 
@@ -122,7 +128,7 @@ internal class TestToolbox {
             )
         )
 
-        guard publishTxBlock["effects"]["status"]["status"].stringValue == "success" else {
+        guard publishTxBlock.effects?.status.status == .success else {
             throw SuiError.notImplemented
         }
     }
@@ -136,7 +142,7 @@ internal class TestToolbox {
         _ recipients: [String]? = nil,
         _ amounts: [Int]? = nil,
         _ coinId: String? = nil
-    ) async throws -> JSON {
+    ) async throws -> SuiTransactionBlockResponse {
         var txBlock = try TransactionBlock()
 
         let recipientsTx = try recipients ?? self.getRandomAddresses(numRecipients)
@@ -179,7 +185,7 @@ internal class TestToolbox {
             )
         )
 
-        guard publishTxBlock["effects"]["status"]["status"].stringValue == "success" else {
+        guard publishTxBlock.effects?.status.status == .success else {
             throw SuiError.notImplemented
         }
 
@@ -191,8 +197,8 @@ internal class TestToolbox {
         _ numRecipientsPerTxn: Int = 1,
         _ recipients: [String]? = nil,
         _ amounts: [Int]? = nil
-    ) async throws -> [JSON] {
-        var txns: [JSON] = [JSON](repeating: JSON(), count: nTimes)
+    ) async throws -> [SuiTransactionBlockResponse] {
+        var txns: [SuiTransactionBlockResponse] = []
         for i in (0..<nTimes) {
             txns[i] = try await self.paySui(numRecipientsPerTxn, recipients, amounts)
         }
@@ -230,5 +236,5 @@ internal class TestToolbox {
 
 internal struct PublishedPackage {
     internal let packageId: String
-    internal let publishedTx: JSON
+    internal let publishedTx: SuiTransactionBlockResponse
 }

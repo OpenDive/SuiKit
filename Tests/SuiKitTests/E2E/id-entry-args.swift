@@ -52,8 +52,8 @@ final class IdEntryArgsTest: XCTestCase {
             signer: toolBox.account,
             options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
-            XCTFail("Status does not match")
+        guard result.effects?.status.status == .success else {
+            XCTFail("Transaction Failed")
             return
         }
     }
@@ -74,8 +74,8 @@ final class IdEntryArgsTest: XCTestCase {
             signer: toolBox.account,
             options: SuiTransactionBlockResponseOptions(showEffects: true)
         )
-        guard "success" == result["effects"]["status"]["status"].stringValue else {
-            XCTFail("Status does not match")
+        guard result.effects?.status.status == .success else {
+            XCTFail("Transaction Failed")
             return
         }
     }

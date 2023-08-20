@@ -31,7 +31,7 @@ public struct SharedObjectArg: KeyProtocol {
     public let initialSharedVersion: UInt64
     public let mutable: Bool
 
-    public init(objectId: objectId, initialSharedVersion: UInt64, mutable: Bool) throws {
+    public init(objectId: objectId, initialSharedVersion: UInt64, mutable: Bool) {
         self.objectId = objectId
         self.initialSharedVersion = initialSharedVersion
         self.mutable = mutable
@@ -52,13 +52,16 @@ public struct SharedObjectArg: KeyProtocol {
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        let publicKey = try ED25519PublicKey(hexString: objectId)
-        publicKey.serializeModule(serializer)
-        try Serializer.u64(serializer, initialSharedVersion)
-        try Serializer.bool(serializer, mutable)
+        let account = try AccountAddress.fromHex(self.objectId)
+        try Serializer._struct(serializer, value: account)
+        try Serializer.u64(serializer, self.initialSharedVersion)
+        try Serializer.bool(serializer, self.mutable)
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> SharedObjectArg {
-        throw SuiError.notImplemented
+        let account: AccountAddress = try Deserializer._struct(deserializer)
+        let initialSharedVersion = try Deserializer.u64(deserializer)
+        let mutable = try deserializer.bool()
+        return SharedObjectArg(objectId: account.hex(), initialSharedVersion: initialSharedVersion, mutable: mutable)
     }
 }

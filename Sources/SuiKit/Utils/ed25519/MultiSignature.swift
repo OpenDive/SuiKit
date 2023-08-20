@@ -53,10 +53,10 @@ public struct MultiSignature: EncodingProtocol, Equatable {
     /// This function concatenates the signatures of the instance and serializes the concatenated signatures and bitmap to a Data object.
     ///
     /// - Returns: A Data object containing the serialized concatenated signatures and bitmap.
-    public func toBytes() -> Data {
+    public func toBytes() throws -> Data {
         var concatenatedSignatures: Data = Data()
         for signature in self.signatures {
-            concatenatedSignatures += signature.data()
+            concatenatedSignatures += try signature.data()
         }
         return concatenatedSignatures + self.bitmap
     }

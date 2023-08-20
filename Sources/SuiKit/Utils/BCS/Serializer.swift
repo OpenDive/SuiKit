@@ -176,7 +176,7 @@ public class Serializer {
     /// value cannot be encoded.
     ///
     /// - Throws: This function may throw an error from the valueEncoder closure when encoding a value fails.
-    func sequence<T>(
+    public func sequence<T>(
         _ values: [T],
         _ valueEncoder: (Serializer, T) throws -> ()
     ) throws {
@@ -185,6 +185,20 @@ public class Serializer {
             do {
                 let bytes = try encoder(value, valueEncoder)
                 self.fixedBytes(bytes)
+            } catch {
+                continue
+            }
+        }
+    }
+
+    public func optionalSequence<T: EncodingProtocol>(
+        _ values: [T?],
+        _ valueEncoder: (Serializer, T) throws -> ()
+    ) throws {
+        try self.uleb128(UInt(values.count))
+        for value in values {
+            do {
+                try self._optional(value, valueEncoder)
             } catch {
                 continue
             }
@@ -205,7 +219,11 @@ public class Serializer {
     /// if the provided value does not match either a String object or an array of String objects.
     public static func str<T: EncodingContainer>(_ serializer: Serializer, _ value: T) throws {
         if let str = value as? String {
-            try Serializer.toBytes(serializer, String(str).data(using: .utf8)!)
+            if Self.containsNonASCIICharacters(str) {
+                try Serializer.toBytes(serializer, Data(str.utf8))
+            } else {
+                try Serializer.toBytes(serializer, str.data(using: .ascii)!)
+            }
         } else if let strArray = value as? [String] {
             try serializer.sequence(strArray, Serializer.str)
         } else {
@@ -339,6 +357,18 @@ public class Serializer {
         }
     }
 
+    public func _optional<T: EncodingContainer>(
+        _ value: T?,
+        _ valueEncoder: (Serializer, T) throws -> ()
+    ) throws {
+        if let value {
+            let bytes = try encoder(value, valueEncoder)
+            self.fixedBytes(bytes)
+        } else {
+            try Serializer.u8(self, 0)
+        }
+    }
+
     /// Serialize a given UInt value as a ULEB128 (Unsigned Little Endian Base 128) encoded integer.
     ///
     /// This function takes a UInt value and encodes it using the ULEB128 variable-length integer encoding.
@@ -369,6 +399,15 @@ public class Serializer {
         var _value = value
         let valueData = withUnsafeBytes(of: &_value) { Data($0) }
         self._output.append(valueData.prefix(length))
+    }
+
+    private static func containsNonASCIICharacters(_ string: String) -> Bool {
+        for scalar in string.unicodeScalars {
+            if scalar.value > 127 {
+                return true
+            }
+        }
+        return false
     }
 }
 

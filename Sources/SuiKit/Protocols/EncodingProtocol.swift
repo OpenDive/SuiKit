@@ -41,6 +41,7 @@ extension UInt: EncodingProtocol { }
 extension Bool: EncodingProtocol { }
 extension String: EncodingProtocol { }
 extension Data: EncodingProtocol { }
+extension String.UTF8View: EncodingProtocol { }
 
 extension Array: EncodingContainer where Element: EncodingProtocol { }
 extension Dictionary: EncodingContainer where Key: EncodingProtocol, Value: Any { }

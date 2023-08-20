@@ -36,10 +36,13 @@ public struct FaucetClient {
             request.httpBody = try JSONSerialization.data(withJSONObject: data)
             request.httpMethod = "POST"
             let result = try await URLSession.shared.asyncData(with: request)
-                
             let json = try JSONDecoder().decode(JSON.self, from: result)["transferredGasObjects"][0]
             return FaucetCoinInfo(amount: json["amount"].intValue, id: json["id"].stringValue, transferTxDigest: json["transferTxDigest"].stringValue)
         } catch {
+            if let error = error as? SuiError, error == .FaucetRateLimitError {
+                throw SuiError.FaucetRateLimitError
+            }
+            
             throw SuiError.invalidJsonData
         }
     }

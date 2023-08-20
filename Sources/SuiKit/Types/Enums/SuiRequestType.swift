@@ -7,16 +7,7 @@
 
 import Foundation
 
-public enum SuiRequestType: Int {
-    case waitforEffectsCert = 0
-    case waitForLocalExecution = 1
-    
-    public func asString() -> String {
-        switch self {
-        case .waitforEffectsCert:
-            return "WaitForEffectsCert"
-        case .waitForLocalExecution:
-            return "WaitForLocalExecution"
-        }
-    }
+public enum SuiRequestType: String, Codable {
+    case waitforEffectsCert = "WaitForEffectsCert"
+    case waitForLocalExecution = "WaitForLocalExecution"
 }

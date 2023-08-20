@@ -50,16 +50,36 @@ public extension Data {
     }
     
     static func fromBase64(_ encoded: String) -> Data? {
-        // Prefixes padding-character(s) (if needed).
-        var encoded = encoded;
-        let remainder = encoded.count % 4
-        if remainder > 0 {
-            encoded = encoded.padding(
-                toLength: encoded.count + 4 - remainder,
-                withPad: "=", startingAt: 0);
+        return Data(base64Encoded: encoded);
+    }
+    
+    mutating func set(_ bytes: [UInt8], offset: Int? = nil) throws {
+        let actualOffset = offset ?? 0
+        
+        guard actualOffset >= 0 else {
+            throw NSError(
+                domain: "Invalid offset",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Offset can't be negative."]
+            )
         }
         
-        // Finally, decode.
-        return Data(base64Encoded: encoded);
+        guard actualOffset <= self.count else {
+            throw NSError(
+                domain: "Invalid offset",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "Offset exceeds Data's length."]
+            )
+        }
+        
+        let end = actualOffset + bytes.count
+        if end > self.count {
+            let additionalCount = end - self.count
+            self.append(Data(repeating: 0, count: additionalCount))
+        }
+        
+        for i in 0..<bytes.count {
+            self[actualOffset + i] = bytes[i]
+        }
     }
 }

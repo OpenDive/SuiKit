@@ -10,7 +10,4 @@ import Foundation
 public struct EndOfEpochData {
     let nextEpochComittee: [(String, String)]
     let nextEpochProtocolVersion: String
-    let epochCommitments: [CheckpointComitment]
 }
-
-public typealias CheckpointComitment = Any

@@ -20,8 +20,7 @@ final class TXBuilderTest: XCTestCase {
     var suiClockObjectId: String = ""
 
     override func setUp() async throws {
-        let account = try Account(accountType: .ed25519, "W8hh3ioDwgAoUlm0IXRZn6ETlcLmF07DN3RQBLCQ3N0=")
-        self.toolBox = try await TestToolbox(account: account, true)
+        self.toolBox = try await TestToolbox(true)
         let packageResult = try await self.fetchToolBox().publishPackage("serializer")
         self.packageId = packageResult.packageId
         guard let createdObjects = packageResult.publishedTx.effects?.created else { throw SuiError.notImplemented }
@@ -72,18 +71,13 @@ final class TXBuilderTest: XCTestCase {
     private func validateTransaction(client: SuiProvider, account: Account, tx: inout TransactionBlock) async throws {
         try tx.setSenderIfNotSet(sender: try account.publicKey.toSuiAddress())
         let localDigest = try await tx.getDigest(client)
-        let result = try await client.signAndExecuteTransactionBlock(
+        let options = SuiTransactionBlockResponseOptions(showEffects: true)
+        var result = try await client.signAndExecuteTransactionBlock(
             transactionBlock: &tx,
             signer: account,
-            options: SuiTransactionBlockResponseOptions(
-                showInput: false,
-                showEffects: true,
-                showEvents: false,
-                showObjectChanges: true,
-                showBalanceChanges: false
-            )
+            options: options
         )
-        try await self.fetchToolBox().client.waitForTransaction(localDigest)
+        result = try await self.fetchToolBox().client.waitForTransaction(tx: localDigest, options: options)
         XCTAssertEqual(localDigest, result.digest)
         guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")

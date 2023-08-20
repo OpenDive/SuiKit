@@ -59,24 +59,22 @@ internal class TestToolbox {
         )
 
         let _ = try txBlock.transferObject(objects: [cap], address: try self.address())
-
-        let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
+        let options = SuiTransactionBlockResponseOptions(
+            showEffects: true,
+            showObjectChanges: true
+        )
+        var publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
             transactionBlock: &txBlock,
             signer: self.account,
-            options: SuiTransactionBlockResponseOptions(
-                showInput: false,
-                showEffects: true,
-                showEvents: false,
-                showObjectChanges: true,
-                showBalanceChanges: false
-            )
+            options: options
         )
-        try await self.client.waitForTransaction(publishTxBlock.digest)
-
+        publishTxBlock = try await self.client.waitForTransaction(tx: publishTxBlock.digest, options: options)
+        
         guard 
             publishTxBlock.effects?.status.status == .success,
             let objectChanges = publishTxBlock.objectChanges
         else {
+            print(publishTxBlock)
             throw SuiError.notImplemented
         }
 
@@ -177,11 +175,8 @@ internal class TestToolbox {
             transactionBlock: &txBlock,
             signer: self.account,
             options: SuiTransactionBlockResponseOptions(
-                showInput: false,
                 showEffects: true,
-                showEvents: false,
-                showObjectChanges: true,
-                showBalanceChanges: false
+                showObjectChanges: true
             )
         )
 
@@ -198,9 +193,12 @@ internal class TestToolbox {
         _ recipients: [String]? = nil,
         _ amounts: [Int]? = nil
     ) async throws -> [SuiTransactionBlockResponse] {
+        let options = SuiTransactionBlockResponseOptions(showEffects: true, showObjectChanges: true)
         var txns: [SuiTransactionBlockResponse] = []
-        for i in (0..<nTimes) {
-            txns[i] = try await self.paySui(numRecipientsPerTxn, recipients, amounts)
+        for _ in (0..<nTimes) {
+            var txResponse = try await self.paySui(numRecipientsPerTxn, recipients, amounts)
+            txResponse = try await self.client.waitForTransaction(tx: txResponse.digest, options: options)
+            txns.append(txResponse)
         }
         return txns
     }

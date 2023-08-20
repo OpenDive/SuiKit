@@ -1010,7 +1010,42 @@ public struct SuiProvider {
         )
     }
 
-    // TODO: Implement Query Transaction Block Function
+    public func queryTransactionBlocks(
+        cursor: String? = nil,
+        limit: Int? = nil,
+        order: SortOrder? = nil,
+        filter: TransactionFilter? = nil,
+        options: SuiTransactionBlockResponseOptions? = nil
+    ) async throws -> PaginatedTransactionResponse {
+        let data = try await JsonRpcClient.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest(
+                "suix_queryTransactionBlocks",
+                [
+                    AnyCodable(
+                        SuiTransactionBlockResponseQuery(
+                            filter: filter,
+                            options: options
+                        )
+                    ),
+                    AnyCodable(cursor),
+                    AnyCodable(limit),
+                    AnyCodable(order == .descending ? true : false)
+                ]
+            )
+        )
+        var responsePage: [SuiTransactionBlockResponse] = []
+        let result = JSON(data)["result"]
+        for response in result["data"].arrayValue {
+            let responseUnwrapped = SuiTransactionBlockResponse(input: response)
+            responsePage.append(responseUnwrapped)
+        }
+        return PaginatedTransactionResponse(
+            data: responsePage,
+            hasNextPage: result["hasNextPage"].boolValue, 
+            nextCursor: result["nextCursor"].stringValue
+        )
+    }
 
     public func resolveNameserviceAddress(name: String) async throws -> AccountAddress {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
@@ -1022,7 +1057,10 @@ public struct SuiProvider {
 
     // TODO: Implement Resolve Name Service Names
 
-    public func waitForTransaction(_ tx: String) async throws {
+    public func waitForTransaction(
+        tx: String,
+        options: SuiTransactionBlockResponseOptions? = nil
+    ) async throws -> SuiTransactionBlockResponse {
         var count = 0
         repeat {
             if count >= 60 {
@@ -1030,13 +1068,17 @@ public struct SuiProvider {
             }
             try await Task.sleep(nanoseconds: 1_000_000_000)
             count += 1
-        } while await self.isValidTransactionBlock(tx)
+        } while await !(self.isValidTransactionBlock(tx: tx, options: options))
+        return try await self.getTransactionBlock(digest: tx, options: options)
     }
 
-    private func isValidTransactionBlock(_ digest: String) async -> Bool {
+    private func isValidTransactionBlock(
+        tx: String,
+        options: SuiTransactionBlockResponseOptions? = nil
+    ) async -> Bool {
         do {
-            let result = try await self.getTransactionBlock(digest: digest)
-            return result.effects?.status.status == .success
+            let result = try await self.getTransactionBlock(digest: tx, options: options)
+            return result.timestampMs != nil
         } catch {
             return false
         }

@@ -33,9 +33,3 @@ public struct SuiTransactionBlockResponse {
         self.errors = input["errors"].arrayValue.compactMap { $0.string }
     }
 }
-
-public struct PaginatedTransactionResponse {
-    public let data: [SuiTransactionBlockResponse]
-    public let nextCursor: TransactionDigest?
-    public let hasNextPage: Bool
-}

@@ -13,7 +13,7 @@ final class CheckpointTest: XCTestCase {
     var toolBox: TestToolbox?
 
     override func setUp() async throws {
-        self.toolBox = try await TestToolbox(false)
+        self.toolBox = try await TestToolbox(true)
     }
 
     private func fetchToolBox() throws -> TestToolbox {

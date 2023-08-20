@@ -43,18 +43,13 @@ final class EntryPointStringTest: XCTestCase {
                 .input(tx.pure(value: .number(UInt64(len))))
             ]
         )
-        let result = try await self.fetchToolBox().client.signAndExecuteTransactionBlock(
+        let options = SuiTransactionBlockResponseOptions(showEffects: true)
+        var result = try await self.fetchToolBox().client.signAndExecuteTransactionBlock(
             transactionBlock: &tx,
             signer: try self.fetchToolBox().account,
-            options: SuiTransactionBlockResponseOptions(
-                showInput: false,
-                showEffects: true,
-                showEvents: false,
-                showObjectChanges: true,
-                showBalanceChanges: false
-            )
+            options: options
         )
-        try await self.fetchToolBox().client.waitForTransaction(result.digest)
+        result = try await self.fetchToolBox().client.waitForTransaction(tx: result.digest, options: options)
         guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")
             return
@@ -70,18 +65,16 @@ final class EntryPointStringTest: XCTestCase {
                 .input(tx.pure(value: .number(UInt64(len))))
             ]
         )
-        let result = try await self.fetchToolBox().client.signAndExecuteTransactionBlock(
+        let options = SuiTransactionBlockResponseOptions(showEffects: true)
+        var result = try await self.fetchToolBox().client.signAndExecuteTransactionBlock(
             transactionBlock: &tx,
             signer: try self.fetchToolBox().account,
-            options: SuiTransactionBlockResponseOptions(
-                showInput: false,
-                showEffects: true,
-                showEvents: false,
-                showObjectChanges: true,
-                showBalanceChanges: false
-            )
+            options: options
         )
-        try await self.fetchToolBox().client.waitForTransaction(result.digest)
+        result = try await self.fetchToolBox().client.waitForTransaction(
+            tx: result.digest,
+            options: options
+        )
         guard result.effects?.status.status == .success else {
             XCTFail("Transaction Failed")
             return

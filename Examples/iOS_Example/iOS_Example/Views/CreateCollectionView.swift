@@ -61,7 +61,7 @@ struct CreateCollectionView: View {
                 Task {
                     do {
                         self.isCreatingCollection = true
-                        try await self.viewModel.createCollection(self.viewModel.currentWallet.account)
+                        try await self.viewModel.createCollection()
                         self.message = "Successfully uploaded contract!"
                         self.isShowingPopup = true
                     } catch {
@@ -89,20 +89,13 @@ struct CreateCollectionView: View {
                 }
             }
             .padding(.top)
-            
+
             Button {
-                Task {
-                    do {
-                        let objectId = try await self.viewModel.fetchObjectId()
-                        UIPasteboard.general.setValue(
-                            objectId,
-                            forPasteboardType: UTType.plainText.identifier
-                        )
-                    } catch {
-                        self.message = "Something went wrong: \(error.localizedDescription)"
-                        self.isShowingPopup = true
-                    }
-                }
+                let objectId = self.viewModel.fetchObjectId()
+                UIPasteboard.general.setValue(
+                    objectId,
+                    forPasteboardType: UTType.plainText.identifier
+                )
             } label: {
                 Text("Copy Object ID")
                     .font(.headline)
@@ -114,7 +107,6 @@ struct CreateCollectionView: View {
 
             }
 
-            
             Spacer()
         }
         .alert("\(message)", isPresented: $isShowingPopup) {

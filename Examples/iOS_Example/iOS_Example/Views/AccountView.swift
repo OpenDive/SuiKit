@@ -60,7 +60,7 @@ struct AccountView: View {
 
             Button {
                 UIPasteboard.general.setValue(
-                    self.viewModel.currentWallet.mnemonic.phrase.joined(separator: " "),
+                    self.viewModel.currentWallet.mnemonic.mnemonic().joined(separator: " "),
                     forPasteboardType: UTType.plainText.identifier
                 )
             } label: {
@@ -76,27 +76,11 @@ struct AccountView: View {
 
             Button {
                 UIPasteboard.general.setValue(
-                    self.viewModel.getCurrentWalletAddress(),
+                    self.viewModel.walletAddress,
                     forPasteboardType: UTType.plainText.identifier
                 )
             } label: {
                 Text("Copy Address")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .frame(width: 270, height: 50)
-                    .background(.blue)
-                    .clipShape(Capsule())
-                    .padding(.top, 8)
-            }
-            .padding(.top)
-
-            Button {
-                UIPasteboard.general.setValue(
-                    self.viewModel.currentWallet.account.privateKey.key.hexEncodedString(),
-                    forPasteboardType: UTType.plainText.identifier
-                )
-            } label: {
-                Text("Copy Private Key")
                     .font(.headline)
                     .foregroundColor(.white)
                     .frame(width: 270, height: 50)

@@ -87,15 +87,13 @@ struct MintNFTView: View {
                 Task {
                     do {
                         self.isMintingNft = true
-                        try await self.viewModel.createNft(
-                            self.viewModel.currentWallet.account,
+                        let digest = try await self.viewModel.createNft(
                             tokenName,
                             objectId,
                             tokenDescription,
-                            tokenURL,
-                            supply,
-                            self.viewModel.currentWallet.account.accountAddress.description
+                            tokenURL
                         )
+                        self.message = "Successfully minted your NFT at digest: \(digest!)"
                         self.isShowingPopup = true
                     } catch {
                         self.message = "Something went wrong: \(error.localizedDescription)"

@@ -64,7 +64,7 @@ struct TransferView: View {
             VStack {
                 ZStack {
                     Text("Sender Address: ") +
-                    Text("\(self.viewModel.getCurrentWalletAddress())").bold()
+                    Text("\(self.viewModel.walletAddress)").bold()
                 }
                 .padding()
 
@@ -95,7 +95,8 @@ struct TransferView: View {
                             self.isShowingPopup = true
                             return
                         }
-                        try await self.viewModel.createTransaction(self.viewModel.currentWallet.account, AccountAddress.fromHex(receiverAddress), amountDouble)
+                        let digest = try await self.viewModel.createTransaction(AccountAddress.fromHex(self.receiverAddress), amountDouble)
+                        self.message = "Successfully Executed Transaction at digest: \(digest!)"
                         self.isShowingPopup = true
                     } catch {
                         self.message = "Something went wrong: \(error)"

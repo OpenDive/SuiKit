@@ -27,8 +27,8 @@ struct ContentView: View {
             if defaultWalletSeeds.isEmpty {
                 self.viewModel = try HomeViewModel()
                 userDefaults.set(
-                    self.viewModel.currentWallet.mnemonic.phrase,
-                    forKey: self.viewModel.currentWallet.account.accountAddress.description
+                    self.viewModel.currentWallet.mnemonic.mnemonic(),
+                    forKey: try self.viewModel.currentWallet.accounts[0].address()
                 )
             } else {
                 self.viewModel = try HomeViewModel(defaultWalletSeeds)

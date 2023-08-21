@@ -7,33 +7,35 @@
 
 import Foundation
 import SuiKit
+import Bip39
 import SwiftyJSON
 
 public class HomeViewModel: ObservableObject {
     @Published var wallets: [Wallet] = []
     @Published var currentWallet: Wallet
-    
-    public let restClient = SuiClient(connection: devnetConnection)
-    public let faucetClient = FaucetClient(connection: devnetConnection)
+    @Published var walletAddress: String = ""
+    @Published var collectionId: String = ""
+
+    public let restClient = SuiProvider(connection: devnetConnection())
+    public let faucetClient = FaucetClient(connection: devnetConnection())
 
     public init(_ mnemos: [[String]]? = nil) throws {
         if let mnemos {
             var tmpWallets: [Wallet] = []
             var lastWallet: Wallet? = nil
             for mnemo in mnemos {
-                let mnemoObject = try Mnemonic(phrase: mnemo)
-                let newWallet = try Wallet(mnemonic: mnemoObject)
+                let newWallet = try Wallet(mnemonic: Mnemonic(mnemonic: mnemo))
                 tmpWallets.append(newWallet)
                 lastWallet = newWallet
             }
             self.wallets = tmpWallets
             self.currentWallet = lastWallet!
         } else {
-            let mnemo = Mnemonic(wordcount: 12, wordlist: Wordlists.english)
-            let newWallet = try Wallet(mnemonic: mnemo)
+            let newWallet = try Wallet()
             self.currentWallet = newWallet
             self.wallets = [newWallet]
         }
+        self.walletAddress = try self.currentWallet.accounts[0].address()
     }
 
     public init(wallet: Wallet) {
@@ -42,73 +44,66 @@ public class HomeViewModel: ObservableObject {
     }
 
     public func createWallet() throws {
-        let mnemo = Mnemonic(wordcount: 12, wordlist: Wordlists.english)
+        let mnemo = try Mnemonic()
         try self.initializeWallet(mnemo)
     }
 
     public func restoreWallet(_ phrase: String) throws {
-        let mnemo = try Mnemonic(phrase: phrase.components(separatedBy: " "))
+        let mnemo = try Mnemonic(mnemonic: phrase.components(separatedBy: " "))
         try self.initializeWallet(mnemo)
     }
 
-    public func getWalletAddresses() -> [String] {
-        return wallets.map { $0.account.address().hex() }
+    public func getWalletAddresses() throws -> [String] {
+        return try self.wallets.map { try $0.accounts[0].address() }
     }
 
-    public func getCurrentWalletAddress() -> String {
-        return self.currentWallet.account.address().description
+    public func getCurrentWalletAddress() throws -> String {
+        return try self.currentWallet.accounts[0].address()
     }
 
     public func getCurrentWalletBalance() async throws -> Double {
-        return (Double(
-            try await self.restClient.getBalance(self.currentWallet.account.accountAddress, "0x2::sui::SUI").totalBalance
-        ) ?? 0) / Double(1_000_000_000)
+        return (Double(try await self.restClient.getBalance(account: self.currentWallet.accounts[0].publicKey).totalBalance) ?? 0) / Double(1_000_000_000)
     }
 
     public func airdropToCurrentWallet() async throws {
-        let _ = try await self.faucetClient.funcAccount(self.currentWallet.account.accountAddress.description)
+        let _ = try await self.faucetClient.funcAccount(try self.currentWallet.accounts[0].address())
     }
 
     public func createNft(
-        _ signer: Account,
         _ name: String,
         _ objectId: String,
         _ description: String,
-        _ url: String,
-        _ mintCap: String,
-        _ recipient: String
-    ) async throws {
-        let objects = try await self.restClient.getOwnedObjects(signer.accountAddress)
-        let suiCoinObjects = objects.filter { $0.type == "0x2::coin::Coin<0x2::sui::SUI>" }
-        
-        if !suiCoinObjects.isEmpty {
+        _ url: String
+    ) async throws -> String? {
+        let coins = try await self.restClient.getCoins(account: try self.currentWallet.accounts[0].address())
+        if !coins.data.isEmpty {
+            var tx = try TransactionBlock()
             let txArguments: [String] = [
                 name,
                 description,
                 url
             ]
-            let tx = try await self.restClient.moveCall(
-                signer,
-                objectId,
-                "devnet_nft",
-                "mint",
-                [],
-                txArguments,
-                suiCoinObjects[0].objectId,
-                "\(Int(200_000_000))",
-                .commit
+            let _ = try tx.moveCall(
+                target: "\(objectId)::devnet_nft::mint",
+                arguments: txArguments.map { .input(try tx.pure(value: .string($0))) }
             )
-            let _ = try await self.restClient.executeTransactionBlocks(tx, signer)
+            let options = SuiTransactionBlockResponseOptions(showEffects: true)
+            var result = try await self.restClient.signAndExecuteTransactionBlock(
+                transactionBlock: &tx,
+                signer: self.currentWallet.accounts[0],
+                options: options
+            )
+            result = try await self.restClient.waitForTransaction(tx: result.digest, options: options)
+            return result.digest
         }
-    }
-    
-    public func fetchObjectId() async throws -> String {
-        let objects = try await self.restClient.getOwnedObjects(self.currentWallet.account.accountAddress)
-        let id = objects.filter { $0.content.fields["package"].exists() }
-        return id[0].content.fields["package"].stringValue
+        return nil
     }
 
-    public func createCollection(_ signer: Account) async throws {
+    public func fetchObjectId() -> String {
+        return self.collectionId
+    }
+
+    public func createCollection() async throws {
         guard let fileUrl = Bundle.main.url(forResource: "Package", withExtension: "json") else {
             throw NSError(domain: "package is missing", code: -1)
         }
@@ -116,46 +111,70 @@ public class HomeViewModel: ObservableObject {
             throw NSError(domain: "package is corrupted", code: -1)
         }
         let fileData = JSON(fileCompiledData)
-        let objects = try await self.restClient.getOwnedObjects(signer.accountAddress)
-        let suiCoinObjects = objects.filter { $0.type == "0x2::coin::Coin<0x2::sui::SUI>" }
-        
-        if !suiCoinObjects.isEmpty {
-            let tx = try await self.restClient.publish(
-                signer,
-                fileData["modules"].arrayValue.map { $0.stringValue },
-                fileData["dependencies"].arrayValue.map { $0.stringValue },
-                suiCoinObjects[0].objectId,
-                "\(Int(200_000_000))"
+        let coins = try await self.restClient.getCoins(account: try self.currentWallet.accounts[0].address())
+        if !coins.data.isEmpty {
+            var tx = try TransactionBlock()
+            let publish = try tx.publish(
+                modules: fileData["modules"].arrayObject as! [String],
+                dependencies: fileData["dependencies"].arrayObject as! [String]
             )
-            let _ = try await self.restClient.executeTransactionBlocks(tx, signer)
+            let _ = try tx.transferObject(objects: [publish], address: try self.currentWallet.accounts[0].address())
+            let options = SuiTransactionBlockResponseOptions(showEffects: true, showObjectChanges: true)
+            var result = try await self.restClient.signAndExecuteTransactionBlock(
+                transactionBlock: &tx,
+                signer: self.currentWallet.accounts[0],
+                options: options
+            )
+            result = try await self.restClient.waitForTransaction(tx: result.digest, options: options)
+            guard let objectsChanged = result.objectChanges else { return }
+            let packageId = objectsChanged.compactMap {
+                switch $0 {
+                case .published(let published):
+                    return published
+                default:
+                    return nil
+                }
+            }[0].packageId.replacingOccurrences(of: "^(0x)(0+)", with: "0x", options: .regularExpression)
+            self.collectionId = packageId
         }
     }
 
-    public func createTransaction(_ signer: Account, _ receiverAddress: AccountAddress, _ amount: Double) async throws {
-        let objects = try await self.restClient.getOwnedObjects(signer.accountAddress)
-        let suiCoinObjects = objects.filter { $0.type == "0x2::coin::Coin<0x2::sui::SUI>" }
-        
-        if !suiCoinObjects.isEmpty {
-            let gas = try await self.restClient.getGasPrice()
-            let tx = try await self.restClient.transferSui(
-                signer,
-                receiverAddress,
-                "\(Int(1_000 * gas + 1_000_000))",
-                "\(Int(amount * 1_000_000_000))",
-                suiCoinObjects[0].objectId
+    public func createTransaction(_ receiverAddress: AccountAddress, _ amount: Double) async throws -> String? {
+        let coins = try await self.restClient.getCoins(account: try self.currentWallet.accounts[0].address())
+        if !coins.data.isEmpty {
+            var txBlock = try TransactionBlock()
+            let coin = try txBlock.splitCoin(
+                coin: txBlock.gas,
+                amounts: [
+                    txBlock.pure(
+                        value: .number(
+                            UInt64(amount * 1_000_000_000)
+                        )
+                    )
+                ]
             )
-            let _ = try await restClient.executeTransactionBlocks(tx, signer)
+            let _ = try txBlock.transferObject(objects: [coin], address: receiverAddress.hex())
+            let options = SuiTransactionBlockResponseOptions(showEffects: true)
+            var result = try await self.restClient.signAndExecuteTransactionBlock(
+                transactionBlock: &txBlock,
+                signer: self.currentWallet.accounts[0],
+                options: options
+            )
+            result = try await self.restClient.waitForTransaction(tx: result.digest, options: options)
+            return result.digest
         }
+        return nil
     }
 
     private func initializeWallet(_ mnemo: Mnemonic) throws {
         let userDefaults = UserDefaults.standard
         let newWallet = try Wallet(mnemonic: mnemo)
         userDefaults.set(
-            mnemo.phrase,
-            forKey: newWallet.account.accountAddress.description
+            mnemo.mnemonic(),
+            forKey: try newWallet.accounts[0].address()
         )
         self.wallets.append(newWallet)
         self.currentWallet = newWallet
+        self.walletAddress = try self.currentWallet.accounts[0].address()
     }
 }

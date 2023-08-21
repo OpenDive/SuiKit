@@ -96,7 +96,7 @@ struct HomeView: View {
             if !self.viewModel.wallets.isEmpty {
                 Picker("Select A Wallet", selection: self.$viewModel.currentWallet) {
                     ForEach(self.viewModel.wallets, id: \.self) { wallet in
-                        Text("\(wallet.account.address().description)")
+                        Text("\((try? wallet.accounts[0].address()) ?? "No current address")")
                     }
                 }
                 .pickerStyle(.menu)
@@ -135,6 +135,7 @@ struct HomeView: View {
                     self.isGettingBalance = true
                     self.currentWalletBalance = try await self.viewModel.getCurrentWalletBalance()
                     self.isGettingBalance = false
+                    self.viewModel.walletAddress = try self.viewModel.currentWallet.accounts[0].address()
                 } catch {
                     print("ERROR - \(error)")
                 }

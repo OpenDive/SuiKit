@@ -1,5 +1,5 @@
 //
-//  KeyProtocol.swift
+//  RPCErrorRequest.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -22,22 +22,11 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
-import Foundation
 
-public protocol KeyProtocol: EncodingProtocol {
-    /// Serializes an output instance using the given Serializer.
-    ///
-    /// - Parameter serializer: The Serializer instance used to serialize the data.
-    ///
-    /// - Throws: An error if the serialization fails.
-    func serialize(_ serializer: Serializer) throws
-    
-    /// Deserializes an output instance from a Deserializer.
-    ///
-    /// - Parameter deserializer: The Deserializer instance used to deserialize the data.
-    ///
-    /// - Returns: A new PrivateKey instance with the deserialized key data.
-    ///
-    /// - Throws: An error if the deserialization fails.
-    static func deserialize(from deserializer: Deserializer) throws -> Self
+import Foundation
+import AnyCodable
+
+public protocol RPCErrorRequest {
+    var method: String { get set }
+    var args: [AnyCodable] { get set }
 }

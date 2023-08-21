@@ -1,5 +1,5 @@
 //
-//  TypeProtocol.swift
+//  PublicKeyProtocol.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -22,10 +22,18 @@
 //  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //  THE SOFTWARE.
 //
+
 import Foundation
 
-public protocol TypeProtocol: KeyProtocol {
-    /// Returns the type variant the class represents
-    /// - Returns: An Integer value that represents the class's type tag
-    func variant() -> Int
+public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashable {
+    var key: Data { get }
+
+    func verify(data: Data, signature: Signature) throws -> Bool
+    func base64() -> String
+    func hex() -> String
+    func toSuiAddress() throws -> String
+    func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool
+    func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool
+    func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool
+    func toSerializedSignature(signature: Signature) throws -> String
 }

@@ -108,10 +108,10 @@ fileprivate func convertHex(_ s: String.UnicodeScalarView, i: String.UnicodeScal
         return convertHex(s, i: next1, appendTo: d)
     } else {
         guard next1 != s.endIndex else { return d }
-        
+
         let next2 = s.index(after: next1)
         let sub = String(s[i..<next2])
-        
+
         guard let v = UInt8(sub, radix: 16) else { return d }
         return convertHex(s, i: next2, appendTo: d + [ v ])
     }

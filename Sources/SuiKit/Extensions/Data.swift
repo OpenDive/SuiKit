@@ -40,22 +40,22 @@ public extension Data {
     init(hex: String) {
         self.init([UInt8](hex: hex))
     }
-    
+
     var bytes: [UInt8] {
         Array(self)
     }
-    
+
     func hexEncodedString() -> String {
         return map { String(format: "%02hhx", $0) }.joined()
     }
-    
+
     static func fromBase64(_ encoded: String) -> Data? {
         return Data(base64Encoded: encoded);
     }
-    
+
     mutating func set(_ bytes: [UInt8], offset: Int? = nil) throws {
         let actualOffset = offset ?? 0
-        
+
         guard actualOffset >= 0 else {
             throw NSError(
                 domain: "Invalid offset",
@@ -63,7 +63,7 @@ public extension Data {
                 userInfo: [NSLocalizedDescriptionKey: "Offset can't be negative."]
             )
         }
-        
+
         guard actualOffset <= self.count else {
             throw NSError(
                 domain: "Invalid offset",
@@ -71,13 +71,13 @@ public extension Data {
                 userInfo: [NSLocalizedDescriptionKey: "Offset exceeds Data's length."]
             )
         }
-        
+
         let end = actualOffset + bytes.count
         if end > self.count {
             let additionalCount = end - self.count
             self.append(Data(repeating: 0, count: additionalCount))
         }
-        
+
         for i in 0..<bytes.count {
             self[actualOffset + i] = bytes[i]
         }

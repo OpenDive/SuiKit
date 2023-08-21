@@ -1,8 +1,26 @@
 //
-//  File.swift
-//  
+//  SplitCoinsTransaction.swift
+//  SuiKit
 //
-//  Created by Marcus Arnett on 5/12/23.
+//  Copyright (c) 2023 OpenDive
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
@@ -12,16 +30,23 @@ public struct SplitCoinsTransaction: KeyProtocol, TransactionProtocol {
     public var coin: TransactionArgument
     public var amounts: [TransactionArgument]
 
-    public init(coin: TransactionArgument, amounts: [TransactionArgument]) {
+    public init(
+        coin: TransactionArgument,
+        amounts: [TransactionArgument]
+    ) {
         self.coin = coin
         self.amounts = amounts
     }
 
     public init?(input: JSON) {
         let split = input.arrayValue
-        guard let coin = TransactionArgument.fromJSON(split[0]) else { return nil }
+        guard let coin = TransactionArgument.fromJSON(split[0]) else {
+            return nil
+        }
         self.coin = coin
-        self.amounts = split[1].arrayValue.compactMap { TransactionArgument.fromJSON($0) }
+        self.amounts = split[1].arrayValue.compactMap {
+            TransactionArgument.fromJSON($0)
+        }
     }
 
     public func serialize(_ serializer: Serializer) throws {
@@ -29,14 +54,19 @@ public struct SplitCoinsTransaction: KeyProtocol, TransactionProtocol {
         try serializer.sequence(amounts, Serializer._struct)
     }
 
-    public static func deserialize(from deserializer: Deserializer) throws -> SplitCoinsTransaction {
+    public static func deserialize(
+        from deserializer: Deserializer
+    ) throws -> SplitCoinsTransaction {
         return SplitCoinsTransaction(
             coin: try Deserializer._struct(deserializer),
             amounts: try deserializer.sequence(valueDecoder: Deserializer._struct)
         )
     }
 
-    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
+    public func executeTransaction(
+        objects: inout [ObjectsToResolve],
+        inputs: inout [TransactionBlockInput]
+    ) throws {
         try self.amounts.forEach { argument in
             try argument.encodeInput(objects: &objects, inputs: &inputs)
         }

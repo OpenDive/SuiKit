@@ -71,7 +71,7 @@ final class KeypairTest: XCTestCase {
             XCTFail("Failed to decode transaction.")
             return
         }
-        let intentMessage = messageWithIntent(.TransactionData, txBytesData)
+        let intentMessage = RawSigner.messageWithIntent(.TransactionData, txBytesData)
         let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
         XCTAssertEqual(digest.base64EncodedString(), self.digest)
 
@@ -115,7 +115,7 @@ final class KeypairTest: XCTestCase {
             XCTFail("Failed to decode transaction.")
             return
         }
-        let intentMessage = messageWithIntent(.TransactionData, txBytesData)
+        let intentMessage = RawSigner.messageWithIntent(.TransactionData, txBytesData)
         let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
         XCTAssertEqual(digest.base64EncodedString(), self.digest)
 

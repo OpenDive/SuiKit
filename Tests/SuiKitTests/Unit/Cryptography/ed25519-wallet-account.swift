@@ -118,7 +118,7 @@ final class Ed25519WalletTest: XCTestCase {
     func testThatSigningTransactionBlockFunctionsAsIntended() async throws {
         let wallet = try Wallet()
         let txBlock = try TransactionBlock()
-        let provider = SuiProvider(connection: devnetConnection())
+        let provider = SuiProvider(connection: DevnetConnection())
         
         try txBlock.setSender(sender: try wallet.accounts[0].publicKey.toSuiAddress())
         txBlock.setGasPrice(price: 5)

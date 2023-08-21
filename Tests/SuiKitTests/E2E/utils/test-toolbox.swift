@@ -17,7 +17,7 @@ internal class TestToolbox {
     let account: Account
     let client: SuiProvider
 
-    init(account: Account, client: SuiProvider = SuiProvider(connection: localnetConnection()), _ needsFunds: Bool = true) async throws {
+    init(account: Account, client: SuiProvider = SuiProvider(connection: LocalnetConnection()), _ needsFunds: Bool = true) async throws {
         self.account = account
         self.client = client
 
@@ -26,7 +26,7 @@ internal class TestToolbox {
 
     init(_ needsFunds: Bool = true) async throws {
         self.account = try Account()
-        self.client = SuiProvider(connection: localnetConnection())
+        self.client = SuiProvider(connection: LocalnetConnection())
         if needsFunds { try await self.setup() }
     }
 

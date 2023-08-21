@@ -134,7 +134,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     }
     
     public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
-        let intentMessage = messageWithIntent(intent, Data(bytes))
+        let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
         let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
         
         return try self.verify(data: digest, signature: signature)

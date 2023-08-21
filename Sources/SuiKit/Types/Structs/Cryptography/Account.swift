@@ -29,13 +29,13 @@ import Bip39
 /// Sui Blockchain Account
 public struct Account: Equatable, Hashable {
     public let accountType: KeyType
-    
+
     /// The public key associated with the account
     public let publicKey: any PublicKeyProtocol
 
     /// The private key for the account
     private let privateKey: any PrivateKeyProtocol
-    
+
     public init(accountType: KeyType = .ed25519) throws {
         switch accountType {
         case .ed25519:
@@ -46,8 +46,11 @@ public struct Account: Equatable, Hashable {
             try self.init(privateKey: privateKey, accountType: accountType)
         }
     }
-    
-    public init(privateKey: Data, accountType: KeyType = .ed25519) throws {
+
+    public init(
+        privateKey: Data,
+        accountType: KeyType = .ed25519
+    ) throws {
         switch accountType {
         case .ed25519:
             let privateKey = try ED25519PrivateKey(key: privateKey)
@@ -57,20 +60,30 @@ public struct Account: Equatable, Hashable {
             try self.init(privateKey: privateKey, accountType: accountType)
         }
     }
-    
-    public init(publicKey: any PublicKeyProtocol, privateKey: any PrivateKeyProtocol, accountType: KeyType = .ed25519) {
+
+    public init(
+        publicKey: any PublicKeyProtocol,
+        privateKey: any PrivateKeyProtocol,
+        accountType: KeyType = .ed25519
+    ) {
         self.publicKey = publicKey
         self.privateKey = privateKey
         self.accountType = accountType
     }
-    
-    public init(privateKey: any PrivateKeyProtocol, accountType: KeyType = .ed25519) throws {
+
+    public init(
+        privateKey: any PrivateKeyProtocol,
+        accountType: KeyType = .ed25519
+    ) throws {
         self.privateKey = privateKey
         self.publicKey = try privateKey.publicKey()
         self.accountType = accountType
     }
-    
-    public init(keyType: KeyType = .ed25519, hexString: String) throws {
+
+    public init(
+        keyType: KeyType = .ed25519,
+        hexString: String
+    ) throws {
         switch keyType {
         case .ed25519:
             let privateKey = ED25519PrivateKey(hexString: hexString)
@@ -84,11 +97,13 @@ public struct Account: Equatable, Hashable {
             self.accountType = keyType
         }
     }
-    
+
     public init(keyType: KeyType = .ed25519, path: String) throws {
         let fileURL = URL(fileURLWithPath: path)
         let data = try Data(contentsOf: fileURL)
-        guard let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] else {
+        guard let json = try JSONSerialization
+            .jsonObject(with: data, options: []) as? [String: Any]
+        else {
             throw SuiError.invalidJsonData
         }
 
@@ -101,10 +116,10 @@ public struct Account: Equatable, Hashable {
             hexString: privateKeyHex
         )
     }
-    
+
     public init(_ mnemonic: String, accountType: KeyType = .ed25519) throws {
         self.accountType = accountType
-        
+
         switch accountType {
         case .ed25519:
             let privateKey = try ED25519PrivateKey(mnemonic)
@@ -137,7 +152,7 @@ public struct Account: Equatable, Hashable {
             lhs.publicKey.key == rhs.publicKey.key &&
             lhs.privateKey.key == rhs.privateKey.key
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.privateKey.base64())
         hasher.combine(self.publicKey.base64())
@@ -159,10 +174,12 @@ public struct Account: Equatable, Hashable {
         ]
 
         let fileURL = URL(fileURLWithPath: path)
-        let jsonData = try JSONSerialization.data(withJSONObject: data, options: [])
+        let jsonData = try JSONSerialization
+            .data(withJSONObject: data, options: [])
+
         try jsonData.write(to: fileURL)
     }
-    
+
     /// Returns the account's account address.
     /// - Returns: An AccountAddress object
     public func address() throws -> String {
@@ -175,53 +192,77 @@ public struct Account: Equatable, Hashable {
     public func sign(_ data: Data) throws -> Signature {
         return try self.privateKey.sign(data: data)
     }
-    
-    public func verify(_ data: Data, _ signature: Signature) throws -> Bool {
-        return try self.publicKey.verify(data: data, signature: signature)
+
+    public func verify(
+        _ data: Data,
+        _ signature: Signature
+    ) throws -> Bool {
+        return try self.publicKey.verify(
+            data: data,
+            signature: signature
+        )
     }
-    
-    public func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature {
+
+    public func signWithIntent(
+        _ bytes: [UInt8],
+        _ intent: IntentScope
+    ) throws -> Signature {
         return try self.privateKey.signWithIntent(bytes, intent)
     }
-    
-    public func signTransactionBlock(_ bytes: [UInt8]) throws -> Signature {
+
+    public func signTransactionBlock(
+        _ bytes: [UInt8]
+    ) throws -> Signature {
         return try self.privateKey.signTransactionBlock(bytes)
     }
-    
-    public func signPersonalMessage(_ bytes: [UInt8]) throws -> Signature {
+
+    public func signPersonalMessage(
+        _ bytes: [UInt8]
+    ) throws -> Signature {
         return try self.privateKey.signPersonalMessage(bytes)
     }
-    
-    public func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
-        return try self.publicKey.verifyTransactionBlock(transactionBlock, signature)
+
+    public func verifyTransactionBlock(
+        _ transactionBlock: [UInt8],
+        _ signature: Signature
+    ) throws -> Bool {
+        return try self.publicKey.verifyTransactionBlock(
+            transactionBlock, signature
+        )
     }
-    
-    public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
-        return try self.publicKey.verifyWithIntent(bytes, signature, intent)
+
+    public func verifyWithIntent(
+        _ bytes: [UInt8],
+        _ signature: Signature,
+        _ intent: IntentScope
+    ) throws -> Bool {
+        return try self.publicKey.verifyWithIntent(
+            bytes,
+            signature,
+            intent
+        )
     }
-    
-    public func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool {
-        return try self.publicKey.verifyPersonalMessage(message, signature)
+
+    public func verifyPersonalMessage(
+        _ message: [UInt8], 
+        _ signature: Signature
+    ) throws -> Bool {
+        return try self.publicKey.verifyPersonalMessage(
+            message,
+            signature
+        )
     }
 
     public func toSerializedSignature(_ signature: Signature) throws -> String {
-        return try self.publicKey.toSerializedSignature(signature: signature)
+        return try self.publicKey.toSerializedSignature(
+            signature: signature
+        )
     }
-    
+
     public func export() -> ExportedAccount {
         return ExportedAccount(
             schema: self.accountType,
             privateKey: privateKey.key.base64EncodedString()
         )
-    }
-}
-
-public struct ExportedAccount {
-    public let schema: KeyType
-    public let privateKey: String
-    
-    public init(schema: KeyType, privateKey: String) {
-        self.schema = schema
-        self.privateKey = privateKey
     }
 }

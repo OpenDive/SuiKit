@@ -63,4 +63,5 @@ public enum SuiError: Error, Equatable {
     case unableToParseJson
     case transactionTimedOut
     case cannotFindSignatureType
+    case cannotFindKeyNumber
 }

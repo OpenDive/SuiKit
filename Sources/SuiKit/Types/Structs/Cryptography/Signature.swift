@@ -31,19 +31,17 @@ import Web3Core
 public struct Signature: Equatable, KeyProtocol {
     /// The length of the key in bytes
     public let LENGTH: Int
-    
+
     /// The signature itself
     var signature: Data
-    
     var publicKey: Data
-    
     var signatureScheme: SignatureScheme
-    
+
     init(signature: Data, publickey: Data, signatureScheme: SignatureScheme = .ED25519) {
         self.signature = signature
         self.publicKey = publickey
         self.signatureScheme = signatureScheme
-        
+
         switch signatureScheme {
         case .ED25519:
             self.LENGTH = 64
@@ -51,11 +49,11 @@ public struct Signature: Equatable, KeyProtocol {
             self.LENGTH = 65
         }
     }
-    
+
     public static func == (lhs: Signature, rhs: Signature) -> Bool {
         return lhs.signature == rhs.signature
     }
-    
+
     public func hex() throws -> String {
         return try self.data().hexEncodedString()
     }
@@ -71,15 +69,19 @@ public struct Signature: Equatable, KeyProtocol {
 
     public static func deserialize(from deserializer: Deserializer) throws -> Signature {
         let signatureBytes = try Deserializer.toBytes(deserializer)
+
         if signatureBytes.count != 64 || signatureBytes.count != 65 {
             throw AccountError.lengthMismatch
         }
+
         guard let stringSignature = String(data: signatureBytes, encoding: .utf8) else {
             throw AccountError.failedData
         }
+
         guard let bytes = Data.fromBase64(stringSignature) else { throw AccountError.invalidData }
+
         let signatureScheme = SignatureSchemeFlags.SIGNATURE_FLAG_TO_SCHEME[bytes[0]]
-        
+
         if signatureScheme == "ED25519" {
             let signature = Array(bytes[1...(bytes.count - ED25519PublicKey.LENGTH)])
             let pubKeyBytes = Array(bytes[(1 + signature.count)...])
@@ -97,24 +99,15 @@ public struct Signature: Equatable, KeyProtocol {
 
     public func serialize(_ serializer: Serializer) throws {
         var serializedSignature = Data(capacity: 1 + signature.count + publicKey.count)
+
         guard let signatureFlag = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {
             throw AccountError.cannotBeSerialized
         }
+
         serializedSignature.append(signatureFlag)
         serializedSignature.append(contentsOf: self.signature)
         serializedSignature.append(contentsOf: self.publicKey)
+
         try Serializer.str(serializer, serializedSignature.base64EncodedString())
     }
-}
-
-public struct SignatureSchemeFlags {
-    public static var SIGNATURE_SCHEME_TO_FLAG: [String: UInt8] = [
-        "ED25519": 0x00,
-        "SECP256K1": 0x01
-    ]
-    
-    public static var SIGNATURE_FLAG_TO_SCHEME: [UInt8: String] = [
-        0x00: "ED25519",
-        0x01: "SECP256K1"
-    ]
 }

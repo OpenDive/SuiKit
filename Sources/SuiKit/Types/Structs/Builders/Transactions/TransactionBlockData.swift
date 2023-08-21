@@ -1,8 +1,26 @@
 //
-//  File.swift
+//  TransactionBlockDataBuilder.swift
+//  SuiKit
 //
+//  Copyright (c) 2023 OpenDive
 //
-//  Created by Marcus Arnett on 5/13/23.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
@@ -22,10 +40,14 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
 
     public init?(bytes: Data) {
         let der = Deserializer(data: bytes)
-        guard let transactionData: TransactionData = try? Deserializer._struct(der) else { return nil }
+        guard let transactionData: TransactionData = try? Deserializer._struct(der) else {
+            return nil
+        }
         switch transactionData {
         case .V1(let v1Data):
-            guard let builder = SerializedTransactionDataBuilder(v1Transaction: v1Data) else { return nil }
+            guard let builder = SerializedTransactionDataBuilder(
+                v1Transaction: v1Data
+            ) else { return nil }
             self.builder = builder
         }
     }
@@ -34,18 +56,21 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         let typeTag = "TransactionData"
         let data: Data = bytes
         let typeTagBytes = Array(typeTag.utf8) + Array("::".utf8)
-        
+
         var dataWithTag = [UInt8]()
+
         dataWithTag.append(contentsOf: typeTagBytes)
         dataWithTag.append(contentsOf: data)
-        
+
         let hashedData = try Blake2.hash(.b2b, size: 32, data: Data(dataWithTag))
-        
         let hash = Array(hashedData)
+
         return Base58.base58Encode(hash)
     }
 
-    public static func restore(data: SerializedTransactionDataBuilder) -> TransactionBlockDataBuilder {
+    public static func restore(
+        data: SerializedTransactionDataBuilder
+    ) -> TransactionBlockDataBuilder {
         return TransactionBlockDataBuilder(builder: data)
     }
 
@@ -115,7 +140,9 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         try Serializer._struct(serializer, value: self.builder)
     }
 
-    public static func deserialize(from deserializer: Deserializer) throws -> TransactionBlockDataBuilder {
+    public static func deserialize(
+        from deserializer: Deserializer
+    ) throws -> TransactionBlockDataBuilder {
         return TransactionBlockDataBuilder(builder: try Deserializer._struct(deserializer))
     }
 

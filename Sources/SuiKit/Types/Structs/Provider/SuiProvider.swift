@@ -1,8 +1,26 @@
 //
-//  File.swift
-//  
+//  SuiProvider.swift
+//  SuiKit
 //
-//  Created by Marcus Arnett on 4/24/23.
+//  Copyright (c) 2023 OpenDive
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
@@ -40,7 +58,6 @@ public struct SuiProvider {
                 ]
             )
         )
-//        print("DEBUG: TX BLOCK DEV INSPECT - \([UInt8](result))")
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return DevInspectResults(input: JSON(data)["result"])
@@ -49,7 +66,6 @@ public struct SuiProvider {
     public func dryRunTransactionBlock(
         transactionBlock: [UInt8]
     ) async throws -> SuiTransactionBlockResponse {
-//        print("DEBUG: DRY RUN BYTES - \(transactionBlock)")
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -61,7 +77,6 @@ public struct SuiProvider {
         )
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
-//        print("DEBUG: DRY RUN TX RESULT - \(JSON(data)["result"])")
         return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
@@ -111,7 +126,6 @@ public struct SuiProvider {
         options: SuiTransactionBlockResponseOptions? = nil,
         requestType: SuiRequestType? = nil
     ) async throws -> SuiTransactionBlockResponse {
-//        print("DEBUG: TRANSACTION BLOCK BYTES - \(transactionBlock)")
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -124,7 +138,6 @@ public struct SuiProvider {
                 ]
             )
         )
-//        print("DEBUG: RESULT - \(JSON(data))")
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         return SuiTransactionBlockResponse(input: JSON(data)["result"])

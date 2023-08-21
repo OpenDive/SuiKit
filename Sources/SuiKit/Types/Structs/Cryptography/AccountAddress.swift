@@ -26,24 +26,6 @@
 import Foundation
 import CryptoSwift
 
-/// An enum representing the available authorization key schemes for Aptos Blockchain accounts.
-enum AuthKeyScheme {
-    /// The ED25519 authorization key scheme value.
-    static let ed25519: UInt8 = 0x00
-
-    /// The multi-ED25519 authorization key scheme value.
-    static let multiEd25519: UInt8 = 0x01
-
-    /// The authorization key scheme value used to derive an object address from a GUID.
-    static let deriveObjectAddressFromGuid: Data = Data([0xFD])
-
-    /// The authorization key scheme value used to derive an object address from a seed.
-    static let deriveObjectAddressFromSeed: UInt8 = 0xFE
-
-    /// The authorization key scheme value used to derive a resource account address.
-    static let deriveResourceAccountAddress: UInt8 = 0xFF
-}
-
 /// The Sui Blockchain Account Address
 public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, Hashable {
     /// The address data itself
@@ -97,27 +79,6 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
         return try AccountAddress(address: Data(hex: addr))
     }
 
-    /// Create an AccountAddress instance from a PublicKey.
-    ///
-    /// This function creates an AccountAddress instance from a provided PublicKey. The function generates a new address by appending the ED25519 authorization key
-    /// scheme value to the byte representation of the provided public key, and then computes the SHA3-256 hash of the resulting byte array. The resulting hash is used to
-    /// create a new AccountAddress instance.
-    ///
-    /// - Parameters:
-    ///    - key: A PublicKey instance representing the public key to create the AccountAddress instance from.
-    ///
-    /// - Returns: An AccountAddress instance created from the provided PublicKey.
-    ///
-    /// - Throws: An error of type AptosError indicating that the provided PublicKey is invalid and cannot be converted to an AccountAddress instance.
-    public static func fromKey(_ key: any PublicKeyProtocol) throws -> AccountAddress {
-        var addressBytes = Data(count: key.key.count + 1)
-        addressBytes[0..<key.key.count] = key.key[0..<key.key.count]
-        addressBytes[key.key.count] = AuthKeyScheme.ed25519
-        let result = addressBytes.sha3(.sha256)
-
-        return try AccountAddress(address: result)
-    }
-
     /// Create an AccountAddress instance from a MultiPublicKey.
     ///
     /// This function creates an AccountAddress instance from a provided MultiPublicKey. The function generates a new address by appending the Multi ED25519 authorization key
@@ -145,7 +106,9 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
             let data = try Deserializer.toBytes(deserializer)
             return try AccountAddress(address: data)
         }
-        return try AccountAddress(address: deserializer.fixedBytes(length: AccountAddress.length))
+        return try AccountAddress(
+            address: deserializer.fixedBytes(length: AccountAddress.length)
+        )
     }
 
     public func serialize(_ serializer: Serializer) throws {

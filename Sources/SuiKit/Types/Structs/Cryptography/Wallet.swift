@@ -35,23 +35,23 @@ public class Wallet: Hashable {
             lhs.mnemonic == rhs.mnemonic &&
             lhs.accounts == rhs.accounts
     }
-    
+
     /// The mnemonic words.
     public var mnemonic: Mnemonic
 
     /// The key pair.
     public var accounts: [Account]
-    
+
     public convenience init() throws {
         let mnemonic = try Mnemonic()
         try self.init(mnemonic: mnemonic)
     }
-    
+
     public init(mnemonic: Mnemonic, accounts: [Account]) {
         self.mnemonic = mnemonic
         self.accounts = accounts
     }
-    
+
     public init(mnemonic: Mnemonic, accountType: KeyType = .ed25519, separator: String = " ") throws {
         self.mnemonic = mnemonic
         self.accounts = [
@@ -61,7 +61,7 @@ public class Wallet: Hashable {
             )
         ]
     }
-    
+
     public convenience init(
         mnemonicString: String,
         accountType: KeyType = .ed25519,
@@ -70,7 +70,7 @@ public class Wallet: Hashable {
         let mnemonic = try Mnemonic(mnemonic: mnemonicString.components(separatedBy: separator))
         try self.init(mnemonic: mnemonic, accountType: accountType, separator: separator)
     }
-    
+
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.accounts)
         hasher.combine(self.mnemonic)

@@ -45,10 +45,10 @@ public struct MultiPublicKey: EncodingProtocol, CustomStringConvertible, Equatab
     init(keys: [ED25519PublicKey], threshold: Int, checked: Bool = true) throws {
         if checked {
             if MultiPublicKey.minKeys > keys.count || MultiPublicKey.maxKeys < keys.count {
-                throw SuiError.keysCountOutOfRange(min: MultiPublicKey.minKeys, max: MultiPublicKey.maxKeys)
+                throw AccountError.keysCountOutOfRange(min: MultiPublicKey.minKeys, max: MultiPublicKey.maxKeys)
             }
             if MultiPublicKey.minThreshold > threshold || threshold > keys.count {
-                throw SuiError.thresholdOutOfRange(min: MultiPublicKey.minThreshold, max: keys.count)
+                throw AccountError.thresholdOutOfRange(min: MultiPublicKey.minThreshold, max: keys.count)
             }
         }
 
@@ -91,17 +91,17 @@ public struct MultiPublicKey: EncodingProtocol, CustomStringConvertible, Equatab
         let nSigners = Int(key.count / ED25519PublicKey.LENGTH)
 
         if minKeys > nSigners || nSigners > maxKeys {
-            throw SuiError.keysCountOutOfRange(min: minKeys, max: maxKeys)
+            throw AccountError.keysCountOutOfRange(min: minKeys, max: maxKeys)
         }
 
         guard let keyThreshold = key.last else {
-            throw SuiError.noContentInKey
+            throw AccountError.noContentInKey
         }
 
         let threshold = Int(keyThreshold)
 
         if minThreshold > threshold || threshold > nSigners {
-            throw SuiError.thresholdOutOfRange(min: minThreshold, max: nSigners)
+            throw AccountError.thresholdOutOfRange(min: minThreshold, max: nSigners)
         }
 
         var keys: [ED25519PublicKey] = []

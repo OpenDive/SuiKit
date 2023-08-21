@@ -60,7 +60,7 @@ public class Serializer {
         } else if let boolArray = value as? [Bool] {
             try serializer.sequence(boolArray, Serializer.bool)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "Bool or [Bool]")
+            throw BCSError.invalidDataValue(supportedType: "Bool or [Bool]")
         }
     }
 
@@ -83,7 +83,7 @@ public class Serializer {
         } else if let dataArray = value as? [Data] {
             try serializer.sequence(dataArray, Serializer.toBytes)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "Data or [Data]")
+            throw BCSError.invalidDataValue(supportedType: "Data or [Data]")
         }
     }
 
@@ -108,7 +108,7 @@ public class Serializer {
         if let keyProtocolValue = value as? KeyProtocol {
             try keyProtocolValue.serialize(serializer)
         } else {
-            throw SuiError.doesNotConformTo(protocolType: "KeyProtocol")
+            throw BCSError.doesNotConformTo(protocolType: "KeyProtocol")
         }
     }
 
@@ -227,7 +227,7 @@ public class Serializer {
         } else if let strArray = value as? [String] {
             try serializer.sequence(strArray, Serializer.str)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "String or [String]")
+            throw BCSError.invalidDataValue(supportedType: "String or [String]")
         }
     }
 
@@ -248,7 +248,7 @@ public class Serializer {
         } else if let uint8Array = value as? [UInt8] {
             try serializer.sequence(uint8Array, Serializer.u8)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "UInt8 or [UInt8]")
+            throw BCSError.invalidDataValue(supportedType: "UInt8 or [UInt8]")
         }
     }
 
@@ -269,7 +269,7 @@ public class Serializer {
         } else if let uint16Array = value as? [UInt16] {
             try serializer.sequence(uint16Array, Serializer.u16)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "UInt16 or [UInt16]")
+            throw BCSError.invalidDataValue(supportedType: "UInt16 or [UInt16]")
         }
     }
 
@@ -290,7 +290,7 @@ public class Serializer {
         } else if let uint32Array = value as? [UInt32] {
             try serializer.sequence(uint32Array, Serializer.u32)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "UInt32 or [UInt32]")
+            throw BCSError.invalidDataValue(supportedType: "UInt32 or [UInt32]")
         }
     }
 
@@ -311,7 +311,7 @@ public class Serializer {
         } else if let uint64Array = value as? [UInt64] {
             try serializer.sequence(uint64Array, Serializer.u64)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "UInt64 or [UInt64]")
+            throw BCSError.invalidDataValue(supportedType: "UInt64 or [UInt64]")
         }
     }
 
@@ -332,7 +332,7 @@ public class Serializer {
         } else if let uint128Array = value as? [UInt128] {
             try serializer.sequence(uint128Array, Serializer.u128)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "UInt128 or [UInt128]")
+            throw BCSError.invalidDataValue(supportedType: "UInt128 or [UInt128]")
         }
     }
 
@@ -353,7 +353,7 @@ public class Serializer {
         } else if let uint256Array = value as? [UInt256] {
             try serializer.sequence(uint256Array, Serializer.u256)
         } else {
-            throw SuiError.invalidDataValue(supportedType: "UInt256 or [UInt256]")
+            throw BCSError.invalidDataValue(supportedType: "UInt256 or [UInt256]")
         }
     }
 

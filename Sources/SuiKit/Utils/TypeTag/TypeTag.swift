@@ -93,7 +93,7 @@ public struct TypeTag: KeyProtocol, Equatable {
         } else if variant == TypeTag._struct {
             return TypeTag(value: try StructTag.deserialize(from: deserializer))
         } else {
-            throw SuiError.notImplemented
+            throw SuiError.unableToDeserialize
         }
     }
 

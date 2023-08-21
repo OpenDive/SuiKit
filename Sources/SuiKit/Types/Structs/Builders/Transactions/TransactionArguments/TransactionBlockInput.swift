@@ -10,12 +10,12 @@ import Foundation
 public struct TransactionBlockInput: KeyProtocol {
     public var index: UInt16
     public var value: SuiJsonValue?
-    public var type: TransactionArgumentKind?
+    public var type: ValueType?
 
     public init(
         index: UInt16,
         value: SuiJsonValue? = nil,
-        type: TransactionArgumentKind? = nil
+        type: ValueType? = nil
     ) {
         self.index = index
         self.value = value

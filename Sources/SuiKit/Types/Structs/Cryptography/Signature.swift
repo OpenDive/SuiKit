@@ -68,16 +68,16 @@ public struct Signature: Equatable, KeyProtocol {
             return self.signature
         }
     }
-    
+
     public static func deserialize(from deserializer: Deserializer) throws -> Signature {
         let signatureBytes = try Deserializer.toBytes(deserializer)
         if signatureBytes.count != 64 || signatureBytes.count != 65 {
-            throw SuiError.lengthMismatch
+            throw AccountError.lengthMismatch
         }
         guard let stringSignature = String(data: signatureBytes, encoding: .utf8) else {
-            throw SuiError.failedData
+            throw AccountError.failedData
         }
-        guard let bytes = Data.fromBase64(stringSignature) else { throw SuiError.notImplemented }
+        guard let bytes = Data.fromBase64(stringSignature) else { throw AccountError.invalidData }
         let signatureScheme = SignatureSchemeFlags.SIGNATURE_FLAG_TO_SCHEME[bytes[0]]
         
         if signatureScheme == "ED25519" {
@@ -91,14 +91,14 @@ public struct Signature: Equatable, KeyProtocol {
             let pubKey = try SECP256K1PublicKey(data: Data(pubKeyBytes))
             return Signature(signature: Data(signature), publickey: pubKey.key, signatureScheme: .SECP256K1)
         } else {
-            throw SuiError.notImplemented
+            throw AccountError.cannotBeDeserialized
         }
     }
-    
+
     public func serialize(_ serializer: Serializer) throws {
         var serializedSignature = Data(capacity: 1 + signature.count + publicKey.count)
         guard let signatureFlag = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {
-            throw SuiError.notImplemented
+            throw AccountError.cannotBeSerialized
         }
         serializedSignature.append(signatureFlag)
         serializedSignature.append(contentsOf: self.signature)

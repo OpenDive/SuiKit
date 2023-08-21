@@ -357,7 +357,7 @@ public struct SuiProvider {
         objectId: String,
         options: SuiObjectDataOptions? = nil
     ) async throws -> SuiObjectResponse? {
-        guard (try Inputs.normalizeSuiAddress(value: objectId)).isValidSuiAddress() else { throw SuiError.notImplemented }
+        guard (try Inputs.normalizeSuiAddress(value: objectId)).isValidSuiAddress() else { throw SuiError.unableToValidateAddress }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -424,7 +424,7 @@ public struct SuiProvider {
         digest: String,
         options: SuiTransactionBlockResponseOptions? = nil
     ) async throws -> SuiTransactionBlockResponse {
-        guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
+        guard self.isValidTransactionDigest(digest) else { throw SuiError.invalidDigest }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -446,7 +446,7 @@ public struct SuiProvider {
     ) async throws -> [SuiObjectResponse] {
         for object in ids {
             guard (try Inputs.normalizeSuiAddress(value: object)).isValidSuiAddress() else {
-                throw SuiError.notImplemented
+                throw SuiError.unableToValidateAddress
             }
         }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
@@ -475,9 +475,9 @@ public struct SuiProvider {
         options: SuiTransactionBlockResponseOptions? = nil
     ) async throws -> [SuiTransactionBlockResponse] {
         for digest in digests {
-            guard self.isValidTransactionDigest(digest) else { throw SuiError.notImplemented }
+            guard self.isValidTransactionDigest(digest) else { throw SuiError.invalidDigest }
         }
-        guard digests.count == Set(digests).count else { throw SuiError.notImplemented }
+        guard digests.count == Set(digests).count else { throw SuiError.digestsDoNotMatch }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -769,7 +769,7 @@ public struct SuiProvider {
         limit: Int? = nil,
         cursor: String? = nil
     ) async throws -> DynamicFieldPage {
-        guard (try Inputs.normalizeSuiAddress(value: parentId)).isValidSuiAddress() else { throw SuiError.notImplemented }
+        guard (try Inputs.normalizeSuiAddress(value: parentId)).isValidSuiAddress() else { throw SuiError.unableToValidateAddress }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -827,7 +827,7 @@ public struct SuiProvider {
         cursor: String? = nil,
         limit: Int? = nil
     ) async throws -> PaginatedObjectsResponse {
-        guard owner.isValidSuiAddress() else { throw SuiError.notImplemented }
+        guard owner.isValidSuiAddress() else { throw SuiError.unableToValidateAddress }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -900,7 +900,7 @@ public struct SuiProvider {
                 case "Unstaked":
                     stakesInner.append(.unstaked(finalStake))
                 default:
-                    throw SuiError.notImplemented
+                    throw SuiError.unableToParseJson
                 }
             }
             stakes.append(
@@ -948,7 +948,7 @@ public struct SuiProvider {
                 case "Unstaked":
                     stakesInner.append(.unstaked(finalStake))
                 default:
-                    throw SuiError.notImplemented
+                    throw SuiError.unableToParseJson
                 }
             }
             stakes.append(
@@ -1064,7 +1064,7 @@ public struct SuiProvider {
         var count = 0
         repeat {
             if count >= 60 {
-                throw SuiError.notImplemented
+                throw SuiError.transactionTimedOut
             }
             try await Task.sleep(nanoseconds: 1_000_000_000)
             count += 1

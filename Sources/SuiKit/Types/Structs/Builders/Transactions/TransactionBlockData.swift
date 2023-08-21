@@ -80,7 +80,7 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
             let payment = gasConfig.payment,
             let price = gasConfig.price
         else {
-            throw SuiError.notImplemented
+            throw SuiError.missingGasValues
         }
 
         let transactionData = TransactionData.V1(TransactionDataV1(

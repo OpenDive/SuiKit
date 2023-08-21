@@ -87,7 +87,7 @@ public class Deserializer {
         case 1:
             return true
         default:
-            throw SuiError.unexpectedValue(value: "\(value)")
+            throw BCSError.unexpectedValue(value: "\(value)")
         }
     }
 
@@ -177,7 +177,7 @@ public class Deserializer {
     public static func string(_ deserializer: Deserializer) throws -> String {
         let data = try Deserializer.toBytes(deserializer)
         guard let result = String(data: data, encoding: .utf8) else {
-            throw SuiError.stringToDataFailure(value: "\(data)")
+            throw BCSError.stringToDataFailure(value: "\(data)")
         }
         return result
     }
@@ -273,7 +273,7 @@ public class Deserializer {
     public static func u256(_ deserializer: Deserializer) throws -> UInt256 {
         let value = try deserializer.readInt(length: 32)
         guard let result = UInt256(String(value)) else {
-            throw SuiError.stringToUInt256Failure(value: String(value))
+            throw BCSError.stringToUInt256Failure(value: String(value))
         }
         return result
     }
@@ -307,7 +307,7 @@ public class Deserializer {
         }
         
         if value > UInt128(MAX_U128) {
-            throw SuiError.unexpectedLargeULEB128Value(value: "\(value)")
+            throw BCSError.unexpectedLargeULEB128Value(value: "\(value)")
         }
         
         return value
@@ -323,7 +323,7 @@ public class Deserializer {
     /// to satisfy the requested length. The error message will contain the requested length and the remaining bytes available to read.
     private func read(length: Int) throws -> Data {
         guard position + length <= input.count else {
-            throw SuiError.unexpectedEndOfInput(requested: "\(length)", found: "\(input.count - position)")
+            throw BCSError.unexpectedEndOfInput(requested: "\(length)", found: "\(input.count - position)")
         }
         let range = position ..< position + length
         let value = input.subdata(in: range)
@@ -354,7 +354,7 @@ public class Deserializer {
         } else if length == 32 {
             return data.withUnsafeBytes { $0.load(as: UInt256.self) }
         } else {
-            throw SuiError.invalidLength
+            throw BCSError.invalidLength
         }
     }
 }

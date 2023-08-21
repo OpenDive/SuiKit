@@ -38,7 +38,7 @@ final class ObjectDisplayStandardTest: XCTestCase {
         let toolBox = try self.fetchToolBox()
         let resp = try await toolBox.client.getOwnedObjects(
             owner: try toolBox.address(),
-            filter: SuiObjectDataFilter.StructType("\(try self.fetchPackageId())::boars::Boar"),
+            filter: SuiObjectDataFilter.structType("\(try self.fetchPackageId())::boars::Boar"),
             options: SuiObjectDataOptions(showDisplay: true, showType: true)
         ).data
         guard let data = resp[0].data else {

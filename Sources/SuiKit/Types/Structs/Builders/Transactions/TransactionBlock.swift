@@ -125,12 +125,12 @@ public class TransactionBlock {
 
     public func setGasPayment(payments: [SuiObjectRef]) throws {
         guard payments.count < TransactionConstants.MAX_GAS_OBJECTS else {
-            throw SuiError.notImplemented
+            throw SuiError.gasPaymentTooHigh
         }
         self.blockData.builder.gasConfig.payment = payments
     }
 
-    private func input(type: TransactionArgumentKind, value: SuiJsonValue?) throws -> TransactionBlockInput {
+    private func input(type: ValueType, value: SuiJsonValue?) throws -> TransactionBlockInput {
         let index = self.blockData.builder.inputs.count
         let input = TransactionBlockInput(
             index: UInt16(index),
@@ -391,13 +391,13 @@ public class TransactionBlock {
         }
         
         if buildOptions.protocolConfig!.attributes[key.rawValue] == nil {
-            throw SuiError.notImplemented
+            throw SuiError.cannotFindProtocolConfig
         }
         
         let attribute = buildOptions.protocolConfig!.attributes[key.rawValue]!
         
         if attribute == nil {
-            throw SuiError.notImplemented
+            throw SuiError.cannotFindAttribute
         }
         
         switch attribute! {
@@ -426,7 +426,7 @@ public class TransactionBlock {
 
     private func prepareGasPayment(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
         if self.isMissingSender(onlyTransactionKind) {
-            throw SuiError.notImplemented
+            throw SuiError.senderIsMissing
         }
 
         if (onlyTransactionKind != nil && onlyTransactionKind!) || self.blockData.builder.gasConfig.payment != nil {
@@ -437,7 +437,7 @@ public class TransactionBlock {
                 self.blockData.builder.gasConfig.owner?.hex() ??
                 self.blockData.builder.sender?.hex()
         else {
-            throw SuiError.notImplemented
+            throw SuiError.gasOwnerCannotBeFound
         }
         
         let coins = try await provider.getCoins(
@@ -477,7 +477,7 @@ public class TransactionBlock {
         }
         
         guard !paymentCoins.isEmpty else {
-            throw SuiError.notImplemented
+            throw SuiError.ownerDoesNotHavePaymentCoins
         }
         
         try self.setGasPayment(payments: paymentCoins)
@@ -485,7 +485,7 @@ public class TransactionBlock {
     
     private func prepareGasPrice(provider: SuiProvider, onlyTransactionKind: Bool? = nil) async throws {
         if self.isMissingSender(onlyTransactionKind) {
-            throw SuiError.notImplemented
+            throw SuiError.senderIsMissing
         }
         
         self.setGasPrice(
@@ -533,7 +533,7 @@ public class TransactionBlock {
                 
                 let hasTxContext = try normalized.hasTxContext()
                 let params = hasTxContext ? normalized.parameters.dropLast() : normalized.parameters
-                guard params.count == moveCallTx.arguments.count else { throw SuiError.notImplemented }
+                guard params.count == moveCallTx.arguments.count else { throw SuiError.moveCallSizeDoesNotMatch }
                 
                 try params.enumerated().forEach { (idx, param) in
                     let arg = moveCallTx.arguments[idx]
@@ -553,8 +553,8 @@ public class TransactionBlock {
                             )
                             return
                         }
-                        guard param.extractStructTag() != nil || param.kind == "TypeParameter" else { throw SuiError.notImplemented }
-                        guard inputValue.kind == .string else { throw SuiError.notImplemented }
+                        guard param.extractStructTag() != nil || param.kind == "TypeParameter" else { throw SuiError.unknownCallArgType }
+                        guard inputValue.kind == .string else { throw SuiError.inputValueIsNotObjectId }
                         
                         switch inputValue {
                         case .string(let string):
@@ -566,7 +566,7 @@ public class TransactionBlock {
                                 )
                             )
                         default:
-                            throw SuiError.notImplemented
+                            throw SuiError.inputValueIsNotObjectId
                         }
                     default: return
                     }
@@ -593,7 +593,7 @@ public class TransactionBlock {
                 objectsById[id] = object
             }
             let invalidObjects = objectsById.filter { _, obj in obj.error != nil }.map { key, _ in key }
-            guard invalidObjects.isEmpty else { throw SuiError.notImplemented }
+            guard invalidObjects.isEmpty else { throw SuiError.objectIsInvalid }
             var resolvedIds: [String: Range<Array<ObjectsToResolve>.Index>.Element] = [:]
             for i in objectsToResolve.indices {
                 var idx = i
@@ -681,7 +681,7 @@ public class TransactionBlock {
         var options: BuildOptions = optionsPassed
         
         guard let provider = options.provider else {
-            throw SuiError.notImplemented
+            throw SuiError.providerNotFound
         }
         
         if options.protocolConfig == nil && options.limits == nil {
@@ -707,7 +707,7 @@ public class TransactionBlock {
                     transactionBlock: [UInt8](blockData.build(overrides: txBlockDataBuilder))
                 )
                 guard dryRunResult.effects?.status.status != .failure else {
-                    throw SuiError.notImplemented
+                    throw SuiError.failedDryRun
                 }
                 let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
                     Int(blockData.builder.gasConfig.price ?? "1")!
@@ -775,12 +775,6 @@ public struct ResolvedConstants {
     public static let validatorsEventQuery = "\(ResolvedConstants.suiSystemAddress)::validator_set::ValidatorEpochInfoEventV2"
 }
 
-public enum ProtocolConfigValue {
-    case u32(String)
-    case u64(String)
-    case f64(String)
-}
-
 public struct ProtocolConfig {
     public let attributes: [String: ProtocolConfigValue?]
     public let featureFlags: [String: Bool]
@@ -801,13 +795,6 @@ public let LIMITS: [String: String] = [
 ]
 
 public typealias Limits = [String: Int?]
-
-public enum LimitsKey: String {
-    case maxTxGas = "max_tx_gas"
-    case maxGasObjects = "max_gas_payment_objects"
-    case maxTxSizeBytes = "max_tx_size_bytes"
-    case maxPureArgumentSize = "max_pure_argument_size"
-}
 
 public struct ObjectsToResolve {
     let id: String

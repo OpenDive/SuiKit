@@ -69,12 +69,11 @@ internal class TestToolbox {
             options: options
         )
         publishTxBlock = try await self.client.waitForTransaction(tx: publishTxBlock.digest, options: options)
-        
+
         guard 
             publishTxBlock.effects?.status.status == .success,
             let objectChanges = publishTxBlock.objectChanges
         else {
-            print(publishTxBlock)
             throw SuiError.notImplemented
         }
 

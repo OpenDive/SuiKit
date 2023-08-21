@@ -37,7 +37,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
 
     public init(data: Data) throws {
         guard data.count == ED25519PublicKey.LENGTH else {
-            throw SuiError.invalidPublicKey
+            throw AccountError.invalidPublicKey
         }
         self.key = data
     }
@@ -48,15 +48,15 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
             hexValue = String(hexString.dropFirst(2))
         }
         guard Data(hex: hexValue).count == ED25519PublicKey.LENGTH else {
-            throw SuiError.invalidPublicKey
+            throw AccountError.invalidPublicKey
         }
         self.key = Data(hex: hexValue)
     }
     
     public init(value: String) throws {
-        guard let result = Data.fromBase64(value) else { throw SuiError.notImplemented }
+        guard let result = Data.fromBase64(value) else { throw AccountError.invalidData }
         guard result.count == ED25519PublicKey.LENGTH else {
-            throw SuiError.invalidPublicKey
+            throw AccountError.invalidPublicKey
         }
         self.key = result
     }
@@ -149,7 +149,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     public static func deserialize(from deserializer: Deserializer) throws -> ED25519PublicKey {
         let key = try Deserializer.toBytes(deserializer)
         if key.count != ED25519PublicKey.LENGTH {
-            throw SuiError.lengthMismatch
+            throw AccountError.lengthMismatch
         }
         return try ED25519PublicKey(data: key)
     }

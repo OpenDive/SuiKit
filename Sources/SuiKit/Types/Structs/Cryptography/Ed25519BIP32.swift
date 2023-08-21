@@ -44,7 +44,7 @@ public struct Ed25519BIP32 {
     /// - Throws: An SuiError object with the type invalidDerivationPath if the derivation path provided is invalid.
     public func derivePath(path: String) throws -> (key: Data, chainCode: Data) {
         if !Ed25519BIP32.isValidPath(path: path) {
-            throw SuiError.invalidDerivationPath
+            throw AccountError.invalidDerivationPath
         }
 
         let hardenedOffset: UInt32 = 0x80000000

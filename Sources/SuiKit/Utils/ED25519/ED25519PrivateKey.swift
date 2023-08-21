@@ -1,5 +1,5 @@
 //
-//  PrivateKey.swift
+//  ED25519PrivateKey.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -45,7 +45,7 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
 
     /// The key itself
     public var key: Data
-    
+
     public init(key: Data) throws {
         guard key.count == Self.LENGTH else {
             throw AccountError.invalidLength
@@ -208,7 +208,7 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
 
         return valid
     }
-    
+
     private static func seed(_ mnemonic: String) throws -> Data {
         let mnemonicMapping = (mnemonic as NSString).decomposedStringWithCompatibilityMapping
         let salt = ("mnemonic" as NSString).decomposedStringWithCompatibilityMapping

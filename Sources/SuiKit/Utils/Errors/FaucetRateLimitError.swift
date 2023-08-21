@@ -1,5 +1,5 @@
 //
-//  BoolTag.swift
+//  FaucetRateLimitError.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,24 +25,4 @@
 
 import Foundation
 
-/// Bool Type Tag
-public struct BoolTag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Bool
-
-    public static func ==(lhs: BoolTag, rhs: BoolTag) -> Bool {
-        return lhs.value == rhs.value
-    }
-
-    public func variant() -> Int {
-        return TypeTag.bool
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> BoolTag {
-        return try BoolTag(value: deserializer.bool())
-    }
-
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.bool(serializer, self.value)
-    }
-}
+class FaucetRateLimitError: Error {}

@@ -1,5 +1,5 @@
 //
-//  BoolTag.swift
+//  RPCValidationError.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,24 +25,29 @@
 
 import Foundation
 
-/// Bool Type Tag
-public struct BoolTag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Bool
+class RPCValidationError: Error {
+    let req: RPCErrorRequest
+    let result: Any?
+    let cause: Error?
 
-    public static func ==(lhs: BoolTag, rhs: BoolTag) -> Bool {
-        return lhs.value == rhs.value
+    init(options: (req: RPCErrorRequest, result: Any?, cause: Error?)) {
+        self.req = options.req
+        self.result = options.result
+        self.cause = options.cause
     }
 
-    public func variant() -> Int {
-        return TypeTag.bool
-    }
+    func toString() -> String {
+        var str = 
+            "RPC Validation Error: The response returned from RPC server does not match the Swift definition. This is likely because the SDK version is not compatible with the RPC server."
+        
+        if let cause = cause {
+            str += "\nCause: \(cause)"
+        }
 
-    public static func deserialize(from deserializer: Deserializer) throws -> BoolTag {
-        return try BoolTag(value: deserializer.bool())
-    }
+        if let result = result {
+            str += "\nResponse Received: \(String(describing: result))"
+        }
 
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.bool(serializer, self.value)
+        return str
     }
 }

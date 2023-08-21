@@ -44,7 +44,7 @@ public struct MultiSignature: EncodingProtocol, Equatable {
                 bitmap = bitmap | (1 << shift)
             }
         }
-        
+
         self.bitmap = withUnsafeBytes(of: (bitmap.bigEndian, UInt32.self)) { Data($0) }.prefix(4)
     }
 

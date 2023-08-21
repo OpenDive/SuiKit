@@ -51,11 +51,11 @@ public class Deserializer {
 
     /// Meant for determining how many bytes are left to deserialize
     private var position: Int = 0
-    
+
     public init(data: Data) {
         self.input = data
     }
-    
+
     public func output() -> Data {
         return self.input
     }
@@ -296,7 +296,7 @@ public class Deserializer {
     public func uleb128() throws -> UInt {
         var value: UInt = 0
         var shift: UInt = 0
-        
+
         while value <= UInt(MAX_U32) {
             let byte = try readInt(length: 1)
             value |= (UInt(byte) & 0x7F) << shift
@@ -305,11 +305,11 @@ public class Deserializer {
             }
             shift += 7
         }
-        
+
         if value > UInt128(MAX_U128) {
             throw BCSError.unexpectedLargeULEB128Value(value: "\(value)")
         }
-        
+
         return value
     }
 
@@ -340,7 +340,7 @@ public class Deserializer {
     /// - Throws: An SuiError object of type invalidLength if the specified length is not valid, i.e. not one of the supported lengths: 1, 2, 4, 8, 16 or 32 bytes.
     private func readInt(length: Int) throws -> any UnsignedInteger {
         let data = try read(length: length)
-        
+
         if length == 1 {
             return data.withUnsafeBytes { $0.load(as: UInt8.self) }
         } else if length == 2 {

@@ -1,5 +1,5 @@
 //
-//  PublicKey.swift
+//  ED25519PublicKey.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -41,7 +41,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         }
         self.key = data
     }
-    
+
     public init(hexString: String) throws {
         var hexValue = hexString
         if hexString.hasPrefix("0x") {
@@ -52,7 +52,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         }
         self.key = Data(hex: hexValue)
     }
-    
+
     public init(value: String) throws {
         guard let result = Data.fromBase64(value) else { throw AccountError.invalidData }
         guard result.count == ED25519PublicKey.LENGTH else {
@@ -87,15 +87,15 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
             publicKey: [UInt8](self.key)
         )
     }
-    
+
     public func base64() -> String {
         return key.base64EncodedString()
     }
-    
+
     public func hex() -> String {
         return "0x\(key.hexEncodedString())"
     }
-    
+
     public func toSuiAddress() throws -> String {
         var tmp = Data(count: ED25519PublicKey.LENGTH + 1)
         try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
@@ -105,12 +105,12 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         )
         return result
     }
-    
+
     public func toSuiPublicKey() throws -> String {
         let bytes = try self.toSuiBytes()
         return bytes.toBase64()
     }
-    
+
     public func toSuiBytes() throws -> [UInt8] {
         let rawBytes = self.key
         var suiBytes = Data(count: rawBytes.count + 1)
@@ -128,18 +128,18 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
 
         return serializedSignature.base64EncodedString()
     }
-    
+
     public func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool {
         return try self.verifyWithIntent(transactionBlock, signature, .TransactionData)
     }
-    
+
     public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
         let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
         
         return try self.verify(data: digest, signature: signature)
     }
-    
+
     public func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool {
         let ser = Serializer()
         try ser.sequence(message, Serializer.u8)

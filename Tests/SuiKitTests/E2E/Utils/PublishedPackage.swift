@@ -1,5 +1,5 @@
 //
-//  BundleExtension.swift
+//  PublishedPackage.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -24,17 +24,9 @@
 //
 
 import Foundation
+import SuiKit
 
-extension Bundle {
-    static var test: Bundle {
-        let bundle: Bundle
-        #if SWIFT_PACKAGE
-        bundle = Bundle.module
-        #else
-        bundle = Bundle(for: SuiKitTests.self)
-        #endif
-
-        return bundle
-    }
+internal struct PublishedPackage {
+    internal let packageId: String
+    internal let publishedTx: SuiTransactionBlockResponse
 }
-

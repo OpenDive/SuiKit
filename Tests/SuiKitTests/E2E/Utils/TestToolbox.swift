@@ -1,8 +1,26 @@
 //
-//  test-toolbox.swift
-//  
+//  TestToolbox.swift
+//  SuiKit
 //
-//  Created by Marcus Arnett on 8/8/23.
+//  Copyright (c) 2023 OpenDive
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
@@ -202,17 +220,7 @@ internal class TestToolbox {
         return txns
     }
 
-    private func getModule(_ name: String) throws -> JSON {
-        guard let fileUrl = Bundle.test.resourceURL?.appending(component: "Resources/\(name).json") else {
-            throw NSError(domain: "package is missing", code: -1)
-        }
-        guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
-            throw NSError(domain: "package is corrupted", code: -1)
-        }
-        return JSON(fileCompiledData)
-    }
-
-    internal func setup() async throws {
+    func setup() async throws {
         var isInitializing = true
         while isInitializing {
             do {
@@ -229,9 +237,14 @@ internal class TestToolbox {
             }
         }
     }
-}
 
-internal struct PublishedPackage {
-    internal let packageId: String
-    internal let publishedTx: SuiTransactionBlockResponse
+    private func getModule(_ name: String) throws -> JSON {
+        guard let fileUrl = Bundle.test.resourceURL?.appending(component: "Resources/\(name).json") else {
+            throw NSError(domain: "package is missing", code: -1)
+        }
+        guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
+            throw NSError(domain: "package is corrupted", code: -1)
+        }
+        return JSON(fileCompiledData)
+    }
 }

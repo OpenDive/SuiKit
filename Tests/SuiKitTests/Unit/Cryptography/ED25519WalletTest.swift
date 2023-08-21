@@ -1,8 +1,26 @@
 //
-//  ed25519-keypair.swift
-//  
+//  ED25519WalletTest.swift
+//  SuiKit
 //
-//  Created by Marcus Arnett on 8/2/23.
+//  Copyright (c) 2023 OpenDive
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
@@ -10,10 +28,10 @@ import XCTest
 import Base58Swift
 @testable import SuiKit
 
-final class Ed25519WalletTest: XCTestCase {
+final class ED25519WalletTest: XCTestCase {
     let validSecretKey = "mdqVWeFekT7pqy5T49+tV12jO0m+ESW7ki4zSU9JiCg="
     let privateKeySize = 32
-    
+
     let testCases = [
         [
             "film crazy soon outside stand loop subway crumble thrive popular green nuclear struggle pistol arm wife phrase warfare march wheat nephew ask sunny firm",
@@ -31,14 +49,14 @@ final class Ed25519WalletTest: XCTestCase {
             "0xe69e896ca10f5a77732769803cc2b5707f0ab9d4407afb5e4b4464b89769af14",
         ]
     ]
-    
+
     let testMnemonic = "result crisp session latin must fruit genuine question prevent start coconut brave speak student dismiss"
-    
+
     func testForNewWallet() throws {
         let wallet = try Wallet()
         XCTAssertEqual(wallet.accounts[0].publicKey.key.count, 32)
     }
-    
+
     func testForCreatingAccountFromSecretKey() throws {
         guard let secretKey = Data.fromBase64(validSecretKey) else {
             XCTFail("Secret Key '\(validSecretKey)' cannot be converted from Base 64")
@@ -47,7 +65,7 @@ final class Ed25519WalletTest: XCTestCase {
         let account = try Account(privateKey: secretKey)
         XCTAssertEqual(account.publicKey.base64(), "Gy9JCW4+Xb0Pz6nAwM2S2as7IVRLNNXdSmXZi4eLmSI=")
     }
-    
+
     func testThatWalletSecretKeyFromMnemonicsAndAccountSecretKeyMatchesKeytool() throws {
         for testCase in testCases {
             // Keypair derived from mnemonic
@@ -72,13 +90,13 @@ final class Ed25519WalletTest: XCTestCase {
             XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
         }
     }
-    
+
     func testThatAccountIsCreatedFromRandomSeed() throws {
         let privateKey = try ED25519PrivateKey(key: Data(Array(repeating: 8, count: privateKeySize)))
         let account = try Account(privateKey: privateKey)
         XCTAssertEqual(account.publicKey.base64(), "E5j2LG0aRXxRumpLXz29L2n8qTIWIY3ImX5Ba9F9k8o=")
     }
-    
+
     func testThatSignatureOfDataIsValid() throws {
         let account = try Account()
         guard let signData = "hello world".data(using: .utf8) else {
@@ -92,34 +110,32 @@ final class Ed25519WalletTest: XCTestCase {
         )
         XCTAssertTrue(isValid)
     }
-    
-    // TODO: Implement for fine tuned test (e.g., test for specific error)
+
     func testThatIncoorectCoinTypeWillThrowForWallet() throws {
         func incorrectCoin() throws {
             let _ = try ED25519PrivateKey(testMnemonic, "m/44'/0'/0'/0'/0'")
         }
-        
+
         XCTAssertThrowsError(
             try incorrectCoin()
         )
     }
-    
-    // TODO: Implement for fine tuned test (e.g., test for specific error)
+
     func testThatIncoorectPurposeNodeWillThrowForWallet() throws {
         func incorrectPurposeNode() throws {
             let _ = try ED25519PrivateKey(testMnemonic, "m/54'/784'/0'/0'/0'")
         }
-        
+
         XCTAssertThrowsError(
             try incorrectPurposeNode()
         )
     }
-    
+
     func testThatSigningTransactionBlockFunctionsAsIntended() async throws {
         let wallet = try Wallet()
         let txBlock = try TransactionBlock()
         let provider = SuiProvider(connection: DevnetConnection())
-        
+
         try txBlock.setSender(sender: try wallet.accounts[0].publicKey.toSuiAddress())
         txBlock.setGasPrice(price: 5)
         txBlock.setGasBudget(price: 100)
@@ -138,20 +154,20 @@ final class Ed25519WalletTest: XCTestCase {
                 digest: Base58.base58Encode(digest)
             )
         ])
-        
+
         let bytes = try await txBlock.build(provider)
         let serializedSignature = try wallet.accounts[0].signTransactionBlock([UInt8](bytes))
-        
+
         XCTAssertTrue(try wallet.accounts[0].verifyTransactionBlock([UInt8](bytes), serializedSignature))
     }
-    
+
     func testThatSigningPersonalMessagesFunctionsAsIntended() throws {
         let wallet = try Wallet()
         guard let message = "hello world".data(using: .utf8) else {
             XCTFail()
             return
         }
-        
+
         let serializedSignature = try wallet.accounts[0].signPersonalMessage([UInt8](message))
         XCTAssertTrue(try wallet.accounts[0].verifyPersonalMessage([UInt8](message), serializedSignature))
     }

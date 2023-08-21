@@ -1,5 +1,5 @@
 //
-//  BundleExtension.swift
+//  CoinTest.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -24,17 +24,26 @@
 //
 
 import Foundation
+import XCTest
+@testable import SuiKit
 
-extension Bundle {
-    static var test: Bundle {
-        let bundle: Bundle
-        #if SWIFT_PACKAGE
-        bundle = Bundle.module
-        #else
-        bundle = Bundle(for: SuiKitTests.self)
-        #endif
+final class CoinTest: XCTestCase {
+    func testThatCoinUtilityWorksAsIntended() async throws {
+        let toolbox = try await TestToolbox(true)
+        let coins = try await toolbox.getCoins()
 
-        return bundle
+        XCTAssertGreaterThan(coins.data.count, 0)
+    }
+
+    func testThatGetCoinStructTagWorksAsIntended() async throws {
+        let toolbox = try await TestToolbox(true)
+        let suiStructTag = SuiMoveNormalizedStructType(
+            address: try AccountAddress.fromHex(try Inputs.normalizeSuiAddress(value: "0x2")),
+            module: "sui",
+            name: "SUI",
+            typeArguments: []
+        )
+        let coins = try await toolbox.getCoins()
+        XCTAssertEqual(try Coin.getCoinStructTag(coinTypeArg: coins.data[0].coinType), suiStructTag)
     }
 }
-

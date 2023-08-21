@@ -65,7 +65,7 @@ struct MintNFTView: View {
                 TextField("Object ID", text: $objectId)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(10)
-                
+
                 TextField("Name", text: $tokenName)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding(10)

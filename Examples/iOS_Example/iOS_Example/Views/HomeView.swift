@@ -28,10 +28,12 @@ import SuiKit
 
 struct HomeView: View {
     @ObservedObject var viewModel: HomeViewModel
+
     @State private var currentWalletBalance: Double = 0.0
     @State private var phrase: String = ""
     @State private var isShowingPopup: Bool = false
     @State private var isGettingBalance: Bool = false
+
     @FocusState private var isFocused: Bool
 
     init(viewModel: HomeViewModel) {

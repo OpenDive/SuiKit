@@ -35,7 +35,7 @@ struct TransferView: View {
     @State private var message: String = ""
     @State private var isShowingPopup: Bool = false
     @State private var isTransfering: Bool = false
-    
+
     @FocusState private var isFocused: Bool
 
     init(viewModel: HomeViewModel) {

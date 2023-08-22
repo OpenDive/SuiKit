@@ -21,23 +21,27 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 ## Features
 
-- [x] Submitting transactions and Move Calls
+- [x] Submitting transactions
 - [x] Transferring objects
 - [x] Transfer Sui
 - [x] Air drop Sui tokens
 - [x] Merge and Split coins
 - [x] Publish modules
+- [x] Transfer objects
+- [x] Execute move calls
 - [x] Retrieving objects, transactions, checkpoints, coins, and events
 - [x] Executing transactions
 - [x] Local, custom, dev, test, and main net compatiblity
 - [x] ED25519 and SECP256K1 Key and HD Wallet generation
 - [x] Native Swift BCS Implementation
 - [x] Swift Concurrency Support back to iOS 13, macOS 10.15, tvOS 13, and watchOS 6.
+- [x] Comprehensive Unit and Integration Test coverage.
 
 ## ToDo
 
 - [ ] Complete documentation of SuiKit.
-- [ ] Comprehensive Unit and Integration Test coverage.
+- [ ] Implement Resolve Name Service Names.
+- [ ] Implement SECP256R1 Enclaves.
 
 ## Requirements
 
@@ -73,25 +77,26 @@ SuiKit is really easy to implement and use in your own projects. Simply provide 
 
 ```swift
 import SuiKit
+import Bip39
 
 do {
     // Create new wallet
-    let mnemo = Mnemonic(wordcount: 12, wordlist: Wordlists.english)
-    let newWallet = try Wallet(mnemonic: mnemo)
-    
+    let newWallet = try Wallet()
+
     // Create Signer and Provider
     let provider = SuiProvider()
-    let signer = RawSigner(account: newWallet.account, provider: provider)
-    
+    let signer = RawSigner(account: newWallet.accounts[0], provider: provider)
+
     // Create transaction block
-    let tx = TransactionBlock()
-    
+    var tx = try TransactionBlock()
+
     // Split coin and prepare transaction
-    let coin = tx.splitCoin(tx.gas, [tx.pure(1_000)])
-    tx.transferObjects([coin], tx.pure(newWallet.account.address().description))
-    
+    let coin = try tx.splitCoin(tx.gas, [try tx.pure(value: .number(1_000))])
+    try tx.transferObjects([coin], try newWallet.accounts[0].address())
+
     // Execute transaction
-    let result = try await signer.signAndExecuteTransaction(transactionBlock: tx)
+    var result = try await signer.signAndExecuteTransaction(transactionBlock: &tx)
+    result = try await provider.waitForTransaction(tx: result.digest)
     print(result)
 } catch {
     print("Error: \(error)")
@@ -106,7 +111,7 @@ import SuiKit
 do {
     // Create provider
     let provider = SuiProvier()
-    
+
     // Get objects
     let txn = try await provider.getObjects(id: "0xcc2bd176a478baea9a0de7a24cd927661cc6e860d5bacecb9a138ef20dbab231")
 } catch {
@@ -120,24 +125,24 @@ As well here is how to use the move call function
 import Suikit
 do {
     // Create new wallet
-    let memo = Mnemonic (wordcount: 12, wordlist: Wordlists.english)
-    let newWallet = try Wallet (mnemonic: mnemo)
-    
+    let newWallet = try Wallet()
+
     // Create Signer and Provider
     let provider = SuiProvider()
-    let signer = RawSigner (account: newWallet.account, provider: provider)
-    
+    let signer = RawSigner(account: newWallet.accounts[0], provider: provider)
+
     // Create transaction block
-    let tx = TransactionBlock()
-    
+    var tx = try TransactionBlock()
+
     // Prepare merge coin 
-    tx.moveCall (
-        target: "Ox...::nft: :mint" arguments: [tx.pure "Example NFT") ]
+    try tx.moveCall(
+        target: "OxB0B::nft::mint",
+        arguments: [.input(try tx.pure(value: .string("Example NFT")))]
     )
-    
+
     // Execute transaction
-    let result = try await signer.signAndExecuteTransaction (transactionBlock: tx)
-    
+    var result = try await signer.signAndExecuteTransaction(transactionBlock: &tx)
+    result = try await provider.waitForTransaction(tx: result.digest)
     print (result)
 catch {
     print ("Error: (error)")
@@ -159,30 +164,29 @@ do {
         throw NSError (domain: "Package is corrupted", code: -1)
     }
     let fileData = JSON (fileCompiledData)
-    
+
     // Create new wallet
-    let memo = Mnemonic(wordcount: 12, wordlist: Wordlists.english)
-    let newWallet = try Wallet mnemonic: mnemo)
-    
+    let newWallet = try Wallet()
+
     // Create Signer and Provider
     let provider = SuiProvider()
-    let signer = RawSigner (account: newWallet.account, provider: provider)
-    
+    let signer = RawSigner(account: newWallet.accounts[0], provider: provider)
+
     // Create transaction block
-    let tx = TransactionBlock()
-    
+    var tx = try TransactionBlock()
+
     // Prepare Publish
-    let publishObject = tx.publish(
-        fileData["modules"], 
-        fileData["dependencies"]
+    let publishObject = try tx.publish(
+        modules: fileData["modules"], 
+        dependencies: fileData["dependencies"]
     )
-    
+
     // Prepare Transfer Object
-    t×.transferObjects([publishObject], tx.pure(await signer. getAddress()))
+    try t×.transferObjects([publishObject], try newWallet.accounts[0].address())
 
     // Execute transaction
-    let result = try await signer. signAndExecuteTransaction( transactionBlock: tx)
-    
+    var result = try await signer.signAndExecuteTransaction(transactionBlock: &tx)
+    result = try await provider.waitForTransaction(tx: result.digest)
     print(result)
 } catch {
     print("Error: \(error)")

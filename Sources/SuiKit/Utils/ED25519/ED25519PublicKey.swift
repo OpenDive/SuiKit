@@ -29,11 +29,13 @@ import Blake2
 
 /// The ED25519 Public Key
 public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
+    public typealias DataValue = Data
+
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
     /// The key itself
-    public var key: Data
+    public var key: DataValue
 
     public init(data: Data) throws {
         guard data.count == ED25519PublicKey.LENGTH else {
@@ -101,7 +103,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
         try tmp.set([UInt8](self.key), offset: 1)
         let result = try Inputs.normalizeSuiAddress(
-            value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<ED25519PublicKey.LENGTH * 2]
+            value: try Blake2b.hash(size: 32, data: tmp).hexEncodedString()[0..<ED25519PublicKey.LENGTH * 2]
         )
         return result
     }
@@ -135,7 +137,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
 
     public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
-        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
+        let digest = try Blake2b.hash(size: 32, data: intentMessage)
         
         return try self.verify(data: digest, signature: signature)
     }

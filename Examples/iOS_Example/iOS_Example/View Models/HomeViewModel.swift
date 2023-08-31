@@ -34,8 +34,8 @@ public class HomeViewModel: ObservableObject {
     @Published var walletAddress: String = ""
     @Published var collectionId: String = ""
 
-    public let restClient = SuiProvider(connection: devnetConnection())
-    public let faucetClient = FaucetClient(connection: devnetConnection())
+    public let restClient = SuiProvider(connection: DevnetConnection())
+    public let faucetClient = FaucetClient(connection: DevnetConnection())
 
     public init(_ mnemos: [[String]]? = nil) throws {
         if let mnemos {
@@ -122,7 +122,7 @@ public class HomeViewModel: ObservableObject {
     }
 
     public func createCollection() async throws {
-        guard let fileUrl = Bundle.main.url(forResource: "Package", withExtension: "json") else {
+        guard let fileUrl = Bundle.main.url(forResource: "nft", withExtension: "json") else {
             throw NSError(domain: "package is missing", code: -1)
         }
         guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {

@@ -71,7 +71,8 @@ final class SECP256K1WalletTest: XCTestCase {
 
     func testThatSecp256k1AccountCanBeInitialized() throws {
         let account = try Account(accountType: .secp256k1)
-        XCTAssertEqual(account.publicKey.key.count, 33)
+        XCTAssertEqual(account.publicKey.key.getType(), .data)
+        XCTAssertEqual((account.publicKey.key as! Data).count, 33)
     }
 
     func testThatSecp256k1AccountCanBeCreatedUsingASecretKey() throws {
@@ -80,7 +81,7 @@ final class SECP256K1WalletTest: XCTestCase {
         let publicKeyB64 = publicKey.base64EncodedString()
         let account = try Account(privateKey: secretKey, accountType: .secp256k1)
 
-        XCTAssertEqual(account.publicKey.key, publicKey)
+        XCTAssertEqual(account.publicKey.key as! Data, publicKey)
         XCTAssertEqual(account.publicKey.base64(), publicKeyB64)
     }
 
@@ -157,8 +158,8 @@ final class SECP256K1WalletTest: XCTestCase {
             let imported = try Account(privateKey: raw.dropFirst(), accountType: .secp256k1)
             XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
 
-            let exported = imported.export()
-            let exportedAccount = account.export()
+            let exported = try imported.export()
+            let exportedAccount = try account.export()
             XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
             XCTAssertEqual(exportedAccount.privateKey, raw.dropFirst().base64EncodedString())
         }

@@ -37,7 +37,6 @@ public struct RawSigner: SignerWithProviderProtocol {
     public init(account: Account, provider: SuiProvider) {
         self.provider = provider
         self.faucetProvider = FaucetClient(connection: provider.connection)
-
         self.account = account
     }
 
@@ -47,7 +46,7 @@ public struct RawSigner: SignerWithProviderProtocol {
 
     public func signData(data: Data) throws -> String {
         let pubKey = self.account.publicKey.base64()
-        let digest = try Blake2.hash(.b2b, size: 32, data: data)
+        let digest = try Blake2b.hash(size: 32, data: data)
         let signature = try self.account.sign(digest)
         let signatureScheme = self.account.accountType
         return try Self.toSerializedSignature(signature, signatureScheme, pubKey)

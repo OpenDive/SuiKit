@@ -28,9 +28,9 @@ import Bip39
 
 public protocol PrivateKeyProtocol: KeyProtocol, CustomStringConvertible, Hashable {
     associatedtype PublicKeyType: PublicKeyProtocol
-    associatedtype PrivateKeyType: PrivateKeyProtocol
+    associatedtype DataValue: KeyValueProtocol
 
-    var key: Data { get }
+    var key: DataValue { get }
 
     func hex() -> String
     func base64() -> String

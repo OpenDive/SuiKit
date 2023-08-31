@@ -26,7 +26,9 @@
 import Foundation
 
 public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashable {
-    var key: Data { get }
+    associatedtype DataValue: KeyValueProtocol
+
+    var key: DataValue { get }
 
     func verify(data: Data, signature: Signature) throws -> Bool
     func base64() -> String

@@ -148,9 +148,22 @@ public struct Account: Equatable, Hashable {
     }
 
     public static func == (lhs: Account, rhs: Account) -> Bool {
-        return
-            lhs.publicKey.key == rhs.publicKey.key &&
-            lhs.privateKey.key == rhs.privateKey.key
+        if 
+            lhs.privateKey.key.getType() == rhs.privateKey.key.getType() &&
+            lhs.publicKey.key.getType() == rhs.publicKey.key.getType()
+        {
+            if lhs.privateKey.key.getType() == .data {
+                return 
+                    (lhs.privateKey.key as! Data) == (rhs.privateKey.key as! Data) &&
+                    (lhs.publicKey.key as! Data) == (rhs.publicKey.key as! Data)
+            }
+            if lhs.privateKey.key.getType() == .secKey {
+                return
+                    (lhs.privateKey.key as! SecKey) == (rhs.privateKey.key as! SecKey) &&
+                    (lhs.publicKey.key as! SecKey) == (rhs.publicKey.key as! SecKey)
+            }
+        }
+        return false
     }
 
     public func hash(into hasher: inout Hasher) {
@@ -158,6 +171,7 @@ public struct Account: Equatable, Hashable {
         hasher.combine(self.publicKey.base64())
     }
 
+    // TODO: Implement Available tag for MacOS machines only
     /// Store the account information to a file at the given path.
     ///
     /// This function takes a path as a string and stores the account information in a JSON file
@@ -259,10 +273,16 @@ public struct Account: Equatable, Hashable {
         )
     }
 
-    public func export() -> ExportedAccount {
-        return ExportedAccount(
-            schema: self.accountType,
-            privateKey: privateKey.key.base64EncodedString()
-        )
+    public func export() throws -> ExportedAccount {
+        if self.privateKey.key.getType() == .data {
+            return ExportedAccount(
+                schema: self.accountType,
+                privateKey: (privateKey.key as! Data).base64EncodedString()
+            )
+        }
+        if self.privateKey.key.getType() == .secKey {
+            return ExportedAccount(schema: self.accountType, privateKey: "\((privateKey.key as! SecKey).hashValue)")
+        }
+        throw AccountError.cannotBeExported
     }
 }

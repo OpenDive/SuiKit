@@ -54,7 +54,8 @@ final class ED25519WalletTest: XCTestCase {
 
     func testForNewWallet() throws {
         let wallet = try Wallet()
-        XCTAssertEqual(wallet.accounts[0].publicKey.key.count, 32)
+        XCTAssertEqual(wallet.accounts[0].publicKey.key.getType(), .data)
+        XCTAssertEqual((wallet.accounts[0].publicKey.key as! Data).count, 32)
     }
 
     func testForCreatingAccountFromSecretKey() throws {
@@ -86,7 +87,7 @@ final class ED25519WalletTest: XCTestCase {
             XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
             
             // Exported secret key matches the 32-byte secret key.
-            let exported = imported.export()
+            let exported = try imported.export()
             XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
         }
     }

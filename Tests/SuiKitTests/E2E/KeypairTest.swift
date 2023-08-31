@@ -90,7 +90,7 @@ final class KeypairTest: XCTestCase {
             return
         }
         let intentMessage = RawSigner.messageWithIntent(.TransactionData, txBytesData)
-        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
+        let digest = try Blake2b.hash(size: 32, data: intentMessage)
         XCTAssertEqual(digest.base64EncodedString(), self.digest)
 
         for testCase in testCases {
@@ -134,7 +134,7 @@ final class KeypairTest: XCTestCase {
             return
         }
         let intentMessage = RawSigner.messageWithIntent(.TransactionData, txBytesData)
-        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
+        let digest = try Blake2b.hash(size: 32, data: intentMessage)
         XCTAssertEqual(digest.base64EncodedString(), self.digest)
 
         for testCase in testCasesSecp256k1 {

@@ -48,4 +48,5 @@ public enum AccountError: Error, Equatable {
     case failedData
     case cannotBeDeserialized
     case cannotBeSerialized
+    case cannotBeExported
 }

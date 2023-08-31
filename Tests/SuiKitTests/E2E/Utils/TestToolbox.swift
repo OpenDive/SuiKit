@@ -35,7 +35,7 @@ internal class TestToolbox {
     let account: Account
     let client: SuiProvider
 
-    init(account: Account, client: SuiProvider = SuiProvider(connection: LocalnetConnection()), _ needsFunds: Bool = true) async throws {
+    init(account: Account, client: SuiProvider = SuiProvider(connection: DevnetConnection()), _ needsFunds: Bool = true) async throws {
         self.account = account
         self.client = client
 

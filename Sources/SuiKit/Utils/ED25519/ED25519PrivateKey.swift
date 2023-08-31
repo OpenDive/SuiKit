@@ -31,7 +31,7 @@ import Blake2
 
 /// The ED25519 Private Key
 public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
-    public typealias PrivateKeyType = ED25519PrivateKey
+    public typealias DataValue = Data
     public typealias PublicKeyType = ED25519PublicKey
 
     /// The length of the key in bytes
@@ -44,7 +44,7 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
     public static let hardenedPathRegex = "^m\\/44'\\/784'\\/[0-9]+'\\/[0-9]+'\\/[0-9]+'+$"
 
     /// The key itself
-    public var key: Data
+    public var key: DataValue
 
     public init(key: Data) throws {
         guard key.count == Self.LENGTH else {
@@ -130,8 +130,8 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
 
     public func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
-        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
-        
+        let digest = try Blake2b.hash(size: 32, data: intentMessage)
+
         let signature = try self.sign(data: digest)
         return signature
     }

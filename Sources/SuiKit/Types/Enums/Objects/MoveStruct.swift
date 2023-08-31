@@ -32,15 +32,15 @@ public enum MoveStruct {
     case fieldMap([String: MoveValue])
 
     public static func parseJSON(_ input: JSON) -> MoveStruct? {
-        if !(input["fields"].dictionaryValue.isEmpty) {
+        if !(input.dictionaryValue.isEmpty) {
             var fieldsMap: [String: MoveValue] = [:]
-            for (fieldKey, fieldValue) in input["fields"].dictionaryValue {
+            for (fieldKey, fieldValue) in input.dictionaryValue {
                 fieldsMap[fieldKey] = MoveValue.parseJSON(fieldValue)
             }
             return .fieldMap(fieldsMap)
         }
 
-        if let array = input["fields"].array {
+        if let array = input.array {
             return .fieldArray(array.map { MoveValue.parseJSON($0) })
         }
 

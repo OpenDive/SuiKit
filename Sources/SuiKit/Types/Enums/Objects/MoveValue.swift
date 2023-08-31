@@ -53,7 +53,7 @@ public enum MoveValue {
         }
 
         if input["id"].exists() {
-            return .id(MoveValueId(input: input["id"]))
+            return .id(MoveValueId(input: input))
         }
 
         if let structure = MoveStruct.parseJSON(input) {

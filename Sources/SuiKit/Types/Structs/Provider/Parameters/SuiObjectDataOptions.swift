@@ -33,4 +33,22 @@ public struct SuiObjectDataOptions: Codable {
     public var showPreviousTransaction: Bool?
     public var showStorageRebate: Bool?
     public var showType: Bool?
+
+    public init(
+        showBcs: Bool? = nil,
+        showContent: Bool? = nil,
+        showDisplay: Bool? = nil,
+        showOwner: Bool? = nil,
+        showPreviousTransaction: Bool? = nil,
+        showStorageRebate: Bool? = nil,
+        showType: Bool? = nil
+    ) {
+        self.showBcs = showBcs
+        self.showContent = showContent
+        self.showDisplay = showDisplay
+        self.showOwner = showOwner
+        self.showPreviousTransaction = showPreviousTransaction
+        self.showStorageRebate = showStorageRebate
+        self.showType = showType
+    }
 }

@@ -35,7 +35,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 - [x] ED25519 and SECP256K1 Key and HD Wallet generation
 - [x] Native Swift BCS Implementation
 - [x] Swift Concurrency Support back to iOS 13, macOS 10.15, tvOS 13, and watchOS 6.
-- [x] Comprehensive Unit and Integration Test coverage.
+- [x] Comprehensive Unit and End To End Test coverage.
 
 ## ToDo
 
@@ -73,11 +73,10 @@ dependencies: [
 
 ## Using SuiKit
 
-SuiKit is really easy to implement and use in your own projects. Simply provide the provider, transaction block, and signer. Here's an example on how to transfer Sui tokens, which also utilizes the key generation functionality of the library
+SuiKit is really easy to implement and use in your own projects. Simply provide the provider, transaction block, and account. Here's an example on how to transfer Sui tokens, which also utilizes the key generation functionality of the library
 
 ```swift
 import SuiKit
-import Bip39
 
 do {
     // Create new wallet
@@ -90,7 +89,7 @@ do {
     // Create transaction block
     var tx = try TransactionBlock()
 
-    // Split coin and prepare transaction
+    // Split coin and prepare transaction (e.g., sending 1K Droplets to an account)
     let coin = try tx.splitCoin(tx.gas, [try tx.pure(value: .number(1_000))])
     try tx.transferObjects([coin], try newWallet.accounts[0].address())
 
@@ -113,7 +112,7 @@ do {
     let provider = SuiProvier()
 
     // Get objects
-    let txn = try await provider.getObjects(id: "0xcc2bd176a478baea9a0de7a24cd927661cc6e860d5bacecb9a138ef20dbab231")
+    let txn = try await provider.getObjects(id: "0xB0B")
 } catch {
     print("Error: \(error)")
 }
@@ -122,7 +121,7 @@ do {
 As well here is how to use the move call function
 
 ```swift
-import Suikit
+import SuiKit
 do {
     // Create new wallet
     let newWallet = try Wallet()
@@ -158,12 +157,12 @@ import SwiftyJSON
 do {
     // Import Package Module JSON
     guard let fileUrl = Bundle. main.ur(forResource: "Package", withExtension: "json") else {
-        throw NSError (domain: "Package is missing", code: -1)
+        throw NSError(domain: "Package is missing", code: -1)
     }
     guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
-        throw NSError (domain: "Package is corrupted", code: -1)
+        throw NSError(domain: "Package is corrupted", code: -1)
     }
-    let fileData = JSON (fileCompiledData)
+    let fileData = JSON(fileCompiledData)
 
     // Create new wallet
     let newWallet = try Wallet()
@@ -177,12 +176,12 @@ do {
 
     // Prepare Publish
     let publishObject = try tx.publish(
-        modules: fileData["modules"], 
-        dependencies: fileData["dependencies"]
+        modules: fileData["modules"].arrayValue as! [String], 
+        dependencies: fileData["dependencies"].arrayValue as! [String]
     )
 
     // Prepare Transfer Object
-    try t×.transferObjects([publishObject], try newWallet.accounts[0].address())
+    try tx.transferObjects([publishObject], try newWallet.accounts[0].address())
 
     // Execute transaction
     var result = try await signer.signAndExecuteTransaction(transactionBlock: &tx)

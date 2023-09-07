@@ -19,7 +19,6 @@
 		7D657DBA2A05B5E9008D3754 /* CreateCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DB92A05B5E9008D3754 /* CreateCollectionView.swift */; };
 		7D657DBC2A05B665008D3754 /* MintNFTView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D657DBB2A05B665008D3754 /* MintNFTView.swift */; };
 		7D657DC42A09FBE6008D3754 /* Package.json in Resources */ = {isa = PBXBuildFile; fileRef = 7D657DC32A09FBE6008D3754 /* Package.json */; };
-		7D809C8F2AA0FA4700A27F24 /* nft.json in Resources */ = {isa = PBXBuildFile; fileRef = 7D809C8E2AA0FA4700A27F24 /* nft.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +35,6 @@
 		7D657DB92A05B5E9008D3754 /* CreateCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateCollectionView.swift; sourceTree = "<group>"; };
 		7D657DBB2A05B665008D3754 /* MintNFTView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MintNFTView.swift; sourceTree = "<group>"; };
 		7D657DC32A09FBE6008D3754 /* Package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Package.json; sourceTree = "<group>"; };
-		7D809C8E2AA0FA4700A27F24 /* nft.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = nft.json; path = ../../../../../../../../../Users/marcodotio/Downloads/SuiEaselARNFT/nft.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -112,8 +110,8 @@
 		7D657DB02A0546D1008D3754 /* View Models */ = {
 			isa = PBXGroup;
 			children = (
-				7D809C8E2AA0FA4700A27F24 /* nft.json */,
 				7D657DC32A09FBE6008D3754 /* Package.json */,
+				7D9DBB8B2AAA3EE0003BFA47 /* nft.json */,
 				7D657DB12A0546DE008D3754 /* HomeViewModel.swift */,
 			);
 			path = "View Models";
@@ -180,7 +178,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7D809C8F2AA0FA4700A27F24 /* nft.json in Resources */,
 				7D657DA32A000965008D3754 /* Preview Assets.xcassets in Resources */,
 				7D657DA02A000965008D3754 /* Assets.xcassets in Resources */,
 				7D657DC42A09FBE6008D3754 /* Package.json in Resources */,

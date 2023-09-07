@@ -122,7 +122,7 @@ public class HomeViewModel: ObservableObject {
     }
 
     public func createCollection() async throws {
-        guard let fileUrl = Bundle.main.url(forResource: "nft", withExtension: "json") else {
+        guard let fileUrl = Bundle.main.url(forResource: "Package", withExtension: "json") else {
             throw NSError(domain: "package is missing", code: -1)
         }
         guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {

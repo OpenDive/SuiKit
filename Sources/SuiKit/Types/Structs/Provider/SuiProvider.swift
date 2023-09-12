@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 import AnyCodable
 import Blake2
-import Base58Swift
+import Web3Core
 
 public struct SuiProvider {
     public var connection: any ConnectionProtcol
@@ -1122,7 +1122,7 @@ public struct SuiProvider {
 
     private func isValidTransactionDigest(_ value: String) -> Bool {
         guard !value.isEmpty else { return false }
-        guard let buffer = Base58.base58Decode(value) else { return false }
+        guard let buffer = value.base58DecodedData else { return false }
         return buffer.count == 32
     }
 

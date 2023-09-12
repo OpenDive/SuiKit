@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import Base58Swift
+import Web3Core
 import SwiftyJSON
 
 public struct SuiObjectRef: KeyProtocol {
@@ -62,7 +62,7 @@ public struct SuiObjectRef: KeyProtocol {
         let account = try AccountAddress.fromHex(self.objectId)
         try Serializer._struct(serializer, value: account)
         try Serializer.u64(serializer, UInt64(version) ?? 0)
-        if let dataDigest = Base58.base58Decode(digest) {
+        if let dataDigest = digest.base58DecodedData {
             try Serializer.toBytes(serializer, Data(dataDigest))
         }
     }
@@ -73,7 +73,7 @@ public struct SuiObjectRef: KeyProtocol {
         return SuiObjectRef(
             objectId: try Deserializer._struct(deserializer),
             version: "\(try Deserializer.u64(deserializer))",
-            digest: Base58.base58Encode([UInt8](try Deserializer.toBytes(deserializer)))
+            digest: ([UInt8](try Deserializer.toBytes(deserializer))).base58EncodedString
         )
     }
 }

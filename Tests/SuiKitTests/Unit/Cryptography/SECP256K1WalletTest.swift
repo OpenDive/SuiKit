@@ -25,7 +25,7 @@
 
 import Foundation
 import XCTest
-import Base58Swift
+import Web3Core
 @testable import SuiKit
 
 final class SECP256K1WalletTest: XCTestCase {
@@ -185,7 +185,7 @@ final class SECP256K1WalletTest: XCTestCase {
                     startingAt: 0
                 ),
                 version: "\(UInt64.random(in: 0..<10000))",
-                digest: Base58.base58Encode(digest)
+                digest: digest.base58EncodedString
             )
         ])
 

@@ -61,9 +61,9 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: target)
+        try Serializer._struct(serializer, value: self.target)
         try serializer.sequence(self.typeArguments, Serializer._struct)
-        try serializer.sequence(arguments, Serializer._struct)
+        try serializer.sequence(self.arguments, Serializer._struct)
     }
 
     public static func deserialize(

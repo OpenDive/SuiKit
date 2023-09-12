@@ -24,7 +24,6 @@
 //
 
 import Foundation
-import Bip39
 
 public protocol PrivateKeyProtocol: KeyProtocol, CustomStringConvertible, Hashable {
     associatedtype PublicKeyType: PublicKeyProtocol

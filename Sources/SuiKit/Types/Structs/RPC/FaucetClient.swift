@@ -66,8 +66,8 @@ public struct FaucetClient {
                 transferTxDigest: json["transferTxDigest"].stringValue
             )
         } catch {
-            if let error = error as? SuiError, error == .FaucetRateLimitError {
-                throw SuiError.FaucetRateLimitError
+            if let error = error as? SuiError, error == .faucetRateLimitError {
+                throw SuiError.faucetRateLimitError
             }
 
             throw SuiError.invalidJsonData

@@ -26,7 +26,7 @@
 import Foundation
 import BigInt
 import CryptoKit
-import Base58Swift
+import Web3Core
 import Blake2
 
 public struct TransactionBlockDataBuilder: KeyProtocol {
@@ -65,7 +65,7 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         let hashedData = try Blake2b.hash(size: 32, data: Data(dataWithTag))
         let hash = Array(hashedData)
 
-        return Base58.base58Encode(hash)
+        return hash.base58EncodedString
     }
 
     public static func restore(

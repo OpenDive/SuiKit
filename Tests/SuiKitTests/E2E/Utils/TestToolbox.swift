@@ -228,9 +228,9 @@ internal class TestToolbox {
                 let _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
                 isInitializing = false
             } catch {
-                if let error = error as? SuiError, error == .FaucetRateLimitError {
+                if let error = error as? SuiError, error == .faucetRateLimitError {
                     isInitializing = false
-                    throw SuiError.FaucetRateLimitError
+                    throw SuiError.faucetRateLimitError
                 }
                 print("Retrying requesting from faucet...")
                 try await Task.sleep(nanoseconds: 60_000_000_000)

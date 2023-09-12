@@ -25,28 +25,75 @@
 
 import Foundation
 
+/// `AccountError` represents a set of errors that can occur while dealing with accounts, keys, or cryptographic operations.
 public enum AccountError: Error, Equatable {
+    /// Indicates that the provided public key is invalid.
     case invalidPublicKey
+
+    /// Indicates that there is a mismatch in the expected length for certain data.
     case lengthMismatch
+
+    /// Indicates that the length of the provided data is invalid.
     case invalidLength
+
+    /// Indicates that the provided signature is invalid.
     case invalidSignature
+
+    /// Indicates that the serialized signature is invalid.
     case invalidSerializedSignature
+
+    /// Indicates that the parsed signature is invalid.
     case invalidParsedSignature
+
+    /// Indicates that the parsed public key is invalid.
     case invalidParsedPublicKey
+
+    /// Indicates that the provided data is invalid.
     case invalidData
+
+    /// Indicates that the provided context for the operation is invalid.
     case invalidContext
+
+    /// Indicates that the public key could not be created.
     case invalidPubKeyCreation
+
+    /// Indicates that the generated key is invalid.
     case invalidGeneratedKey
+
+    /// Indicates that the provided derivation path is invalid.
     case invalidDerivationPath
+
+    /// Indicates that the provided mnemonic seed is invalid.
     case invalidMnemonicSeed
+
+    /// Indicates that the HD (Hierarchical Deterministic) node is invalid.
     case invalidHDNode
+
+    /// Indicates that the hardened path provided is invalid.
     case invalidHardenedPath
+
+    /// Indicates that the curve data is invalid.
     case invalidCurveData
+
+    /// Indicates that the number of keys is out of the allowable range. Takes minimum and maximum allowed values as associated values.
     case keysCountOutOfRange(min: Int, max: Int)
+
+    /// Indicates that the threshold value is out of the allowable range. Takes minimum and maximum allowed values as associated values.
     case thresholdOutOfRange(min: Int, max: Int)
+
+    /// Indicates that there is no content present in the key.
     case noContentInKey
+
+    /// Indicates that the operation failed due to some unspecified data issue.
     case failedData
+
+    /// Indicates that the data cannot be deserialized.
     case cannotBeDeserialized
+
+    /// Indicates that the data cannot be serialized.
     case cannotBeSerialized
+
+    /// Indicates that the data or key cannot be exported.
     case cannotBeExported
 }
+

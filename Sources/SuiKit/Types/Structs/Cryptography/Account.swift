@@ -24,7 +24,6 @@
 //
 
 import Foundation
-import Bip39
 
 /// Sui Blockchain Account
 public struct Account: Equatable, Hashable {

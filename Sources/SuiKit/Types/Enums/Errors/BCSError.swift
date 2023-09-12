@@ -25,13 +25,29 @@
 
 import Foundation
 
+/// `BCSError` represents a set of errors specific to operations within the BCS (Binary Canonical Serialization) domain.
 public enum BCSError: Error, Equatable {
+    /// Indicates that an unexpected value was encountered during serialization or deserialization. The associated value provides details.
     case unexpectedValue(value: String)
+
+    /// Indicates that a failure occurred while converting a string to data. The associated value specifies the string that caused the failure.
     case stringToDataFailure(value: String)
+
+    /// Indicates that a failure occurred while converting a string to UInt256. The associated value specifies the string that caused the failure.
     case stringToUInt256Failure(value: String)
+
+    /// Indicates that an unexpectedly large ULEB128 value was encountered. The associated value specifies the string representation of the value.
     case unexpectedLargeULEB128Value(value: String)
+
+    /// Indicates that an unexpected end of input occurred when a certain type of data was expected. It takes the expected and the found type as associated values.
     case unexpectedEndOfInput(requested: String, found: String)
+
+    /// Indicates that an invalid data value was encountered. The supported type for the operation is provided as an associated value.
     case invalidDataValue(supportedType: String)
+
+    /// Indicates that a particular element does not conform to the expected protocol. The type of the expected protocol is provided as an associated value.
     case doesNotConformTo(protocolType: String)
+
+    /// Indicates that the length of the provided data is invalid.
     case invalidLength
 }

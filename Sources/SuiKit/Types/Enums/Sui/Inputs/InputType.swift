@@ -29,6 +29,7 @@ import SwiftyJSON
 public indirect enum InputType: KeyProtocol {
     case pure(PureCallArg)
     case object(ObjectArg)
+    // TODO: Implement Object Vector type
 
     public static func fromJSON(_ input: JSON) -> InputType? {
         switch input["type"].stringValue {

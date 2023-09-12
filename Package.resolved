@@ -10,15 +10,6 @@
       }
     },
     {
-      "identity" : "base58swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/keefertaylor/Base58Swift.git",
-      "state" : {
-        "revision" : "1c13ea6b07f1584660526f8bde3d4cc150e91acd",
-        "version" : "2.1.14"
-      }
-    },
-    {
       "identity" : "bigint",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/attaswift/BigInt.git",

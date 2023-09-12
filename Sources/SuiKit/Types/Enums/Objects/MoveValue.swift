@@ -26,40 +26,69 @@
 import Foundation
 import SwiftyJSON
 
+/// `MoveValue` represents the possible types of values in the Move programming language.
 public enum MoveValue {
+    /// Represents a numerical value. The associated value is an `Int`.
     case number(Int)
+
+    /// Represents a boolean value. The associated value is a `Bool`.
     case boolean(Bool)
+
+    /// Represents a string value. The associated value is a `String`.
     case string(String)
+
+    /// Represents an array of `MoveValue` items.
     case moveValues([MoveValue])
+
+    /// Represents an identifier for a value, defined by `MoveValueId`.
     case id(MoveValueId)
+
+    /// Represents a Move structure, defined by `MoveStruct`.
     case moveStruct(MoveStruct)
+
+    /// Represents a null value.
     case null
 
+    /// Parses a `JSON` object to produce a `MoveValue` object.
+    ///
+    /// - Parameters:
+    ///   - input: The JSON object representing the Move value.
+    /// - Returns: A `MoveValue` object based on the parsed JSON.
+    ///
+    /// This method attempts to parse the provided JSON into a `MoveValue` by checking for
+    /// various expected types such as numbers, booleans, strings, arrays, identifiers, and structures.
     public static func parseJSON(_ input: JSON) -> MoveValue {
+        // If the input JSON is a number, process it
         if let number = input.int {
             return .number(number)
         }
 
+        // If the input JSON is a boolean, process it
         if let bool = input.bool {
             return .boolean(bool)
         }
 
+        // If the input JSON is a string, process it
         if let string = input.string {
             return .string(string)
         }
 
+        // If the input JSON is an array, process it
         if let array = input.array {
             return .moveValues(array.map { MoveValue.parseJSON($0) })
         }
 
+        // If the input JSON contains an id, process it
         if input["id"].exists() {
             return .id(MoveValueId(input: input))
         }
 
+        // If the input JSON contains a structure, process it
         if let structure = MoveStruct.parseJSON(input) {
             return .moveStruct(structure)
         }
 
+        // If none of the above conditions are met, return null
         return .null
     }
 }

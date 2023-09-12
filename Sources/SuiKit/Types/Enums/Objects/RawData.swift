@@ -26,10 +26,25 @@
 import Foundation
 import SwiftyJSON
 
+/// `RawData` represents the types of raw data that can be processed or generated.
+///
+/// This enum allows for either a `MoveObjectRaw` or `PackageRaw` data type, capturing
+/// the raw information for either a Move object or a package object.
 public enum RawData {
+    /// Represents raw data for a Move object. The associated value is a `MoveObjectRaw` containing the Move object's raw data.
     case moveObject(MoveObjectRaw)
+
+    /// Represents raw data for a package object. The associated value is a `PackageRaw` containing the package object's raw data.
     case packageObject(PackageRaw)
 
+    /// Parses a `JSON` object to determine the type of raw data it contains and returns a corresponding `RawData` instance.
+    ///
+    /// - Parameters:
+    ///   - input: The JSON object containing the raw data information.
+    /// - Returns: A `RawData` instance if the parsing is successful; otherwise, returns `nil`.
+    ///
+    /// This method will inspect the `dataType` key in the provided JSON to determine whether the data should be parsed as
+    /// a `MoveObjectRaw` or a `PackageRaw`. Additional processing is done for each type to properly populate their respective fields.
     public static func parseJSON(_ input: JSON) -> RawData? {
         switch input["dataType"].stringValue {
         case "moveObject":

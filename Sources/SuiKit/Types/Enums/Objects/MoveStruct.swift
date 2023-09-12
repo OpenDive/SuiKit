@@ -26,12 +26,27 @@
 import Foundation
 import SwiftyJSON
 
+/// `MoveStruct` represents the possible types of structures in the Move programming language.
 public enum MoveStruct {
+    /// Represents an array of `MoveValue` items. Suitable for handling Move's native vector type.
     case fieldArray([MoveValue])
+
+    /// Represents a single field type defined by `MoveFieldType`.
     case fieldType(MoveFieldType)
+
+    /// Represents a map from field names (as `String`) to their corresponding `MoveValue` objects. This is suitable for handling Move's native struct type.
     case fieldMap([String: MoveValue])
 
+    /// Parses a `JSON` object to produce a `MoveStruct` object if possible.
+    ///
+    /// - Parameters:
+    ///   - input: The JSON object representing the Move structure.
+    /// - Returns: A `MoveStruct` object if parsing is successful; otherwise returns `nil`.
+    ///
+    /// This method attempts to parse the provided JSON into a `MoveStruct` by checking for
+    /// various expected structures such as arrays, maps, or field types.
     public static func parseJSON(_ input: JSON) -> MoveStruct? {
+        // If the input JSON contains a dictionary (map), process it
         if !(input.dictionaryValue.isEmpty) {
             var fieldsMap: [String: MoveValue] = [:]
             for (fieldKey, fieldValue) in input.dictionaryValue {
@@ -40,14 +55,17 @@ public enum MoveStruct {
             return .fieldMap(fieldsMap)
         }
 
+        // If the input JSON is an array, process it
         if let array = input.array {
             return .fieldArray(array.map { MoveValue.parseJSON($0) })
         }
 
+        // If the input JSON contains a type, process it
         if input["type"].exists() {
             return .fieldType(MoveFieldType(input: input))
         }
 
+        // If none of the above conditions are met, return nil
         return nil
     }
 }

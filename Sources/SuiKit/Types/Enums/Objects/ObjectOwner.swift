@@ -26,22 +26,45 @@
 import Foundation
 import SwiftyJSON
 
+/// `ObjectOwner` represents the possible types of ownership for objects.
 public enum ObjectOwner {
+    /// Represents an object owned by an address. The associated value is a `String` containing the address.
     case addressOwner(String)
+
+    /// Represents an object owned by another object. The associated value is a `String` containing the object's identifier.
     case objectOwner(String)
+
+    /// Represents an object with shared ownership. The associated value is an `Int` indicating the initial shared version.
     case shared(Int)
+
+    /// Represents an object that is immutable and cannot be owned.
     case immutable
 
+    /// Parses a `JSON` object to produce an `ObjectOwner` object if possible.
+    ///
+    /// - Parameters:
+    ///   - input: The JSON object representing the ownership information.
+    /// - Returns: An `ObjectOwner` object if parsing is successful; otherwise returns `nil`.
+    ///
+    /// This method attempts to parse the provided JSON into an `ObjectOwner` by checking for
+    /// various expected key-value pairs such as "AddressOwner", "ObjectOwner", and "Shared".
     public static func parseJSON(_ input: JSON) -> ObjectOwner? {
+        // If the input JSON contains an address owner, process it
         if let addressOwner = input["AddressOwner"].string {
             return .addressOwner(addressOwner)
         }
+
+        // If the input JSON contains an object owner, process it
         if let objectOwner = input["ObjectOwner"].string {
             return .objectOwner(objectOwner)
         }
+
+        // If the input JSON contains shared ownership information, process it
         if let initialSharedVersion = input["Shared"]["initial_shared_version"].int {
             return .shared(initialSharedVersion)
         }
+
+        // If none of the above conditions are met, return nil
         return nil
     }
 }

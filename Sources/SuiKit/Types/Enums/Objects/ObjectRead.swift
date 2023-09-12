@@ -26,13 +26,30 @@
 import Foundation
 import SwiftyJSON
 
+/// `ObjectRead` describes the result of attempting to read an object in the Sui blockchain ecosystem.
 public enum ObjectRead {
+    /// Indicates that the object's version was successfully found. The associated value is the found `SuiObjectData`.
     case versionFound(SuiObjectData)
+
+    /// Indicates that the object does not exist. The associated value is a `String` containing the object's identifier.
     case objectNotExists(String)
+
+    /// Indicates that the object has been deleted. The associated value is a `SuiObjectRef` reference to the deleted object.
     case objectDeleted(SuiObjectRef)
+
+    /// Indicates that the requested version of the object was not found. The associated values are `String`s containing the object ID and the requested version.
     case versionNotFound(String, String)
+
+    /// Indicates that the requested version is higher than the latest version. The associated values are `String`s containing the asked version, the latest version, and the object ID.
     case versionTooHigh(askedVersion: String, latestVersion: String, objectId: String)
 
+    /// Parses a `JSON` object to produce an `ObjectRead` object.
+    ///
+    /// - Parameters:
+    ///   - data: The JSON object representing the read object's status.
+    /// - Returns: An `ObjectRead` object based on the parsed JSON, or `nil` if parsing fails.
+    ///
+    /// The function attempts to parse the JSON object to determine the result of an object read operation.
     public static func parseJSON(_ data: JSON) -> ObjectRead? {
         switch data["status"].stringValue {
         case "VersionFound":
@@ -58,6 +75,11 @@ public enum ObjectRead {
         }
     }
 
+    /// Retrieves the status as a `String`.
+    ///
+    /// - Returns: A `String` representing the status of the `ObjectRead`.
+    ///
+    /// This function converts the `ObjectRead` case into a `String` that can be easily read or transmitted.
     public func status() -> String {
         switch self {
         case .versionFound:

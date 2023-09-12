@@ -26,10 +26,25 @@
 import Foundation
 import SwiftyJSON
 
+/// `SuiParsedData` represents the types of parsed data that can be encountered in the Sui blockchain ecosystem.
+///
+/// The enum handles two main types of parsed data: `MoveObject` and `MovePackage`, which represent
+/// different kinds of data structures commonly used in Sui-related operations.
 public enum SuiParsedData {
+    /// Represents a parsed Move object. The associated value is a `MoveObject` that holds the parsed fields and other relevant data for a Move object.
     case moveObject(MoveObject)
+
+    /// Represents a parsed Move package. The associated value is a `MovePackage` containing the disassembled or decomposed package information.
     case movePackage(MovePackage)
 
+    /// Parses a JSON object to determine the type of parsed data and returns an instance of `SuiParsedData`.
+    ///
+    /// - Parameters:
+    ///   - input: The JSON object containing the parsed data information.
+    /// - Returns: An instance of `SuiParsedData` if parsing is successful; otherwise, returns `nil`.
+    ///
+    /// This function reads the `dataType` key from the input JSON to decide whether the data should be interpreted as a `MoveObject` or a `MovePackage`.
+    /// It then proceeds to create an instance of the corresponding type based on the additional information in the JSON object.
     public static func parseJSON(_ input: JSON) -> SuiParsedData? {
         switch input["dataType"].stringValue {
         case "moveObject":

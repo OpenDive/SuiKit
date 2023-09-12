@@ -26,10 +26,22 @@
 import Foundation
 import SwiftyJSON
 
+/// `ExecutionStatusType` describes the status of a given execution process.
+///
+/// - `success`: Indicates that the execution process has successfully completed.
+/// - `failure`: Indicates that the execution process has failed.
 public enum ExecutionStatusType: String, Equatable {
+    /// Represents a successful execution.
     case success
+
+    /// Represents a failed execution.
     case failure
 
+    /// Creates an `ExecutionStatusType` from a JSON object.
+    ///
+    /// - Parameters:
+    ///     - input: The JSON object containing the string representation of the execution status.
+    /// - Returns: An `ExecutionStatusType` value if the JSON object contains a valid string ("success" or "failure"), or `nil` otherwise.
     public static func fromJSON(_ input: JSON) -> ExecutionStatusType? {
         switch input.stringValue {
         case "success":

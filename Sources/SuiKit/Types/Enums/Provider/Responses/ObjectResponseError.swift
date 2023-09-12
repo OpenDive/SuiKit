@@ -26,13 +26,33 @@
 import Foundation
 import SwiftyJSON
 
+/// `ObjectResponseError` represents different types of errors that can occur when dealing with object responses.
+///
+/// - `notExist`: Indicates that an object with the given ID does not exist.
+/// - `dynamicFieldNotFound`: Indicates that a dynamic field is not found within the parent object.
+/// - `deleted`: Indicates that the object has been deleted, and additional details are provided.
+/// - `unknown`: Represents an unknown error.
+/// - `displayError`: Indicates that there's a display error, and the details are given as a string.
 public enum ObjectResponseError: Error, Equatable {
+    /// Indicates that an object with the given ID does not exist.
     case notExist(objectId: String)
+    
+    /// Indicates that a dynamic field is not found within the parent object.
     case dynamicFieldNotFound(parentObjectId: String)
+    
+    /// Indicates that the object has been deleted. The digest, object ID, and version are provided for context.
     case deleted(digest: String, objectId: String, version: String)
+    
+    /// Represents an unknown error.
     case unknown
+    
+    /// Indicates that there's a display error. The details are provided as a string.
     case displayError(error: String)
 
+    /// Parses an `ObjectResponseError` from a JSON object.
+    ///
+    /// - Parameter input: The JSON object containing the error information.
+    /// - Returns: An `ObjectResponseError` value if the JSON object contains valid information, or `nil` otherwise.
     public static func parseJSON(_ input: JSON) -> ObjectResponseError? {
         switch input["code"].stringValue {
         case "notExist":
@@ -54,3 +74,4 @@ public enum ObjectResponseError: Error, Equatable {
         }
     }
 }
+

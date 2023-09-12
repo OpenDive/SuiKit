@@ -26,9 +26,18 @@
 import Foundation
 import SwiftyJSON
 
+/// `MessageVersion` represents different versions of messages.
+///
+/// - `v1`: Represents version 1 of the message.
 public enum MessageVersion: String {
+    /// Represents version 1 of the message.
     case v1
 
+    /// Creates a `MessageVersion` from a JSON object.
+    ///
+    /// - Parameters:
+    ///     - input: The JSON object containing the string representation of the message version.
+    /// - Returns: A `MessageVersion` value if the JSON object contains a valid string ("v1"), or `nil` otherwise.
     public static func fromJSON(_ input: JSON) -> MessageVersion? {
         switch input.stringValue {
         case "v1":
@@ -38,3 +47,4 @@ public enum MessageVersion: String {
         }
     }
 }
+

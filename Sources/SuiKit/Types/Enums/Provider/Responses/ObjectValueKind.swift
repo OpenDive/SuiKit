@@ -25,8 +25,19 @@
 
 import Foundation
 
+/// `ObjectValueKind` represents how an object value is treated or accessed.
+///
+/// - `byImmutableReference`: The object value is accessed by an immutable reference.
+/// - `byMutableReference`: The object value is accessed by a mutable reference.
+/// - `byValue`: The object value is accessed by value.
 public enum ObjectValueKind: String, Equatable {
+    /// The object value is accessed by an immutable reference.
     case byImmutableReference = "ByImmutableReference"
+    
+    /// The object value is accessed by a mutable reference.
     case byMutableReference = "ByMutableReference"
+    
+    /// The object value is accessed by value.
     case byValue = "ByValue"
 }
+

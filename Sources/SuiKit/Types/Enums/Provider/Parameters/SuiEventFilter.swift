@@ -26,7 +26,12 @@
 import Foundation
 import SwiftyJSON
 
+/// `SuiEventFilter` defines various filters that can be applied to events in the Sui blockchain ecosystem.
+///
+/// The enum supports different types of event filters such as sender, transaction, package, etc.
+/// It also provides compound filtering capabilities like `any`, `all`, `and`, and `or`.
 public enum SuiEventFilter: Codable {
+    /// Keys used for encoding and decoding the enum cases.
     private enum CodingKeys: String, CodingKey {
         case sender = "Sender"
         case transaction = "Transaction"
@@ -42,19 +47,43 @@ public enum SuiEventFilter: Codable {
         case or = "Or"
     }
 
+    /// Filter events by sender's address.
     case sender(String)
+
+    /// Filter events by transaction ID.
     case transaction(String)
+
+    /// Filter events by package ID.
     case package(String)
+
+    /// Filter events by Move module characteristics.
     case moveModule(MoveModuleFilter)
+
+    /// Filter events by Move event type.
     case moveEventType(String)
+
+    /// Filter events by Move module attributes related to the event.
     case moveEventModule(MoveModuleFilter)
+
+    /// Filter events by Move event fields.
     case moveEventField(MoveEventField)
+
+    /// Filter events occurring within a specified time range.
     case timeRange(TimeRange)
+
+    /// Match any of the provided filters.
     case any([SuiEventFilter])
+
+    /// Match all of the provided filters.
     case all([SuiEventFilter])
+
+    /// Logical AND between the provided filters.
     case and([SuiEventFilter])
+
+    /// Logical OR between the provided filters.
     case or([SuiEventFilter])
 
+    /// Encode the enum into a container.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {

@@ -25,7 +25,15 @@
 
 import Foundation
 
+/// `SuiMoveFunctionArgType` represents the type of an argument in a Move function.
+///
+/// - `pure`: The argument is a pure value, meaning it doesn't involve any object references.
+/// - `object`: The argument is an object, and its kind (immutable reference, mutable reference, or by value) is specified.
 public enum SuiMoveFunctionArgType: Equatable {
+    /// The argument is a pure value and doesn't involve any object references.
     case pure
+    
+    /// The argument is an object. The kind of the object (immutable/mutable reference or by value) is specified.
     case object(ObjectValueKind)
 }
+

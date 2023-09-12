@@ -25,7 +25,15 @@
 
 import Foundation
 
+/// `DynamicFieldType` describes the types of fields that can be dynamic.
+///
+/// - `dynamicField`: Represents a single dynamic field, which can contain various data types.
+/// - `dynamicObject`: Represents an object that itself can be dynamic, containing potentially
+///   multiple dynamic fields.
 public enum DynamicFieldType: String {
+    /// Represents a single dynamic field.
     case dynamicField = "DynamicField"
+
+    /// Represents a dynamic object, which could contain multiple fields.
     case dynamicObject = "DynamicObject"
 }

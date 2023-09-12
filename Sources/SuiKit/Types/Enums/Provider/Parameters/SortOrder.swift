@@ -25,7 +25,14 @@
 
 import Foundation
 
+/// `SortOrder` defines the possible sorting orders that can be used for arranging a list of items.
+///
+/// This enum has two cases: `ascending` and `descending`, each of which specifies the direction in which
+/// the list of items should be sorted.
 public enum SortOrder: String, Codable {
+    /// Sort items in ascending order. For example, for numerical data, this means going from the smallest to the largest value.
     case ascending
+
+    /// Sort items in descending order. For example, for numerical data, this means going from the largest to the smallest value.
     case descending
 }

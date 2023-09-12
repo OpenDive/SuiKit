@@ -25,7 +25,12 @@
 
 import Foundation
 
+/// `TransactionFilter` enumerates the various filters that can be applied when querying transactions.
+///
+/// This enum allows for precise filtering based on different transaction attributes such as the involved
+/// addresses, checkpoint, transaction kind, etc.
 public enum TransactionFilter: Codable {
+    /// Keys used for encoding and decoding the enum cases.
     private enum CodingKeys: String, CodingKey {
         case checkpoint = "Checkpoint"
         case moveFunction = "MoveFunction"
@@ -39,17 +44,37 @@ public enum TransactionFilter: Codable {
         case transactionKindIn = "TransactionKindIn"
     }
 
+    /// Filter transactions that match a given checkpoint.
     case checkpoint(String)
+
+    /// Filter transactions that involve a specific Move function.
     case moveFunction(TransactionMoveFunction)
+
+    /// Filter transactions that include a specific input object.
     case inputObject(String)
+
+    /// Filter transactions that changed a specific object.
     case changedObject(String)
+
+    /// Filter transactions that originated from a specific address.
     case fromAddress(String)
+
+    /// Filter transactions that are destined for a specific address.
     case toAddress(String)
+
+    /// Filter transactions involving both a specific 'from' and 'to' address.
     case fromAndToAddress(FromAndToAddress)
+
+    /// Filter transactions involving either a specific 'from' or 'to' address.
     case fromOrToAddress(FromOrToAddress)
+
+    /// Filter transactions of a specific kind.
     case transactionKind(String)
+
+    /// Filter transactions belonging to any of a list of kinds.
     case transactionKindIn([String])
 
+    /// Encode the enum into a container.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {

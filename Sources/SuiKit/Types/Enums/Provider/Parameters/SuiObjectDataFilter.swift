@@ -25,7 +25,12 @@
 
 import Foundation
 
+/// `SuiObjectDataFilter` defines various filters that can be applied to object data within the Sui blockchain ecosystem.
+///
+/// The enum supports different types of data filters such as package, move module, object ID, etc.
+/// It also provides compound filtering capabilities like `matchAll`, `matchAny`, and `matchNone`.
 public enum SuiObjectDataFilter: Codable {
+    /// Keys used for encoding and decoding the enum cases.
     private enum CodingKeys: String, CodingKey {
         case matchAll = "MatchAll"
         case matchAny = "MatchAny"
@@ -40,18 +45,40 @@ public enum SuiObjectDataFilter: Codable {
         case version = "Version"
     }
 
+    /// All filters in the array should match.
     case matchAll([SuiObjectDataFilter])
+
+    /// Any filter in the array should match.
     case matchAny([SuiObjectDataFilter])
+
+    /// None of the filters in the array should match.
     case matchNone([SuiObjectDataFilter])
+
+    /// Filter object data by package ID.
     case package(String)
+
+    /// Filter object data by characteristics of the Move module.
     case moveModule(MoveModuleFilter)
+
+    /// Filter object data by the struct type.
     case structType(String)
+
+    /// Filter object data by address owner.
     case addressOwner(String)
+
+    /// Filter object data by object owner.
     case objectOwner(String)
+
+    /// Filter object data by a specific object ID.
     case objectId(String)
+
+    /// Filter object data by a list of object IDs.
     case objectIds([String])
+
+    /// Filter object data by version.
     case version(String)
 
+    /// Encode the enum into a container.
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {

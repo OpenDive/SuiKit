@@ -26,14 +26,34 @@
 import Foundation
 import SwiftyJSON
 
+/// `SuiObjectChange` represents the type of change that occurred on a SuiObject.
+///
+/// - `published`: The object has been published.
+/// - `transferred`: The object has been transferred.
+/// - `mutated`: The object has been mutated.
+/// - `deleted`: The object has been deleted.
+/// - `wrapped`: The object has been wrapped.
+/// - `created`: The object has been created.
 public enum SuiObjectChange {
+    /// Represents a published object change.
     case published(SuiObjectChangePublished)
+
+    /// Represents a transferred object change.
     case transferred(SuiObjectChangeTransferred)
+
+    /// Represents a mutated object change.
     case mutated(SuiObjectChangeMutated)
+
+    /// Represents a deleted object change.
     case deleted(SuiObjectChangeDeleted)
+
+    /// Represents a wrapped object change.
     case wrapped(SuiObjectChangeWrapped)
+
+    /// Represents a created object change.
     case created(SuiObjectChangeCreated)
 
+    /// Creates a `SuiObjectChange` instance from a JSON object.
     public static func fromJSON(_ input: JSON) -> SuiObjectChange? {
         switch input["type"].stringValue {
         case "published":
@@ -58,6 +78,7 @@ public enum SuiObjectChange {
         }
     }
 
+    /// Returns the kind of object change as a string.
     var kind: String {
         switch self {
         case .published:

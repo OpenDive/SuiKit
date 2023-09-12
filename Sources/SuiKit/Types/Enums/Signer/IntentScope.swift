@@ -25,9 +25,22 @@
 
 import Foundation
 
+/// `IntentScope` represents the scope or context in which an intent operates.
+///
+/// - `TransactionData`: Represents the scope that covers only the data of the transaction.
+/// - `TransactionEffects`: Represents the scope that covers the effects (such as side-effects) of the transaction.
+/// - `CheckpointSummary`: Represents the scope that covers a summary of checkpoints.
+/// - `PersonalMessage`: Represents the scope for a personal message.
 public enum IntentScope: Int {
+    /// Represents the scope that covers only the data of the transaction.
     case TransactionData
+
+    /// Represents the scope that covers the effects (such as side-effects) of the transaction.
     case TransactionEffects
+
+    /// Represents the scope that covers a summary of checkpoints.
     case CheckpointSummary
+
+    /// Represents the scope for a personal message.
     case PersonalMessage
 }

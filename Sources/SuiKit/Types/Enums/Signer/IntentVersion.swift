@@ -25,6 +25,10 @@
 
 import Foundation
 
+/// `IntentVersion` represents the version of an intent.
+///
+/// - `V0`: Represents version 0 of the intent.
 public enum IntentVersion: Int {
+    /// Represents version 0 of the intent.
     case V0
 }

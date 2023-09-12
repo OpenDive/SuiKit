@@ -25,6 +25,10 @@
 
 import Foundation
 
+/// `AppId` represents the ID of an application.
+///
+/// - `Sui`: Represents the ID for the Sui application.
 public enum AppId: Int {
+    /// Represents the ID for the Sui application.
     case Sui
 }

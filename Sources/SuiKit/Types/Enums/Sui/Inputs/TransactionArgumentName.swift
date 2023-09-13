@@ -25,9 +25,18 @@
 
 import Foundation
 
+/// An enum representing the names of possible transaction arguments.
+/// The raw value of each case is a `String` representing the name of the transaction argument.
 public enum TransactionArgumentName: String {
+    /// Represents the gas coin argument in a transaction.
     case gasCoin = "GasCoin"
+
+    /// Represents the input argument in a transaction.
     case input = "Input"
+
+    /// Represents the result argument in a transaction.
     case result = "Result"
+
+    /// Represents the nested result argument in a transaction.
     case nestedResult = "NestedResult"
 }

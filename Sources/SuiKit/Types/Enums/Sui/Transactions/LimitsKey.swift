@@ -25,9 +25,18 @@
 
 import Foundation
 
+/// Enumeration representing different types of limits in a transactional environment.
 public enum LimitsKey: String {
+    /// Represents the maximum amount of gas that can be used in a transaction.
     case maxTxGas = "max_tx_gas"
+
+    /// Represents the maximum number of payment objects that can be included in the gas payment for a transaction.
     case maxGasObjects = "max_gas_payment_objects"
+
+    /// Represents the maximum size, in bytes, that a transaction can be.
     case maxTxSizeBytes = "max_tx_size_bytes"
+
+    /// Represents the maximum size of a pure function's argument.
     case maxPureArgumentSize = "max_pure_argument_size"
 }
+

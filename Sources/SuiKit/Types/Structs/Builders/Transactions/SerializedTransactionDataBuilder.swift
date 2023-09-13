@@ -45,7 +45,7 @@ public struct SerializedTransactionDataBuilder: KeyProtocol {
     public init(
         version: UInt8 = 1,
         sender: AccountAddress? = nil,
-        expiration: TransactionExpiration? = TransactionExpiration.none(true),
+        expiration: TransactionExpiration? = TransactionExpiration.none,
         gasConfig: SuiGasData? = nil,
         inputs: [TransactionBlockInput] = [],
         transactions: [SuiTransaction] = []

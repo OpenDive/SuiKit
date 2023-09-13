@@ -223,16 +223,14 @@ public class TransactionBlock {
     }
 
     public func mergeCoin(
-        destination: TransactionBlockInput,
-        sources: [TransactionBlockInput]
+        destination: TransactionArgument,
+        sources: [TransactionArgument]
     ) throws -> TransactionArgument {
         try self.add(
             transaction: .mergeCoins(
                 Transactions.mergeCoins(
-                    destination: .input(destination),
-                    sources: sources.map {
-                        .input($0)
-                    }
+                    destination: destination,
+                    sources: sources
                 )
             )
         )

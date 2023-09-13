@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// Enumerates the types of request confirmation methods in the Sui framework.
 public enum SuiRequestType: String, Codable {
+    /// Waits for a certificate that confirms the effects of a request have taken place.
     case waitforEffectsCert = "WaitForEffectsCert"
+
+    /// Waits for the local execution of a request to complete.
     case waitForLocalExecution = "WaitForLocalExecution"
 }

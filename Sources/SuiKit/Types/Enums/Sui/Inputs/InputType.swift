@@ -26,11 +26,21 @@
 import Foundation
 import SwiftyJSON
 
+/// An `InputType` enum encapsulates the different types of input arguments.
+/// This enum conforms to the `KeyProtocol`, meaning it satisfies certain requirements for being used as a key type.
 public indirect enum InputType: KeyProtocol {
+    /// Represents a "pure" call argument, meaning the argument does not include any object references.
     case pure(PureCallArg)
+
+    /// Represents an object argument, meaning the argument includes an object reference.
     case object(ObjectArg)
+
     // TODO: Implement Object Vector type
 
+    /// A static function to create an `InputType` instance from a JSON object.
+    ///
+    /// - Parameter input: The JSON object containing the input data.
+    /// - Returns: An optional `InputType` if the JSON could be parsed, otherwise `nil`.
     public static func fromJSON(_ input: JSON) -> InputType? {
         switch input["type"].stringValue {
         case "pure":
@@ -44,6 +54,10 @@ public indirect enum InputType: KeyProtocol {
         }
     }
 
+    /// Serializes the `InputType` using the provided `Serializer`.
+    ///
+    /// - Parameter serializer: The `Serializer` to use for the serialization.
+    /// - Throws: Throws an error if the serialization fails.
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .pure(let pure):
@@ -55,6 +69,11 @@ public indirect enum InputType: KeyProtocol {
         }
     }
 
+    /// A static function to deserialize an `InputType` instance from a `Deserializer`.
+    ///
+    /// - Parameter deserializer: The `Deserializer` to use for the deserialization.
+    /// - Returns: A deserialized `InputType` instance.
+    /// - Throws: Throws `SuiError.unableToDeserialize` if the deserialization fails.
     public static func deserialize(from deserializer: Deserializer) throws -> InputType {
         let value = try Deserializer.u8(deserializer)
         switch value {

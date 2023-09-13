@@ -26,11 +26,20 @@
 import Foundation
 import SwiftyJSON
 
+/// Enumeration representing visibility levels in the SuiMove environment.
 public enum SuiMoveVisibility: String {
+    /// Represents a private visibility level, accessible only within the same module.
     case Private
+
+    /// Represents a public visibility level, accessible from any module.
     case Public
+
+    /// Represents a friend visibility level, accessible only by designated friend modules.
     case Friend
-    
+
+    /// Function to parse a JSON object into a `SuiMoveVisibility` enum.
+    /// - Parameter data: The JSON data to parse.
+    /// - Returns: Returns a `SuiMoveVisibility` if it could be parsed, otherwise returns `nil`.
     public static func parseJSON(_ data: JSON) -> SuiMoveVisibility? {
         switch data.stringValue {
         case "Private": return .Private
@@ -40,3 +49,4 @@ public enum SuiMoveVisibility: String {
         }
     }
 }
+

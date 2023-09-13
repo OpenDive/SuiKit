@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// An enum representing the possible types of values.
 public enum ValueType {
+    /// Represents a pure value (e.g., `UInt8` array).
     case pure
+
+    /// Represents an object reference.
     case object
 }

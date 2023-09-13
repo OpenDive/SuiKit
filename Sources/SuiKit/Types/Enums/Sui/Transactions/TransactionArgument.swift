@@ -26,12 +26,21 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents the different types of arguments that can be involved in a transaction.
 public enum TransactionArgument: KeyProtocol {
+    /// Represents the gas coin for the transaction.
     case gasCoin
+
+    /// Represents the input block for the transaction.
     case input(TransactionBlockInput)
+
+    /// Represents the result of the transaction.
     case result(Result)
+
+    /// Represents a nested result within a transaction.
     case nestedResult(NestedResult)
 
+    /// Returns the kind of transaction argument.
     public var kind: TransactionArgumentName {
         switch self {
         case .gasCoin:
@@ -45,6 +54,10 @@ public enum TransactionArgument: KeyProtocol {
         }
     }
 
+    /// Creates a `TransactionArgument` from a JSON object.
+    ///
+    /// - Parameter input: The JSON object to parse.
+    /// - Returns: A `TransactionArgument` if successful, otherwise `nil`.
     public static func fromJSON(_ input: JSON) -> TransactionArgument? {
         if input["Input"].exists() {
             return .input(TransactionBlockInput(index: input["Input"].uInt16Value))
@@ -67,6 +80,12 @@ public enum TransactionArgument: KeyProtocol {
         return nil
     }
 
+    /// Encodes the input for the transaction.
+    ///
+    /// - Parameters:
+    ///   - objects: The list of objects to resolve.
+    ///   - inputs: The list of transaction block inputs.
+    /// - Throws: Throws an error if encoding fails.
     public func encodeInput(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
         switch self {
         case .input(let transactionBlockInput):
@@ -94,7 +113,7 @@ public enum TransactionArgument: KeyProtocol {
 
     public static func deserialize(from deserializer: Deserializer) throws -> TransactionArgument {
         let type = try Deserializer.u8(deserializer)
-        
+
         switch type {
         case 0:
             return TransactionArgument.gasCoin
@@ -109,6 +128,12 @@ public enum TransactionArgument: KeyProtocol {
         }
     }
 
+    /// Encodes the input transaction block.
+    ///
+    /// - Parameters:
+    ///   - input: The transaction block input to encode.
+    ///   - objects: The list of objects to resolve.
+    /// - Throws: Throws an error if encoding fails.
     private func encodeInput(
         with input: inout TransactionBlockInput,
         objects: inout [ObjectsToResolve]

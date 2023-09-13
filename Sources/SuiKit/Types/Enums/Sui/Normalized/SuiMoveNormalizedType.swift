@@ -26,22 +26,55 @@
 import Foundation
 import SwiftyJSON
 
+/// An enumeration that represents various types that can be encountered in the SuiMove environment.
+/// Conforms to `Equatable` and `KeyProtocol`.
 public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
+    /// Represents a boolean type.
     case bool
+
+    /// Represents an 8-bit unsigned integer.
     case u8
+
+    /// Represents a 16-bit unsigned integer.
     case u16
+
+    /// Represents a 32-bit unsigned integer.
     case u32
+
+    /// Represents a 64-bit unsigned integer.
     case u64
+
+    /// Represents a 128-bit unsigned integer.
     case u128
+
+    /// Represents a 256-bit unsigned integer.
     case u256
+
+    /// Represents an address type.
     case address
+
+    /// Represents a signer type.
     case signer
+
+    /// Represents a generic type parameter.
     case typeParameter(TypeParameter)
+
+    /// Represents an immutable reference to a type.
     case reference(SuiMoveNormalizedType)
+
+    /// Represents a mutable reference to a type.
     case mutableReference(SuiMoveNormalizedType)
+
+    /// Represents a vector of a type.
     case vector(SuiMoveNormalizedType)
+
+    /// Represents a structured type.
     case structure(SuiMoveNormalizedStructType)
-    
+
+    /// Function to determine the pure serialization type based on the argument value.
+    /// - Parameter argVal: The JSON value of the argument.
+    /// - Throws: Throws `SuiError.typeArgumentIsEmpty` if type argument is empty.
+    /// - Returns: Returns a string representation of the pure serialization type if it exists, otherwise returns `nil`.
     public func getPureSerializationType(_ argVal: SuiJsonValue) throws -> String? {
         switch self {
         case .bool:
@@ -78,7 +111,9 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
         }
         return nil
     }
-    
+
+    /// Function to extract mutable references from the normalized type.
+    /// - Returns: Returns the mutable reference type if it exists, otherwise returns `nil`.
     public func extractMutableReference() -> SuiMoveNormalizedType? {
         switch self {
         case .mutableReference(let suiMoveNormalizedType):
@@ -87,7 +122,9 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             return nil
         }
     }
-    
+
+    /// Function to extract structure tags from the normalized type.
+    /// - Returns: Returns the structure type if it exists, otherwise returns `nil`.
     public func extractStructTag() -> SuiMoveNormalizedStructType? {
         switch self {
         case .reference(let suiMoveNormalizedType):
@@ -108,7 +145,8 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             return nil
         }
     }
-    
+
+    /// A string representation of the kind of the type.
     public var kind: String {
         switch self {
         case .bool:
@@ -141,7 +179,10 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             return "Structure"
         }
     }
-    
+
+    /// Function to parse JSON into a `SuiMoveNormalizedType`.
+    /// - Parameter data: The JSON data to parse.
+    /// - Returns: Returns a `SuiMoveNormalizedType` if it could be parsed, otherwise returns `nil`.
     public static func parseJSON(_ data: JSON) -> SuiMoveNormalizedType? {
         switch data.stringValue {
         case "Bool":

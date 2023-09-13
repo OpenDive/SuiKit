@@ -131,8 +131,8 @@ final class TXBuilderTest: XCTestCase {
         var tx = try TransactionBlock()
 
         let _ = try tx.mergeCoin(
-            destination: tx.object(value: coin0.coinObjectId),
-            sources: [tx.object(value: coin1.coinObjectId)]
+            destination: .input(tx.object(value: coin0.coinObjectId)),
+            sources: [.input(tx.object(value: coin1.coinObjectId))]
         )
 
         try await self.validateTransaction(

@@ -25,8 +25,17 @@
 
 import Foundation
 
+/// Enumeration representing different types of values that can be stored in a protocol configuration.
 public enum ProtocolConfigValue {
+    /// Represents a 32-bit unsigned integer value in the configuration.
+    /// The associated `String` holds the actual value in string format.
     case u32(String)
+
+    /// Represents a 64-bit unsigned integer value in the configuration.
+    /// The associated `String` holds the actual value in string format.
     case u64(String)
+
+    /// Represents a 64-bit floating-point value in the configuration.
+    /// The associated `String` holds the actual value in string format.
     case f64(String)
 }

@@ -138,7 +138,7 @@ final class BCSTest: XCTestCase {
             ),
             sender: try AccountAddress.fromHex(try Inputs.normalizeSuiAddress(value: "0xBAD")),
             gasData: SuiGasData(payment: [self.ref()], owner: sui, price: "1", budget: "1000000"),
-            expiration: .none(true)
+            expiration: .none
         ))
 
         let ser = Serializer()

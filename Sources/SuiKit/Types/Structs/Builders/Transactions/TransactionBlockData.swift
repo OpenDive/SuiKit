@@ -119,7 +119,7 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
                 price: price,
                 budget: budget
             ),
-            expiration: expiration ?? TransactionExpiration.none(true)
+            expiration: expiration ?? TransactionExpiration.none
         ))
 
         let ser = Serializer()

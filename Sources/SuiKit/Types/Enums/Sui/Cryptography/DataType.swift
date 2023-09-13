@@ -25,7 +25,14 @@
 
 import Foundation
 
+/// `DataType` represents the type of data being dealt with.
+///
+/// - `data`: Represents generic data.
+/// - `secKey`: Represents a security key.
 public enum DataType {
+    /// Represents generic `Data` object.
     case data
+
+    /// Represents a security key.
     case secKey
 }

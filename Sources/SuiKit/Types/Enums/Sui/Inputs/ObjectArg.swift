@@ -26,10 +26,19 @@
 import Foundation
 import SwiftyJSON
 
+/// An `ObjectArg` enum encapsulates the different types of object arguments.
+/// This enum conforms to `KeyProtocol`, allowing it to be used as a key in collections like dictionaries.
 public enum ObjectArg: KeyProtocol {
+    /// Represents an object argument that is either immutable or owned by the caller.
     case immOrOwned(ImmOrOwned)
+
+    /// Represents a shared object argument.
     case shared(SharedObjectArg)
 
+    /// A static function to create an `ObjectArg` instance from a JSON object.
+    ///
+    /// - Parameter input: The JSON object containing the data.
+    /// - Returns: An optional `ObjectArg` if the JSON could be parsed; otherwise, `nil`.
     public static func fromJSON(_ input: JSON) -> ObjectArg? {
         switch input["objectType"].stringValue {
         case "immOrOwnedObject":
@@ -42,6 +51,10 @@ public enum ObjectArg: KeyProtocol {
         }
     }
 
+    /// Serializes the `ObjectArg` using the provided `Serializer`.
+    ///
+    /// - Parameter serializer: The `Serializer` to use for serialization.
+    /// - Throws: Throws an error if the serialization fails.
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .immOrOwned(let immOrOwned):
@@ -53,9 +66,14 @@ public enum ObjectArg: KeyProtocol {
         }
     }
 
+    /// A static function to deserialize an `ObjectArg` from a `Deserializer`.
+    ///
+    /// - Parameter deserializer: The `Deserializer` to use for deserialization.
+    /// - Returns: A deserialized `ObjectArg` instance.
+    /// - Throws: Throws `SuiError.unableToDeserialize` if deserialization fails.
     public static func deserialize(from deserializer: Deserializer) throws -> ObjectArg {
         let type = try Deserializer.u8(deserializer)
-
+        
         switch type {
         case 0:
             return ObjectArg.immOrOwned(

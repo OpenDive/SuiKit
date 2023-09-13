@@ -25,17 +25,42 @@
 
 import Foundation
 
+/// Protocol defining the requirements for a public key type.
 public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashable {
+    /// The type of data value that represents the key.
     associatedtype DataValue: KeyValueProtocol
 
+    /// The actual public key data.
     var key: DataValue { get }
 
+    /// Verifies the given data against a signature.
+    /// Returns true if the signature is valid, false otherwise.
+    /// Throws an error if the verification operation fails.
     func verify(data: Data, signature: Signature) throws -> Bool
+
+    /// Returns the base64 representation of the public key.
     func base64() -> String
+
+    /// Returns the hexadecimal representation of the public key.
     func hex() -> String
+
+    /// Converts the public key to a Sui Address representation.
+    /// Throws an error if the conversion fails.
     func toSuiAddress() throws -> String
+
+    /// Verifies a transaction block using the given signature.
+    /// Throws an error if the verification operation fails.
     func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool
+
+    /// Verifies the given bytes with a specific intent and signature.
+    /// Throws an error if the verification operation fails.
     func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool
+
+    /// Verifies a personal message using the given signature.
+    /// Throws an error if the verification operation fails.
     func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool
+
+    /// Serializes a signature to its string representation.
+    /// Throws an error if the serialization fails.
     func toSerializedSignature(signature: Signature) throws -> String
 }

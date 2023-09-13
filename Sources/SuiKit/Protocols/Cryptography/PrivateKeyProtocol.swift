@@ -25,17 +25,40 @@
 
 import Foundation
 
+/// Protocol defining the requirements for a private key type.
 public protocol PrivateKeyProtocol: KeyProtocol, CustomStringConvertible, Hashable {
+    /// The type of the public key that corresponds to this private key.
     associatedtype PublicKeyType: PublicKeyProtocol
+
+    /// The type of data value that represents the key.
     associatedtype DataValue: KeyValueProtocol
 
+    /// The actual private key data.
     var key: DataValue { get }
 
+    /// Returns the hexadecimal representation of the private key.
     func hex() -> String
+
+    /// Returns the base64 representation of the private key.
     func base64() -> String
+
+    /// Computes and returns the corresponding public key.
+    /// Throws an error if the operation fails.
     func publicKey() throws -> PublicKeyType
+
+    /// Signs the given data and returns the signature.
+    /// Throws an error if the signing operation fails.
     func sign(data: Data) throws -> Signature
+
+    /// Signs the given bytes with a specific intent.
+    /// Throws an error if the signing operation fails.
     func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature
+
+    /// Signs a transaction block represented by the given bytes.
+    /// Throws an error if the signing operation fails.
     func signTransactionBlock(_ bytes: [UInt8]) throws -> Signature
+
+    /// Signs a personal message represented by the given bytes.
+    /// Throws an error if the signing operation fails.
     func signPersonalMessage(_ bytes: [UInt8]) throws -> Signature
 }

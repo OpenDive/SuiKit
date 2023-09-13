@@ -25,7 +25,19 @@
 
 import Foundation
 
-public protocol KeyValueProtocol { func getType() -> DataType }
+/// Represents what type of type the key's data is going to be,
+public protocol KeyValueProtocol {
+    /// Get the type of data used for the key's data.
+    /// - Returns: A `DataType` enum.
+    func getType() -> DataType
+}
 
-extension Data: KeyValueProtocol { public func getType() -> DataType { return .data } }
-extension SecKey: KeyValueProtocol { public func getType() -> DataType { return .secKey } }
+/// Represents generic `Data` object.
+extension Data: KeyValueProtocol {
+    public func getType() -> DataType { return .data }
+}
+
+/// Represents a security key.
+extension SecKey: KeyValueProtocol {
+    public func getType() -> DataType { return .secKey }
+}

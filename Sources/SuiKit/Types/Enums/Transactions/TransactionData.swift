@@ -26,7 +26,9 @@
 import Foundation
 import SwiftyJSON
 
+/// Enum representing different versions of transaction data.
 public enum TransactionData: KeyProtocol {
+    /// Version 1 of transaction data.
     case V1(TransactionDataV1)
     
     public func serialize(_ serializer: Serializer) throws {

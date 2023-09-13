@@ -25,9 +25,17 @@
 
 import Foundation
 
+/// Names for each of the Sui framework transaction kinds.
 public enum TransactionKindName: String {
+    /// A block for a programmable transaction.
     case programmableTransaction = "ProgrammableTransaction"
+
+    /// A block for changing epochs.
     case changeEpoch = "ChangeEpoch"
+
+    /// A block for initializing the chain's state.
     case genesis = "Genesis"
+
+    /// A block for handling consensus commit prologues.
     case consensusCommitPrologue = "ConsensusCommitPrologue"
 }

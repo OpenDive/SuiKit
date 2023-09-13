@@ -25,12 +25,26 @@
 
 import Foundation
 
+/// Represents the names of the different kinds of Sui framework transactions
 public enum SuiTransactionKind: String {
+    /// Transaction type for moving calls.
     case moveCall = "MoveCall"
+
+    /// Transaction type for transferring objects.
     case transferObjects = "TransferObjects"
+
+    /// Transaction type for splitting coins.
     case splitCoins = "SplitCoins"
+
+    /// Transaction type for merging coins.
     case mergeCoins = "MergeCoins"
+
+    /// Transaction type for publishing.
     case publish = "Publish"
+
+    /// Transaction type for creating a vector in the Move language.
     case makeMoveVec = "MakeMoveVec"
+
+    /// Transaction type for upgrades.
     case upgrade = "Upgrade"
 }

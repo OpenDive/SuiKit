@@ -26,28 +26,27 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents various types of JSON values used in the Sui framework.
 public indirect enum SuiJsonValue: KeyProtocol, Equatable {
-    public static func == (lhs: SuiJsonValue, rhs: SuiJsonValue) -> Bool {
-        let ser1 = Serializer()
-        let ser2 = Serializer()
-
-        do {
-            try Serializer._struct(ser1, value: lhs)
-            try Serializer._struct(ser2, value: rhs)
-
-            return ser1.output() == ser2.output()
-        } catch {
-            return false
-        }
-    }
-
+    /// Represents a boolean value.
     case boolean(Bool)
+
+    /// Represents a number as UInt64.
     case number(UInt64)
+
+    /// Represents a string value.
     case string(String)
+
+    /// Represents a call argument, likely to be used in a function or method call.
     case callArg(Input)
+
+    /// Represents an array of `SuiJsonValue`.
     case array([SuiJsonValue])
+
+    /// Represents an account address.
     case address(AccountAddress)
 
+    /// Provides the specific type of the JSON value.
     public var kind: SuiJsonValueType {
         switch self {
         case .boolean:
@@ -65,6 +64,22 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
         }
     }
 
+    /// Overloads the equality operator to compare two SuiJsonValue instances.
+    public static func == (lhs: SuiJsonValue, rhs: SuiJsonValue) -> Bool {
+        let ser1 = Serializer()
+        let ser2 = Serializer()
+
+        do {
+            try Serializer._struct(ser1, value: lhs)
+            try Serializer._struct(ser2, value: rhs)
+
+            return ser1.output() == ser2.output()
+        } catch {
+            return false
+        }
+    }
+
+    /// Constructs a `SuiJsonValue` from a JSON object.
     public static func fromJSON(_ input: JSON) -> SuiJsonValue? {
         if let bool = input.bool {
             return .boolean(bool)

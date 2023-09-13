@@ -26,15 +26,30 @@
 import Foundation
 import SwiftyJSON
 
+/// Enum representing various types of transactions supported in the Sui framework.
 public enum SuiTransaction: KeyProtocol {
+    /// Transaction type for moving calls.
     case moveCall(MoveCallTransaction)
+
+    /// Transaction type for transferring objects.
     case transferObjects(TransferObjectsTransaction)
+
+    /// Transaction type for splitting coins.
     case splitCoins(SplitCoinsTransaction)
+
+    /// Transaction type for merging coins.
     case mergeCoins(MergeCoinsTransaction)
+
+    /// Transaction type for publishing.
     case publish(PublishTransaction)
+
+    /// Transaction type for creating a vector in the Move language.
     case makeMoveVec(MakeMoveVecTransaction)
+
+    /// Transaction type for upgrades.
     case upgrade(UpgradeTransaction)
 
+    /// Returns the kind of transaction.
     public func kind() -> SuiTransactionKind {
         switch self {
         case .moveCall:
@@ -54,6 +69,7 @@ public enum SuiTransaction: KeyProtocol {
         }
     }
 
+    /// Returns the underlying transaction as an object conforming to TransactionProtocol.
     public func transaction() -> any TransactionProtocol {
         switch self {
         case .moveCall(let moveCallTransaction):
@@ -73,6 +89,7 @@ public enum SuiTransaction: KeyProtocol {
         }
     }
 
+    /// Initializes a `SuiTransaction` from a JSON object.
     public static func fromJSON(_ input: JSON) -> SuiTransaction? {
         if input["MoveCall"].exists() {
             guard let moveCall = MoveCallTransaction(input: input["MoveCall"]) else { return nil }

@@ -26,12 +26,22 @@
 import Foundation
 import SwiftyJSON
 
+/// Enum representing different kinds of transaction blocks in the Sui framework.
 public enum SuiTransactionBlockKind: KeyProtocol {
+    /// A block for a programmable transaction.
     case programmableTransaction(ProgrammableTransaction)
+
+    /// A block for changing epochs.
     case changeEpoch(SuiChangeEpoch)
+
+    /// A block for initializing the chain's state.
     case genesis(Genesis)
+
+    /// A block for handling consensus commit prologues.
     case consensusCommitPrologue(SuiConsensusCommitPrologue)
 
+    /// Initializes a `SuiTransactionBlockKind` from a JSON object.
+    /// Returns `nil` if the kind specified in the JSON doesn't match any of the supported kinds.
     public static func fromJSON(_ input: JSON) -> SuiTransactionBlockKind? {
         switch input["kind"].stringValue {
         case "ProgrammableTransaction":
@@ -47,6 +57,7 @@ public enum SuiTransactionBlockKind: KeyProtocol {
         }
     }
 
+    /// Returns the kind of transaction block.
     public func kind() -> TransactionKindName {
         switch self {
         case .programmableTransaction:

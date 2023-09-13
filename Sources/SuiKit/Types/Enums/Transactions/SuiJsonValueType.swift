@@ -25,11 +25,23 @@
 
 import Foundation
 
+/// Named values for each of the `SuiJsonValue` types.
 public enum SuiJsonValueType: String {
+    /// Represents a boolean value.
     case boolean = "Boolean"
+
+    /// Represents a number as UInt64.
     case number = "Number"
+
+    /// Represents a string value.
     case string = "String"
+
+    /// Represents a call argument, likely to be used in a function or method call.
     case callArg = "CallArg"
+
+    /// Represents an array of `SuiJsonValue`.
     case array = "Array"
+
+    /// Represents an account address.
     case address = "Address"
 }

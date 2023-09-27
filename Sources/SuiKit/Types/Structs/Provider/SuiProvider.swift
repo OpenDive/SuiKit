@@ -30,9 +30,9 @@ import Blake2
 import Web3Core
 
 public struct SuiProvider {
-    public var connection: any ConnectionProtcol
+    public var connection: any ConnectionProtocol
 
-    public init(connection: any ConnectionProtcol) {
+    public init(connection: any ConnectionProtocol) {
         self.connection = connection
     }
 

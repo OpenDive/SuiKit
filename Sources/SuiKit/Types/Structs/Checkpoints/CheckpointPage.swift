@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// Represents a page of checkpoints in pagination, usually when fetching multiple checkpoints from a service or API.
 public struct CheckpointPage {
+    /// An array containing `Checkpoint` objects. Each object represents a single checkpoint in the blockchain.
     public let data: [Checkpoint]
+
+    /// A string representing the cursor for the next page of checkpoints. This can be used to request the next set of checkpoints in pagination.
     public let nextCursor: String
+
+    /// A boolean indicating whether there is another page of checkpoints available after the current page.
     public let hasNextPage: Bool
 }

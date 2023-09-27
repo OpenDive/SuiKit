@@ -26,12 +26,27 @@
 import Foundation
 import SwiftyJSON
 
-public struct GasCostSummary {
+/// Represents a summary of the gas costs in a blockchain transaction or operation.
+/// Gas is a unit that measures the amount of computational effort required to execute operations, like making transactions or running dApps.
+public struct GasCostSummary: Equatable {
+    /// A string representing the cost of computation in the transaction or operation.
+    /// This cost is associated with the execution of smart contract code or transaction processing.
     public let computationCost: String
+
+    /// A string representing the cost associated with storing data in the transaction or operation.
+    /// This can include costs related to saving data on the blockchain.
     public let storageCost: String
+
+    /// A string representing the rebate for storage in the transaction or operation.
+    /// This can include any reductions or refunds on the overall storage cost.
     public let storageRebate: String
+
+    /// A string representing any non-refundable storage fee in the transaction or operation.
+    /// This refers to the portion of the storage cost that cannot be recovered or refunded.
     public let nonRefundableStorageFee: String
 
+    /// Initializes a new `GasCostSummary` instance with the given JSON input.
+    /// - Parameter input: A `JSON` object containing the computationCost, storageCost, storageRebate, and nonRefundableStorageFee values.
     public init(input: JSON) {
         self.computationCost = input["computationCost"].stringValue
         self.storageCost = input["storageCost"].stringValue

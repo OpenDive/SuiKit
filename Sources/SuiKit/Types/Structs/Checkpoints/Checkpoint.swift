@@ -26,24 +26,44 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a checkpoint in the blockchain, capturing various attributes and states at that point in time.
 public struct Checkpoint: Equatable {
+    /// Represents the epoch of the checkpoint, it may be nil.
     public let epoch: String?
+
+    /// Represents the sequence number of the checkpoint, it may be nil.
     public let sequenceNumber: String?
+
+    /// Represents the digest of the checkpoint.
     public let digest: CheckpointDigest
+
+    /// Represents the total number of transactions in the network until this checkpoint, it may be nil.
     public let networkTotalTransactions: String?
+
+    /// Represents the digest of the previous checkpoint, it may be nil.
     public let previousDigest: CheckpointDigest?
-    public let epochRollingGasCostSummary: GasCostSummaryCheckpoint?
+
+    /// Represents the summary of the gas cost in the epoch rolling until this checkpoint, it may be nil.
+    public let epochRollingGasCostSummary: GasCostSummary?
+
+    /// Represents the timestamp in milliseconds when the checkpoint was created, it may be nil.
     public let timestampMs: String?
+
+    /// Represents the signature of the validator for this checkpoint, it may be nil.
     public let validatorSignature: ValidatorSignature?
+
+    /// Represents the array of transaction digests included in this checkpoint.
     public let transactions: [TransactionDigest]
 
+    /// Initializes a new instance of `Checkpoint` from a JSON object.
+    /// - Parameter input: A JSON object containing values for initializing a new Checkpoint.
     public init(input: JSON) {
         self.epoch = input["epoch"].string
         self.sequenceNumber = input["sequenceNumber"].string
         self.digest = input["digest"].stringValue
         self.networkTotalTransactions = input["networkTotalTransactions"].string
         self.previousDigest = input["previousDigest"].string
-        self.epochRollingGasCostSummary = GasCostSummaryCheckpoint(
+        self.epochRollingGasCostSummary = GasCostSummary(
             input: input["epochRollingGasCostSummary"]
         )
         self.timestampMs = input["timestampMs"].string

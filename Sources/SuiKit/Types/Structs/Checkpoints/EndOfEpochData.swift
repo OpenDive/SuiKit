@@ -26,6 +26,10 @@
 import Foundation
 
 public struct EndOfEpochData {
+    /// A tuple array containing pairs of strings representing the committee for the next epoch.
+    /// The first string in each pair might represent a committee member’s identifier, and the second string might represent additional information or a related property, depending on the blockchain's context.
     let nextEpochComittee: [(String, String)]
+
+    /// A string representing the protocol version that will be used in the next epoch. This might indicate the set of rules or the version of the blockchain protocol that the network nodes adhere to during the next epoch.
     let nextEpochProtocolVersion: String
 }

@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// Represents a type parameter in a SuiMove structure, along with its constraints and whether it's a phantom type parameter.
 public struct SuiMoveStructTypeParameter {
+    /// A `SuiMoveAbilitySet` representing the constraints on the type parameter in the SuiMove structure.
     public let constraints: SuiMoveAbilitySet
+    
+    /// A `Bool` indicating whether the type parameter is a phantom type parameter in the SuiMove structure.
     public let isPhantom: Bool
 }

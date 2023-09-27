@@ -26,13 +26,19 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents the set of abilities of a SuiMove in the ecosystem.
 public struct SuiMoveAbilitySet {
+    /// Holds the abilities of the SuiMove.
     public let abilities: [String]
 
+    /// Initializes a new instance of `SuiMoveAbilitySet` with the provided abilities.
+    /// - Parameter abilities: An array of abilities in string format.
     public init(abilities: [String]) {
         self.abilities = abilities
     }
 
+    /// Initializes a new instance of `SuiMoveAbilitySet` with the abilities extracted from the given JSON.
+    /// - Parameter input: A `JSON` object containing the abilities.
     public init(input: JSON) {
         self.abilities = input["abilities"].arrayValue.map { $0.stringValue }
     }

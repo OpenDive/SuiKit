@@ -26,13 +26,31 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a normalized function within a SuiMove entity.
 public struct SuiMoveNormalizedFunction {
+    /// Defines the visibility of the function (e.g. public, private).
     public let visibility: SuiMoveVisibility
+
+    /// Indicates whether the function is an entry point to its containing entity.
     public let isEntry: Bool
+
+    /// Holds the ability sets for the function's type parameters, detailing the capabilities of those types.
     public let typeParameters: [SuiMoveAbilitySet]
+
+    /// Represents the types of the parameters that the function can receive.
     public let parameters: [SuiMoveNormalizedType]
+
+    /// Represents the types of the values that the function can return.
     public let returnValues: [SuiMoveNormalizedType]
 
+    /// Initializes a new instance of `SuiMoveNormalizedFunction` with the provided parameters.
+    ///
+    /// - Parameters:
+    ///   - visibility: The visibility of the function.
+    ///   - isEntry: A boolean value indicating whether the function is an entry point.
+    ///   - typeParameters: The ability sets for the type parameters of the function.
+    ///   - parameters: The types of the parameters that the function can receive.
+    ///   - returnValues: The types of the values that the function can return.
     public init(
         visibility: SuiMoveVisibility,
         isEntry: Bool,
@@ -47,6 +65,10 @@ public struct SuiMoveNormalizedFunction {
         self.returnValues = returnValues
     }
 
+    /// Initializes a new instance of `SuiMoveNormalizedFunction` from a JSON representation.
+    /// Returns `nil` if there is an issue with the JSON input.
+    ///
+    /// - Parameter input: A JSON representation of a `SuiMoveNormalizedFunction`.
     public init?(input: JSON) {
         guard let visibility = SuiMoveVisibility.parseJSON(input["visibility"]) else { return nil }
         self.visibility = visibility
@@ -56,13 +78,17 @@ public struct SuiMoveNormalizedFunction {
         self.returnValues = input["returnValues"].arrayValue.compactMap { SuiMoveNormalizedType.parseJSON($0) }
     }
 
+    /// Determines if the function has transaction context.
+    ///
+    /// - Returns: A boolean value indicating whether the function has transaction context.
+    /// - Throws: An error if there is an issue determining the transaction context.
     public func hasTxContext() throws -> Bool {
         guard !(parameters.isEmpty) else { return false }
 
         let possiblyTxContext = parameters.last!
-
+        
         guard let structTag = possiblyTxContext.extractStructTag() else { return false }
-
+        
         return
             try structTag.address.hex() == Inputs.normalizeSuiAddress(value: "0x2") &&
             structTag.module == "tx_context" &&

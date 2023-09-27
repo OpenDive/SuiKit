@@ -26,14 +26,31 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a normalized SuiMove Module, containing various details about the module including its address,
+/// name, friend modules, structs, and exposed functions.
 public struct SuiMoveNormalizedModule {
+    /// Specifies the file format version of the module.
     public let fileFormatVersion: Int
+
+    /// The address where the module is located.
     public let address: String
+
+    /// The name of the module.
     public let name: String
+
+    /// An array of `SuiMoveModuleId` representing the friend modules of this module.
     public let friends: [SuiMoveModuleId]
+
+    /// A dictionary containing the structs present in the module, where the key is the name of the struct and the value is an instance of `SuiMoveNormalizedStruct`.
     public let structs: [String: SuiMoveNormalizedStruct]
+
+    /// A dictionary containing the exposed functions of the module, where the key is the name of the function and the value is an instance of `SuiMoveNormalizedFunction`.
     public let exposedFunctions: [String: SuiMoveNormalizedFunction]
 
+    /// Initializes a new instance of `SuiMoveNormalizedModule` from a JSON representation.
+    /// Returns `nil` if there is an issue with the JSON input.
+    ///
+    /// - Parameter input: A JSON representation of a `SuiMoveNormalizedModule`.
     public init?(input: JSON) {
         var structs: [String: SuiMoveNormalizedStruct] = [:]
         var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]

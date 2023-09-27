@@ -26,11 +26,24 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a normalized SuiMove Struct, containing details about the struct including its abilities,
+/// type parameters, and fields.
 public struct SuiMoveNormalizedStruct {
+    /// A `SuiMoveAbilitySet` representing the abilities of the struct.
     public let abilities: SuiMoveAbilitySet
+
+    /// An array of `SuiMoveStructTypeParameter` representing the type parameters of the struct.
     public let typeParameters: [SuiMoveStructTypeParameter]
+
+    /// An array of `SuiMoveNormalizedField` representing the fields within the struct.
     public let fields: [SuiMoveNormalizedField]
 
+    /// Initializes a new instance of `SuiMoveNormalizedStruct`.
+    ///
+    /// - Parameters:
+    ///   - abilities: A `SuiMoveAbilitySet` representing the abilities of the struct.
+    ///   - typeParameters: An array of `SuiMoveStructTypeParameter` representing the type parameters of the struct.
+    ///   - fields: An array of `SuiMoveNormalizedField` representing the fields within the struct.
     public init(
         abilities: SuiMoveAbilitySet,
         typeParameters: [SuiMoveStructTypeParameter],
@@ -41,6 +54,10 @@ public struct SuiMoveNormalizedStruct {
         self.fields = fields
     }
 
+    /// Initializes a new instance of `SuiMoveNormalizedStruct` from a JSON representation.
+    /// Returns `nil` if there is an issue with the JSON input.
+    ///
+    /// - Parameter input: A JSON representation of a `SuiMoveNormalizedStruct`.
     public init?(input: JSON) {
         let typeParameters = input["typeParameters"].arrayValue
         let fields = input["fields"].arrayValue

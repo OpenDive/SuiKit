@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// Represents a normalized field within a SuiMove structure or contract.
 public struct SuiMoveNormalizedField {
+    /// Holds the name of the field, serving as an identifier within its containing entity.
     public let name: String
+
+    /// Represents the type of the field, defining what kind of data or structure it can hold.
     public let type: SuiMoveNormalizedType
 }

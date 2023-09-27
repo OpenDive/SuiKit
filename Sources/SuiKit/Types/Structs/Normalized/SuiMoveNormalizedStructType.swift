@@ -26,26 +26,28 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a normalized SuiMove Struct Type, providing details about the struct including its address,
+/// module, name, and type arguments.
 public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringConvertible {
+    /// An `AccountAddress` representing the address of the struct.
     public let address: AccountAddress
+
+    /// A `String` representing the module where the struct is defined.
     public let module: String
+
+    /// A `String` representing the name of the struct.
     public let name: String
+
+    /// An array of `SuiMoveNormalizedType` representing the type arguments of the struct.
     public let typeArguments: [SuiMoveNormalizedType]
 
-    public var description: String {
-        "\(self.address.hex())::\(self.module)::\(self.name)"
-    }
-
-    public func isSameStruct(_ rhs: any ResolvedProtocol) -> Bool {
-        guard let rhsAddress = try? Inputs.normalizeSuiAddress(
-            value: rhs.address
-        ) else { return false }
-        return
-            self.address.hex() == rhsAddress &&
-            self.module == rhs.module &&
-            self.name == rhs.name
-    }
-
+    /// Initializes a new instance of `SuiMoveNormalizedStructType`.
+    ///
+    /// - Parameters:
+    ///   - address: An `AccountAddress` representing the address of the struct.
+    ///   - module: A `String` representing the module where the struct is defined.
+    ///   - name: A `String` representing the name of the struct.
+    ///   - typeArguments: An array of `SuiMoveNormalizedType` representing the type arguments of the struct.
     public init(
         address: AccountAddress,
         module: String,
@@ -58,6 +60,10 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         self.typeArguments = typeArguments
     }
 
+    /// Initializes a new instance of `SuiMoveNormalizedStructType` from a string input.
+    ///
+    /// - Parameter input: A `String` representation of a `SuiMoveNormalizedStructType`.
+    /// - Throws: An error if the initialization fails.
     public init(input: String) throws {
         let typeTag = try StructTag.fromStr(input)
         self.address = typeTag.value.address
@@ -66,6 +72,10 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         self.typeArguments = []
     }
 
+    /// Initializes a new instance of `SuiMoveNormalizedStructType` from a JSON representation.
+    /// Returns `nil` if there is an issue with the JSON input.
+    ///
+    /// - Parameter input: A JSON representation of a `SuiMoveNormalizedStructType`.
     public init?(input: JSON) {
         guard let address = try? AccountAddress.fromHex(
             input["address"].stringValue
@@ -77,6 +87,24 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         self.typeArguments = input["arguments"].arrayValue.compactMap {
             SuiMoveNormalizedType.parseJSON($0)
         }
+    }
+
+    public var description: String {
+        "\(self.address.hex())::\(self.module)::\(self.name)"
+    }
+
+    /// Compares the current struct with another to determine if they are of the same struct.
+    ///
+    /// - Parameter rhs: The `any ResolvedProtocol` to compare the current struct with.
+    /// - Returns: A `Bool` indicating whether the two structs are the same.
+    public func isSameStruct(_ rhs: any ResolvedProtocol) -> Bool {
+        guard let rhsAddress = try? Inputs.normalizeSuiAddress(
+            value: rhs.address
+        ) else { return false }
+        return
+            self.address.hex() == rhsAddress &&
+            self.module == rhs.module &&
+            self.name == rhs.name
     }
 
     public func serialize(_ serializer: Serializer) throws {

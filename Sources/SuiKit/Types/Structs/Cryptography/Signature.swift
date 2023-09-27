@@ -27,21 +27,32 @@ import Foundation
 import secp256k1
 import Web3Core
 
-/// The Crypto Signature
+/// Represents a cryptographic signature.
 public struct Signature: Equatable, KeyProtocol {
-    /// The length of the key in bytes
+    /// A constant defining the length of the signature in bytes.
     public let LENGTH: Int
 
-    /// The signature itself
+    /// The actual cryptographic signature.
     var signature: Data
+
+    /// The public key associated with the signature.
     var publicKey: Data
+
+    /// The signature scheme used for creating the signature.
     var signatureScheme: SignatureScheme
 
+    /// Initializes a new `Signature`.
+    ///
+    /// - Parameters:
+    ///   - signature: The actual cryptographic signature as `Data`.
+    ///   - publickey: The public key as `Data`.
+    ///   - signatureScheme: The signature scheme used (default is `.ED25519`).
     init(signature: Data, publickey: Data, signatureScheme: SignatureScheme = .ED25519) {
         self.signature = signature
         self.publicKey = publickey
         self.signatureScheme = signatureScheme
 
+        // Set the LENGTH property based on the signature scheme.
         switch signatureScheme {
         case .ED25519:
             self.LENGTH = 64
@@ -54,10 +65,12 @@ public struct Signature: Equatable, KeyProtocol {
         return lhs.signature == rhs.signature
     }
 
+    /// Converts the signature to a hexadecimal string.
     public func hex() throws -> String {
         return try self.data().hexEncodedString()
     }
 
+    /// Converts the signature to `Data`.
     public func data() throws -> Data {
         switch self.signatureScheme {
         case .ED25519:

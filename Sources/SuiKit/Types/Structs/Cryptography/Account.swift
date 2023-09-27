@@ -27,14 +27,22 @@ import Foundation
 
 /// Sui Blockchain Account
 public struct Account: Equatable, Hashable {
+    /// Represents the type of cryptographic key associated with the account.
+    /// For example, it could be `ed25519` or `secp256k1`.
     public let accountType: KeyType
 
-    /// The public key associated with the account
+    /// Represents the public key associated with the account. The public key is used
+    /// to verify signatures created using the corresponding private key and to derive the blockchain address.
     public let publicKey: any PublicKeyProtocol
 
-    /// The private key for the account
+    /// Represents the private key associated with the account. The private key is used to
+    /// create cryptographic signatures. It is kept private and should never be shared.
     private let privateKey: any PrivateKeyProtocol
 
+    /// Creates an account with the given key type.
+    ///
+    /// - Parameter accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    /// - Throws: An error if the account initialization fails.
     public init(accountType: KeyType = .ed25519) throws {
         switch accountType {
         case .ed25519:
@@ -46,6 +54,12 @@ public struct Account: Equatable, Hashable {
         }
     }
 
+    /// Creates an account with the given private key and key type.
+    ///
+    /// - Parameters:
+    ///   - privateKey: The private key data.
+    ///   - accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    /// - Throws: An error if the account initialization fails.
     public init(
         privateKey: Data,
         accountType: KeyType = .ed25519
@@ -60,6 +74,12 @@ public struct Account: Equatable, Hashable {
         }
     }
 
+    /// Creates an account with the given public key, private key, and key type.
+    ///
+    /// - Parameters:
+    ///   - publicKey: The public key protocol.
+    ///   - privateKey: The private key protocol.
+    ///   - accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
     public init(
         publicKey: any PublicKeyProtocol,
         privateKey: any PrivateKeyProtocol,
@@ -70,6 +90,12 @@ public struct Account: Equatable, Hashable {
         self.accountType = accountType
     }
 
+    /// Creates an account with the given private key protocol and key type.
+    ///
+    /// - Parameters:
+    ///   - privateKey: The private key protocol.
+    ///   - accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    /// - Throws: An error if the public key initialization fails.
     public init(
         privateKey: any PrivateKeyProtocol,
         accountType: KeyType = .ed25519
@@ -79,6 +105,12 @@ public struct Account: Equatable, Hashable {
         self.accountType = accountType
     }
 
+    /// Creates an account with the given key type and hexadecimal string representation of the private key.
+    ///
+    /// - Parameters:
+    ///   - keyType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    ///   - hexString: The hexadecimal string representation of the private key.
+    /// - Throws: An error if the account initialization fails.
     public init(
         keyType: KeyType = .ed25519,
         hexString: String
@@ -97,6 +129,13 @@ public struct Account: Equatable, Hashable {
         }
     }
 
+    /// Creates an account from the JSON representation of the private key stored at the given file path.
+    ///
+    /// - Parameters:
+    ///   - keyType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    ///   - path: The file path to the JSON representation of the private key.
+    /// - Throws: `SuiError.invalidJsonData` if the data is not a valid JSON,
+    ///           or `SuiError.missingPrivateKey` if the private key is missing in the JSON data.
     public init(keyType: KeyType = .ed25519, path: String) throws {
         let fileURL = URL(fileURLWithPath: path)
         let data = try Data(contentsOf: fileURL)
@@ -116,6 +155,12 @@ public struct Account: Equatable, Hashable {
         )
     }
 
+    /// Creates an account with the given mnemonic and key type.
+    ///
+    /// - Parameters:
+    ///   - mnemonic: The mnemonic phrase.
+    ///   - accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    /// - Throws: An error if the account initialization fails.
     public init(_ mnemonic: String, accountType: KeyType = .ed25519) throws {
         self.accountType = accountType
 
@@ -131,6 +176,12 @@ public struct Account: Equatable, Hashable {
         }
     }
 
+    /// Creates an account with the given value and key type.
+    ///
+    /// - Parameters:
+    ///   - accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
+    ///   - value: A string value representing the private key.
+    /// - Throws: An error if the account initialization fails.
     public init(accountType: KeyType = .ed25519, _ value: String) throws {
         self.accountType = accountType
 
@@ -206,6 +257,13 @@ public struct Account: Equatable, Hashable {
         return try self.privateKey.sign(data: data)
     }
 
+    /// Verifies the given signature with the given data using the public key.
+    ///
+    /// - Parameters:
+    ///   - data: The data that was signed.
+    ///   - signature: The signature to verify.
+    /// - Returns: A boolean value indicating whether the signature is valid.
+    /// - Throws: An error if the verification process fails.
     public func verify(
         _ data: Data,
         _ signature: Signature
@@ -216,6 +274,13 @@ public struct Account: Equatable, Hashable {
         )
     }
 
+    /// Signs the given bytes with a specified intent using the private key.
+    ///
+    /// - Parameters:
+    ///   - bytes: The data to sign.
+    ///   - intent: The intent scope of the signing.
+    /// - Returns: The resulting signature.
+    /// - Throws: An error if the signing process fails.
     public func signWithIntent(
         _ bytes: [UInt8],
         _ intent: IntentScope
@@ -223,18 +288,37 @@ public struct Account: Equatable, Hashable {
         return try self.privateKey.signWithIntent(bytes, intent)
     }
 
+    /// Signs the transaction block using the private key.
+    ///
+    /// - Parameters:
+    ///   - bytes: The transaction block to sign.
+    /// - Returns: The resulting signature.
+    /// - Throws: An error if the signing process fails.
     public func signTransactionBlock(
         _ bytes: [UInt8]
     ) throws -> Signature {
         return try self.privateKey.signTransactionBlock(bytes)
     }
 
+    /// Signs a personal message using the private key.
+    ///
+    /// - Parameters:
+    ///   - bytes: The personal message to sign.
+    /// - Returns: The resulting signature.
+    /// - Throws: An error if the signing process fails.
     public func signPersonalMessage(
         _ bytes: [UInt8]
     ) throws -> Signature {
         return try self.privateKey.signPersonalMessage(bytes)
     }
 
+    /// Verifies the signature of a transaction block using the public key.
+    ///
+    /// - Parameters:
+    ///   - transactionBlock: The transaction block that was signed.
+    ///   - signature: The signature to verify.
+    /// - Returns: A boolean value indicating whether the signature is valid.
+    /// - Throws: An error if the verification process fails.
     public func verifyTransactionBlock(
         _ transactionBlock: [UInt8],
         _ signature: Signature
@@ -244,6 +328,14 @@ public struct Account: Equatable, Hashable {
         )
     }
 
+    /// Verifies the signature of the given bytes with a specified intent using the public key.
+    ///
+    /// - Parameters:
+    ///   - bytes: The data that was signed.
+    ///   - signature: The signature to verify.
+    ///   - intent: The intent scope of the verification.
+    /// - Returns: A boolean value indicating whether the signature is valid.
+    /// - Throws: An error if the verification process fails.
     public func verifyWithIntent(
         _ bytes: [UInt8],
         _ signature: Signature,
@@ -256,6 +348,13 @@ public struct Account: Equatable, Hashable {
         )
     }
 
+    /// Verifies the signature of a personal message using the public key.
+    ///
+    /// - Parameters:
+    ///   - message: The personal message that was signed.
+    ///   - signature: The signature to verify.
+    /// - Returns: A boolean value indicating whether the signature is valid.
+    /// - Throws: An error if the verification process fails.
     public func verifyPersonalMessage(
         _ message: [UInt8], 
         _ signature: Signature
@@ -266,12 +365,21 @@ public struct Account: Equatable, Hashable {
         )
     }
 
+    /// Serializes the given signature to a string.
+    ///
+    /// - Parameter signature: The signature to serialize.
+    /// - Returns: The serialized signature as a string.
+    /// - Throws: An error if the serialization process fails.
     public func toSerializedSignature(_ signature: Signature) throws -> String {
         return try self.publicKey.toSerializedSignature(
             signature: signature
         )
     }
 
+    /// Exports the account to an `ExportedAccount` representation.
+    ///
+    /// - Returns: The exported account representation.
+    /// - Throws: `AccountError.cannotBeExported` if the account's private key type is unsupported for export.
     public func export() throws -> ExportedAccount {
         if self.privateKey.key.getType() == .data {
             return ExportedAccount(

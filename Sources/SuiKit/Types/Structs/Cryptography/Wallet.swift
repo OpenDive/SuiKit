@@ -28,47 +28,65 @@ import ed25519swift
 import CryptoSwift
 import Bip39
 
-/// Represents an Sui wallet.
+/// Represents a Sui wallet, capable of managing multiple accounts.
 public class Wallet: Hashable {
-    public static func == (lhs: Wallet, rhs: Wallet) -> Bool {
-        return
-            lhs.mnemonic == rhs.mnemonic &&
-            lhs.accounts == rhs.accounts
-    }
-
-    /// The mnemonic words.
+    /// The mnemonic associated with the wallet, represented by a `Mnemonic` instance.
     public var mnemonic: Mnemonic
-
-    /// The key pair.
+    
+    /// An array of `Account` instances representing the accounts in the wallet.
     public var accounts: [Account]
 
+    /// Convenience initializer to create a `Wallet` instance with a new mnemonic.
+    /// - Throws: An error if there is any issue creating the mnemonic or initializing the wallet with it.
     public convenience init() throws {
-        let mnemonic = try Mnemonic()
-        try self.init(mnemonic: mnemonic)
+        let mnemonic = try Mnemonic() // Generates a new mnemonic.
+        try self.init(mnemonic: mnemonic) // Initializes the wallet with the newly created mnemonic.
     }
 
+    /// Initializes a new wallet with the given mnemonic and accounts.
+    /// - Parameters:
+    ///   - mnemonic: The mnemonic associated with the wallet.
+    ///   - accounts: The accounts to be included in the wallet.
     public init(mnemonic: Mnemonic, accounts: [Account]) {
         self.mnemonic = mnemonic
         self.accounts = accounts
     }
 
+    /// Initializes a new wallet with the given mnemonic and a single account of the specified type.
+    /// - Parameters:
+    ///   - mnemonic: The mnemonic associated with the wallet.
+    ///   - accountType: The type of account to be created in the wallet, defaulting to `.ed25519`.
+    ///   - separator: The string that separates the mnemonic words, defaulting to " ".
+    /// - Throws: An error if there is any issue creating the account with the given mnemonic and account type.
     public init(mnemonic: Mnemonic, accountType: KeyType = .ed25519, separator: String = " ") throws {
         self.mnemonic = mnemonic
         self.accounts = [
             try Account(
                 mnemonic.mnemonic().joined(separator: separator),
                 accountType: accountType
-            )
+            ) // Creates a new account with the specified mnemonic and account type.
         ]
     }
 
+    /// Convenience initializer to create a `Wallet` instance with a mnemonic string.
+    /// - Parameters:
+    ///   - mnemonicString: A string representation of the mnemonic.
+    ///   - accountType: The type of account to be created in the wallet, defaulting to `.ed25519`.
+    ///   - separator: The string that separates the mnemonic words in `mnemonicString`, defaulting to " ".
+    /// - Throws: An error if there is any issue creating the mnemonic or initializing the wallet with it.
     public convenience init(
         mnemonicString: String,
         accountType: KeyType = .ed25519,
         separator: String = " "
     ) throws {
-        let mnemonic = try Mnemonic(mnemonic: mnemonicString.components(separatedBy: separator))
-        try self.init(mnemonic: mnemonic, accountType: accountType, separator: separator)
+        let mnemonic = try Mnemonic(mnemonic: mnemonicString.components(separatedBy: separator)) // Parses the mnemonic string.
+        try self.init(mnemonic: mnemonic, accountType: accountType, separator: separator) // Initializes the wallet with the parsed mnemonic.
+    }
+
+    public static func == (lhs: Wallet, rhs: Wallet) -> Bool {
+        return
+            lhs.mnemonic == rhs.mnemonic &&
+            lhs.accounts == rhs.accounts
     }
 
     public func hash(into hasher: inout Hasher) {

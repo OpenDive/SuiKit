@@ -26,10 +26,17 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents information related to an upgrade.
 public struct UpgradeInfo {
+    /// A `String` representing the ID of the upgraded element.
     public var upgradedId: String
+
+    /// A `String` representing the version of the upgraded element.
     public var upgradedVersion: String
 
+    /// Parses a `JSON` object to create an instance of `UpgradeInfo`.
+    /// - Parameter input: A `JSON` object containing `upgradedId` and `upgradedVersion`.
+    /// - Returns: An instance of `UpgradeInfo` initialized with the values from the input `JSON`.
     public static func parseJSON(_ input: JSON) -> UpgradeInfo {
         return UpgradeInfo(
             upgradedId: input["upgradedId"].stringValue,

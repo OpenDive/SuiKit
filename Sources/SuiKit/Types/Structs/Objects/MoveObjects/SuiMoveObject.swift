@@ -25,8 +25,17 @@
 
 import Foundation
 
+/// Represents a Move object in the Sui programming language.
 public struct SuiMoveObject {
+    /// A `String` representing the type of the Move object.
     public let type: String
+
+    /// An optional `ObjectContentFields` representing the fields of the object.
+    /// It will be `nil` if the object does not have any fields.
     public let fields: ObjectContentFields?
+
+    /// A `Bool` indicating whether the object has public transfer enabled.
+    /// If `true`, the object can be transferred publicly.
+    /// If `false`, the object cannot be transferred publicly.
     public let hasPublicTransfer: Bool
 }

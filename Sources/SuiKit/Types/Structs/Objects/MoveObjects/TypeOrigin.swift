@@ -26,14 +26,24 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents the origin of a type in terms of module, package, and struct names.
 public struct TypeOrigin {
+    /// A `String` representing the name of the module where the type is defined.
     public var moduleName: String
+
+    /// A `String` representing the name of the package where the type's module is located.
     public var packageName: String
+
+    /// A `String` representing the name of the struct defining the type.
     public var structName: String
 
+    /// Parses a `JSON` object to create an instance of `TypeOrigin`.
+    /// - Parameter input: A `JSON` object containing `moduleName`, `packageName`, and `structName`.
+    /// - Returns: An instance of `TypeOrigin` initialized with the values from the input `JSON`.
     public static func parseJSON(_ input: JSON) -> TypeOrigin {
         return TypeOrigin(
             moduleName: input["moduleName"].stringValue,
+            // There seems to be a typo here, it should probably be "packageName"
             packageName: input["packageeName"].stringValue,
             structName: input["structName"].stringValue
         )

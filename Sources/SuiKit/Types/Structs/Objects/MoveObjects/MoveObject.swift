@@ -25,8 +25,15 @@
 
 import Foundation
 
+/// Represents a Move Object in Move programming language, detailing its fields, type, and whether it has public transfer enabled.
 public struct MoveObject {
+    /// An optional `MoveStruct` representing the fields of the Move object.
+    /// It is `nil` if the Move object does not have any fields.
     public var fields: MoveStruct?
+
+    /// A `Bool` indicating whether the Move object has public transfer enabled.
     public var hasPublicTransfer: Bool
+
+    /// A `String` representing the type of the Move object.
     public var type: String
 }

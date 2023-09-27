@@ -26,9 +26,13 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents an identifier for a `MoveValue` in the Move programming language.
 public struct MoveValueId {
+    /// A `String` representing the unique identifier of a `MoveValue`.
     public var id: String
 
+    /// Initializes a `MoveValueId` instance by parsing a `JSON` object.
+    /// - Parameter input: A `JSON` object containing the identifier data for a `MoveValue`.
     public init(input: JSON) {
         self.id = input["id"].stringValue
     }

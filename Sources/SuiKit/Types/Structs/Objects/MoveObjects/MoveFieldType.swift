@@ -26,10 +26,18 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents the field type in Move, containing the fields and their types.
 public struct MoveFieldType {
+    /// A dictionary where keys are the names of the fields and values are the `MoveValue` associated with each field.
     public var fields: [String: MoveValue]
+
+    /// A `String` representing the type of the Move field.
     public var type: String
 
+    /// Initializes a new instance of `MoveFieldType` using a given JSON input.
+    /// It parses the input JSON to populate the `fields` and `type` properties.
+    ///
+    /// - Parameter input: A `JSON` object containing the information to initialize the `MoveFieldType`.
     public init(input: JSON) {
         var fieldsOutput: [String: MoveValue] = [:]
         for (key, value) in input["fields"].dictionaryValue {

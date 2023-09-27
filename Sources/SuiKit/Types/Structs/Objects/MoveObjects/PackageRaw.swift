@@ -25,10 +25,20 @@
 
 import Foundation
 
+/// Represents the raw data structure for a Package in the Move programming language.
 public struct PackageRaw {
+    /// A `String` representing the unique identifier of the package.
     public var id: String
+
+    /// A dictionary mapping `String` keys to `UpgradeInfo` values, representing the linkage table of the package.
     public var linkageTable: [String: UpgradeInfo]
+
+    /// A dictionary mapping `String` keys to `String` values, representing the module map of the package.
     public var moduleMap: [String: String]
+
+    /// An array of `TypeOrigin` representing the type origin table of the package.
     public var typeOriginTable: [TypeOrigin]
+
+    /// A `String` representing the version of the package.
     public var version: String
 }

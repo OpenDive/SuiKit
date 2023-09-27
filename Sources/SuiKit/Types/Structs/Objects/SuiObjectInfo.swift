@@ -26,9 +26,18 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents information about a Sui Object.
 public struct SuiObjectInfo {
+    /// A `SuiObjectRef` instance containing the reference information of the Sui Object.
     public let suiObjectRef: SuiObjectRef
+
+    /// A `String` representing the type of the Sui Object.
     public let type: String
+
+    /// An `ObjectOwner` instance representing the owner of the Sui Object.
     public let owner: ObjectOwner
+
+    /// A `TransactionDigest` instance representing the digest of the previous transaction
+    /// associated with this Sui Object.
     public let previousTransaction: TransactionDigest
 }

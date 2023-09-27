@@ -27,13 +27,24 @@ import Foundation
 import Web3Core
 import SwiftyJSON
 
+/// Represents a reference to a Sui Object and conforms to `KeyProtocol`.
 public struct SuiObjectRef: KeyProtocol {
+    /// A `String` representing the object ID of the Sui Object.
     public var objectId: String
+
+    /// A `String` representing the version of the Sui Object.
     public var version: String
+
+    /// A `TransactionDigest` representing the digest related to the Sui Object transaction.
     public var digest: TransactionDigest
 
+    /// Initializes a new instance of `SuiObjectRef`.
+    /// - Parameters:
+    ///   - objectId: A `String` representing the object ID of the Sui Object.
+    ///   - version: A `String` representing the version of the Sui Object.
+    ///   - digest: A `TransactionDigest` representing the transaction digest.
     public init(
-        objectId: objectId,
+        objectId: String,
         version: String,
         digest: TransactionDigest
     ) {
@@ -42,6 +53,11 @@ public struct SuiObjectRef: KeyProtocol {
         self.digest = digest
     }
 
+    /// Initializes a new instance of `SuiObjectRef` with `AccountAddress` as object ID.
+    /// - Parameters:
+    ///   - objectId: An `AccountAddress` representing the object ID of the Sui Object.
+    ///   - version: A `String` representing the version of the Sui Object.
+    ///   - digest: A `TransactionDigest` representing the transaction digest.
     public init(
         objectId: AccountAddress,
         version: String,
@@ -52,28 +68,11 @@ public struct SuiObjectRef: KeyProtocol {
         self.digest = digest
     }
 
+    /// Initializes a new instance of `SuiObjectRef` from a JSON object.
+    /// - Parameter input: A `JSON` object containing the initial values for the new instance.
     public init(input: JSON) {
         self.objectId = input["objectId"].stringValue
         self.version = "\(input["version"].uInt64Value)"
-        self.digest = input["digest"].stringValue
-    }
-
-    public func serialize(_ serializer: Serializer) throws {
-        let account = try AccountAddress.fromHex(self.objectId)
-        try Serializer._struct(serializer, value: account)
-        try Serializer.u64(serializer, UInt64(version) ?? 0)
-        if let dataDigest = digest.base58DecodedData {
-            try Serializer.toBytes(serializer, Data(dataDigest))
-        }
-    }
-
-    public static func deserialize(
-        from deserializer: Deserializer
-    ) throws -> SuiObjectRef {
-        return SuiObjectRef(
-            objectId: try Deserializer._struct(deserializer),
-            version: "\(try Deserializer.u64(deserializer))",
-            digest: ([UInt8](try Deserializer.toBytes(deserializer))).base58EncodedString
-        )
+        self.digest = TransactionDigest(input: input["digest"])
     }
 }

@@ -25,9 +25,18 @@
 
 import Foundation
 
+/// Represents a raw Move Object in the Move programming language, containing its BCS (Binary Canonical Serialization) representation, type, version, and whether it has public transfer enabled.
 public struct MoveObjectRaw {
+    /// A `String` representing the BCS (Binary Canonical Serialization) bytes of the Move object.
+    /// BCS is a binary format used for encoding structured data.
     public var bcsBytes: String
+
+    /// A `Bool` indicating whether the Move object has public transfer enabled.
     public var hasPublicTransfer: Bool
+
+    /// A `String` representing the type of the Move object.
     public var type: String
+
+    /// A `String` representing the version of the Move object.
     public var version: String
 }

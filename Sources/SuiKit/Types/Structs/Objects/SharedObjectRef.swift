@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// Represents a reference to a shared object.
 public struct SharedObjectRef {
+    /// A `String` representing the unique identifier of the shared object.
     public let objectId: String
+
+    /// A `UInt64` value representing the initial shared version of the object.
     public let initialSharedVersion: UInt64
+
+    /// A `Bool` indicating whether the shared object is mutable. `true` if it's mutable, `false` otherwise.
     public let mutable: Bool
 }

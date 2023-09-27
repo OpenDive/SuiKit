@@ -26,9 +26,16 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a Move Package in the Move programming language.
+/// A Move Package is a container for Move Modules, where each module contains Move Scripts and Move Structs.
 public struct MovePackage {
+    /// A dictionary where the key is a `String` representing the name of a module, script, or struct,
+    /// and the value is a `String` representing the disassembled bytecode of that entity.
     public var disassembled: [String: String]
 
+    /// Parses a `JSON` object to initialize a `MovePackage`.
+    /// - Parameter input: A `JSON` object containing the Move Package data.
+    /// - Returns: An instance of `MovePackage` initialized with the parsed data.
     public static func parseJSON(_ input: JSON) -> MovePackage {
         var package: [String: String] = [:]
         for (key, value) in input.dictionaryValue {

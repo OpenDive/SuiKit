@@ -25,7 +25,13 @@
 
 import Foundation
 
+/// Represents a balance that is locked and cannot be accessed until a certain condition is met.
 public struct LockedBalance {
+    /// An integer representing the identifier of the epoch
+    /// during which the balance is locked.
     public let epochId: Int
+
+    /// An integer representing the number or amount
+    /// of coins that are locked.
     public let number: Int
 }

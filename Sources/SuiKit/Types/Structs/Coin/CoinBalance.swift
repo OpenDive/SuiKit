@@ -25,9 +25,21 @@
 
 import Foundation
 
+/// Represents the balance details of a specific coin type in a user's account or wallet.
 public struct CoinBalance {
+    /// A string that represents the type of coin.
+    /// This could be the name or the identifier of the coin/cryptocurrency.
     public let coinType: String
+
+    /// An integer representing the count of coin objects within the specified coin type.
+    /// Coin objects are instances or units of the coin type.
     public let coinObjectCount: Int
+
+    /// A string representing the total balance of the coin type in the account or wallet.
+    /// This is typically the sum of the values of all coin objects of this coin type.
     public let totalBalance: String
+
+    /// An optional `LockedBalance` instance representing any locked balance of the coin type.
+    /// Locked balance is the portion of the total balance that is restricted or not readily available for use.
     public let lockedBalance: LockedBalance?
 }

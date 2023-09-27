@@ -25,8 +25,16 @@
 
 import Foundation
 
+/// Represents a paginated set of `CoinStruct`, often used to handle large sets of coins
+/// and retrieve them page by page to minimize load and optimize performance.
 public struct PaginatedCoins {
+    /// An array of `CoinStruct` representing the coin structures contained in the current page.
     public let data: [CoinStruct]
+
+    /// A string representing the object identifier (objectId) for the next cursor in the pagination.
+    /// It is used to retrieve the next page of `CoinStruct` objects.
     public let nextCursor: objectId
+
+    /// A boolean value indicating whether there is a next page available in the pagination.
     public let hasNextPage: Bool
 }

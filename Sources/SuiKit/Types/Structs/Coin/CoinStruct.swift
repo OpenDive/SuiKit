@@ -7,14 +7,31 @@
 
 import Foundation
 
+/// Represents the details of a specific coin object.
 public struct CoinStruct {
+    /// A string representing the type of the coin, e.g., Bitcoin, Ethereum.
     public let coinType: String
+
+    /// An `objectId` representing the unique identifier of the coin object.
     public let coinObjectId: objectId
+
+    /// A string representing the version of the coin object.
+    /// This can be used to track the changes or updates made to the coin object.
     public let version: String
+
+    /// A `TransactionDigest` representing the summary or the hash
+    /// of the transaction associated with this coin object.
     public let digest: TransactionDigest
+
+    /// A string representing the balance associated with this coin object.
     public let balance: String
+
+    /// A `TransactionDigest` representing the summary or the hash
+    /// of the previous transaction associated with this coin object.
     public let previousTransaction: TransactionDigest
 
+    /// Converts the `CoinStruct` instance to a `SuiObjectData` instance.
+    /// - Returns: A `SuiObjectData` instance containing relevant data from `CoinStruct`.
     public func toSuiObjectData() -> SuiObjectData {
         return SuiObjectData(
             bcs: nil,
@@ -30,6 +47,8 @@ public struct CoinStruct {
         )
     }
 
+    /// Converts the `CoinStruct` instance to a `SuiObjectRef` instance.
+    /// - Returns: A `SuiObjectRef` instance containing relevant references from `CoinStruct`.
     public func toSuiObjectRef() -> SuiObjectRef {
         return SuiObjectRef(
             objectId: self.coinObjectId,

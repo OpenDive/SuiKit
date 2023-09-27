@@ -24,19 +24,36 @@
 //
 
 import Foundation
-import AnyCodable
 import SwiftyJSON
 
 public struct SuiEvent {
+    /// The unique identifier of the event.
     public let id: EventId
+
+    /// The identifier of the package associated with the event.
     public let packageId: objectId
+
+    /// A string representing the module associated with the transaction.
     public let transactionModule: String
+
+    /// An `AccountAddress` representing the sender of the event.
     public let sender: AccountAddress
+
+    /// A string representing the type of the event.
     public let type: String
+
+    /// A JSON object representing the parsed JSON associated with the event.
     public let parsedJson: JSON
+
+    /// An optional string representing the BCS (Binary Canonical Serialization) of the event.
     public let bcs: String?
+
+    /// An optional string representing the timestamp of the event in milliseconds.
     public let timestampMs: String?
 
+    /// Initializes a new `SuiEvent` with the provided JSON input.
+    /// - Parameter input: A JSON object containing the event data.
+    /// - Returns: An initialized `SuiEvent` object if the input is valid, otherwise returns nil.
     public init?(input: JSON) {
         guard let sender = try? AccountAddress.fromHex(input["sender"].stringValue) else { return nil }
         self.id = EventId.parseJSON(input["id"])

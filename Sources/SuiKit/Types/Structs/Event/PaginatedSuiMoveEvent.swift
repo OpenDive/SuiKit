@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// Represents a paginated list of Sui Move Events.
 public struct PaginatedSuiMoveEvent {
+    /// An array of `SuiEvent` objects representing the events in the current page.
     public let data: [SuiEvent]
+
+    /// An `EventId` object representing the cursor to the next page of events.
     public let nextCursor: EventId
+
+    /// A Boolean value indicating whether there is a next page of events available.
     public let hasNextPage: Bool
 }

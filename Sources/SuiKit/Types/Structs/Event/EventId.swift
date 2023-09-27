@@ -26,10 +26,17 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a unique identifier for an event, typically associated with a transaction.
 public struct EventId: Codable {
+    /// The digest of the transaction, typically represented by a `TransactionDigest` object.
     public let txDigest: TransactionDigest
+
+    /// The sequence number of the event, typically represented by a `SequenceNumber` object.
     public let eventSeq: SequenceNumber
 
+    /// Parses a JSON object to construct and return an `EventId` instance.
+    /// - Parameter input: The JSON object containing the event ID data.
+    /// - Returns: An initialized `EventId` object.
     public static func parseJSON(_ input: JSON) -> EventId {
         return EventId(
             txDigest: input["txDigest"].stringValue,

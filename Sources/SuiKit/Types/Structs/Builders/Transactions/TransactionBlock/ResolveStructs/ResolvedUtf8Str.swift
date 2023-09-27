@@ -26,7 +26,20 @@
 import Foundation
 
 public struct ResolvedUtf8Str: ResolvedProtocol {
+    /// Represents the address associated with the Move standard library.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var address: String = ResolvedConstants.moveStdlibAddress
+
+    /// Represents the module name where the `String` struct is declared in UTF-8 in the standard library.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var module: String = ResolvedConstants.stdUtf8ModuleName
+
+    /// Represents the name for the UTF-8 `String` struct in the standard library.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var name: String = ResolvedConstants.stdUtf8StructName
+
+    /// Initializes a new instance of `ResolvedUtf8Str`.
+    /// As all properties are initialized with default values,
+    /// no parameters are needed and rarely this initializer will be used.
+    public init() {}
 }

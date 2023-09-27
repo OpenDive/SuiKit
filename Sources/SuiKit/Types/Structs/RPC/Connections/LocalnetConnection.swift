@@ -25,7 +25,7 @@
 
 import Foundation
 
-public struct LocalnetConnection: ConnectionProtcol {
+public struct LocalnetConnection: ConnectionProtocol {
     public var fullNode: String = "http://127.0.0.1:9000/"
     public var faucet: String? = "http://127.0.0.1:9123/gas"
 

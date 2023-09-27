@@ -26,7 +26,10 @@
 import Foundation
 
 public struct NestedResult: KeyProtocol {
+    /// The index representing the position of the `NestedResult` in a collection.
     public let index: UInt16
+
+    /// The index representing the position of the result in a collection.
     public let resultIndex: UInt16
 
     public func serialize(_ serializer: Serializer) throws {
@@ -43,3 +46,4 @@ public struct NestedResult: KeyProtocol {
         )
     }
 }
+

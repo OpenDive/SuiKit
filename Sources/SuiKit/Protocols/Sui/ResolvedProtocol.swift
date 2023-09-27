@@ -25,8 +25,20 @@
 
 import Foundation
 
+/// Protocol defining the requirements for a resolved object.
+/// Conforming types are expected to contain all necessary data for
+/// uniquely identifying a resource, typically within a blockchain or
+/// other decentralized architecture.
 public protocol ResolvedProtocol: Equatable {
+    /// The address that uniquely identifies the location of the resource.
+    /// This could be a blockchain address, IP address, or other identifier.
     var address: String { get }
+
+    /// The module to which the resource belongs. This gives additional
+    /// context to the resource's nature and how it should be handled.
     var module: String { get }
+
+    /// The human-readable name of the resource. This serves as an easier
+    /// way to refer to the resource, though it may not be unique.
     var name: String { get }
 }

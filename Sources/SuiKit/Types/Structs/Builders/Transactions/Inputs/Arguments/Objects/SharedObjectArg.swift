@@ -26,17 +26,33 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing the argument for a Shared Object, conforming to `KeyProtocol`.
 public struct SharedObjectArg: KeyProtocol {
+    /// A string that uniquely identifies the object.
     public let objectId: String
+
+    /// A `UInt64` value representing the initial shared version of the object.
     public let initialSharedVersion: UInt64
+
+    /// A Boolean value indicating whether the object is mutable.
     public let mutable: Bool
 
-    public init(objectId: objectId, initialSharedVersion: UInt64, mutable: Bool) {
+    /// Initializes a new instance of `SharedObjectArg`.
+    ///
+    /// - Parameters:
+    ///   - objectId: A string uniquely identifying the object.
+    ///   - initialSharedVersion: A `UInt64` value representing the initial shared version.
+    ///   - mutable: A Boolean value indicating whether the object is mutable.
+    public init(objectId: String, initialSharedVersion: UInt64, mutable: Bool) {
         self.objectId = objectId
         self.initialSharedVersion = initialSharedVersion
         self.mutable = mutable
     }
 
+    /// Initializes a new instance of `SharedObjectArg` from the provided JSON object.
+    ///
+    /// - Parameter input: A JSON object containing the required data.
+    /// - Returns: An optional `SharedObjectArg`. Will be `nil` if any of the required fields are missing or invalid in the JSON object.
     public init?(input: JSON) {
         guard
             let objectId = input["objectId"].string,

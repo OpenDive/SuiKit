@@ -26,21 +26,33 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing an argument for a Pure Call, conforming to `KeyProtocol`.
 public struct PureCallArg: KeyProtocol {
+    /// An array of `UInt8` representing the value of the argument.
     public var value: [UInt8]
 
+    /// Initializes a new instance of `PureCallArg`.
+    ///
+    /// - Parameter value: An array of `UInt8` representing the value of the argument.
     public init(value: [UInt8]) {
         self.value = value
     }
 
+    /// Initializes a new instance of `PureCallArg`.
+    ///
+    /// - Parameter value: A `Data` object representing the value of the argument.
     public init(value: Data) {
         self.value = [UInt8](value)
     }
 
+    /// Initializes a new instance of `PureCallArg` from the provided JSON object.
+    ///
+    /// - Parameter input: A JSON object containing the required data.
+    /// - Returns: An optional `PureCallArg`. Will be `nil` if any of the required fields are missing or invalid in the JSON object.
     public init?(input: JSON) {
         guard let value = SuiJsonValue.fromJSON(input["value"]) else { return nil }
         let ser = Serializer()
-        guard ((try? Serializer._struct(ser, value: value)) != nil) else { return nil }
+        guard (try? Serializer._struct(ser, value: value)) != nil else { return nil }
         self.value = [UInt8](ser.output())
     }
 

@@ -25,11 +25,11 @@
 
 import Foundation
 
-public protocol SignerWithProviderProtocol: SignerProcotol {
+public protocol SignerWithProviderProtocol {
     var provider: SuiProvider { get set }
     var faucetProvider: FaucetClient { get set }
 
     func getAddress() throws -> String
-
     func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoinInfo
+    func signData(data: Data) throws -> String
 }

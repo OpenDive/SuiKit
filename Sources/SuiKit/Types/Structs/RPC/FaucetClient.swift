@@ -27,9 +27,9 @@ import Foundation
 import SwiftyJSON
 
 public struct FaucetClient {
-    public let connection: any ConnectionProtcol
+    public let connection: any ConnectionProtocol
 
-    public init(connection: any ConnectionProtcol) {
+    public init(connection: any ConnectionProtocol) {
         self.connection = connection
     }
 

@@ -30,14 +30,23 @@ import Web3Core
 import Blake2
 
 public struct TransactionBlockDataBuilder: KeyProtocol {
+    /// Maximum allowed size for transaction data.
     public static let transactionDataMaxSize = 128 * 1024
 
+    /// An instance of `SerializedTransactionDataBuilder` used to build transaction data.
     public var builder: SerializedTransactionDataBuilder
 
+    /// Initializes a new instance of `TransactionBlockDataBuilder` with the provided `SerializedTransactionDataBuilder`.
+    ///
+    /// - Parameter builder: An instance of `SerializedTransactionDataBuilder`.
     public init(builder: SerializedTransactionDataBuilder) {
         self.builder = builder
     }
 
+    /// Initializes a new instance of `TransactionBlockDataBuilder` with raw bytes.
+    ///
+    /// - Parameter bytes: A `Data` object containing the serialized transaction data.
+    /// - Returns: An optional instance of `TransactionBlockDataBuilder`.
     public init?(bytes: Data) {
         let der = Deserializer(data: bytes)
         guard let transactionData: TransactionData = try? Deserializer._struct(der) else {
@@ -52,6 +61,11 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         }
     }
 
+    /// Computes and returns the digest from the provided raw bytes.
+    ///
+    /// - Parameter bytes: A `Data` object.
+    /// - Throws: If hashing fails.
+    /// - Returns: A `String` representing the base58 encoded string of the hashed data.
     public static func getDigestFromBytes(bytes: Data) throws -> String {
         let typeTag = "TransactionData"
         let data: Data = bytes
@@ -68,12 +82,23 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         return hash.base58EncodedString
     }
 
+    /// Restores and returns an instance of `TransactionBlockDataBuilder` from the provided `SerializedTransactionDataBuilder`.
+    ///
+    /// - Parameter data: An instance of `SerializedTransactionDataBuilder`.
+    /// - Returns: An instance of `TransactionBlockDataBuilder`.
     public static func restore(
         data: SerializedTransactionDataBuilder
     ) -> TransactionBlockDataBuilder {
         return TransactionBlockDataBuilder(builder: data)
     }
 
+    /// Builds and returns the serialized transaction data with the optional provided overrides and transaction kind.
+    ///
+    /// - Parameters:
+    ///   - overrides: An optional instance of `TransactionBlockDataBuilder` containing the overrides.
+    ///   - onlyTransactionKind: A `Bool` indicating whether to only use the transaction kind when building. Defaults to nil.
+    /// - Throws: If missing required gas values or serialization fails.
+    /// - Returns: A `Data` object representing the serialized transaction data.
     public func build(
         overrides: TransactionBlockDataBuilder? = nil,
         onlyTransactionKind: Bool? = nil
@@ -127,25 +152,46 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         return ser.output()
     }
 
+    /// Computes and returns the digest of the built transaction data.
+    ///
+    /// - Throws: If building or hashing fails.
+    /// - Returns: A `String` representing the base58 encoded string of the hashed data.
     public func getDigest() throws -> String {
         let bytes = try self.build()
         return try TransactionBlockDataBuilder.getDigestFromBytes(bytes: bytes)
     }
 
+    /// Returns a snapshot of the current builder instance.
+    ///
+    /// - Returns: An instance of `SerializedTransactionDataBuilder`.
     public func snapshot() -> SerializedTransactionDataBuilder {
         return self.builder
     }
 
+    /// Serializes the transaction block data builder.
+    ///
+    /// - Parameter serializer: An instance of `Serializer`.
+    /// - Throws: If serialization fails.
     public func serialize(_ serializer: Serializer) throws {
         try Serializer._struct(serializer, value: self.builder)
     }
 
+    /// Deserializes and returns an instance of `TransactionBlockDataBuilder`.
+    ///
+    /// - Parameter deserializer: An instance of `Deserializer`.
+    /// - Throws: If deserialization fails.
+    /// - Returns: An instance of `TransactionBlockDataBuilder`.
     public static func deserialize(
         from deserializer: Deserializer
     ) throws -> TransactionBlockDataBuilder {
         return TransactionBlockDataBuilder(builder: try Deserializer._struct(deserializer))
     }
 
+    /// Prepares and returns a normalized SUI address from the provided address string.
+    ///
+    /// - Parameter address: A `String` representing the SUI address.
+    /// - Throws: If address normalization fails.
+    /// - Returns: A `String` representing the normalized SUI address.
     public func prepareSuiAddress(address: String) throws -> String {
         return try Inputs.normalizeSuiAddress(value: address).replacingOccurrences(of: "0x", with: "")
     }

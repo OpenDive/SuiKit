@@ -27,14 +27,24 @@ import Foundation
 import SwiftyJSON
 
 public struct MergeCoinsTransaction: KeyProtocol, TransactionProtocol {
+    /// The destination where the coins are to be merged.
     public let destination: TransactionArgument
+
+    /// An array of sources from which the coins are taken to be merged.
     public let sources: [TransactionArgument]
 
+    /// Initializes a new instance of `MergeCoinsTransaction`.
+    /// - Parameters:
+    ///   - destination: The destination argument where the coins are to be merged.
+    ///   - sources: An array of source arguments from which the coins are taken to be merged.
     public init(destination: TransactionArgument, sources: [TransactionArgument]) {
         self.destination = destination
         self.sources = sources
     }
 
+    /// Initializes a new instance of `MergeCoinsTransaction` from JSON.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `MergeCoinsTransaction`.
     public init?(input: JSON) {
         let merge = input.arrayValue
         guard let destination = TransactionArgument.fromJSON(merge[0]) else { return nil }

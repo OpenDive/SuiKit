@@ -27,9 +27,16 @@ import Foundation
 import SwiftyJSON
 
 public struct SplitCoinsTransaction: KeyProtocol, TransactionProtocol {
+    /// A `TransactionArgument` representing the coin to be split.
     public var coin: TransactionArgument
+
+    /// An array of `TransactionArgument` representing the amounts in which the coin will be split.
     public var amounts: [TransactionArgument]
 
+    /// Initializes a new instance of `SplitCoinsTransaction`.
+    /// - Parameters:
+    ///   - coin: A `TransactionArgument` representing the coin.
+    ///   - amounts: An array of `TransactionArgument` representing the amounts.
     public init(
         coin: TransactionArgument,
         amounts: [TransactionArgument]
@@ -38,6 +45,9 @@ public struct SplitCoinsTransaction: KeyProtocol, TransactionProtocol {
         self.amounts = amounts
     }
 
+    /// Initializes a new instance of `SplitCoinsTransaction` using a JSON object.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `SplitCoinsTransaction`.
     public init?(input: JSON) {
         let split = input.arrayValue
         guard let coin = TransactionArgument.fromJSON(split[0]) else {

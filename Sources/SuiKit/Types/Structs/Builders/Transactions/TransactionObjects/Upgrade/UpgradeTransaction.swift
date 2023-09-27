@@ -27,11 +27,24 @@ import Foundation
 import SwiftyJSON
 
 public struct UpgradeTransaction: KeyProtocol, TransactionProtocol {
+    /// Represents a set of modules where each module is an array of UInt8.
     public let modules: [[UInt8]]
+
+    /// An array of object IDs representing dependencies.
     public let dependencies: [objectId]
+
+    /// The ID of the package.
     public let packageId: objectId
+
+    /// Represents a ticket which is an instance of `TransactionArgument`.
     public let ticket: TransactionArgument
 
+    /// Initializes a new instance of `UpgradeTransaction`.
+    /// - Parameters:
+    ///   - modules: Represents a set of modules.
+    ///   - dependencies: An array of object IDs representing dependencies.
+    ///   - packageId: The ID of the package.
+    ///   - ticket: Represents a ticket which is an instance of `TransactionArgument`.
     public init(
         modules: [[UInt8]],
         dependencies: [objectId],
@@ -44,6 +57,9 @@ public struct UpgradeTransaction: KeyProtocol, TransactionProtocol {
         self.ticket = ticket
     }
 
+    /// Initializes a new instance of `UpgradeTransaction` using a JSON object.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `UpgradeTransaction`.
     public init?(input: JSON) {
         let upgrade = input.arrayValue
         guard let ticket = TransactionArgument.fromJSON(upgrade[3]) else { return nil }

@@ -26,7 +26,20 @@
 import Foundation
 
 public struct ResolvedStdOption: ResolvedProtocol {
+    /// Represents the address associated with the Move standard library.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var address: String = ResolvedConstants.moveStdlibAddress
+
+    /// Represents the module name where the standard `Option` struct is declared.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var module: String = ResolvedConstants.stdOptionModuleName
+
+    /// Represents the standard name for the `Option` struct.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var name: String = ResolvedConstants.stdOptionStructName
+
+    /// Initializes a new instance of `ResolvedStdOption`.
+    /// As all properties are initialized with default values,
+    /// no parameters are needed and rarely this initializer will be used.
+    public init() {}
 }

@@ -26,28 +26,38 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing an Input conforming to `KeyProtocol`.
 public struct Input: KeyProtocol {
-    var type: InputType
+    /// Represents the type of the input, could be object or pure.
+    public var inputType: InputType
 
+    /// Initializes a new instance of `Input`.
+    ///
+    /// - Parameter inputType: The type of the input.
     public init(type: InputType) {
-        self.type = type
+        self.inputType = type
     }
 
+    /// Initializes a new instance of `Input` from the provided JSON object.
+    ///
+    /// - Parameter input: A JSON object containing the required data.
+    /// - Returns: An optional `Input`. Will be `nil` if the type field is missing or invalid in the JSON object.
     public init?(input: JSON) {
         switch input["type"].stringValue {
         case "object":
             guard let object = ObjectArg.fromJSON(input) else { return nil }
-            self.type = .object(object)
+            self.inputType = .object(object)
         case "pure":
             guard let pure = PureCallArg(input: input) else { return nil }
-            self.type = .pure(pure)
+            self.inputType = .pure(pure)
         default:
             return nil
         }
     }
 
+    /// Returns the kind of input as a string.
     public var kind: String {
-        switch type {
+        switch inputType {
         case .pure:
             return "pure"
         case .object:
@@ -56,7 +66,7 @@ public struct Input: KeyProtocol {
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer._struct(serializer, value: self.type)
+        try Serializer._struct(serializer, value: self.inputType)
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> Input {
@@ -65,12 +75,18 @@ public struct Input: KeyProtocol {
 }
 
 public extension Input {
+    /// Determines whether the input is a mutable shared object or not.
+    ///
+    /// - Returns: A boolean value indicating whether the input is a mutable shared object.
     func isMutableSharedObjectInput() -> Bool {
         return self.getSharedObjectInput()?.mutable ?? false
     }
 
+    /// Retrieves the shared object input if available.
+    ///
+    /// - Returns: An optional `SharedObjectArg`. Will be `nil` if the input type is not a shared object.
     func getSharedObjectInput() -> SharedObjectArg? {
-        switch self.type {
+        switch self.inputType {
         case .object(let object):
             switch object {
             case .shared(let sharedArg):
@@ -83,3 +99,4 @@ public extension Input {
         }
     }
 }
+

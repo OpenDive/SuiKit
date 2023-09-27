@@ -26,13 +26,25 @@
 import Foundation
 
 public struct SerializedTransactionDataBuilder: KeyProtocol {
+    /// Represents the version of the serialized transaction data.
     public var version: UInt8
+
+    /// The account address of the sender of the transaction. It is optional and can be nil.
     public var sender: AccountAddress?
+
+    /// Represents the expiration of the transaction. It is optional and defaults to `TransactionExpiration.none`.
     public var expiration: TransactionExpiration?
+
+    /// Holds the configuration for gas in the transaction.
     public var gasConfig: SuiGasData
+
+    /// An array of inputs for the transaction block.
     public var inputs: [TransactionBlockInput]
+
+    /// An array of transactions.
     public var transactions: [SuiTransaction]
 
+    /// Defines the keys used for encoding and decoding.
     public enum CodingKeys: String, CodingKey {
         case version
         case sender
@@ -42,6 +54,15 @@ public struct SerializedTransactionDataBuilder: KeyProtocol {
         case transactions
     }
 
+    /// Initializes a new instance of `SerializedTransactionDataBuilder`.
+    /// - Parameters:
+    ///   - version: Represents the version of the transaction. Defaults to 1.
+    ///   - sender: The account address of the sender of the transaction. Defaults to nil.
+    ///   - expiration: Represents the expiration of the transaction. Defaults to `TransactionExpiration.none`.
+    ///   - gasConfig: Holds the configuration for gas in the transaction. Defaults to a new instance of `SuiGasData`.
+    ///   - inputs: An array of inputs for the transaction block. Defaults to an empty array.
+    ///   - transactions: An array of transactions. Defaults to an empty array.
+    /// - Throws: If initialization fails due to invalid parameters.
     public init(
         version: UInt8 = 1,
         sender: AccountAddress? = nil,
@@ -58,6 +79,9 @@ public struct SerializedTransactionDataBuilder: KeyProtocol {
         self.transactions = transactions
     }
 
+    /// Initializes a new instance of `SerializedTransactionDataBuilder` from a `TransactionDataV1` object.
+    /// - Parameter v1Transaction: A `TransactionDataV1` object.
+    /// - Returns: An optional instance of `SerializedTransactionDataBuilder`.
     public init?(v1Transaction: TransactionDataV1) {
         switch v1Transaction.kind {
         case .programmableTransaction(let programTx):

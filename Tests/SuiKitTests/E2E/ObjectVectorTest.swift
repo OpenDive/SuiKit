@@ -106,6 +106,20 @@ final class ObjectVectorTest: XCTestCase {
         )
     }
 
+    // TODO: Figure out and implement a solution for this flanky test.
+    func testThatTypeHintsWorksAsIntended() async throws {
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        try await self.destroyObjects(
+            objects: [
+                (try await self.mintObject(val: 7, toolBox: toolBox)),
+                (try await self.mintObject(val: 42, toolBox: toolBox))
+            ],
+            withType: true, 
+            toolBox: toolBox
+        )
+    }
+
     func testThatRegularArgumentsAndObjectVectorArgsMixedWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         try await toolBox.setup()

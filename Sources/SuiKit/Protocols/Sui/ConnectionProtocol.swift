@@ -25,17 +25,28 @@
 
 import Foundation
 
-public protocol ConnectionProtcol {
+/// Protocol defining the requirements for a connection configuration.
+public protocol ConnectionProtocol {
+    /// The URL or IP address of the full node to connect to.
     var fullNode: String { get }
+
+    /// Optional URL for a faucet service to obtain tokens.
+    /// Default is nil, meaning no faucet is configured.
     var faucet: String? { get }
+
+    /// Optional URL for a WebSocket connection.
+    /// Default is nil, meaning no WebSocket is configured.
     var websocket: String? { get }
 }
 
-public extension ConnectionProtcol {
+// MARK: - Default Implementations
+public extension ConnectionProtocol {
+    /// Default implementation returns nil, indicating that a faucet is not configured.
     var faucet: String? {
         get { return nil }
     }
 
+    /// Default implementation returns nil, indicating that a WebSocket is not configured.
     var websocket: String? {
         get { return nil }
     }

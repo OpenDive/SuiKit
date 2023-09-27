@@ -26,22 +26,37 @@
 import Foundation
 
 public struct BuildOptions {
+    /// A `SuiProvider` object that provides network connectivity.
+    /// It is optional and can be `nil`.
     public var provider: SuiProvider?
+
+    /// A Boolean that specifies whether only a transaction kind is allowed.
+    /// It is optional and can be `nil`.
     public var onlyTransactionKind: Bool?
+
+    /// Represents the limits like maximum gas, transaction size etc.
+    /// It is optional and can be `nil`.
     public var limits: Limits?
+
+    /// Represents the protocol configurations including attributes, feature flags and version details.
+    /// It is optional and can be `nil`.
     public var protocolConfig: ProtocolConfig?
 
+    /// A dictionary containing string keys and values representing various limits.
+    /// For example, it can include the maximum gas allowed, maximum transaction size etc.
     public static let limits: [String: String] = [
-        // The maximum gas that is allowed.
         "maxTxGas": "max_tx_gas",
-        // The maximum number of gas objects that can be selected for one transaction.
         "maxGasObjects": "max_gas_payment_objects",
-        // The maximum size (in bytes) that the transaction can be.
         "maxTxSizeBytes": "max_tx_size_bytes",
-        // The maximum size (in bytes) that pure arguments can be.
         "maxPureArgumentSize": "max_pure_argument_size"
     ]
 
+    /// Initializes a new instance of `BuildOptions` with optional parameters.
+    /// - Parameters:
+    ///   - provider: A `SuiProvider` object, default is `nil`.
+    ///   - onlyTransactionKind: A Boolean value, default is `nil`.
+    ///   - limits: A `Limits` object, default is `nil`.
+    ///   - protocolConfig: A `ProtocolConfig` object, default is `nil`.
     public init(
         provider: SuiProvider? = nil,
         onlyTransactionKind: Bool? = nil,

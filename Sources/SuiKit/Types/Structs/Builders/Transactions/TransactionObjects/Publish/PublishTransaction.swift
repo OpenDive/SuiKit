@@ -27,14 +27,25 @@ import Foundation
 import SwiftyJSON
 
 public struct PublishTransaction: KeyProtocol, TransactionProtocol {
+    /// An array of modules where each module is represented as an array of `UInt8`.
     public let modules: [[UInt8]]
+
+    /// An array of dependencies represented by `AccountAddress`.
     public let dependencies: [AccountAddress]
 
+    /// Initializes a new instance of `PublishTransaction`.
+    /// - Parameters:
+    ///   - modules: An array of modules where each module is represented as an array of `UInt8`.
+    ///   - dependencies: An array of dependencies represented by `objectId`.
+    /// - Throws: If conversion of objectId to AccountAddress fails.
     public init(modules: [[UInt8]], dependencies: [objectId]) throws {
         self.modules = modules
         self.dependencies = try dependencies.map { try AccountAddress.fromHex($0) }
     }
 
+    /// Initializes a new instance of `PublishTransaction` using a JSON object.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `PublishTransaction`.
     public init?(input: JSON) {
         let publish = input.arrayValue
         self.modules = publish[0].arrayValue.map {
@@ -47,7 +58,7 @@ public struct PublishTransaction: KeyProtocol, TransactionProtocol {
 
     public func serialize(_ serializer: Serializer) throws {
         try serializer.sequence(modules.map { Data($0) }, Serializer.toBytes)
-        try serializer.uleb128(UInt(self.dependencies.count))
+        try serializer.uleb128(UInt(self.dependencies.count))  // TODO: Check if we need it as this or if we can use it as a sequence.
         for dependency in dependencies {
             try Serializer._struct(serializer, value: dependency)
         }

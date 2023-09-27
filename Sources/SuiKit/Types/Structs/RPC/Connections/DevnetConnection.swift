@@ -25,7 +25,7 @@
 
 import Foundation
 
-public struct DevnetConnection: ConnectionProtcol {
+public struct DevnetConnection: ConnectionProtocol {
     public var fullNode: String = "https://fullnode.devnet.sui.io:443/"
     public var faucet: String? = "https://faucet.devnet.sui.io/gas"
 

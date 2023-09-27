@@ -26,23 +26,49 @@
 import Foundation
 
 public struct ResolvedConstants {
+    /// Represents the standard name for the `Option` struct.
     public static let stdOptionStructName = "Option"
+
+    /// Represents the module name where the standard `Option` struct is declared.
     public static let stdOptionModuleName = "option"
-    
+
+    /// Represents the standard name for the `String` struct in UTF-8.
     public static let stdUtf8StructName = "String"
+
+    /// Represents the module name where the standard UTF-8 `String` struct is declared.
     public static let stdUtf8ModuleName = "string"
-    
+
+    /// Represents the standard name for the `String` struct in ASCII.
     public static let stdAsciiStructName = "String"
+
+    /// Represents the module name where the standard ASCII `String` struct is declared.
     public static let stdAsciiModuleName = "ascii"
-    
+
+    /// Represents the address associated with the SUI system.
     public static let suiSystemAddress = "0x3"
+
+    /// Represents the address associated with the SUI framework.
     public static let suiFrameworkAddress = "0x2"
+
+    /// Represents the address associated with the Move standard library.
     public static let moveStdlibAddress = "0x1"
-    
+
+    /// Represents the module name where the `object` is declared.
     public static let objectModuleName = "object"
+
+    /// Represents the standard name for the `UID` struct.
     public static let uidStructName = "UID"
+
+    /// Represents the standard name for the `ID` struct.
     public static let idStructName = "ID"
-    
+
+    /// Represents a string combining the SUI framework address and the standard SUI string.
     public static let suiTypeArg = "\(ResolvedConstants.suiFrameworkAddress)::sui::SUI"
+
+    /// Represents a string that can be used to query validators event.
     public static let validatorsEventQuery = "\(ResolvedConstants.suiSystemAddress)::validator_set::ValidatorEpochInfoEventV2"
+
+    /// Initializes a new instance of `ResolvedConstants`.
+    /// As all properties are static constants, no parameters are needed and rarely this initializer will be used.
+    public init() {}
 }

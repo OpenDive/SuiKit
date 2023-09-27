@@ -25,7 +25,7 @@
 
 import Foundation
 
-public struct MainnetConnection: ConnectionProtcol {
+public struct MainnetConnection: ConnectionProtocol {
     public var fullNode: String = "https://fullnode.mainnet.sui.io:443/"
 
     public init() { }

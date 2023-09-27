@@ -26,9 +26,45 @@
 import Foundation
 
 public struct ProtocolConfig {
+    /// A dictionary containing attributes related to the protocol configuration.
+    /// The keys are strings representing the name of the attribute,
+    /// and the values are optional `ProtocolConfigValue` instances representing the value of the attribute.
     public let attributes: [String: ProtocolConfigValue?]
+
+    /// A dictionary containing feature flags related to the protocol configuration.
+    /// The keys are strings representing the name of the feature flag,
+    /// and the values are Booleans representing whether the feature is enabled (`true`) or disabled (`false`).
     public let featureFlags: [String: Bool]
+
+    /// A string representing the maximum supported protocol version.
     public let maxSupportedProtocolVersion: String
+
+    /// A string representing the minimum supported protocol version.
     public let minSupportedProtocolVersion: String
+
+    /// A string representing the current protocol version.
     public let protocolVersion: String
+
+    /// Initializes a new instance of `ProtocolConfig`.
+    ///
+    /// - Parameters:
+    ///   - attributes: A dictionary representing the attributes of the protocol configuration.
+    ///   - featureFlags: A dictionary representing the feature flags of the protocol configuration.
+    ///   - maxSupportedProtocolVersion: A string representing the maximum supported protocol version.
+    ///   - minSupportedProtocolVersion: A string representing the minimum supported protocol version.
+    ///   - protocolVersion: A string representing the current protocol version.
+    public init(
+        attributes: [String: ProtocolConfigValue?],
+        featureFlags: [String: Bool],
+        maxSupportedProtocolVersion: String,
+        minSupportedProtocolVersion: String,
+        protocolVersion: String
+    ) {
+        self.attributes = attributes
+        self.featureFlags = featureFlags
+        self.maxSupportedProtocolVersion = maxSupportedProtocolVersion
+        self.minSupportedProtocolVersion = minSupportedProtocolVersion
+        self.protocolVersion = protocolVersion
+    }
 }
+

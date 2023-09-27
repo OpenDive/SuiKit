@@ -26,7 +26,20 @@
 import Foundation
 
 public struct ResolvedSuiId: ResolvedProtocol {
+    /// Represents the address associated with the SUI framework.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var address: String = ResolvedConstants.suiFrameworkAddress
+
+    /// Represents the module name where the `ID` struct is declared in the SUI framework.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var module: String = ResolvedConstants.objectModuleName
+
+    /// Represents the name for the `ID` struct in the SUI framework.
+    /// It is initialized with a default value from `ResolvedConstants`.
     public var name: String = ResolvedConstants.idStructName
+
+    /// Initializes a new instance of `ResolvedSuiId`.
+    /// As all properties are initialized with default values,
+    /// no parameters are needed and rarely this initializer will be used.
+    public init() {}
 }

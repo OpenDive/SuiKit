@@ -26,13 +26,22 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing a reference to an object that is either immutable or owned.
+/// Conforming to `KeyProtocol` makes this struct usable wherever object keys are needed.
 public struct ImmOrOwned: KeyProtocol {
+    /// A reference to a SuiObject.
     public var ref: SuiObjectRef
 
+    /// Initializes a new instance of `ImmOrOwned` with the provided `SuiObjectRef`.
+    ///
+    /// - Parameter ref: A reference to a `SuiObject`.
     public init(ref: SuiObjectRef) {
         self.ref = ref
     }
 
+    /// Initializes a new instance of `ImmOrOwned` with the provided JSON object.
+    ///
+    /// - Parameter input: A JSON object containing the data needed to initialize the `SuiObjectRef`.
     public init(input: JSON) {
         self.ref = SuiObjectRef(input: input)
     }

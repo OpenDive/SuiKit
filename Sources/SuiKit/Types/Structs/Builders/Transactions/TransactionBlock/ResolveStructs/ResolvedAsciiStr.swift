@@ -26,7 +26,32 @@
 import Foundation
 
 public struct ResolvedAsciiStr: ResolvedProtocol {
+    /// A string representing the address of the resolved ASCII string.
+    /// By default, it is set to `ResolvedConstants.moveStdlibAddress`.
     public var address: String = ResolvedConstants.moveStdlibAddress
+
+    /// A string representing the module of the resolved ASCII string.
+    /// By default, it is set to `ResolvedConstants.stdAsciiModuleName`.
     public var module: String = ResolvedConstants.stdAsciiModuleName
+
+    /// A string representing the name of the resolved ASCII string.
+    /// By default, it is set to `ResolvedConstants.stdAsciiStructName`.
     public var name: String = ResolvedConstants.stdAsciiStructName
+
+    /// Initializes a new instance of `ResolvedAsciiStr`.
+    ///
+    /// - Parameters:
+    ///   - address: (Optional) A string representing the address of the resolved ASCII string.
+    ///   - module: (Optional) A string representing the module of the resolved ASCII string.
+    ///   - name: (Optional) A string representing the name of the resolved ASCII string.
+    public init(
+        address: String = ResolvedConstants.moveStdlibAddress,
+        module: String = ResolvedConstants.stdAsciiModuleName,
+        name: String = ResolvedConstants.stdAsciiStructName
+    ) {
+        self.address = address
+        self.module = module
+        self.name = name
+    }
 }
+

@@ -27,9 +27,16 @@ import Foundation
 import SwiftyJSON
 
 public struct TransferObjectsTransaction: KeyProtocol, TransactionProtocol {
+    /// An array of `TransactionArgument` representing the objects to be transferred.
     public var objects: [TransactionArgument]
+
+    /// A `TransactionArgument` representing the address to which the objects will be transferred.
     public var address: TransactionArgument
 
+    /// Initializes a new instance of `TransferObjectsTransaction`.
+    /// - Parameters:
+    ///   - objects: An array of `TransactionArgument` representing the objects.
+    ///   - address: A `TransactionArgument` representing the address.
     public init(
         objects: [TransactionArgument],
         address: TransactionArgument
@@ -38,6 +45,9 @@ public struct TransferObjectsTransaction: KeyProtocol, TransactionProtocol {
         self.address = address
     }
 
+    /// Initializes a new instance of `TransferObjectsTransaction` using a JSON object.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `TransferObjectsTransaction`.
     public init?(input: JSON) {
         let transfer = input.arrayValue
         guard let address = TransactionArgument.fromJSON(transfer[1]) else {

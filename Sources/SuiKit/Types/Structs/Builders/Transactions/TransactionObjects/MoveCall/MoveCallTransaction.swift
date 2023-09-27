@@ -27,10 +27,20 @@ import Foundation
 import SwiftyJSON
 
 public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
+    /// The target normalized struct type for the move call.
     public let target: SuiMoveNormalizedStructType
+
+    /// An array of struct tags used as type arguments for the move call.
     public let typeArguments: [StructTag]
+
+    /// An array of arguments used for executing the move call.
     public var arguments: [TransactionArgument]
 
+    /// Initializes a new instance of `MoveCallTransaction`.
+    /// - Parameters:
+    ///   - target: The target normalized struct type.
+    ///   - typeArguments: An array of struct tags used as type arguments.
+    ///   - arguments: An array of transaction arguments.
     public init(
         target: SuiMoveNormalizedStructType,
         typeArguments: [StructTag],
@@ -41,6 +51,12 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
         self.arguments = arguments
     }
 
+    /// Initializes a new instance of `MoveCallTransaction` using string representations.
+    /// - Parameters:
+    ///   - target: The string representation of the target normalized struct type.
+    ///   - typeArguments: An array of string representations of struct tags used as type arguments.
+    ///   - arguments: An array of transaction arguments.
+    /// - Throws: If creating struct tags from strings fails.
     public init(
         target: String,
         typeArguments: [String],
@@ -51,6 +67,9 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
         self.arguments = arguments
     }
 
+    /// Initializes a new instance of `MoveCallTransaction` from JSON.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `MoveCallTransaction`.
     public init?(input: JSON) {
         guard let target = SuiMoveNormalizedStructType(input: input) else {
             return nil
@@ -83,6 +102,11 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
         return
     }
 
+    /// Adds to resolve list if needed, based on the arguments and provided inputs.
+    /// - Parameters:
+    ///   - list: A reference to an array of `MoveCallTransaction` to which the current instance may be appended.
+    ///   - inputs: An array of `TransactionBlockInput` used for resolving the arguments.
+    /// - Throws: If resolving fails.
     public mutating func addToResolve(
         list: inout [MoveCallTransaction],
         inputs: [TransactionBlockInput]
@@ -103,9 +127,11 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
                 for (idxOuter, argumentOuter) in self.arguments.enumerated() {
                     if case .input(let outerInput) = argumentOuter {
                         for (idxInner, argumentInner) in moveCall.arguments.enumerated() {
-                            if case .input(let innerInput) = argumentInner,
-                               outerInput.value == innerInput.value,
-                               outerInput.index != innerInput.index {
+                            if 
+                                case .input(let innerInput) = argumentInner,
+                                outerInput.value == innerInput.value,
+                                outerInput.index != innerInput.index 
+                            {
                                 self.arguments[idxOuter] = moveCall.arguments[idxInner]
                             }
                         }

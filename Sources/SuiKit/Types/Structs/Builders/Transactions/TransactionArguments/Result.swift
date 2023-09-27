@@ -26,6 +26,7 @@
 import Foundation
 
 public struct Result: KeyProtocol {
+    /// The index representing the position of the `Result` in a collection.
     public let index: UInt16
 
     public func serialize(_ serializer: Serializer) throws {

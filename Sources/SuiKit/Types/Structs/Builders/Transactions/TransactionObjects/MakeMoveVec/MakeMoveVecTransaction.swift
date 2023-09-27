@@ -27,26 +27,48 @@ import Foundation
 import SwiftyJSON
 
 public struct MakeMoveVecTransaction: KeyProtocol, TransactionProtocol {
+    /// An array of TransactionArguments representing objects involved in the transaction.
     public let objects: [TransactionArgument]
-    public let type: String?
 
-    public init(objects: [TransactionArgument], type: String?) {
+    /// Represents the type of Move Normalized Struct. It's optional and could be nil.
+    public let type: SuiMoveNormalizedStructType?
+
+    /// Initializes a new instance of `MakeMoveVecTransaction`.
+    /// - Parameters:
+    ///   - objects: An array of `TransactionArgument` representing objects in the transaction.
+    ///   - type: A string representing the type of `SuiMoveNormalizedStructType`.
+    /// - Throws: If initialization fails due to type conversion.
+    public init(objects: [TransactionArgument], type: String?) throws {
+        self.objects = objects
+        if let type = type {
+            self.type = try Coin.getCoinStructTag(coinTypeArg: type)
+        } else {
+            self.type = nil
+        }
+    }
+
+    /// Initializes a new instance of `MakeMoveVecTransaction`.
+    /// - Parameters:
+    ///   - objects: An array of `TransactionArgument` representing objects in the transaction.
+    ///   - type: An optional instance of `SuiMoveNormalizedStructType`.
+    public init(objects: [TransactionArgument], type: SuiMoveNormalizedStructType?) {
         self.objects = objects
         self.type = type
     }
 
+    /// Initializes a new instance of `MakeMoveVecTransaction` from JSON.
+    /// - Parameter input: The JSON object used for initialization.
+    /// - Returns: An optional instance of `MakeMoveVecTransaction`.
     public init?(input: JSON) {
         let vec = input.arrayValue
-        self.objects = vec[0].arrayValue.compactMap {
-            TransactionArgument.fromJSON($0)
-        }
-        self.type = vec[1].string
+        self.objects = vec[0].arrayValue.compactMap { TransactionArgument.fromJSON($0) }
+        self.type = try? Coin.getCoinStructTag(coinTypeArg: vec[1].stringValue)
     }
 
     public func serialize(_ serializer: Serializer) throws {
         try serializer.uleb128(0)
         try serializer.sequence(objects, Serializer._struct)
-        if let type { try Serializer.str(serializer, type) }
+        if let type { try Serializer._struct(serializer, value: type) }
     }
 
     public static func deserialize(
@@ -55,7 +77,7 @@ public struct MakeMoveVecTransaction: KeyProtocol, TransactionProtocol {
         let _ = Deserializer.uleb128(deserializer)
         return MakeMoveVecTransaction(
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
-            type: try? Deserializer.string(deserializer)
+            type: try? Deserializer._struct(deserializer)
         )
     }
 

@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// Represents information about a coin from a faucet in the Sui ecosystem.
 public struct FaucetCoinInfo: Codable {
+    /// Represents the amount of coins.
     public let amount: Int
+
+    /// The identifier of the object.
     public let id: objectId
+
+    /// A `TransactionDigest` representing the transaction digest of the transfer.
     public let transferTxDigest: TransactionDigest
 }

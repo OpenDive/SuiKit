@@ -27,10 +27,19 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiObjectChangeDeleted {
+    /// A constant `String` representing the type of object change, which is "deleted".
     public let type: String = "deleted"
+
+    /// An `AccountAddress` representing the sender who has deleted the object.
     public let sender: AccountAddress
+
+    /// A `String` representing the type of the deleted object.
     public let objectType: String
+
+    /// An `objectId` representing the unique identifier of the deleted object.
     public let objectId: objectId
+
+    /// A `SequenceNumber` representing the version of the deleted object.
     public let version: SequenceNumber
 
     public init?(input: JSON) {

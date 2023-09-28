@@ -27,7 +27,10 @@ import Foundation
 import SwiftyJSON
 
 public struct ProgrammableTransaction: KeyProtocol {
+    /// Array representing the inputs of the programmable transaction.
     public let inputs: [Input]
+
+    /// Array containing the `SuiTransaction` instances associated with the programmable transaction.
     public let transactions: [SuiTransaction]
 
     public init(inputs: [Input], transactions: [SuiTransaction]) {

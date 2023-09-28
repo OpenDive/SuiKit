@@ -27,9 +27,16 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiTransactionBlockData: KeyProtocol {
+    /// A `String` representing the message version of the transaction block data.
     public let messageVersion: String
+
+    /// A `SuiTransactionBlockKind` representing the kind or type of the transaction block.
     public let transaction: SuiTransactionBlockKind
+
+    /// An `AccountAddress` representing the sender of the transaction block.
     public let sender: AccountAddress
+
+    /// A `SuiGasData` representing the gas data associated with the transaction block.
     public let gasData: SuiGasData
 
     public init(

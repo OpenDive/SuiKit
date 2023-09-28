@@ -27,10 +27,19 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiObjectChangeWrapped {
+    /// A constant `String` representing the type of object change, which is "wrapped".
     public let type: String = "wrapped"
+
+    /// An `AccountAddress` type representing the sender of the wrapped object.
     public let sender: AccountAddress
+
+    /// A `String` type representing the object type of the object wrapped.
     public let objectType: String
+
+    /// The `ObjectId` type representing the ID of the object wrapped.
     public let objectId: objectId
+
+    /// The `SequenceNumber` type representing the version of the wrapped object.
     public let version: SequenceNumber
 
     public init?(input: JSON) {

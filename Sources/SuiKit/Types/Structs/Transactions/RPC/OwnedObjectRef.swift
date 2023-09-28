@@ -26,8 +26,12 @@
 import Foundation
 import SwiftyJSON
 
+/// The structure representing an Owned Object Reference
 public struct OwnedObjectRef {
+    /// An `ObjectOwner` object representing the owner of the object.
     public let owner: ObjectOwner
+
+    /// A `SuiObjectRef` type representing a reference to the Sui Object.
     public let reference: SuiObjectRef
 
     public init?(input: JSON) {

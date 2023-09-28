@@ -26,6 +26,9 @@
 import Foundation
 
 public struct SuiClientMessage: Codable, Error {
+    /// A numerical value representing the error code associated with the client message.
     let code: Int
+
+    /// A string representing the descriptive error message.
     let message: String
 }

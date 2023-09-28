@@ -26,9 +26,15 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing the changed balance
 public struct BalanceChange {
+    /// The `ObjectOwner` type representing the owner of the coin object changed.
     public let owner: ObjectOwner
+
+    /// The `String` type representing the type of coin used for the transaction.
     public let coinType: String
+
+    /// The `String` type representing the amount spent for the transaction.
     public let amount: String
 
     public init?(input: JSON) {

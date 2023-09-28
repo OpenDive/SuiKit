@@ -27,12 +27,25 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiObjectChangeMutated {
+    /// A constant `String` representing the type of object change, which is "mutated".
     public let type: String = "mutated"
+
+    /// An `AccountAddress` representing the sender who has mutated the object.
     public let sender: AccountAddress
+
+    /// An `ObjectOwner` representing the owner of the mutated object.
     public let owner: ObjectOwner
+
+    /// A `String` representing the type of the mutated object.
     public let objectType: String
+
+    /// A `SequenceNumber` representing the version of the mutated object.
     public let version: SequenceNumber
+
+    /// A `SequenceNumber` representing the previous version of the mutated object.
     public let previousVersion: SequenceNumber
+
+    /// An `ObjectDigest` representing the digest of the mutated object.
     public let digest: ObjectDigest
 
     public init?(input: JSON) {

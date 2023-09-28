@@ -27,12 +27,25 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiObjectChangeTransferred {
+    /// A constant `String` representing the type of object change, which is "transferred".
     public let type: String = "transferred"
+
+    /// An `AccountAddress` representing the sender who has transferred the object.
     public let sender: AccountAddress
+
+    /// An `ObjectOwner` type representing the receiver of the object.
     public let recipient: ObjectOwner
+
+    /// A `String` representing the object type that was transferred.
     public let objectType: String
+
+    /// An `ObjectId` type representing the ID of the object transferred.
     public let objectId: objectId
+
+    /// A `SequenceNumber` representing the version number of the object transferred.
     public let version: SequenceNumber
+
+    /// The `ObjectDigest` type representing the digest of the object transferred.
     public let digest: ObjectDigest
 
     public init?(input: JSON) {

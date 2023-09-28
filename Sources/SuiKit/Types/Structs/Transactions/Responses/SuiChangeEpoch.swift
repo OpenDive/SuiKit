@@ -27,10 +27,19 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiChangeEpoch: Codable, KeyProtocol {
+    /// An `EpochId` representing the identifier of the epoch.
     public let epoch: EpochId
+
+    /// A `String` representing the charge for storage in this epoch.
     public let storageCharge: String
+
+    /// A `String` representing the charge for computation in this epoch.
     public let computationCharge: String
+
+    /// A `String` representing the rebate for storage in this epoch.
     public let storageRebate: String
+
+    /// An optional `String` representing the timestamp at which this epoch started, in milliseconds.
     public let epochStartTimestampMs: String?
 
     public init(

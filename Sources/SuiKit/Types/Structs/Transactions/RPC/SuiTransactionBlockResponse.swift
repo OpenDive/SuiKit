@@ -27,15 +27,34 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiTransactionBlockResponse {
+    /// A `TransactionDigest` representing the digest of the transaction block response.
     public let digest: TransactionDigest
+
+    /// An optional `SuiTransactionBlock` representing the transaction block in the response.
     public let transaction: SuiTransactionBlock?
+
+    /// An optional `TransactionEffects` representing the effects of the transaction.
     public let effects: TransactionEffects?
+
+    /// An optional `TransactionEvents` representing the events occurred during the transaction.
     public let events: TransactionEvents?
+
+    /// An optional `String` representing the timestamp of the transaction block response in milliseconds.
     public let timestampMs: String?
+
+    /// An optional `String` representing the checkpoint of the transaction block response.
     public let checkpoint: String?
+
+    /// A `Bool` flag indicating whether the transaction has been confirmed to execute locally.
     public let confirmedLocalExecution: Bool?
+
+    /// An optional array of `SuiObjectChange` representing the object changes occurred during the transaction.
     public let objectChanges: [SuiObjectChange]?
+
+    /// An optional array of `BalanceChange` representing the balance changes occurred during the transaction.
     public let balanceChanges: [BalanceChange]?
+
+    /// An optional array of `String` representing any errors occurred during the transaction block response.
     public let errors: [String]?
 
     public init(input: JSON) {

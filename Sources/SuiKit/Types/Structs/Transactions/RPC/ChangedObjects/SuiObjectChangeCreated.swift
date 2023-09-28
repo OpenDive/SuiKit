@@ -27,12 +27,25 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiObjectChangeCreated {
+    /// A constant `String` representing the type of object change, which is "created".
     public let type: String = "created"
+
+    /// An `AccountAddress` representing the sender who has created the object.
     public let sender: AccountAddress
+
+    /// An `ObjectOwner` representing the owner of the created object.
     public let owner: ObjectOwner
+
+    /// A `String` representing the type of the created object.
     public let objectType: String
+
+    /// An `objectId` representing the unique identifier of the created object.
     public let objectId: objectId
+
+    /// A `SequenceNumber` representing the version of the created object.
     public let version: SequenceNumber
+
+    /// An `ObjectDigest` representing the digest of the created object.
     public let digest: ObjectDigest
 
     public init?(input: JSON) {

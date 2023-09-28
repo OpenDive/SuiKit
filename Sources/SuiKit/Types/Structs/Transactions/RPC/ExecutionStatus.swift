@@ -26,8 +26,12 @@
 import Foundation
 import SwiftyJSON
 
+/// The execution status of the transaction
 public struct ExecutionStatus {
+    /// The `ExecutionStatusType` object representing the actual status of the transaction.
     public let status: ExecutionStatusType
+
+    /// An optional `String` type representing any errors if the transaction failed.
     public let error: String?
 
     public init?(input: JSON) {

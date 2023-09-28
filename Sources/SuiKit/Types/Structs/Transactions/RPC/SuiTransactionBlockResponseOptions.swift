@@ -26,10 +26,19 @@
 import Foundation
 
 public struct SuiTransactionBlockResponseOptions: Codable {
+    /// An optional `Bool` indicating whether to show the input in the transaction block response.
     public let showInput: Bool?
+
+    /// An optional `Bool` indicating whether to show the effects in the transaction block response.
     public let showEffects: Bool?
+
+    /// An optional `Bool` indicating whether to show the events in the transaction block response.
     public let showEvents: Bool?
+
+    /// An optional `Bool` indicating whether to show the object changes in the transaction block response.
     public let showObjectChanges: Bool?
+
+    /// An optional `Bool` indicating whether to show the balance changes in the transaction block response.
     public let showBalanceChanges: Bool?
 
     public init(

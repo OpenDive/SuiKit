@@ -27,8 +27,13 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiConsensusCommitPrologue: Codable, KeyProtocol {
+    /// An `EpochId` representing the identifier of the epoch.
     public let epoch: EpochId
+
+    /// A `String` representing the round within the consensus process.
     public let round: String
+
+    /// A `String` representing the timestamp at which the consensus commit occurred, in milliseconds.
     public let commitTimestampMs: String
 
     public init(epoch: EpochId, round: String, commitTimestampMs: String) {

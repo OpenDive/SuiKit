@@ -27,10 +27,19 @@ import Foundation
 import SwiftyJSON
 
 public struct SuiObjectChangePublished {
+    /// A constant `String` representing the type of object change, which is "published".
     public let type: String = "published"
+
+    /// An `objectId` representing the ID of the package.
     public let packageId: objectId
+
+    /// A `SequenceNumber` representing the version number of the published object.
     public let version: SequenceNumber
+
+    /// An `ObjectDigest` representing the digest of the published object.
     public let digest: ObjectDigest
+
+    /// An array of `String` objects representing the modules that were published.
     public let modules: [String]
 
     public init(input: JSON) {

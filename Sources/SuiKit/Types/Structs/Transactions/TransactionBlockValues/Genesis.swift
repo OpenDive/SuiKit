@@ -27,6 +27,7 @@ import Foundation
 import SwiftyJSON
 
 public struct Genesis: KeyProtocol {
+    /// Array representing the IDs of the objects included in the Genesis.
     public let objects: [objectId]
 
     public init(objects: [objectId]) {

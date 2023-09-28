@@ -27,7 +27,10 @@ import Foundation
 import SwiftyJSON
 
 public struct TransactionEffectsModifiedAtVersions {
-    public let objectId: objectId
+    /// Represents the ID of the object.
+    public let objectId: ObjectId
+
+    /// Represents the sequence number of the object.
     public let sequenceNumber: SequenceNumber
 
     public init(input: JSON) {

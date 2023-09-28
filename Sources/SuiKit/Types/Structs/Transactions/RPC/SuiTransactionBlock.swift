@@ -26,8 +26,12 @@
 import Foundation
 import SwiftyJSON
 
+/// The structure representing the Sui transaction block within a block response call
 public struct SuiTransactionBlock {
+    /// A `SuiTransactionBlockData` object representing the data of the block
     public let data: SuiTransactionBlockData
+
+    /// An array of `String` objects representing the transaction signatures of the transactions executed within the block.
     public let txSignature: [String]
 
     public init?(input: JSON) {

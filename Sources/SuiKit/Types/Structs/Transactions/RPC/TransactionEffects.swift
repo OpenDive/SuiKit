@@ -27,21 +27,52 @@ import Foundation
 import SwiftyJSON
 
 public struct TransactionEffects {
+    /// Represents the message version of the transaction effect.
     public var messageVersion: MessageVersion
+
+    /// Represents the execution status of the transaction effect.
     public var status: ExecutionStatus
+
+    /// Represents the epoch in which the transaction was executed.
     public var executedEpoch: EpochId
+
+    /// An optional array representing versions at which the transaction was modified.
     public var modifiedAtVersions: [TransactionEffectsModifiedAtVersions]?
+
+    /// Represents a summary of the gas used by the transaction.
     public var gasUsed: GasCostSummary
+
+    /// An optional array representing shared objects associated with the transaction effect.
     public var sharedObjects: [SuiObjectRef]?
+
+    /// Represents the digest of the transaction.
     public var transactionDigest: TransactionDigest
+
+    /// An optional array representing objects created by the transaction.
     public var created: [OwnedObjectRef]?
+
+    /// An optional array representing objects mutated by the transaction.
     public var mutated: [OwnedObjectRef]?
+
+    /// An optional array representing objects unwrapped by the transaction.
     public var unwrapped: [OwnedObjectRef]?
+
+    /// An optional array representing objects deleted by the transaction.
     public var deleted: [SuiObjectRef]?
+
+    /// An optional array representing objects that were unwrapped then deleted by the transaction.
     public var unwrappedThenDeleted: [SuiObjectRef]?
+
+    /// An optional array representing objects wrapped by the transaction.
     public var wrapped: [SuiObjectRef]?
+
+    /// Represents the gas object associated with the transaction effect.
     public var gasObject: OwnedObjectRef
+
+    /// An optional digest of the events related to the transaction.
     public var eventsDigest: TransactionEventDigest?
+
+    /// An optional array representing the dependencies of the transaction.
     public var dependencies: [TransactionDigest]?
 
     public init?(input: JSON) {

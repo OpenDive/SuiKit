@@ -29,21 +29,29 @@ import CryptoSwift
 import Bip39
 import Blake2
 
-/// The ED25519 Private Key
+/// Represents an ED25519 private key and provides functionality for signing and path derivation.
 public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
     public typealias DataValue = Data
     public typealias PublicKeyType = ED25519PublicKey
 
-    /// The length of the key in bytes
+    /// Length of the private key.
     public static let LENGTH: Int = 32
 
+    /// Offset used for creating hardened keys.
     public static let hardenedOffset: UInt32 = 0x80000000
+
+    /// Regular expression used to validate derivation path.
     public static let pathRegex: String = "^m(\\/[0-9]+')+$"
+
+    /// Identifier for the curve used with ED25519 private key.
     public static let curve: String = "ed25519 seed"
+
+    /// Default derivation path for the private key.
     public static let defaultDerivationPath = "m/44'/784'/0'/0'/0'"
+
+    /// Regular expression used to validate hardened derivation path.
     public static let hardenedPathRegex = "^m\\/44'\\/784'\\/[0-9]+'\\/[0-9]+'\\/[0-9]+'+$"
 
-    /// The key itself
     public var key: DataValue
 
     public init(key: Data) throws {
@@ -85,11 +93,6 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return self.hex()
     }
 
-    /// Converts the private key to a hexadecimal string.
-    ///
-    /// - Returns: A string representation of the private key in hexadecimal format, with a "0x" prefix.
-    ///
-    /// - Note: The hexEncodedString function of the Data type is called to convert the private key into a hexadecimal string, and "0x" is prepended to the resulting string.
     public func hex() -> String {
         return "0x\(self.key.hexEncodedString())"
     }
@@ -98,27 +101,11 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return self.key.base64EncodedString()
     }
 
-    /// Calculates the corresponding public key for this private key instance using the Ed25519 algorithm.
-    ///
-    /// - Returns: A PublicKey instance representing the public key associated with this private key.
-    ///
-    /// - Throws: An error if the calculation of the public key fails, or if the public key cannot be used to create a PublicKey instance.
-    ///
-    /// - Note: The private key is converted into a UInt8 array and passed to the calcPublicKey function of the Ed25519 implementation. The resulting public key is then used to create a new PublicKey instance.
     public func publicKey() throws -> PublicKeyType {
         let key = Ed25519.calcPublicKey(secretKey: [UInt8](self.key))
         return try ED25519PublicKey(data: Data(key))
     }
 
-    /// Signs a message using this private key and the Ed25519 algorithm.
-    ///
-    /// - Parameter data: The message to be signed.
-    ///
-    /// - Returns: A Signature instance representing the signature for the message.
-    ///
-    /// - Throws: An error if the signing operation fails or if the resulting signature cannot be used to create a Signature instance.
-    ///
-    /// - Note: The input message is converted into a UInt8 array and passed to the sign function of the Ed25519 implementation along with the private key converted into a UInt8 array. The resulting signature is then used to create a new Signature instance.
     public func sign(data: Data) throws -> Signature {
         let signedMessage = Ed25519.sign(message: [UInt8](data), secretKey: [UInt8](self.key))
         return Signature(
@@ -146,6 +133,13 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return try self.signWithIntent([UInt8](ser.output()), .PersonalMessage)
     }
 
+    /// Derives child keys from the given path and mnemonic.
+    /// - Parameters:
+    ///   - path: The derivation path.
+    ///   - mnemonic: The mnemonic phrase used to generate the seed.
+    ///   - offset: The offset used for creating hardened keys.
+    /// - Throws: An error if derivation fails due to invalid path, curve data, or other reasons.
+    /// - Returns: The derived keys.
     private static func derivePath(
         _ path: String,
         _ mnemonic: String,
@@ -169,6 +163,13 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return result
     }
 
+    /// Gets child key derivation using key, chain code, and index.
+    /// - Parameters:
+    ///   - key: The key data.
+    ///   - chainCode: The chain code.
+    ///   - index: The index.
+    /// - Throws: An error if the child key derivation fails.
+    /// - Returns: The derived keys.
     private static func getChildKeyDerivation(key: Data, chainCode: Data, index: UInt32) throws -> Keys {
         var buffer = Data()
 
@@ -180,6 +181,12 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return try self.hmacSha512(chainCode, buffer)
     }
 
+    /// Performs HMAC-SHA512.
+    /// - Parameters:
+    ///   - keyBuffer: The key buffer.
+    ///   - data: The data.
+    /// - Throws: An error if HMAC-SHA512 authentication fails.
+    /// - Returns: The derived keys.
     private static func hmacSha512(_ keyBuffer: Data, _ data: Data) throws -> Keys {
         let hmac = HMAC(key: keyBuffer.bytes, variant: .sha2(.sha512))
         let i = try hmac.authenticate(data.bytes)
@@ -189,6 +196,9 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return Keys(key: il, chainCode: ir)
     }
 
+    /// Validates the derivation path.
+    /// - Parameter path: The derivation path.
+    /// - Returns: A boolean value indicating whether the path is valid or not.
     private static func isValidPath(_ path: String) -> Bool {
         let regex = try! NSRegularExpression(pattern: ED25519PrivateKey.pathRegex)
 
@@ -209,6 +219,10 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return valid
     }
 
+    /// Generates seed from mnemonic.
+    /// - Parameter mnemonic: The mnemonic phrase.
+    /// - Throws: An error if seed generation fails.
+    /// - Returns: The generated seed as `Data`.
     private static func seed(_ mnemonic: String) throws -> Data {
         let mnemonicMapping = (mnemonic as NSString).decomposedStringWithCompatibilityMapping
         let salt = ("mnemonic" as NSString).decomposedStringWithCompatibilityMapping
@@ -222,6 +236,9 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         return Data(pbkdf2)
     }
 
+    /// Validates the hardened derivation path.
+    /// - Parameter path: The hardened derivation path.
+    /// - Returns: A boolean value indicating whether the hardened path is valid or not.
     private static func isValidHardenedPath(path: String) -> Bool {
         let regex = try! NSRegularExpression(pattern: ED25519PrivateKey.hardenedPathRegex, options: [])
 
@@ -229,16 +246,6 @@ public struct ED25519PrivateKey: Equatable, PrivateKeyProtocol {
         let match = regex.firstMatch(in: path, options: [], range: range)
 
         return match != nil
-    }
-
-    private struct Keys {
-        public let key: Data
-        public let chainCode: Data
-
-        public init(key: Data, chainCode: Data) {
-            self.key = key
-            self.chainCode = chainCode
-        }
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> ED25519PrivateKey {

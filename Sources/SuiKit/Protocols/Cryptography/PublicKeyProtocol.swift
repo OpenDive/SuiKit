@@ -33,34 +33,59 @@ public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashabl
     /// The actual public key data.
     var key: DataValue { get }
 
-    /// Verifies the given data against a signature.
-    /// Returns true if the signature is valid, false otherwise.
-    /// Throws an error if the verification operation fails.
-    func verify(data: Data, signature: Signature) throws -> Bool
-
-    /// Returns the base64 representation of the public key.
+    /// Returns the base64 encoded string representation of the private key.
+    /// - Returns: A `String` representing the base64 value itself.
     func base64() -> String
 
-    /// Returns the hexadecimal representation of the public key.
+    /// Converts the private key to a hexadecimal string.
+    /// - Returns: A string representation of the private key in hexadecimal format, with a "0x" prefix.
+    /// - Note: The hexEncodedString function of the Data type is called to convert the private key into a hexadecimal string, and "0x" is prepended to the resulting string.
     func hex() -> String
 
-    /// Converts the public key to a Sui Address representation.
-    /// Throws an error if the conversion fails.
-    func toSuiAddress() throws -> String
+    /// Verify a digital signature for a given data using the key's corresponding algorithm.
+    ///
+    /// This function verifies a digital signature provided by the key's corresponding algorithm for a given data and public key.
+    /// - Parameters:
+    ///    - data: The Data object to be verified.
+    ///    - signature: The Signature object containing the signature to be verified.
+    ///
+    /// - Returns: A Boolean value indicating whether the signature is valid or not.
+    /// - Throws: An error of type invalidSignature if the signature is invalid or an error occurred during verification.
+    func verify(data: Data, signature: Signature) throws -> Bool
 
-    /// Verifies a transaction block using the given signature.
-    /// Throws an error if the verification operation fails.
+    /// Converts the public key to a Sui address.
+    /// - Throws: If any error occurs during conversion.
+    /// - Returns: A string representing the Sui address.
+    func toSuiAddress() throws -> String
+    
+    /// Serializes the signature along with the public key.
+    /// - Parameter signature: The signature to serialize.
+    /// - Throws: If any error occurs during serialization.
+    /// - Returns: A base64-encoded string representing the serialized signature.
+    func toSerializedSignature(signature: Signature) throws -> String
+
+    /// Verifies a transaction block with the given signature.
+    /// - Parameters:
+    ///   - transactionBlock: The transaction block to verify.
+    ///   - signature: The signature to verify the block with.
+    /// - Throws: If any error occurs during verification.
+    /// - Returns: `true` if the verification is successful, otherwise `false`.
     func verifyTransactionBlock(_ transactionBlock: [UInt8], _ signature: Signature) throws -> Bool
 
-    /// Verifies the given bytes with a specific intent and signature.
-    /// Throws an error if the verification operation fails.
+    /// Verifies bytes with the given signature and intent.
+    /// - Parameters:
+    ///   - bytes: The bytes to verify.
+    ///   - signature: The signature to verify the bytes with.
+    ///   - intent: The intent scope of the verification.
+    /// - Throws: If any error occurs during verification.
+    /// - Returns: `true` if the verification is successful, otherwise `false`.
     func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool
 
-    /// Verifies a personal message using the given signature.
-    /// Throws an error if the verification operation fails.
+    /// Verifies a personal message with the given signature.
+    /// - Parameters:
+    ///   - message: The personal message to verify.
+    ///   - signature: The signature to verify the message with.
+    /// - Throws: If any error occurs during verification.
+    /// - Returns: `true` if the verification is successful, otherwise `false`.
     func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool
-
-    /// Serializes a signature to its string representation.
-    /// Throws an error if the serialization fails.
-    func toSerializedSignature(signature: Signature) throws -> String
 }

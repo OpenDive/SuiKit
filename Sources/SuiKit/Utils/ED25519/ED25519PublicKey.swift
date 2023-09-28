@@ -27,14 +27,13 @@ import Foundation
 import ed25519swift
 import Blake2
 
-/// The ED25519 Public Key
+/// Represents a public key used in the ED25519 signature scheme.
 public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     public typealias DataValue = Data
 
-    /// The length of the key in bytes
+    /// The length of the public key.
     public static let LENGTH: Int = 32
 
-    /// The key itself
     public var key: DataValue
 
     public init(data: Data) throws {
@@ -71,31 +70,20 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         return self.hex()
     }
 
-    /// Verify a digital signature for a given data using Ed25519 algorithm.
-    ///
-    /// This function verifies a digital signature provided by the Ed25519 algorithm for a given data and public key.
-    ///
-    /// - Parameters:
-    ///    - data: The Data object to be verified.
-    ///    - signature: The Signature object containing the signature to be verified.
-    ///
-    /// - Returns: A Boolean value indicating whether the signature is valid or not.
-    ///
-    /// - Throws: An error of type Ed25519Error.invalidSignature if the signature is invalid or an error occurred during verification.
-    public func verify(data: Data, signature: Signature) throws -> Bool {
-        return Ed25519.verify(
-            signature: [UInt8](signature.signature),
-            message: [UInt8](data),
-            publicKey: [UInt8](self.key)
-        )
-    }
-
     public func base64() -> String {
         return key.base64EncodedString()
     }
 
     public func hex() -> String {
         return "0x\(key.hexEncodedString())"
+    }
+
+    public func verify(data: Data, signature: Signature) throws -> Bool {
+        return Ed25519.verify(
+            signature: [UInt8](signature.signature),
+            message: [UInt8](data),
+            publicKey: [UInt8](self.key)
+        )
     }
 
     public func toSuiAddress() throws -> String {
@@ -108,11 +96,17 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         return result
     }
 
+    /// Converts the public key to a Sui address.
+    /// - Throws: If any error occurs during conversion.
+    /// - Returns: A string representing the Sui address.
     public func toSuiPublicKey() throws -> String {
         let bytes = try self.toSuiBytes()
         return bytes.toBase64()
     }
 
+    /// Converts the public key to Sui bytes.
+    /// - Throws: If any error occurs during conversion.
+    /// - Returns: An array of bytes representing the Sui public key.
     public func toSuiBytes() throws -> [UInt8] {
         let rawBytes = self.key
         var suiBytes = Data(count: rawBytes.count + 1)
@@ -122,6 +116,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         return [UInt8](suiBytes)
     }
 
+    
     public func toSerializedSignature(signature: Signature) throws -> String {
         var serializedSignature = Data(count: signature.signature.count + self.key.count)
         serializedSignature[0] = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!
@@ -158,9 +153,5 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
 
     public func serialize(_ serializer: Serializer) throws {
         try Serializer.toBytes(serializer, self.key)
-    }
-
-    public func serializeModule(_ serializer: Serializer) {
-        serializer.fixedBytes(self.key)
     }
 }

@@ -26,7 +26,13 @@
 import Foundation
 import SwiftyJSON
 
+/// `SuiResponse` represents a response structure conforming to JSON-RPC 2.0 specifications.
+/// This structure is used to encapsulate the information received as a response to a JSON-RPC request.
 public struct SuiResponse: Codable {
+    /// Represents the version of the JSON-RPC protocol used, which is "2.0".
     let jsonrpc: String
+
+    /// Represents the result of the invoked method in JSON format.
+    /// It holds the actual data returned from the operation that was executed as a part of the request.
     let result: JSON
 }

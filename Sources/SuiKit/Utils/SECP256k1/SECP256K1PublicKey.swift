@@ -32,7 +32,6 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     /// The length of the key in bytes
     public static let LENGTH: Int = 33
 
-    /// The key itself
     public var key: Data
 
     public init(data: Data) throws {
@@ -69,17 +68,6 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         return "0x\(key.hexEncodedString())"
     }
 
-    /// Verify a digital signature for a given data using Ed25519 algorithm.
-    ///
-    /// This function verifies a digital signature provided by the Ed25519 algorithm for a given data and public key.
-    ///
-    /// - Parameters:
-    ///    - data: The Data object to be verified.
-    ///    - signature: The Signature object containing the signature to be verified.
-    ///
-    /// - Returns: A Boolean value indicating whether the signature is valid or not.
-    ///
-    /// - Throws: An error of type Ed25519Error.invalidSignature if the signature is invalid or an error occurred during verification.
     public func verify(data: Data, signature: Signature) throws -> Bool {
         guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)) else { throw AccountError.invalidContext }
         let hashedData = data.sha256()

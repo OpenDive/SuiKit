@@ -32,22 +32,18 @@ import CryptoKit
 import Web3Core
 import secp256k1
 
+/// `SECP256K1PrivateKey` is a struct representing a private key using the SECP256K1 elliptic curve cryptography.
 public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
+    /// The type of the private key that corresponds to this private key.
     public typealias PrivateKeyType = SECP256K1PrivateKey
     public typealias PublicKeyType = SECP256K1PublicKey
 
+    /// Default derivation path for the private key.
     public static let defaultDerivationPath: String = "m/54'/784'/0'/0/0"
-    public static let curve: String = "Bitcoin seed"
-    public static let secp256k1CurveOrder = BigUInt(
-        "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141",
-        radix: 16
-    )!
-    public static let hardenedOffset: UInt32 = 0x80000000
 
     /// The length of the key in bytes
     public static let LENGTH: Int = 32
 
-    /// The key itself
     public var key: Data
 
     public init(key: Data) throws {
@@ -93,11 +89,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return self.hex()
     }
 
-    /// Converts the private key to a hexadecimal string.
-    ///
-    /// - Returns: A string representation of the private key in hexadecimal format, with a "0x" prefix.
-    ///
-    /// - Note: The hexEncodedString function of the Data type is called to convert the private key into a hexadecimal string, and "0x" is prepended to the resulting string.
     public func hex() -> String {
         return "0x\(self.key.hexEncodedString())"
     }
@@ -106,13 +97,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return self.key.base64EncodedString()
     }
 
-    /// Calculates the corresponding public key for this private key instance using the Ed25519 algorithm.
-    ///
-    /// - Returns: A PublicKey instance representing the public key associated with this private key.
-    ///
-    /// - Throws: An error if the calculation of the public key fails, or if the public key cannot be used to create a PublicKey instance.
-    ///
-    /// - Note: The private key is converted into a UInt8 array and passed to the calcPublicKey function of the Ed25519 implementation. The resulting public key is then used to create a new PublicKey instance.
     public func publicKey() throws -> SECP256K1PublicKey {
         guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)) else { throw AccountError.invalidContext }
         var pubKeyObject: secp256k1_pubkey = secp256k1_pubkey()
@@ -132,15 +116,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return try SECP256K1PublicKey(data: result)
     }
 
-    /// Signs a message using this private key and the Ed25519 algorithm.
-    ///
-    /// - Parameter data: The message to be signed.
-    ///
-    /// - Returns: A Signature instance representing the signature for the message.
-    ///
-    /// - Throws: An error if the signing operation fails or if the resulting signature cannot be used to create a Signature instance.
-    ///
-    /// - Note: The input message is converted into a UInt8 array and passed to the sign function of the Ed25519 implementation along with the private key converted into a UInt8 array. The resulting signature is then used to create a new Signature instance.
     public func sign(data: Data) throws -> Signature {
         let hash = data.sha256
         guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)) else { throw AccountError.invalidContext }
@@ -204,6 +179,11 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return try self.signWithIntent([UInt8](ser.output()), .PersonalMessage)
     }
 
+    /// The BIP32 path is a string representation used to derive keys from a seed in a hierarchical manner.
+    /// - Parameters:
+    ///   - path: A string representing the BIP32 path.
+    /// - Returns: A boolean value, `true` if the given path is valid, `false` otherwise.
+    /// - Note: The pattern for a valid BIP32 path for this function is "^m\\/(54|74)'\\/784'\\/[0-9]+'\\/[0-9]+\\/[0-9]+$".
     private static func isValidBIP32Path(_ path: String) -> Bool {
         let pattern = "^m\\/(54|74)'\\/784'\\/[0-9]+'\\/[0-9]+\\/[0-9]+$"
         let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
@@ -212,6 +192,13 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return matches?.first != nil
     }
 
+    /// Converts a mnemonic string to a seed. A mnemonic is a human-readable representation of a seed, typically
+    /// consisting of a sequence of randomly chosen words. The seed is a byte array generated from the mnemonic and
+    /// is used to derive cryptographic keys.
+    /// - Parameters:
+    ///   - mnemonics: A string of space-separated words representing the mnemonic.
+    /// - Returns: An array of bytes representing the derived seed.
+    /// - Throws: If there is an error during the conversion of the mnemonic to a seed, an error will be thrown.
     private static func mnemonicToSeed(_ mnemonics: String) throws -> [UInt8] {
         let mnemonic = try Mnemonic(mnemonic: mnemonics.components(separatedBy: " "))
         return mnemonic.seed()
@@ -223,16 +210,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
             throw AccountError.lengthMismatch
         }
         return try SECP256K1PrivateKey(key: key)
-    }
-
-    private struct Keys {
-        public let key: Data
-        public let chainCode: Data
-
-        public init(key: Data, chainCode: Data) {
-            self.key = key
-            self.chainCode = chainCode
-        }
     }
 
     public func serialize(_ serializer: Serializer) throws {

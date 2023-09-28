@@ -27,10 +27,19 @@ import Foundation
 import SwiftyJSON
 import AnyCodable
 
+/// `SuiRequest` represents a request structure conforming to JSON-RPC 2.0 specifications.
+/// JSON-RPC is a remote procedure call (RPC) protocol encoded in JSON.
 public struct SuiRequest: Codable {
+    /// Represents a unique identifier for the request. By default, it's assigned a random integer value.
     var id: Int = Int(arc4random())
+
+    /// Represents the name of the method to be invoked.
     var method: String = ""
+
+    /// Represents the version of the JSON-RPC protocol, which is "2.0" in this case.
     var jsonrpc: String = "2.0"
+
+    /// Represents the parameters of the method to be invoked. The parameters are encapsulated in an `AnyCodable` array to support any type that conforms to the `Codable` protocol.
     var params: [AnyCodable]
 
     public init(_ method: String, _ params: [AnyCodable]) {

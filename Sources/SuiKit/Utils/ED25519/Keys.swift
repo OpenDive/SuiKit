@@ -1,5 +1,5 @@
 //
-//  RPCValidationError.swift
+//  Keys.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,29 +25,16 @@
 
 import Foundation
 
-class RPCValidationError: Error {
-    let req: RPCErrorRequest
-    let result: Any?
-    let cause: Error?
+/// Represents a pair of cryptographic keys used internally with ED25519.
+internal struct Keys {
+    /// The cryptographic key data.
+    internal let key: Data
 
-    init(options: (req: RPCErrorRequest, result: Any?, cause: Error?)) {
-        self.req = options.req
-        self.result = options.result
-        self.cause = options.cause
-    }
+    /// The chain code associated with the cryptographic key.
+    internal let chainCode: Data
 
-    func toString() -> String {
-        var str = 
-            "RPC Validation Error: The response returned from RPC server does not match the Swift definition. This is likely because the SDK version is not compatible with the RPC server."
-        
-        if let cause = cause {
-            str += "\nCause: \(cause)"
-        }
-
-        if let result = result {
-            str += "\nResponse Received: \(String(describing: result))"
-        }
-
-        return str
+    internal init(key: Data, chainCode: Data) {
+        self.key = key
+        self.chainCode = chainCode
     }
 }

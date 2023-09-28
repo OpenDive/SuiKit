@@ -26,7 +26,12 @@
 import Foundation
 import AnyCodable
 
+/// Represents the parameters required for making a Remote Procedure Call (RPC).
 public struct RpcParameters: Codable, RPCErrorRequest {
+    /// A string containing the name of the method to be invoked.
     public var method: String
+
+    /// An array representing the arguments to be passed to the method.
+    /// The arguments are of type `AnyCodable` to accommodate different types of values.
     public var args: [AnyCodable]
 }

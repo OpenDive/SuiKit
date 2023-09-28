@@ -25,9 +25,21 @@
 
 import Foundation
 
+/// Represents a structured error value for Remote Procedure Call (RPC).
 public struct RPCErrorValue: Equatable {
+    /// A unique identifier for the RPC call. It can be `nil` if the error is in response to a
+    /// notification (i.e., a request where a response is not expected).
     public let id: Int?
+
+    /// A structured object describing the error, providing more details about what went wrong.
+    /// This could be `nil` if there is no detailed error message available.
     public let error: ErrorMessage?
+
+    /// A string specifying the version of the JSON-RPC protocol.
+    /// This can be `nil` if the protocol version is not specified.
     public let jsonrpc: String?
+
+    /// A boolean indicating whether an error has occurred. It will be `true` if an error
+    /// is present, otherwise `false`.
     public let hasError: Bool
 }

@@ -28,13 +28,20 @@ import SwiftyJSON
 import AnyCodable
 
 public struct JsonRpcClient {
+    /// Represents the package version.
     public static let PACKAGE_VERSION = "0.33.0"
+
+    /// Represents the targeted RPC version.
     public static let TARGETED_RPC_VERSION = "1.1.0"
 
     private let url: URL
     private let httpHeaders: HttpHeaders
     private let session: URLSession
 
+    /// Initializes a new `JsonRpcClient` with the given URL and optionally custom HTTP headers.
+    /// - Parameters:
+    ///   - url: The URL of the JSON-RPC server.
+    ///   - httpHeaders: Optional custom HTTP headers.
     public init(url: URL, httpHeaders: HttpHeaders? = nil) {
         self.url = url
         self.httpHeaders = [
@@ -47,6 +54,12 @@ public struct JsonRpcClient {
         self.session = URLSession(configuration: .default)
     }
 
+    /// Process a JSON-RPC request and returns a `SuiResponse`.
+    /// - Parameters:
+    ///   - url: The URL of the JSON-RPC server.
+    ///   - request: The `SuiRequest` to be sent.
+    /// - Returns: A `SuiResponse` object.
+    /// - Throws: Decoding errors if the response cannot be decoded.
     public static func processSuiJsonRpc(_ url: URL, _ request: SuiRequest) async throws -> SuiResponse {
         let data = try await Self.sendSuiJsonRpc(url, request)
 
@@ -58,6 +71,12 @@ public struct JsonRpcClient {
         }
     }
 
+    /// Sends a JSON-RPC request and returns the received data.
+    /// - Parameters:
+    ///   - url: The URL of the JSON-RPC server.
+    ///   - request: The `SuiRequest` to be sent.
+    /// - Returns: The received `Data`.
+    /// - Throws: Encoding errors if the request cannot be encoded.
     public static func sendSuiJsonRpc(_ url: URL, _ request: SuiRequest) async throws -> Data {
         var requestUrl = URLRequest(url: url)
         requestUrl.allHTTPHeaderFields = [
@@ -82,11 +101,14 @@ public struct JsonRpcClient {
                     con.resume(returning: Data())
                 }
             }
-
             task.resume()
         }
     }
 
+    /// Performs a call to the JSON-RPC server with the given request data.
+    /// - Parameter request: The request data to be sent.
+    /// - Returns: A string containing the server response.
+    /// - Throws: Various errors related to the HTTP response and decoding failures.
     public func call(request: Data?) async throws -> String {
         var urlRequest = URLRequest(url: self.url)
         urlRequest.httpMethod = "POST"
@@ -111,6 +133,13 @@ public struct JsonRpcClient {
         }
     }
 
+    /// Performs a JSON-RPC request and decodes the response.
+    /// - Parameters:
+    ///   - type: The type of the expected response.
+    ///   - method: The JSON-RPC method to be called.
+    ///   - args: The parameters for the JSON-RPC method.
+    /// - Returns: A `JSON` object containing the result of the call.
+    /// - Throws: Various errors related to encoding, decoding, and invalid responses.
     public func request<T: Decodable>(withType type: T.Type, method: String, args: RequestParamsLike) async throws -> JSON {
         let req = RpcParameters(method: method, args: args)
         let requestData = try JSONEncoder().encode(req)

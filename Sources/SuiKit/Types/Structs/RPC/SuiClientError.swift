@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// Represents a client-side error that conforms to the `Codable` and `Error` protocols.
 public struct SuiClientError: Codable, Error {
+    /// A string representing the JSON-RPC protocol version.
     let jsonrpc: String
+
+    /// An instance of `SuiClientMessage` representing the detailed error information.
     let error: SuiClientMessage
+
+    /// A unique identifier for the error.
     let id: Int
 }

@@ -27,12 +27,23 @@ import Foundation
 import SwiftyJSON
 
 public struct FaucetClient {
+    /// A connection conforming to `ConnectionProtocol` to interact with.
     public let connection: any ConnectionProtocol
 
+    /// Initializes a new `FaucetClient` with the given connection.
+    /// - Parameter connection: A connection conforming to `ConnectionProtocol`.
     public init(connection: any ConnectionProtocol) {
         self.connection = connection
     }
 
+    /// Requests coin info for the given account address from the faucet.
+    /// - Parameter address: The account address to request coin info for.
+    /// - Returns: A `FaucetCoinInfo` object containing details about the transferred coins.
+    /// - Throws:
+    ///     - `SuiError.faucetUrlRequired` if the faucet URL is not available in the connection.
+    ///     - `SuiError.invalidUrl` if the faucet URL is invalid.
+    ///     - `SuiError.faucetRateLimitError` if the request is rate limited.
+    ///     - `SuiError.invalidJsonData` if the received JSON data is invalid.
     public func funcAccount(_ address: String) async throws -> FaucetCoinInfo {
         guard let baseUrl = connection.faucet else {
             throw SuiError.faucetUrlRequired
@@ -55,13 +66,12 @@ public struct FaucetClient {
             ]
             request.httpBody = try JSONSerialization.data(withJSONObject: data)
             request.httpMethod = "POST"
+
             let result = try await URLSession.shared.asyncData(with: request)
-            let json = try JSONDecoder().decode(
-                JSON.self,
-                from: result
-            )["transferredGasObjects"][0]
+            let json = try JSONDecoder().decode(JSON.self, from: result)["transferredGasObjects"][0]
+
             return FaucetCoinInfo(
-                amount: json["amount"].intValue, 
+                amount: json["amount"].intValue,
                 id: json["id"].stringValue,
                 transferTxDigest: json["transferTxDigest"].stringValue
             )

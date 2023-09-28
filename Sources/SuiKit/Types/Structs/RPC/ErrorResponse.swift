@@ -26,7 +26,14 @@
 import Foundation
 
 public struct ErrorResponse: Codable, Error {
+    /// A string specifying the version of the JSON-RPC protocol. Defaults to "2.0".
     public var jsonrpc: String = "2.0"
+
+    /// An identifier established by the client that MUST contain a String that
+    /// uniquely identifies the request.
     public let id: String
+
+    /// An `ErrorObject` containing details about the error that occurred during
+    /// the processing of the request.
     public let error: ErrorObject
 }

@@ -26,8 +26,15 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a valid JSON-RPC response that conforms to the `Codable` protocol.
 public struct ValidResponse: Codable {
+    /// A string representing the JSON-RPC protocol version.
+    /// It's initialized with the default value "2.0".
     public var jsonrpc: String = "2.0"
+
+    /// A unique identifier for the response, corresponding to the identifier of the request.
     public let id: String
+
+    /// An instance of `JSON` representing the payload of a successful response.
     public let result: JSON
 }

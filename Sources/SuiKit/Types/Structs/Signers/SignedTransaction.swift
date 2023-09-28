@@ -26,6 +26,9 @@
 import Foundation
 
 public struct SignedTransaction {
+    /// A base64 encoded `String` representing the bytes of the transaction block that was signed.
     public let transactionBlockBytes: String
+
+    /// A `String` representing the signature of the transaction block.
     public let signature: String
 }

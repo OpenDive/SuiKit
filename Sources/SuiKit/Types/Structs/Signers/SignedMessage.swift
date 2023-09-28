@@ -26,6 +26,9 @@
 import Foundation
 
 public struct SignedMessage {
+    /// A base64 encoded `String` representing the bytes of the message that was signed.
     public let messageBytes: String
+
+    /// A `String` representing the signature of the message.
     public let signature: String
 }

@@ -25,7 +25,20 @@
 
 import Foundation
 
+/// Represents a filter for Move modules, conforming to `Codable` to support encoding and decoding.
 public struct MoveModuleFilter: Codable {
+    /// A `String` representing the name of the module being filtered.
     public var module: String
+
+    /// A `String` representing the package in which the module resides.
     public var package: String
+
+    /// Initializes a new instance of `MoveModuleFilter`.
+    /// - Parameters:
+    ///   - module: A `String` representing the name of the module being filtered.
+    ///   - package: A `String` representing the package in which the module resides.
+    public init(module: String, package: String) {
+        self.module = module
+        self.package = package
+    }
 }

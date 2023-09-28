@@ -25,7 +25,20 @@
 
 import Foundation
 
+/// Represents a request to retrieve a past object, conforming to `Codable` to support encoding and decoding.
 public struct GetPastObjectRequest: Codable {
+    /// A `String` representing the unique identifier of the object to be retrieved.
     public var objectId: String
+
+    /// A `String` representing the version of the object to be retrieved.
     public var version: String
+
+    /// Initializes a new instance of `GetPastObjectRequest`.
+    /// - Parameters:
+    ///   - objectId: A `String` representing the unique identifier of the object.
+    ///   - version: A `String` representing the version of the object.
+    public init(objectId: String, version: String) {
+        self.objectId = objectId
+        self.version = version
+    }
 }

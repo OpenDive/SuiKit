@@ -26,8 +26,16 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents a collection of `ValidatorApy` instances associated with a specific epoch.
 public struct ValidatorApys {
+    /// An array containing `ValidatorApy` instances, each of which represents
+    /// the Annual Percentage Yield (APY) of a specific validator.
     public var apys: [ValidatorApy]
+
+    /// A `String` representing the epoch associated with the APYs.
+    /// An epoch is a specific period in the blockchain network during which
+    /// the validators’ APYs are applicable. It acts as a time reference
+    /// to organize the APY data in the blockchain's timeline.
     public var epoch: String
 
     public init(input: JSON) {

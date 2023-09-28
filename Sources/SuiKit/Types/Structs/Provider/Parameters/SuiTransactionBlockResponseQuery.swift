@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// Used for the SDK provider to filter out certain transaction results
 public struct SuiTransactionBlockResponseQuery: Codable {
+    /// Various data filter options for filtering out transactions that fit within certain parameters
     public var filter: TransactionFilter?
+
+    /// What content is returned within each transaction block response
     public var options: SuiTransactionBlockResponseOptions?
 }

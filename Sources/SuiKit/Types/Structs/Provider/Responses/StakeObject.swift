@@ -25,9 +25,24 @@
 
 import Foundation
 
+/// Represents a stake object, detailing information regarding a staking process or state,
+/// and conforming to the `Equatable` protocol to allow comparisons between instances.
 public struct StakeObject: Equatable {
+    /// A string representing the principal involved in the stake, usually identifying the
+    /// individual, account, or entity that initiated or holds the stake.
     public var principal: String
+
+    /// A string representing the epoch in which the stake became active. Epochs are chronological
+    /// units or timeframes used to divide the lifetime of the staking process, and this property
+    /// signifies when the stake starts to be in effect.
     public var stakeActiveEpoch: String
+
+    /// A string representing the epoch in which the stake request was made. This property helps
+    /// in identifying when the initial request to stake was placed within the chronological
+    /// sequence of epochs.
     public var stakeRequestEpoch: String
+
+    /// A string representing the unique identifier associated with this stake in the Sui
+    /// Blockchain, enabling reference and lookup of this specific stake instance.
     public var stakeSuiId: String
 }

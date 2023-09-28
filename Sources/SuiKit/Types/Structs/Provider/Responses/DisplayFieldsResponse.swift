@@ -26,8 +26,15 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing the response containing display fields.
 public struct DisplayFieldsResponse {
+    /// An optional dictionary containing the display data.
+    /// The keys are `String` representing the field names and the values are `String` representing the field values.
+    /// This will be `nil` if there is no display data to represent.
     public var data: [String: String]?
+
+    /// An optional instance of `ObjectResponseError` representing any error that occurred while generating the response.
+    /// This will be `nil` if there is no error to report.
     public var error: ObjectResponseError?
 
     public static func parseJSON(_ input: JSON) -> DisplayFieldsResponse? {

@@ -25,6 +25,14 @@
 
 import Foundation
 
+/// Represents a single address structure, conforming to `Codable` to support encoding and decoding.
 public struct FromOrToAddress: Codable {
+    /// A `String` representing the address.
     public var addr: String
+
+    /// Initializes a new instance of `FromOrToAddress`.
+    /// - Parameter addr: A `String` representing the address.
+    public init(addr: String) {
+        self.addr = addr
+    }
 }

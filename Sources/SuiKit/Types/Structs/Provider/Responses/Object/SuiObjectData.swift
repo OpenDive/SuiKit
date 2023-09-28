@@ -26,16 +26,36 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing SuiObjectData, containing various information about an object.
 public struct SuiObjectData {
+    /// An optional `RawData` representing the Binary Canonical Serialization (BCS) of the object.
     public let bcs: RawData?
+
+    /// An optional `SuiParsedData` representing the parsed data of the object.
     public let content: SuiParsedData?
+
+    /// A `String` representing the digest of the object.
     public let digest: String
+
+    /// An optional `DisplayFieldsResponse` representing the display fields of the object.
     public let display: DisplayFieldsResponse?
+
+    /// A `String` representing the object ID.
     public let objectId: String
+
+    /// An optional `ObjectOwner` representing the owner of the object.
     public let owner: ObjectOwner?
+
+    /// An optional `String` representing the previous transaction of the object.
     public let previousTransaction: String?
+
+    /// An optional `Int` representing the storage rebate of the object.
     public let storageRebate: Int?
+
+    /// An optional `String` representing the type of the object.
     public let type: String?
+
+    /// A `String` representing the version of the object.
     public let version: String
 
     public init(

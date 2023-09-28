@@ -26,9 +26,18 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing the response from a request for a SuiObject, containing either the object data or an error.
 public struct SuiObjectResponse {
+    /// An optional `ObjectResponseError` representing any error that occurred during the request for the SuiObject.
     public var error: ObjectResponseError?
+
+    /// An optional `SuiObjectData` representing the data of the requested SuiObject, if the request was successful.
     public var data: SuiObjectData?
+
+    /// Retrieves the initial version of the shared object, if applicable.
+    ///
+    /// This method will return `nil` if the `data` is `nil` or if the owner of the object is not shared.
+    /// - Returns: An optional `Int` representing the initial version of the shared object.
     public func getSharedObjectInitialVersion() -> Int? {
         guard let owner = self.data?.owner else { return nil }
         switch owner {
@@ -39,6 +48,10 @@ public struct SuiObjectResponse {
         }
     }
 
+    /// Constructs and retrieves a `SuiObjectRef` reference from the object data, if available.
+    ///
+    /// This method will return `nil` if the `data` is `nil`.
+    /// - Returns: An optional `SuiObjectRef` representing the object reference constructed from the object data.
     public func getObjectReference() -> SuiObjectRef? {
         guard let data = self.data else { return nil }
         return SuiObjectRef(

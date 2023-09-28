@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// Filter option for a certain time range
 public struct TimeRange: Codable {
+    /// The most recent update
     public var endTime: String
+
+    /// The earliest update
     public var startTime: String
 }

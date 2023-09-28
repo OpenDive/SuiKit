@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// Move Module used for transactions
 public struct TransactionMoveFunction: Codable {
+    /// The function name
     public var function: String?
+
+    /// The module name
     public var module: String?
+
+    /// The package name
     public var package: String?
 }

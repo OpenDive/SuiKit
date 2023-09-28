@@ -25,7 +25,20 @@
 
 import Foundation
 
+/// Represents a pair of from and to addresses, conforming to `Codable` to support encoding and decoding.
 public struct FromAndToAddress: Codable {
+    /// A `String` representing the source address.
     public var from: String
+
+    /// A `String` representing the destination address.
     public var to: String
+
+    /// Initializes a new instance of `FromAndToAddress`.
+    /// - Parameters:
+    ///   - from: A `String` representing the source address.
+    ///   - to: A `String` representing the destination address.
+    public init(from: String, to: String) {
+        self.from = from
+        self.to = to
+    }
 }

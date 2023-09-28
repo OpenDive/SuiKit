@@ -25,7 +25,12 @@
 
 import Foundation
 
+/// A structure representing the committee information.
 public struct CommitteeInfo {
+    /// A `String` representing the epoch related to the committee information.
     public var epoch: String
+
+    /// A two-dimensional array of `String` representing the validators.
+    /// Each inner array represents a group of validators.
     public var validators: [[String]]
 }

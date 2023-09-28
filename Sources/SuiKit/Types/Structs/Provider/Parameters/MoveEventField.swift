@@ -26,7 +26,21 @@
 import Foundation
 import AnyCodable
 
+/// Represents a field within a Move event, conforming to `Codable` to support encoding and decoding.
 public struct MoveEventField: Codable {
+    /// A `String` representing the path of the event field.
     public var path: String
+
+    /// An `AnyCodable` object representing the value of the event field.
+    /// It's designed to allow encoding and decoding of any Codable value.
     public var value: AnyCodable
+
+    /// Initializes a new instance of `MoveEventField`.
+    /// - Parameters:
+    ///   - path: A `String` representing the path of the event field.
+    ///   - value: An `AnyCodable` object representing the value of the event field.
+    public init(path: String, value: AnyCodable) {
+        self.path = path
+        self.value = value
+    }
 }

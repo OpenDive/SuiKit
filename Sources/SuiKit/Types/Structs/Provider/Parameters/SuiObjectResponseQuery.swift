@@ -25,7 +25,11 @@
 
 import Foundation
 
+/// Used for the SDK provider to filter out Sui objects.
 public struct SuiObjectResponseQuery: Codable {
+    /// Various data filter options for selecting what type of objects are filtered through.
     public var filter: SuiObjectDataFilter?
+
+    /// What is returned within each of the Sui objects.
     public var options: SuiObjectDataOptions?
 }

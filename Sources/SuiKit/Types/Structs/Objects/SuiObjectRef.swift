@@ -44,7 +44,7 @@ public struct SuiObjectRef: KeyProtocol {
     ///   - version: A `String` representing the version of the Sui Object.
     ///   - digest: A `TransactionDigest` representing the transaction digest.
     public init(
-        objectId: String,
+        objectId: objectId,
         version: String,
         digest: TransactionDigest
     ) {
@@ -73,6 +73,25 @@ public struct SuiObjectRef: KeyProtocol {
     public init(input: JSON) {
         self.objectId = input["objectId"].stringValue
         self.version = "\(input["version"].uInt64Value)"
-        self.digest = TransactionDigest(input: input["digest"])
+        self.digest = input["digest"].stringValue
+    }
+
+    public func serialize(_ serializer: Serializer) throws {
+        let account = try AccountAddress.fromHex(self.objectId)
+        try Serializer._struct(serializer, value: account)
+        try Serializer.u64(serializer, UInt64(version) ?? 0)
+        if let dataDigest = digest.base58DecodedData {
+            try Serializer.toBytes(serializer, Data(dataDigest))
+        }
+    }
+
+    public static func deserialize(
+        from deserializer: Deserializer
+    ) throws -> SuiObjectRef {
+        return SuiObjectRef(
+            objectId: try Deserializer._struct(deserializer),
+            version: "\(try Deserializer.u64(deserializer))",
+            digest: ([UInt8](try Deserializer.toBytes(deserializer))).base58EncodedString
+        )
     }
 }

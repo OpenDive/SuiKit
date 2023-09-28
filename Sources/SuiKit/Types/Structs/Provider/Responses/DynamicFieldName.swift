@@ -25,7 +25,13 @@
 
 import Foundation
 
+/// A structure representing the name of a dynamic field, conforming to `Codable` protocol.
 public struct DynamicFieldName: Codable {
+    /// A `String` representing the type of dynamic field.
+    /// This can help in identifying the nature or category of the field.
     public var type: String
+
+    /// A `String` representing the actual name or value of the dynamic field.
+    /// This is the specific identifier for the field.
     public var value: String
 }

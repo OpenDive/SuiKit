@@ -25,7 +25,20 @@
 
 import Foundation
 
+/// Represents an error message, conforming to `Equatable` for comparing instances.
 public struct ErrorMessage: Equatable {
+    /// A `String` containing the textual description of the error.
     public let message: String
+
+    /// An `Int` representing the error code associated with the error message.
     public let code: Int
+
+    /// Initializes a new instance of `ErrorMessage`.
+    /// - Parameters:
+    ///   - message: A `String` representing the error message text.
+    ///   - code: An `Int` representing the error code.
+    public init(message: String, code: Int) {
+        self.message = message
+        self.code = code
+    }
 }

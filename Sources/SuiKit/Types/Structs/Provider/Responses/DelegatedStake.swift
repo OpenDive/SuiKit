@@ -25,8 +25,14 @@
 
 import Foundation
 
+/// A structure representing the information of delegated stakes.
 public struct DelegatedStake {
+    /// An array of `StakeStatus` representing the status of each stake delegated.
     public var stakes: [StakeStatus]
+
+    /// A `String` representing the staking pool to which the stakes are delegated.
     public var stakingPool: String
+
+    /// A `String` representing the address of the validator managing the delegated stakes.
     public var validatorAddress: String
 }

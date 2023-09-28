@@ -25,12 +25,24 @@
 
 import Foundation
 
+/// Various options for what is returned with each transaction block response
 public struct TransactionBlockResponseOptions: Codable {
+    /// Are the input variables shown?
     public var showInput: Bool
+
+    /// Are the raw inputs shown?
     public var showRawInput: Bool
+
+    /// Are the transaction effects shown?
     public var showEffects: Bool
+
+    /// Are the events shown?
     public var showEvents: Bool
+
+    /// Are the objects that have been changed shown?
     public var showObjectChanges: Bool
+
+    /// Is the balance change shown?
     public var showBalanceChanges: Bool
 
     public init(

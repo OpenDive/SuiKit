@@ -25,11 +25,30 @@
 
 import Foundation
 
+/// Represents metadata associated with a SuiCoin, providing details and information
+/// related to a specific coin in the system.
 public struct SuiCoinMetadata {
+    /// An `UInt8` value representing the number of decimals to which the coin can be divided.
+    /// This attribute is useful for representing fractional values of the coin.
     let decimals: UInt8
+
+    /// A `String` providing a human-readable description of the coin, explaining its purpose,
+    /// usage, or any other relevant information that helps in understanding the coin's context.
     let description: String
+
+    /// An optional `String` containing the URL of the coin's icon. This URL can be used to
+    /// retrieve the visual representation or logo associated with the coin.
     let iconUrl: String?
+
+    /// A `String` representing the name of the coin. This is typically a full or formal name
+    /// that is used to refer to the coin in official or detailed contexts.
     let name: String
+
+    /// A `String` representing the symbol of the coin. This is usually a short, concise representation
+    /// used for quick reference or display, such as in trading pairs or price listings.
     let symbol: String
+
+    /// A `String` serving as a unique identifier for the coin, allowing for differentiation and
+    /// reference to this specific coin instance within the system.
     let id: String
 }

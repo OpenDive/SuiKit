@@ -25,8 +25,17 @@
 
 import Foundation
 
+/// Represents a paginated collection of `DynamicFieldInfo` objects, providing information
+/// on the availability of additional pages.
 public struct DynamicFieldPage {
+    /// An array of `DynamicFieldInfo` objects, each providing detailed information
+    /// about a specific dynamic field.
     public var data: [DynamicFieldInfo]
+
+    /// An optional `String` representing the cursor for the next page of dynamic field information.
+    /// If `nil`, it may indicate that there are no more pages available.
     public var nextCursor: String?
+
+    /// A `Bool` indicating whether there is an additional page of dynamic field information available.
     public var hasNextPage: Bool
 }

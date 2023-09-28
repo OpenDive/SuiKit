@@ -26,10 +26,20 @@
 import Foundation
 import SwiftyJSON
 
+/// A structure representing the results of DevInspect call.
 public struct DevInspectResults {
+    /// An instance of `TransactionEffects` representing the effects of the transaction.
     public var effects: TransactionEffects
+
+    /// An optional array of `ExecutionResultType` representing the results of the execution.
+    /// This will be `nil` if there are no execution results to represent.
     public var results: [ExecutionResultType]?
+
+    /// An optional `String` representing any error that occurred during the inspection.
+    /// This will be `nil` if there is no error to report.
     public var error: String?
+
+    /// An array of `SuiEvent` representing the events that occurred during the inspection.
     public var events: [SuiEvent]
 
     public init?(input: JSON) {

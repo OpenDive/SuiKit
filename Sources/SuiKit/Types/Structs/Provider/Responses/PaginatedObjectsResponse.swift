@@ -25,8 +25,19 @@
 
 import Foundation
 
+/// Represents a paginated response containing a list of `SuiObjectResponse` instances,
+/// which may represent objects retrieved from the Sui blockchain, along with
+/// pagination information.
 public struct PaginatedObjectsResponse {
+    /// An array of `SuiObjectResponse` instances, each representing the response
+    /// for a specific object, possibly containing object data or errors.
     public var data: [SuiObjectResponse]
+
+    /// A Boolean value indicating whether there are more pages of objects available to be retrieved.
+    /// `true` if there are more pages available, otherwise `false`.
     public var hasNextPage: Bool
+
+    /// An optional string representing the cursor for the next page of objects.
+    /// `nil` if there are no more pages available.
     public var nextCursor: String?
 }

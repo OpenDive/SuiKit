@@ -25,15 +25,38 @@
 
 import Foundation
 
+/// A structure representing the various display options for SuiObjectData, conforming to `Codable`.
 public struct SuiObjectDataOptions: Codable {
+    /// An optional `Bool` indicating whether to show BCS representation.
     public var showBcs: Bool?
+
+    /// An optional `Bool` indicating whether to display the content of the object.
     public var showContent: Bool?
+
+    /// An optional `Bool` indicating whether to show the display representation of the object.
     public var showDisplay: Bool?
+
+    /// An optional `Bool` indicating whether to show the owner of the object.
     public var showOwner: Bool?
+
+    /// An optional `Bool` indicating whether to show the previous transaction of the object.
     public var showPreviousTransaction: Bool?
+
+    /// An optional `Bool` indicating whether to show the storage rebate of the object.
     public var showStorageRebate: Bool?
+
+    /// An optional `Bool` indicating whether to show the type of the object.
     public var showType: Bool?
 
+    /// Initializes a new instance of `SuiObjectDataOptions` with the given parameters.
+    /// - Parameters:
+    ///   - showBcs: A flag indicating whether to show BCS representation.
+    ///   - showContent: A flag indicating whether to display the content of the object.
+    ///   - showDisplay: A flag indicating whether to show the display representation of the object.
+    ///   - showOwner: A flag indicating whether to show the owner of the object.
+    ///   - showPreviousTransaction: A flag indicating whether to show the previous transaction of the object.
+    ///   - showStorageRebate: A flag indicating whether to show the storage rebate of the object.
+    ///   - showType: A flag indicating whether to show the type of the object.
     public init(
         showBcs: Bool? = nil,
         showContent: Bool? = nil,

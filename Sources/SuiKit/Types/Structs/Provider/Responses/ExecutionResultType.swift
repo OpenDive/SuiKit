@@ -26,8 +26,17 @@
 import Foundation
 import SwiftyJSON
 
+/// Represents the type of execution result, which includes mutable reference outputs
+/// and return values after the execution of a function or operation.
 public struct ExecutionResultType {
+    /// An optional array of `MutableReferenceOutputType` representing the mutable
+    /// reference outputs obtained as a result of the execution. If `nil`, it may indicate
+    /// that there were no mutable reference outputs produced during the execution.
     public var mutableReferenceOutputs: [MutableReferenceOutputType]?
+
+    /// An optional array of `ReturnValueType` representing the return values obtained
+    /// as a result of the execution. If `nil`, it may indicate that there were no return
+    /// values produced during the execution.
     public var returnValues: [ReturnValueType]?
 
     public init?(input: JSON) {

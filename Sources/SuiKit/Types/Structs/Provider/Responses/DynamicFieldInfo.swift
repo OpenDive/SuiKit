@@ -25,12 +25,26 @@
 
 import Foundation
 
+/// A structure representing information about a dynamic field.
 public struct DynamicFieldInfo {
+    /// A `String` representing the BCS (Binary Canonical Serialization) name of the dynamic field.
     public var bcsName: String
+
+    /// A `String` representing the digest of the dynamic field.
     public var digest: String
+
+    /// An instance of `DynamicFieldName` representing the name of the dynamic field.
     public var name: DynamicFieldName
+
+    /// A `String` representing the object ID associated with the dynamic field.
     public var objectId: String
+
+    /// A `String` representing the type of the object associated with the dynamic field.
     public var objectType: String
+
+    /// An instance of `DynamicFieldType` representing the type of the dynamic field.
     public var type: DynamicFieldType
+
+    /// A `String` representing the version of the dynamic field.
     public var version: String
 }

@@ -26,10 +26,18 @@
 import Foundation
 import SwiftyJSON
 
+/// The gas data used for the transaction
 public struct SuiGasData: KeyProtocol {
+    /// The payment objects used for the transaction
     public var payment: [SuiObjectRef]?
+
+    /// The owner of the transaction
     public var owner: AccountAddress?
+
+    /// The total price of the gas used
     public var price: String?
+
+    /// The budget set with the gas data
     public var budget: String?
 
     public init() {

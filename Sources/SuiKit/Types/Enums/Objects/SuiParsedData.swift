@@ -50,7 +50,7 @@ public enum SuiParsedData {
         case "moveObject":
             return .moveObject(
                 MoveObject(
-                    fields: MoveStruct.parseJSON(input["fields"]),
+                    fields: input["fields"],
                     hasPublicTransfer: input["hasPublicTransfer"].boolValue,
                     type: input["type"].stringValue
                 )

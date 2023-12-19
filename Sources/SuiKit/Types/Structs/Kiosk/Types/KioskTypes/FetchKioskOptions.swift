@@ -1,5 +1,5 @@
 //
-//  U256Tag.swift
+//  FetchKioskOptions.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -24,26 +24,29 @@
 //
 
 import Foundation
-import UInt256
 
-/// UInt256 Type Tag
-public struct U256Tag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Int
+public struct FetchKioskOptions {
+    /// Include the base kiosk object, which includes the profits, the owner and the base fields.
+    public var withKioskFields: Bool
 
-    public static func ==(lhs: U256Tag, rhs: U256Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
+    /// Include the listing prices.
+    public var withListingPrices: Bool
 
-    public func variant() -> Int {
-        return TypeTag.u256
-    }
+    /// Include the objects for the Items in the kiosk. Defaults to `display` only.
+    public var withObjects: Bool
 
-    public static func deserialize(from deserializer: Deserializer) throws -> U256Tag {
-        return try U256Tag(value: Int(Deserializer.u256(deserializer)))
-    }
+    /// Pass the data options for the objects, when fetching, in case you want to query other details.
+    public var objectOptions: SuiObjectDataOptions
 
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u256(serializer, UInt256(self.value))
+    public init(
+        withKioskFields: Bool = false,
+        withListingPrices: Bool = false,
+        withObjects: Bool = false,
+        objectOptions: SuiObjectDataOptions = SuiObjectDataOptions(showContent: true)
+    ) {
+        self.withKioskFields = withKioskFields
+        self.withListingPrices = withListingPrices
+        self.withObjects = withObjects
+        self.objectOptions = objectOptions
     }
 }

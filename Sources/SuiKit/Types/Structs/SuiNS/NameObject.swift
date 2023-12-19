@@ -1,5 +1,5 @@
 //
-//  U32Tag.swift
+//  NameObject.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -23,26 +23,21 @@
 //  THE SOFTWARE.
 //
 
-import Foundation
+public struct NameObject: Equatable {
+    /// The name object address
+    public var id: String
 
-/// UInt32 Type Tag
-public struct U32Tag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Int
+    /// The owner address // only if you add the `showOwner` parameter. It includes an extra RPC call.
+    public var owner: String?
 
-    public static func ==(lhs: U32Tag, rhs: U32Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
+    /// The linked address
+    public var targetAddress: String
 
-    public func variant() -> Int {
-        return TypeTag.u32
-    }
+    /// The custom avatar id // Only if you add showAvatar parameter. It includes an extra RPC call.
+    public var avatar: String?
 
-    public static func deserialize(from deserializer: Deserializer) throws -> U32Tag {
-        return try U32Tag(value: Int(Deserializer.u32(deserializer)))
-    }
-
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u32(serializer, UInt32(self.value))
-    }
+    /// The IPFS CID
+    public var contentHash: String?
+    public var nftId: String?
+    public var expirationTimestampMs: String
 }

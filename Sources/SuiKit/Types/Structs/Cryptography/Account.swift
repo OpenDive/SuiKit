@@ -24,11 +24,12 @@
 //
 
 import Foundation
+import CryptoKit
 
 /// Sui Blockchain Account
 public struct Account: Equatable, Hashable {
     /// Represents the type of cryptographic key associated with the account.
-    /// For example, it could be `ed25519` or `secp256k1`.
+    /// For example, it could be `ed25519`, `secp256k1`, or `secp256r1`.
     public let accountType: KeyType
 
     /// Represents the public key associated with the account. The public key is used
@@ -43,7 +44,7 @@ public struct Account: Equatable, Hashable {
     ///
     /// - Parameter accountType: The type of cryptographic key to be used. Defaults to `.ed25519`.
     /// - Throws: An error if the account initialization fails.
-    public init(accountType: KeyType = .ed25519) throws {
+    public init(accountType: KeyType = .ed25519, hasBiometrics: Bool = false) throws {
         switch accountType {
         case .ed25519:
             let privateKey = ED25519PrivateKey()
@@ -51,6 +52,13 @@ public struct Account: Equatable, Hashable {
         case .secp256k1:
             let privateKey = try SECP256K1PrivateKey()
             try self.init(privateKey: privateKey, accountType: accountType)
+        case .secp256r1:
+            if #available(macOS 13.0, iOS 16.0, *) {
+                let privateKey = try SECP256R1PrivateKey(hasBiometrics: hasBiometrics)
+                try self.init(privateKey: privateKey, accountType: accountType)
+            } else {
+                throw AccountError.incompatibleOS
+            }
         }
     }
 
@@ -71,6 +79,13 @@ public struct Account: Equatable, Hashable {
         case .secp256k1:
             let privateKey = try SECP256K1PrivateKey(key: privateKey)
             try self.init(privateKey: privateKey, accountType: accountType)
+        case .secp256r1:
+            if #available(macOS 13.0, iOS 16.0, *) {
+                let privateKey = try SECP256R1PrivateKey(key: privateKey)
+                try self.init(privateKey: privateKey, accountType: accountType)
+            } else {
+                throw AccountError.incompatibleOS
+            }
         }
     }
 
@@ -126,6 +141,15 @@ public struct Account: Equatable, Hashable {
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
             self.accountType = keyType
+        case .secp256r1:
+            if #available(macOS 13.0, iOS 16.0, *) {
+                let privateKey = try SECP256R1PrivateKey(hexString: hexString)
+                self.privateKey = privateKey
+                self.publicKey = try privateKey.publicKey()
+                self.accountType = keyType
+            } else {
+                throw AccountError.incompatibleOS
+            }
         }
     }
 
@@ -173,6 +197,14 @@ public struct Account: Equatable, Hashable {
             let privateKey = try SECP256K1PrivateKey(mnemonic)
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
+        case .secp256r1:
+            if #available(macOS 13.0, iOS 16.0, *) {
+                let privateKey = try SECP256R1PrivateKey(mnemonic)
+                self.privateKey = privateKey
+                self.publicKey = try privateKey.publicKey()
+            } else {
+                throw AccountError.incompatibleOS
+            }
         }
     }
 
@@ -194,6 +226,14 @@ public struct Account: Equatable, Hashable {
             let privateKey = try SECP256K1PrivateKey(value: value)
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
+        case .secp256r1:
+            if #available(macOS 13.0, iOS 16.0, *) {
+                let privateKey = try SECP256R1PrivateKey(value: value)
+                self.privateKey = privateKey
+                self.publicKey = try privateKey.publicKey()
+            } else {
+                throw AccountError.incompatibleOS
+            }
         }
     }
 
@@ -207,10 +247,10 @@ public struct Account: Equatable, Hashable {
                     (lhs.privateKey.key as! Data) == (rhs.privateKey.key as! Data) &&
                     (lhs.publicKey.key as! Data) == (rhs.publicKey.key as! Data)
             }
-            if lhs.privateKey.key.getType() == .secKey {
+            if lhs.privateKey.key.getType() == .p256 {
                 return
-                    (lhs.privateKey.key as! SecKey) == (rhs.privateKey.key as! SecKey) &&
-                    (lhs.publicKey.key as! SecKey) == (rhs.publicKey.key as! SecKey)
+                    (lhs.privateKey.key as! SecureEnclave.P256.Signing.PrivateKey) == (rhs.privateKey.key as! SecureEnclave.P256.Signing.PrivateKey) &&
+                    (lhs.publicKey.key as! P256.Signing.PublicKey) == (rhs.publicKey.key as! P256.Signing.PublicKey)
             }
         }
         return false
@@ -387,8 +427,11 @@ public struct Account: Equatable, Hashable {
                 privateKey: (privateKey.key as! Data).base64EncodedString()
             )
         }
-        if self.privateKey.key.getType() == .secKey {
-            return ExportedAccount(schema: self.accountType, privateKey: "\((privateKey.key as! SecKey).hashValue)")
+        if self.privateKey.key.getType() == .p256 {
+            return ExportedAccount(
+                schema: self.accountType,
+                privateKey: "\((privateKey.key as! SecureEnclave.P256.Signing.PrivateKey).rawRepresentation.base64EncodedString())"
+            )
         }
         throw AccountError.cannotBeExported
     }

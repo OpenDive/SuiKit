@@ -117,7 +117,7 @@ final class TxSerializerTest: XCTestCase {
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::value",
             arguments: [
-                .input(tx.object(value: try self.fetchSharedObjectId()))
+                tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()
             ]
         )
         try await self.serializeAndDeserialize(tx: &tx, mutable: [false])
@@ -129,11 +129,11 @@ final class TxSerializerTest: XCTestCase {
         var tx = try TransactionBlock()
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::value",
-            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+            arguments: [tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()]
         )
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::set_value",
-            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+            arguments: [tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()]
         )
         try await self.serializeAndDeserialize(tx: &tx, mutable: [true])
     }

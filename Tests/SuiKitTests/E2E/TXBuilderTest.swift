@@ -111,7 +111,7 @@ final class TXBuilderTest: XCTestCase {
         var tx = try TransactionBlock()
 
         let coin = try tx.splitCoin(
-            coin: .input(tx.object(value: coin0.coinObjectId)),
+            coin: tx.object(id: coin0.coinObjectId).toTransactionArgument(),
             amounts: [tx.pure(value: .number(UInt64(toolBox.defaultGasBudget * 2)))]
         )
         let _ = try tx.transferObject(objects: [coin], address: try toolBox.address())
@@ -131,8 +131,8 @@ final class TXBuilderTest: XCTestCase {
         var tx = try TransactionBlock()
 
         let _ = try tx.mergeCoin(
-            destination: .input(tx.object(value: coin0.coinObjectId)),
-            sources: [.input(tx.object(value: coin1.coinObjectId))]
+            destination: tx.object(id: coin0.coinObjectId).toTransactionArgument(),
+            sources: [tx.object(id: coin1.coinObjectId).toTransactionArgument()]
         )
 
         try await self.validateTransaction(
@@ -152,7 +152,7 @@ final class TXBuilderTest: XCTestCase {
         let _ = try tx.moveCall(
             target: "0x2::pay::split",
             arguments: [
-                .input(tx.object(value: coin0.coinObjectId)),
+                tx.object(id: coin0.coinObjectId).toTransactionArgument(),
                 .input(tx.pure(value: .number(UInt64(toolBox.defaultGasBudget * 2))))
             ],
             typeArguments: ["0x2::sui::SUI"]
@@ -200,7 +200,7 @@ final class TXBuilderTest: XCTestCase {
         let coins = try await toolBox.getCoins()
         let coin0 = coins.data[0]
         let _ = try tx.transferObject(
-            objects: [.input(tx.object(value: coin0.coinObjectId))],
+            objects: [tx.object(id: coin0.coinObjectId).toTransactionArgument()],
             address: toolBox.defaultRecipient
         )
         try await self.validateTransaction(
@@ -216,11 +216,11 @@ final class TXBuilderTest: XCTestCase {
         var tx = try TransactionBlock()
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::value",
-            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+            arguments: [tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()]
         )
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::set_value",
-            arguments: [.input(tx.object(value: try self.fetchSharedObjectId()))]
+            arguments: [tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()]
         )
         try await self.validateTransaction(
             client: toolBox.client,
@@ -235,7 +235,7 @@ final class TXBuilderTest: XCTestCase {
         var tx = try TransactionBlock()
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::use_clock",
-            arguments: [.input(tx.object(value: suiClockObjectId))]
+            arguments: [tx.object(id: suiClockObjectId).toTransactionArgument()]
         )
         try await self.validateTransaction(
             client: toolBox.client,

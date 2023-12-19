@@ -80,21 +80,6 @@ public enum TransactionArgument: KeyProtocol {
         return nil
     }
 
-    /// Encodes the input for the transaction.
-    ///
-    /// - Parameters:
-    ///   - objects: The list of objects to resolve.
-    ///   - inputs: The list of transaction block inputs.
-    /// - Throws: Throws an error if encoding fails.
-    public func encodeInput(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
-        switch self {
-        case .input(let transactionBlockInput):
-            try self.encodeInput(with: &(inputs[Int(transactionBlockInput.index)]), objects: &objects)
-        default:
-            return
-        }
-    }
-
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .gasCoin:
@@ -125,48 +110,6 @@ public enum TransactionArgument: KeyProtocol {
             return TransactionArgument.nestedResult(try Deserializer._struct(deserializer))
         default:
             throw SuiError.unableToDeserialize
-        }
-    }
-
-    /// Encodes the input transaction block.
-    ///
-    /// - Parameters:
-    ///   - input: The transaction block input to encode.
-    ///   - objects: The list of objects to resolve.
-    /// - Throws: Throws an error if encoding fails.
-    private func encodeInput(
-        with input: inout TransactionBlockInput,
-        objects: inout [ObjectsToResolve]
-    ) throws {
-        guard let value = input.value, let type = input.type else { throw SuiError.valueIsNil }
-
-        switch value {
-        case .callArg:
-            return
-        case .string(let str):
-            switch type {
-            case .object:
-                objects.append(
-                    ObjectsToResolve(id: str, input: input, normalizedType: nil)
-                )
-            default:
-                input.value = .callArg(
-                    Input(
-                        type: .pure(
-                            try Inputs.pure(json: value)
-                        )
-                    )
-                )
-            }
-        default:
-            switch type {
-            case .pure:
-                input.value = .callArg(
-                    Input(type: .pure(try Inputs.pure(json: value)))
-                )
-            case .object:
-                throw SuiError.objectCannotBeEncoded
-            }
         }
     }
 }

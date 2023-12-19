@@ -1,5 +1,5 @@
 //
-//  U64Tag.swift
+//  zkLoginSignatureInputsProofPoints.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,24 +25,28 @@
 
 import Foundation
 
-/// UInt64 Type Tag
-public struct U64Tag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Int
-
-    public static func ==(lhs: U64Tag, rhs: U64Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
-
-    public func variant() -> Int {
-        return TypeTag.u64
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> U64Tag {
-        return try U64Tag(value: Int(Deserializer.u64(deserializer)))
-    }
+public struct zkLoginSignatureInputsProofPoints: KeyProtocol, Equatable {
+    public var a: [String]
+    public var b: [[String]]
+    public var c: [String]
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u64(serializer, UInt64(self.value))
+        try serializer.sequence(self.a, Serializer.str)
+        try serializer.uleb128(UInt(self.b.count))
+        for val in self.b { try serializer.sequence(val, Serializer.str) }
+        try serializer.sequence(self.c, Serializer.str)
+    }
+
+    public static func deserialize(from deserializer: Deserializer) throws -> zkLoginSignatureInputsProofPoints {
+        let a = try deserializer.sequence(valueDecoder: Deserializer.string)
+        let count = try deserializer.uleb128()
+        var b: [[String]] = []
+        for _ in 0..<Int(count) { b.append(try deserializer.sequence(valueDecoder: Deserializer.string)) }
+        let c = try deserializer.sequence(valueDecoder: Deserializer.string)
+        return zkLoginSignatureInputsProofPoints(
+            a: a,
+            b: b,
+            c: c
+        )
     }
 }

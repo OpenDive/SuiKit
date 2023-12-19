@@ -25,11 +25,4 @@
 
 import Foundation
 
-public protocol TransactionProtocol: KeyProtocol {
-    /// Executes the transaction and updates the objects and inputs accordingly.
-    /// - Parameters:
-    ///   - objects: A reference to an array of `ObjectsToResolve`.
-    ///   - inputs: A reference to an array of `TransactionBlockInput`.
-    /// - Throws: If the execution fails.
-    func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws
-}
+public protocol TransactionProtocol: KeyProtocol { }

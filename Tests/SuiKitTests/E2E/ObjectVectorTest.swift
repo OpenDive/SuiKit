@@ -77,7 +77,7 @@ final class ObjectVectorTest: XCTestCase {
         var tx = try TransactionBlock()
         let vec = try tx.makeMoveVec(
             type: withType ? "\(try self.fetchPackageId())::entry_point_vector::Obj" : nil,
-            objects: objects.map { try tx.object(value: $0) }
+            objects: objects.map { try tx.object(id: $0).toTransactionArgument() }
         )
         let _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::entry_point_vector::two_obj_vec_destroy",
@@ -129,14 +129,14 @@ final class ObjectVectorTest: XCTestCase {
         var tx = try TransactionBlock()
         let vec = try tx.makeMoveVec(
             objects: [
-                tx.object(value: coinIds[1]),
-                tx.object(value: coinIds[2])
+                tx.object(id: coinIds[1]).toTransactionArgument(),
+                tx.object(id: coinIds[2]).toTransactionArgument()
             ]
         )
         let _ = try tx.moveCall(
             target: "0x2::pay::join_vec",
             arguments: [
-                .input(tx.object(value: coinIds[0])),
+                tx.object(id: coinIds[0]).toTransactionArgument(),
                 vec
             ],
             typeArguments: ["0x2::sui::SUI"]

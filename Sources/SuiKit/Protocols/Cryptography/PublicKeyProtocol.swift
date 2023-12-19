@@ -57,7 +57,7 @@ public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashabl
     /// - Throws: If any error occurs during conversion.
     /// - Returns: A string representing the Sui address.
     func toSuiAddress() throws -> String
-    
+
     /// Serializes the signature along with the public key.
     /// - Parameter signature: The signature to serialize.
     /// - Throws: If any error occurs during serialization.
@@ -88,4 +88,6 @@ public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashabl
     /// - Throws: If any error occurs during verification.
     /// - Returns: `true` if the verification is successful, otherwise `false`.
     func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool
+    
+    func toSuiBytes() throws -> [UInt8]
 }

@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 /// A structure representing the name of a dynamic field, conforming to `Codable` protocol.
 public struct DynamicFieldName: Codable {
@@ -33,5 +34,5 @@ public struct DynamicFieldName: Codable {
 
     /// A `String` representing the actual name or value of the dynamic field.
     /// This is the specific identifier for the field.
-    public var value: String
+    public var value: JSON
 }

@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "SuiKit",
-    platforms: [.iOS(.v13), .macOS(.v10_15), .watchOS(.v6), .tvOS(.v13), .custom("xros", versionString: "1.0")],
+    platforms: [.iOS(.v13), .macOS(.v11), .watchOS(.v6), .tvOS(.v13), .custom("xros", versionString: "1.0")],
     products: [
         .library(
             name: "SuiKit",
@@ -17,7 +17,8 @@ let package = Package(
         .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.1.0"),
         .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
         .package(url: "https://github.com/tesseract-one/Bip39.swift.git", from: "0.1.1"),
-        .package(url: "https://github.com/web3swift-team/web3swift.git", from: "3.2.0")
+        .package(url: "https://github.com/web3swift-team/web3swift.git", from: "3.2.0"),
+        .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0")
     ],
     targets: [
         .target(
@@ -29,7 +30,8 @@ let package = Package(
                 .product(name: "Blake2", package: "Blake2.swift"),
                 .product(name: "AnyCodable", package: "AnyCodable"),
                 .product(name: "Bip39", package: "Bip39.swift"),
-                .product(name: "web3swift", package: "web3swift")
+                .product(name: "web3swift", package: "web3swift"),
+                .product(name: "JWTDecode", package: "JWTDecode.swift")
             ],
             path: "Sources"
         ),

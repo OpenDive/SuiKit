@@ -30,9 +30,12 @@ import Foundation
 /// - `ed25519`: Represents the Ed25519 cryptographic algorithm.
 /// - `secp256k1`: Represents the SECP256K1 cryptographic algorithm.
 public enum KeyType: String, Equatable {
-    /// Represents the Ed25519 cryptographic algorithm.
+    /// Represents the ED25519 cryptographic algorithm.
     case ed25519 = "ED25519"
 
     /// Represents the SECP256K1 cryptographic algorithm.
     case secp256k1 = "SECP256K1"
+
+    /// Represents the SECP256R1 cryptographic algorithm.
+    case secp256r1 = "SECP256R1"
 }

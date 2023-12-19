@@ -144,4 +144,25 @@ public enum SuiError: Error, Equatable {
 
     /// Indicates that the key number could not be found.
     case cannotFindKeyNumber
+
+    /// `KioskOwnerCap` is still needing to be transferred.
+    case kioskOwnerCapNotTransferred(message: String)
+
+    /// One of the input values for the transfer policy client are nil.
+    case invalidTransferPolicyInput(message: String)
+
+    /// Invalid Transfer Policy.
+    case invalidTransferPolicy
+
+    /// Invalid Sui Address.
+    case invalidSuiAddress
+
+    /// Invalid Object Argument conversion.
+    case invalidObjectArgument
+
+    /// The string to number casting is invalid.
+    case invalidNumber
+
+    /// The Kiosk Data is invalid.
+    case invalidKioskData
 }

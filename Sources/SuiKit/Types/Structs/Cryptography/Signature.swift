@@ -54,7 +54,7 @@ public struct Signature: Equatable, KeyProtocol {
 
         // Set the LENGTH property based on the signature scheme.
         switch signatureScheme {
-        case .ED25519:
+        case .ED25519, .SECP256R1:
             self.LENGTH = 64
         case .SECP256K1:
             self.LENGTH = 65
@@ -72,12 +72,7 @@ public struct Signature: Equatable, KeyProtocol {
 
     /// Converts the signature to `Data`.
     public func data() throws -> Data {
-        switch self.signatureScheme {
-        case .ED25519:
-            return self.signature
-        case .SECP256K1:
-            return self.signature
-        }
+        return self.signature
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> Signature {

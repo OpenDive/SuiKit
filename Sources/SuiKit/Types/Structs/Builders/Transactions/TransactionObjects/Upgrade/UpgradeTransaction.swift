@@ -86,8 +86,4 @@ public struct UpgradeTransaction: KeyProtocol, TransactionProtocol {
             ticket: try Deserializer._struct(deserializer)
         )
     }
-
-    public func executeTransaction(objects: inout [ObjectsToResolve], inputs: inout [TransactionBlockInput]) throws {
-        try ticket.encodeInput(objects: &objects, inputs: &inputs)
-    }
 }

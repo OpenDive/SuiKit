@@ -80,13 +80,4 @@ public struct MakeMoveVecTransaction: KeyProtocol, TransactionProtocol {
             type: try? Deserializer._struct(deserializer)
         )
     }
-
-    public func executeTransaction(
-        objects: inout [ObjectsToResolve],
-        inputs: inout [TransactionBlockInput]
-    ) throws {
-        try self.objects.forEach { argument in
-            try argument.encodeInput(objects: &objects, inputs: &inputs)
-        }
-    }
 }

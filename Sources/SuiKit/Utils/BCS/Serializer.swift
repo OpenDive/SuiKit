@@ -365,7 +365,7 @@ public class Serializer {
             let bytes = try encoder(value, valueEncoder)
             self.fixedBytes(bytes)
         } else {
-            try Serializer.u8(self, 0)
+            self._output.append(0)
         }
     }
 

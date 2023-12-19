@@ -35,7 +35,7 @@ internal class TestToolbox {
     let account: Account
     let client: SuiProvider
 
-    init(account: Account, client: SuiProvider = SuiProvider(connection: DevnetConnection()), _ needsFunds: Bool = true) async throws {
+    init(account: Account, client: SuiProvider = SuiProvider(connection: LocalnetConnection()), _ needsFunds: Bool = true) async throws {
         self.account = account
         self.client = client
 
@@ -113,22 +113,22 @@ internal class TestToolbox {
         let fileData = try self.getModule(name)
 
         var txBlock = try TransactionBlock()
-        let cap = try txBlock.object(value: capId)
+        let cap = try txBlock.object(value: .string(capId))
         let ticket = try txBlock.moveCall(
             target: "0x2::package::authorize_upgrade",
-            arguments: [.input(cap)]
+            arguments: [cap.toTransactionArgument()]
         )
 
         let receipt = try txBlock.upgrade(
             modules: fileData["modules"].arrayObject as! [Data],
             dependencies: fileData["dependencies"].arrayObject as! [String],
             packageId: packageId,
-            ticket: ticket
+            ticket: ticket[0]
         )
 
         let _ = try txBlock.moveCall(
             target: "0x2::package::commit_upgrade",
-            arguments: [.input(cap), receipt]
+            arguments: [cap.toTransactionArgument(), receipt]
         )
 
         let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
@@ -176,7 +176,7 @@ internal class TestToolbox {
 
         try recipientsTx.enumerated().forEach { (idx, recipient) in
             let coin = try txBlock.splitCoin(
-                coin: .input(txBlock.object(value: coinIdTx)),
+                coin: txBlock.object(objectArgument: .string(coinIdTx)).toTransactionArgument(),
                 amounts: [
                     txBlock.pure(
                         value: .number(
@@ -220,6 +220,30 @@ internal class TestToolbox {
         return txns
     }
 
+    func executeTransactionBlock(txb: inout TransactionBlock) async throws -> SuiTransactionBlockResponse {
+        let resp = try await self.client.signAndExecuteTransactionBlock(transactionBlock: &txb, signer: self.account, options: SuiTransactionBlockResponseOptions(showEffects: true, showEvents: true, showObjectChanges: true))
+        guard resp.effects?.status.status == .success else { throw SuiError.notImplemented }
+        return resp
+    }
+
+    func getCreatedObjectIdByType(res: SuiTransactionBlockResponse, type: String) throws -> String {
+        guard let objectChanges = res.objectChanges else { throw SuiError.notImplemented }
+        let results: [SuiObjectChangeCreated] = objectChanges.compactMap({ change in
+            guard
+                case .created(let created) = change,
+                created.objectType.hasSuffix(type)
+            else { return nil }
+            return created
+        })
+        return results[0].objectId
+    }
+
+    func getPublisherObject() async throws -> String {
+        let res = try await self.client.getOwnedObjects(owner: try self.address(), filter: .structType("0x2::package::Publisher"))
+        let publisherObj = res.data[0].data?.objectId
+        return publisherObj ?? ""
+    }
+
     func setup() async throws {
         var isInitializing = true
         while isInitializing {
@@ -237,14 +261,23 @@ internal class TestToolbox {
             }
         }
     }
+    
+    func publishKioskExtensions() async throws -> String {
+        let result = try await self.publishPackage("kiosk")
+        return result.packageId
+    }
 
     private func getModule(_ name: String) throws -> JSON {
-        guard let fileUrl = Bundle.test.resourceURL?.appending(component: "Resources/\(name).json") else {
-            throw NSError(domain: "package is missing", code: -1)
+        if #available(iOS 16.0, *) {
+            guard let fileUrl = Bundle.test.resourceURL?.appending(component: "Resources/\(name).json") else {
+                throw NSError(domain: "package is missing", code: -1)
+            }
+            guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
+                throw NSError(domain: "package is corrupted", code: -1)
+            }
+            return JSON(fileCompiledData)
+        } else {
+            throw SuiError.notImplemented
         }
-        guard let fileCompiledData = try? Data(contentsOf: fileUrl) else {
-            throw NSError(domain: "package is corrupted", code: -1)
-        }
-        return JSON(fileCompiledData)
     }
 }

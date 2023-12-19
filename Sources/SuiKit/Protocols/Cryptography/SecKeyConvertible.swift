@@ -1,5 +1,5 @@
 //
-//  U16Tag.swift
+//  SecKeyConvertible.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -24,25 +24,26 @@
 //
 
 import Foundation
+import CryptoKit
 
-/// UInt16 Type Tag
-public struct U16Tag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Int
+public protocol GenericPasswordConvertible: CustomStringConvertible {
+    /// Creates a key from a raw representation.
+    init(rawRepresentation data: Data) throws
+    
+    /// A raw representation of the key.
+    var rawRepresentation: Data { get }
+}
 
-    public static func ==(lhs: U16Tag, rhs: U16Tag) -> Bool {
-        return lhs.value == rhs.value
+extension SecureEnclave.P256.Signing.PrivateKey: GenericPasswordConvertible {
+    public var description: String {
+        "\(self.hashValue)"
     }
 
-    public func variant() -> Int {
-        return TypeTag.u16
+    public init(rawRepresentation data: Data) throws {
+        try self.init(dataRepresentation: data)
     }
 
-    public static func deserialize(from deserializer: Deserializer) throws -> U16Tag {
-        return try U16Tag(value: Int(Deserializer.u16(deserializer)))
-    }
-
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u16(serializer, UInt16(self.value))
+    public var rawRepresentation: Data {
+        return dataRepresentation
     }
 }

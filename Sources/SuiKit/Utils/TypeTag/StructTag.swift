@@ -33,6 +33,10 @@ public struct StructTag: TypeProtocol, Equatable {
         return lhs.value == rhs.value
     }
 
+    public func variant() -> UInt8 {
+        return TypeTag._struct
+    }
+
     /// Deserialize a StructTag instance from a string representation.
     ///
     /// This function deserializes the given string representation of a StructTag instance to a StructTag object.
@@ -46,13 +50,13 @@ public struct StructTag: TypeProtocol, Equatable {
     public static func fromStr(_ typeTag: String) throws -> StructTag {
         var name = ""
         var index = 0
-        var nestedValue: StructTag? = nil
+        var nestedValue: TypeTag? = nil
 
         while index < typeTag.count {
             let letter = typeTag[typeTag.index(typeTag.startIndex, offsetBy: index)]
             index += 1
             if letter == "<" {
-                nestedValue = try StructTag.fromStr(typeTag[index..<typeTag.count])
+                nestedValue = try TypeTag(stringValue: typeTag[index..<typeTag.count])
                 break
             } else if letter == ">" {
                 break
@@ -66,13 +70,18 @@ public struct StructTag: TypeProtocol, Equatable {
                 address: AccountAddress.fromHex(String(split[0])),
                 module: String(split[1]),
                 name: String(split[2]),
-                typeArgs: nestedValue != nil ? [TypeTag(value: nestedValue!)] : []
+                typeArgs: nestedValue != nil ? [nestedValue!] : []
             )
         )
     }
 
-    public func variant() -> Int {
-        return TypeTag._struct
+    public func toString() throws -> String {
+        let value = self.value
+        let formattedTypeParams =
+        value.typeArgs.count > 0 ?
+        "<\(try value.typeArgs.map({ try $0.toString() }).joined(separator: ","))>" :
+        ""
+        return "\(value.address)::\(value.module)::\(value.name)\(formattedTypeParams)"
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> StructTag {
@@ -93,7 +102,6 @@ public struct StructTag: TypeProtocol, Equatable {
     }
 
     public func serialize(_ serializer: Serializer) throws {
-        try serializer.uleb128(UInt(self.variant()))
         try self.value.address.serialize(serializer)
         try Serializer.str(serializer, self.value.module)
         try Serializer.str(serializer, self.value.name)
@@ -102,13 +110,13 @@ public struct StructTag: TypeProtocol, Equatable {
 }
 
 /// The value contents of a Struct Tag
-public struct StructTagValue: Equatable, EncodingProtocol {
+public struct StructTagValue: Equatable {
     /// The account address
     let address: AccountAddress
 
     /// The module type
     let module: String
-    
+
     /// The name of the struct
     let name: String
 

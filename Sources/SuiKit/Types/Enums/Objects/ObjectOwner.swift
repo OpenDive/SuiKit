@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// `ObjectOwner` represents the possible types of ownership for objects.
-public enum ObjectOwner {
+public enum ObjectOwner: KeyProtocol {
     /// Represents an object owned by an address. The associated value is a `String` containing the address.
     case addressOwner(String)
 
@@ -66,5 +66,42 @@ public enum ObjectOwner {
 
         // If none of the above conditions are met, return nil
         return nil
+    }
+
+    public func serialize(_ serializer: Serializer) throws {
+        switch self {
+        case .addressOwner(let addressOwner):
+            try Serializer.u8(serializer, 0)
+            try Serializer.str(serializer, addressOwner)
+        case .objectOwner(let objectOwner):
+            try Serializer.u8(serializer, 1)
+            try Serializer.str(serializer, objectOwner)
+        case .shared(let shared):
+            try Serializer.u8(serializer, 2)
+            try Serializer.u64(serializer, UInt64(shared))
+        case .immutable:
+            try Serializer.u8(serializer, 3)
+        }
+    }
+
+    public static func deserialize(from deserializer: Deserializer) throws -> ObjectOwner {
+        if let value = try? Deserializer.u8(deserializer) {
+            switch value {
+            case 0:
+                let addressOwner: String = try Deserializer.string(deserializer)
+                return .addressOwner(addressOwner)
+            case 1:
+                let objectOwner = try Deserializer.string(deserializer)
+                return .objectOwner(objectOwner)
+            case 2:
+                let shared: UInt64 = try Deserializer.u64(deserializer)
+                return .shared(Int(shared))
+            case 3:
+                return .immutable
+            default:
+                throw SuiError.notImplemented
+            }
+        }
+        return .immutable
     }
 }

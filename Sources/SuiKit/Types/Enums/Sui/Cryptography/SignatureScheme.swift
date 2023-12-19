@@ -35,4 +35,6 @@ public enum SignatureScheme: String {
 
     /// Represents the SECP256K1 cryptographic algorithm.
     case SECP256K1
+    
+    case SECP256R1
 }

@@ -29,13 +29,13 @@ import SwiftyJSON
 /// A structure representing the argument for a Shared Object, conforming to `KeyProtocol`.
 public struct SharedObjectArg: KeyProtocol {
     /// A string that uniquely identifies the object.
-    public let objectId: String
+    public var objectId: String
 
     /// A `UInt64` value representing the initial shared version of the object.
-    public let initialSharedVersion: UInt64
+    public var initialSharedVersion: UInt64
 
     /// A Boolean value indicating whether the object is mutable.
-    public let mutable: Bool
+    public var mutable: Bool
 
     /// Initializes a new instance of `SharedObjectArg`.
     ///

@@ -83,12 +83,12 @@ public struct SuiMoveNormalizedFunction {
     /// - Returns: A boolean value indicating whether the function has transaction context.
     /// - Throws: An error if there is an issue determining the transaction context.
     public func hasTxContext() throws -> Bool {
-        guard !(parameters.isEmpty) else { return false }
+        guard !(self.parameters.isEmpty) else { return false }
 
-        let possiblyTxContext = parameters.last!
-        
+        let possiblyTxContext = self.parameters.last!
+
         guard let structTag = possiblyTxContext.extractStructTag() else { return false }
-        
+
         return
             try structTag.address.hex() == Inputs.normalizeSuiAddress(value: "0x2") &&
             structTag.module == "tx_context" &&

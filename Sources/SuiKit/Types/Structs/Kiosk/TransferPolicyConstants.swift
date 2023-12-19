@@ -1,5 +1,5 @@
 //
-//  U128Tag.swift
+//  TransferPolicyConstants.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,24 +25,22 @@
 
 import Foundation
 
-/// UInt128 Type Tag
-public struct U128Tag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Int
+public struct TransferPolicyConstants {
+    /// The Transfer Policy module.
+    public static let transferPolicyModule = "0x2::transfer_policy"
 
-    public static func ==(lhs: U128Tag, rhs: U128Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
+    /// Name of the event emitted when a TransferPolicy for T is created.
+    public static let transferPolicyCreatedEvent = "\(transferPolicyModule)::TransferPolicyCreated"
 
-    public func variant() -> Int {
-        return TypeTag.u128
-    }
+    /// The Transfer Policy Type
+    public static let transferPolicyType = "\(transferPolicyModule)::TransferPolicy"
 
-    public static func deserialize(from deserializer: Deserializer) throws -> U128Tag {
-        return try U128Tag(value: Int(Deserializer.u128(deserializer)))
-    }
+    /// The Transfer Policy Cap Type
+    public static let transferPolicyCapType = "\(transferPolicyModule)::TransferPolicyCap"
 
-    public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u128(serializer, UInt128(self.value))
-    }
+    /// The Kiosk Lock Rule
+    public static let kioskLockRule = "kiosk_lock_rule::Rule"
+
+    /// The Royalty rule
+    public static let royaltyRule = "royalty_rule::Rule"
 }

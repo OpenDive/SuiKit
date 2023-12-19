@@ -44,4 +44,10 @@ public enum SuiJsonValueType: String {
 
     /// Represents an account address.
     case address = "Address"
+
+    case input = "Input"
+    
+    case uint16Number = "UInt16Number"
+    
+    case uint8Number = "UInt8Number"
 }

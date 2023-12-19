@@ -28,13 +28,13 @@ import Foundation
 /// AccountAddress Type Tag
 public struct AccountAddressTag: TypeProtocol, Equatable {
     /// The value itself
-    let value: AccountAddress
+    public var value: AccountAddress
 
     public static func ==(lhs: AccountAddressTag, rhs: AccountAddressTag) -> Bool {
         return lhs.value == rhs.value
     }
 
-    public func variant() -> Int {
+    public func variant() -> UInt8 {
         return TypeTag.accountAddress
     }
 

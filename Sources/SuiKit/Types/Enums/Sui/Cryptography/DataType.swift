@@ -33,6 +33,6 @@ public enum DataType {
     /// Represents generic `Data` object.
     case data
 
-    /// Represents a security key.
-    case secKey
+    /// Represents a `P256` key.
+    case p256
 }

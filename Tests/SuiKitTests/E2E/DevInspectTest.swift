@@ -97,7 +97,7 @@ final class DevInspectTest: XCTestCase {
         )
 
         let _ = try tx.transferObject(
-            objects: [obj],
+            objects: [obj[0]],
             address: try toolBox.account.publicKey.toSuiAddress()
         )
 

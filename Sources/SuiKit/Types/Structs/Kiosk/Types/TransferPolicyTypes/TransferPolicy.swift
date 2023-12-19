@@ -1,5 +1,5 @@
 //
-//  U8Tag.swift
+//  TransferPolicy.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -25,24 +25,30 @@
 
 import Foundation
 
-/// UInt8 Type Tag
-public struct U8Tag: TypeProtocol, Equatable {
-    /// The value itself
-    let value: Int
-
-    public static func ==(lhs: U8Tag, rhs: U8Tag) -> Bool {
-        return lhs.value == rhs.value
-    }
-
-    public func variant() -> Int {
-        return TypeTag.u8
-    }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> U8Tag {
-        return try U8Tag(value: Int(Deserializer.u8(deserializer)))
-    }
+/// The `TransferPolicy` object
+public struct TransferPolicy: KeyProtocol {
+    public let id: AccountAddress
+    public let type: String?
+    public let balance: UInt64
+    public let rules: [String]
+    public let owner: ObjectOwner?
 
     public func serialize(_ serializer: Serializer) throws {
-        try Serializer.u8(serializer, UInt8(self.value))
+        try Serializer.str(serializer, self.id)
+        if let type = self.type { try Serializer.str(serializer, type) }
+        try Serializer.u64(serializer, self.balance)
+        try serializer.sequence(self.rules, Serializer.str)
+        if let owner = self.owner { try Serializer._struct(serializer, value: owner) }
+        
+    }
+
+    public static func deserialize(from deserializer: Deserializer) throws -> TransferPolicy {
+        return TransferPolicy(
+            id: try AccountAddress.deserialize(from: deserializer),
+            type: nil,
+            balance: try Deserializer.u64(deserializer),
+            rules: try deserializer.sequence(valueDecoder: Deserializer.string),
+            owner: nil
+        )
     }
 }

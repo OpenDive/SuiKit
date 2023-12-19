@@ -72,14 +72,4 @@ public struct SplitCoinsTransaction: KeyProtocol, TransactionProtocol {
             amounts: try deserializer.sequence(valueDecoder: Deserializer._struct)
         )
     }
-
-    public func executeTransaction(
-        objects: inout [ObjectsToResolve],
-        inputs: inout [TransactionBlockInput]
-    ) throws {
-        try self.amounts.forEach { argument in
-            try argument.encodeInput(objects: &objects, inputs: &inputs)
-        }
-        try self.coin.encodeInput(objects: &objects, inputs: &inputs)
-    }
 }

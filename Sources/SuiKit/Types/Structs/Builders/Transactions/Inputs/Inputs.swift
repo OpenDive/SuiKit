@@ -92,6 +92,18 @@ public struct Inputs {
         return try normalizeSuiAddress(value: arg)
     }
 
+    public static func getIdFromCallArg(arg: ObjectCallArg) throws -> String {
+        if case .immOrOwned(let immOrOwned) = arg.object {
+            return try normalizeSuiAddress(value: immOrOwned.ref.objectId)
+        }
+
+        if case .shared(let shared) = arg.object {
+            return try normalizeSuiAddress(value: shared.objectId)
+        }
+
+        throw SuiError.notImplemented
+    }
+
     /// Normalizes the SUI address from the provided `ObjectArg`.
     ///
     /// - Parameter arg: The `ObjectArg` instance containing the address to be normalized.
@@ -104,6 +116,16 @@ public struct Inputs {
         case .shared(let shared):
             return try normalizeSuiAddress(value: shared.objectId)
         }
+    }
+    
+    public static func getIdFromCallArg(value: TransactionObjectInput) throws -> String {
+        if case .objectCallArg(let objCallArg) = value {
+            return try Self.getIdFromCallArg(arg: objCallArg)
+        }
+        if case .string(let string) = value {
+            return try Self.normalizeSuiAddress(value: string)
+        }
+        throw SuiError.notImplemented
     }
 
     /// The constant value defining the length of a SUI address.

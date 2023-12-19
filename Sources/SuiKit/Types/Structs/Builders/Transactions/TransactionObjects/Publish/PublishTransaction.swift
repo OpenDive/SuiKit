@@ -74,11 +74,4 @@ public struct PublishTransaction: KeyProtocol, TransactionProtocol {
             dependencies: try deserializer.sequence(valueDecoder: Deserializer.string)
         )
     }
-
-    public func executeTransaction(
-        objects: inout [ObjectsToResolve],
-        inputs: inout [TransactionBlockInput]
-    ) throws {
-        return
-    }
 }

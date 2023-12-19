@@ -75,7 +75,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     }
 
     public func hex() -> String {
-        return "0x\(key.hexEncodedString())"
+        return "0x\(self.key.hexEncodedString())"
     }
 
     public func verify(data: Data, signature: Signature) throws -> Bool {
@@ -91,7 +91,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         try tmp.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
         try tmp.set([UInt8](self.key), offset: 1)
         let result = try Inputs.normalizeSuiAddress(
-            value: try Blake2b.hash(size: 32, data: tmp).hexEncodedString()[0..<ED25519PublicKey.LENGTH * 2]
+            value: try Blake2.hash(.b2b, size: 32, data: tmp).hexEncodedString()[0..<ED25519PublicKey.LENGTH * 2]
         )
         return result
     }
@@ -132,7 +132,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
 
     public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
-        let digest = try Blake2b.hash(size: 32, data: intentMessage)
+        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
         
         return try self.verify(data: digest, signature: signature)
     }

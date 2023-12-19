@@ -34,6 +34,10 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
     /// Represents a number as UInt64.
     case number(UInt64)
 
+    case uint16Number(UInt16)
+
+    case uint8Number(UInt8)
+
     /// Represents a string value.
     case string(String)
 
@@ -45,6 +49,17 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
 
     /// Represents an account address.
     case address(AccountAddress)
+
+    case input(TransactionObjectArgument)
+    
+    public var isObject: Bool {
+        switch self {
+        case .callArg, .address, .input:
+            return true
+        default:
+            return false
+        }
+    }
 
     /// Provides the specific type of the JSON value.
     public var kind: SuiJsonValueType {
@@ -61,6 +76,12 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
             return .array
         case .address:
             return .address
+        case .input:
+            return .input
+        case .uint16Number:
+            return .uint16Number
+        case .uint8Number:
+            return .uint8Number
         }
     }
 
@@ -102,6 +123,12 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
         return nil
     }
 
+    public func toData() throws -> Data {
+        let ser = Serializer()
+        try self.serialize(ser)
+        return ser.output()
+    }
+
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .boolean(let bool):
@@ -116,6 +143,12 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
             try serializer.sequence(array, Serializer._struct)
         case .address(let account):
             try Serializer._struct(serializer, value: account)
+        case .input(let input):
+            try Serializer._struct(serializer, value: input)
+        case .uint16Number(let uint16):
+            try Serializer.u16(serializer, uint16)
+        case .uint8Number(let uint8):
+            try Serializer.u8(serializer, uint8)
         }
     }
 
@@ -125,6 +158,12 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
         }
         if let bool = try? deserializer.bool() {
             return .boolean(bool)
+        }
+        if let uint8Number = try? Deserializer.u8(deserializer) {
+            return .uint8Number(uint8Number)
+        }
+        if let uint16Number = try? Deserializer.u16(deserializer) {
+            return .uint16Number(uint16Number)
         }
         if let number = try? Deserializer.u64(deserializer) {
             return .number(number)
@@ -137,6 +176,9 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
         }
         if let array: [SuiJsonValue] = try? deserializer.sequence(valueDecoder: Deserializer._struct) {
             return .array(array)
+        }
+        if let input: TransactionObjectArgument = try? Deserializer._struct(deserializer) {
+            return .input(input)
         }
         throw SuiError.unableToDeserialize
     }

@@ -30,12 +30,16 @@ public struct SignatureSchemeFlags {
     /// A dictionary mapping the names of signature schemes to their associated flags.
     public static var SIGNATURE_SCHEME_TO_FLAG: [String: UInt8] = [
         "ED25519": 0x00,   // Represents the Ed25519 signature scheme.
-        "SECP256K1": 0x01  // Represents the SECP256K1 signature scheme.
+        "SECP256K1": 0x01,  // Represents the SECP256K1 signature scheme.
+        "SECP256R1": 0x02,
+        "ZkLogin": 0x05
     ]
 
     /// A dictionary mapping the flags of signature schemes to their associated names.
     public static var SIGNATURE_FLAG_TO_SCHEME: [UInt8: String] = [
         0x00: "ED25519",   // Represents the flag for the Ed25519 signature scheme.
-        0x01: "SECP256K1"  // Represents the flag for the SECP256K1 signature scheme.
+        0x01: "SECP256K1",  // Represents the flag for the SECP256K1 signature scheme.
+        0x02: "SECP256R1",
+        0x05: "ZkLogin"
     ]
 }

@@ -95,5 +95,9 @@ public enum AccountError: Error, Equatable {
 
     /// Indicates that the data or key cannot be exported.
     case cannotBeExported
+    
+    case incompatibleOS
+    
+    case keychainReadFail(message: String)
 }
 

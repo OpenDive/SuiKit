@@ -28,9 +28,12 @@ import Foundation
 /// `TransactionResult` class encapsulates the results of a transaction.
 /// It holds a main `transactionArgument` and a collection of `nestedResults`
 /// representing the sub-results associated with the main transaction argument.
-public class TransactionResult {
+public class TransactionResult: Sequence, IteratorProtocol {
+//public class TransactionResult {
     /// Represents the main transaction argument which holds a result.
     let transactionArgument: TransactionArgument
+    
+    var count: UInt16
 
     /// An array holding the nested results, each represented by a `TransactionArgument`.
     var nestedResults: [TransactionArgument]
@@ -38,10 +41,11 @@ public class TransactionResult {
     /// Initializes a new instance of `TransactionResult` with the specified index.
     ///
     /// - Parameter index: The index representing the position of the transaction argument.
-    public init(index: UInt16) {
+    public init(index: UInt16, amount: UInt16? = nil) {
         self.transactionArgument = TransactionArgument.result(
             Result(index: index)
         )
+        self.count = amount ?? 1
         self.nestedResults = []
     }
 
@@ -55,7 +59,7 @@ public class TransactionResult {
     ///            is not of type `.result`.
     public func nestedResultFor(_ resultIndex: UInt16) -> TransactionArgument? {
         let index = Int(resultIndex)
-        if let existingResult = nestedResults[safe: index] {
+        if let existingResult = nestedResults[safe: (index + 1)] {
             return existingResult
         }
         if case .result(let result) = transactionArgument {
@@ -71,14 +75,14 @@ public class TransactionResult {
         return nil
     }
 
-    /// Subscript method to access the main transaction argument or the nested results
-    /// based on the provided index.
-    ///
-    /// - Parameter index: The index representing the position of the nested result.
-    /// - Returns: The main `transactionArgument` if `index` is 0, otherwise
-    ///            retrieves or creates and returns the nested result corresponding to the index.
-    public subscript(index: UInt16) -> TransactionArgument? {
-        guard index > 0 else { return self.transactionArgument }
-        return nestedResultFor(index)
+    // Conform to Sequence
+    public func makeIterator() -> TransactionResult {
+        return self
+    }
+    
+    public func next() -> TransactionArgument? {
+        guard self.count > 0 else { return nil }
+        defer { self.count -= 1 }
+        return self.nestedResultFor(UInt16(self.count - 1))
     }
 }

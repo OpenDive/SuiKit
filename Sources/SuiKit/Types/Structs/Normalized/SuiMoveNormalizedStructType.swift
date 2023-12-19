@@ -84,7 +84,7 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         self.address = address
         self.module = input["module"].stringValue
         self.name = input["name"].stringValue
-        self.typeArguments = input["arguments"].arrayValue.compactMap {
+        self.typeArguments = input["typeArguments"].arrayValue.compactMap {
             SuiMoveNormalizedType.parseJSON($0)
         }
     }

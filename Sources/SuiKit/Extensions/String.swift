@@ -26,6 +26,29 @@
 import Foundation
 
 extension String {
+    func extractDomainAndTLD() -> (domain: String?, topLevelDomain: String?) {
+        let regex = try! NSRegularExpression(pattern: "^(.+)\\.([^.]+)$", options: [])
+        let nsrange = NSRange(self.startIndex..<self.endIndex, in: self)
+
+        var domain: String?
+        var topLevelDomain: String?
+
+        if let match = regex.firstMatch(in: self, options: [], range: nsrange) {
+            if let domainRange = Range(match.range(at: 1), in: self) {
+                domain = String(self[domainRange])
+            }
+            if let tldRange = Range(match.range(at: 2), in: self) {
+                topLevelDomain = String(self[tldRange])
+            }
+        }
+
+        return (domain, topLevelDomain)
+    }
+
+    func capitalizingFirstLetter() -> String {
+        return prefix(1).uppercased() + self.lowercased().dropFirst()
+    }
+
     var urlEncoded: String {
         return self.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? self
     }
@@ -80,6 +103,12 @@ extension String {
 
     public func isValidSuiAddress() -> Bool {
         return (self.isHex()) && (self.getHexByteLength() == 32)
+    }
+
+    public func leftPad(toLength: Int, withPad: String) -> String {
+        guard toLength > self.count else { return self }
+        let padding = String(repeating: withPad, count: toLength - self.count)
+        return padding + self
     }
 
     private func isHex() -> Bool {

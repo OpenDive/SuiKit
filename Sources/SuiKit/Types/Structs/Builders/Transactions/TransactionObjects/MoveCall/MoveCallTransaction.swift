@@ -30,8 +30,8 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     /// The target normalized struct type for the move call.
     public let target: SuiMoveNormalizedStructType
 
-    /// An array of struct tags used as type arguments for the move call.
-    public let typeArguments: [StructTag]
+    /// An array of type tags used as type arguments for the move call.
+    public let typeArguments: [TypeTag]
 
     /// An array of arguments used for executing the move call.
     public var arguments: [TransactionArgument]
@@ -39,22 +39,22 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     /// Initializes a new instance of `MoveCallTransaction`.
     /// - Parameters:
     ///   - target: The target normalized struct type.
-    ///   - typeArguments: An array of struct tags used as type arguments.
+    ///   - typeArguments: An array of type tags used as type arguments.
     ///   - arguments: An array of transaction arguments.
     public init(
         target: SuiMoveNormalizedStructType,
         typeArguments: [StructTag],
         arguments: [TransactionArgument]
-    ) {
+    ) throws {
         self.target = target
-        self.typeArguments = typeArguments
+        self.typeArguments = try typeArguments.map { try .init(value: $0) }
         self.arguments = arguments
     }
 
     /// Initializes a new instance of `MoveCallTransaction` using string representations.
     /// - Parameters:
     ///   - target: The string representation of the target normalized struct type.
-    ///   - typeArguments: An array of string representations of struct tags used as type arguments.
+    ///   - typeArguments: An array of string representations of type tags used as type arguments.
     ///   - arguments: An array of transaction arguments.
     /// - Throws: If creating struct tags from strings fails.
     public init(
@@ -63,7 +63,7 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
         arguments: [TransactionArgument]
     ) throws {
         self.target = try Coin.getCoinStructTag(coinTypeArg: target)
-        self.typeArguments = try typeArguments.map { try StructTag.fromStr($0) }
+        self.typeArguments = try typeArguments.map { try .init(stringValue: $0) }
         self.arguments = arguments
     }
 
@@ -88,18 +88,11 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
     public static func deserialize(
         from deserializer: Deserializer
     ) throws -> MoveCallTransaction {
-        return MoveCallTransaction(
+        return try MoveCallTransaction(
             target: try Deserializer._struct(deserializer),
             typeArguments: try deserializer.sequence(valueDecoder: Deserializer._struct),
             arguments: try deserializer.sequence(valueDecoder: Deserializer._struct)
         )
-    }
-
-    public func executeTransaction(
-        objects: inout [ObjectsToResolve],
-        inputs: inout [TransactionBlockInput]
-    ) throws {
-        return
     }
 
     /// Adds to resolve list if needed, based on the arguments and provided inputs.

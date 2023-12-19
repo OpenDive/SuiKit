@@ -21,19 +21,21 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 ## Features
 
-- [x] Submitting transactions
-- [x] Transferring objects
-- [x] Transfer Sui
-- [x] Air drop Sui tokens
-- [x] Merge and Split coins
-- [x] Publish modules
-- [x] Transfer objects
-- [x] Execute move calls
-- [x] Retrieving objects, transactions, checkpoints, coins, and events
-- [x] Executing transactions
-- [x] Local, custom, dev, test, and main net compatiblity
-- [x] ED25519 and SECP256K1 Key and HD Wallet generation
-- [x] Native Swift BCS Implementation
+- [x] Submitting transactions.
+- [x] Transferring objects.
+- [x] Transfer Sui.
+- [x] Air drop Sui tokens.
+- [x] Merge and Split coins.
+- [x] Publish modules.
+- [x] Transfer objects.
+- [x] Execute move calls.
+- [x] Retrieving objects, transactions, checkpoints, coins, and events.
+- [x] Local Transaction Building.
+- [x] Local, custom, dev, test, and main net compatiblity.
+- [x] ED25519, SECP256K1, SECP256R1, and zkLogin Key and HD Wallet generation.
+- [x] SuiNS support.
+- [x] Kiosk Support.
+- [x] Native Swift BCS Implementation.
 - [x] Swift Concurrency Support back to iOS 13, macOS 10.15, tvOS 13, and watchOS 6.
 - [x] Comprehensive Unit and End To End Test coverage.
 
@@ -41,7 +43,6 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 - [ ] Complete documentation of SuiKit.
 - [ ] Implement Resolve Name Service Names.
-- [ ] Implement SECP256R1 Enclaves.
 
 ## Requirements
 
@@ -138,6 +139,42 @@ do {
         target: "OxB0B::nft::mint",
         arguments: [.input(try tx.pure(value: .string("Example NFT")))]
     )
+
+    // Execute transaction
+    var result = try await signer.signAndExecuteTransaction(transactionBlock: &tx)
+    result = try await provider.waitForTransaction(tx: result.digest)
+    print (result)
+catch {
+    print ("Error: (error)")
+}
+```
+
+Also the developer is able to call functions with multiple return values
+
+```swift
+import SuiKit
+do {
+    // Create new wallet
+    let newWallet = try Wallet()
+
+    // Create Signer and Provider
+    let provider = SuiProvider()
+    let signer = RawSigner(account: newWallet.accounts[0], provider: provider)
+
+    // Create transaction block
+    var tx = try TransactionBlock()
+
+    // Prepare merge coin 
+    let result = try tx.moveCall(
+        target: "OxB0B::nft::mint_multiple",
+        arguments: [
+            .input(try tx.pure(value: .string("Example NFT"))), 
+            .input(try tx.pure(value: .number(2)))
+        ]
+    )
+
+    // Utilizing the multiple return values
+    try tx.transferObjects([result[0], result[1]], try newWallet.accounts[0].address())
 
     // Execute transaction
     var result = try await signer.signAndExecuteTransaction(transactionBlock: &tx)

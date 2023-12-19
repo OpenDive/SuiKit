@@ -55,7 +55,7 @@ final class GovernanceTest: XCTestCase {
         let _ = try tx.moveCall(
             target: "0x3::sui_system::request_add_stake",
             arguments: [
-                .input(tx.object(value: stateObjectId)),
+                tx.object(id: stateObjectId).toTransactionArgument(),
                 coinsTx,
                 .input(tx.pure(value: .address(try AccountAddress.fromHex(activeValidator))))
             ]

@@ -1018,7 +1018,7 @@ public struct SuiProvider {
                     digest: fieldInfo["digest"].stringValue,
                     name: DynamicFieldName(
                         type: fieldInfo["name"]["type"].stringValue,
-                        value: fieldInfo["name"]["value"].stringValue
+                        value: fieldInfo["name"]["value"]
                     ),
                     objectId: fieldInfo["objectId"].stringValue,
                     objectType: fieldInfo["objectType"].stringValue,
@@ -1027,7 +1027,6 @@ public struct SuiProvider {
                 )
             )
         }
-
         return DynamicFieldPage(
             data: dynamicFields,
             nextCursor: result["nextCursor"].string,

@@ -125,7 +125,7 @@ public class TransactionBlock {
     ///   - value: An optional `SuiJsonValue` representing the value of the input.
     /// - Throws: Can throw an error if creating a `TransactionBlockInput` fails.
     /// - Returns: A `TransactionBlockInput` object.
-    private func input(
+    internal func input(
         type: ValueType,
         value: SuiJsonValue?
     ) throws -> TransactionBlockInput {
@@ -139,89 +139,41 @@ public class TransactionBlock {
         return input
     }
 
-    /// Creates and returns a `TransactionBlockInput` object for a given object ID.
-    ///
-    /// - Parameter value: An `objectId` representing the ID of the object.
-    /// - Throws: Can throw an error if creating a `TransactionBlockInput` fails.
-    /// - Returns: A `TransactionBlockInput` object.
-    public func object(value: objectId) throws -> TransactionBlockInput {
-        let id = try Inputs.getIdFromCallArg(arg: value)
-        if let firstMatch = try blockData.builder.inputs.first(where: { input in
-            if 
-                case .object = input.type,
-                case .callArg(let callArg) = input.value,
-                case .object(let objArg) = callArg.inputType
-            {
-                switch objArg {
-                case .shared(let shared):
-                    return try Inputs.normalizeSuiAddress(
-                        value: shared.objectId
-                    ) == id
-                case .immOrOwned(let imm):
-                    return try Inputs.normalizeSuiAddress(
-                        value: imm.ref.objectId
-                    ) == id
-                }
-            }
-            return false
-        }) {
-            return firstMatch
+    public func object(value: TransactionObjectInput) throws -> TransactionObjectArgument {
+        if case .transactionObjectArgument(let objectArgument) = value {
+            return objectArgument
         }
-        return try self.input(
-            type: .object,
-            value: SuiJsonValue.string(value)
-        )
+        let id = try Inputs.getIdFromCallArg(value: value)
+        let insertedArr = try self.blockData.builder.inputs.filter { input in
+            guard let suiJsonValue = input.value, case .string(let str) = suiJsonValue else { return false }
+            let rhs = try Inputs.getIdFromCallArg(arg: str)
+            return id == rhs
+        }
+        if let inserted = insertedArr.first {
+            return .input(inserted)
+        } else {
+            switch value {
+            case .string(let string):
+                 return .input(try self.input(type: .object, value: .string(string)))
+            case .objectCallArg(let objectCallArg):
+                return .input(try self.input(type: .object, value: .callArg(.init(type: .object(objectCallArg.object)))))
+            case .transactionObjectArgument(let objArgument):
+                return .input(try self.input(type: .object, value: .input(objArgument)))
+            }
+        }
     }
-
-    /// Creates and returns an array containing a `TransactionBlockInput` object for a given object argument.
-    ///
-    /// - Parameter value: An `ObjectArg` representing the argument of the object.
-    /// - Throws: Can throw an error if creating a `TransactionBlockInput` fails.
-    /// - Returns: An array containing a `TransactionBlockInput` object.
-    public func object(value: ObjectArg) throws -> [TransactionBlockInput] {
-        let id = try Inputs.getIdFromCallArg(arg: value)
-        if let firstMatch = try blockData.builder.inputs.first(where: { input in
-            if case .object = input.type,
-               let valueEnum = input.value,
-               case .callArg(let callArg) = valueEnum,
-               case .object(let objectArg) = callArg.inputType {
-                switch objectArg {
-                case .immOrOwned(let object):
-                    return try id == Inputs.normalizeSuiAddress(value: object.ref.objectId)
-                case .shared(let object):
-                    return try id == Inputs.normalizeSuiAddress(value: object.objectId)
-                }
-            }
-            return false
-        }) {
-            return [firstMatch]
+    
+    public func object(id: String) throws -> TransactionObjectArgument {
+        return try self.object(value: .string(id))
+    }
+    
+    public func object(objectArgument: ObjectArgument) throws -> TransactionObjectArgument {
+        switch objectArgument {
+        case .string(let string):
+            return try self.object(value: .string(string))
+        case .objectArgument(let transactionObjectArgument):
+            return try self.object(value: .transactionObjectArgument(transactionObjectArgument))
         }
-        let newInput: TransactionBlockInput
-        switch value {
-        case .immOrOwned(let immOrOwned):
-            newInput = try self.input(
-                type: .object,
-                value: .callArg(
-                    Input(
-                        type: .object(
-                            Inputs.immOrOwnedRef(suiObjectRef: immOrOwned.ref)
-                        )
-                    )
-                )
-            )
-        case .shared(let sharedArg):
-            newInput = try self.input(
-                type: .object,
-                value: .callArg(
-                    Input(
-                        type: .object(
-                            Inputs.sharedObjectRef(sharedObjectArg: sharedArg)
-                        )
-                    )
-                )
-            )
-        }
-        return [newInput]
     }
 
     /// A convenience method for creating and returning an array containing a `TransactionBlockInput` object
@@ -230,8 +182,8 @@ public class TransactionBlock {
     /// - Parameter objectArg: An `ObjectArg` representing the argument of the object.
     /// - Throws: Can throw an error if creating a `TransactionBlockInput` fails.
     /// - Returns: An array containing a `TransactionBlockInput` object.
-    public func objectRef(objectArg: ObjectArg) throws -> [TransactionBlockInput] {
-        return try self.object(value: objectArg)
+    public func objectRef(objectArg: ObjectArg) throws -> TransactionObjectArgument {
+        return try self.object(value: .objectCallArg(.init(object: objectArg)))
     }
 
     /// Creates and returns an array containing a `TransactionBlockInput` object for a given shared object reference.
@@ -241,11 +193,11 @@ public class TransactionBlock {
     /// - Returns: An array containing a `TransactionBlockInput` object.
     public func shredObjectRef(
         sharedObjectRef: SharedObjectRef
-    ) throws -> [TransactionBlockInput] {
+    ) throws -> TransactionObjectArgument {
         return try self.object(
-            value: Inputs.sharedObjectRef(
+            value: .objectCallArg(.init(object: Inputs.sharedObjectRef(
                 sharedObjectRef: sharedObjectRef
-            )
+            )))
         )
     }
 
@@ -255,24 +207,45 @@ public class TransactionBlock {
     /// - Throws: Can throw an error if creating a `TransactionBlockInput` fails.
     /// - Returns: A `TransactionBlockInput` object.
     public func pure(value: SuiJsonValue) throws -> TransactionBlockInput {
-        return try self.input(type: .pure, value: value)
+        return try self.input(type: .pure, value: .callArg(Input.init(type: .pure(PureCallArg(value: try value.toData())))))
+    }
+
+    public func pure(data: Data) throws -> TransactionBlockInput {
+        return try self.input(type: .pure, value: .callArg(Input.init(type: .pure(PureCallArg(value: data)))))
     }
 
     /// Appends a `SuiTransaction` object to the `blockData.builder.transactions` array and
     /// returns a `TransactionArgument` object representing the result.
-    ///
+    /// 
     /// - Parameter transaction: A `SuiTransaction` object to be added.
+    /// - Parameter returnValueCount: If using a `MoveCall` transaction, this is the amount of return values (if greater than 1) that will be returned by the move call.
     /// - Throws: Can throw an error if the operation fails, for example if result is invalid.
     /// - Returns: A `TransactionArgument` object representing the result of the addition.
-    public func add(transaction: SuiTransaction) throws -> TransactionArgument {
+    public func add(transaction: SuiTransaction, returnValueCount: UInt16? = nil) throws -> [TransactionArgument] {
+        // Append the transaction to the transactions array
         self.blockData.builder.transactions.append(transaction)
+
+        // Determine the index of the new transaction
         let index = self.blockData.builder.transactions.count
-        guard let result = TransactionResult(
-            index: UInt16(index - 1)
-        )[UInt16(index - 1)] else {
-            throw SuiError.invalidResult
+
+        // Create a TransactionResult instance for this transaction
+        let transactionResult = TransactionResult(index: UInt16(index - 1), amount: returnValueCount)
+
+        // Initialize an array to hold the main result and any nested results
+        var results: [TransactionArgument] = []
+
+        if returnValueCount == nil {
+            // Add the main transaction argument to the results array
+            results.append(transactionResult.transactionArgument)
+        } else {
+            // Iterate over the nested results and add them to the results array
+            for nestedResult in transactionResult {
+                results.append(nestedResult)
+            }
+            results.reverse()
         }
-        return result
+
+        return results
     }
 
     /// Splits a coin into multiple amounts.
@@ -294,7 +267,7 @@ public class TransactionBlock {
                     }
                 )
             )
-        )
+        )[0]
     }
 
     /// Merges multiple source coins into a single destination coin.
@@ -302,7 +275,6 @@ public class TransactionBlock {
     ///   - destination: A `TransactionArgument` representing the destination coin.
     ///   - sources: An array of `TransactionArgument` representing the source coins.
     /// - Throws: Can throw an error if the addition of transaction fails.
-    /// - Returns: A `TransactionArgument` representing the result of the merge coin operation.
     public func mergeCoin(
         destination: TransactionArgument,
         sources: [TransactionArgument]
@@ -314,7 +286,7 @@ public class TransactionBlock {
                     sources: sources
                 )
             )
-        )
+        )[0]
     }
 
     /// Publishes modules with given dependencies.
@@ -334,7 +306,7 @@ public class TransactionBlock {
                     dependencies: dependencies
                 )
             )
-        )
+        )[0]
     }
 
     /// Publishes modules with given dependencies.
@@ -348,14 +320,14 @@ public class TransactionBlock {
         modules: [String],
         dependencies: [objectId]
     ) throws -> TransactionArgument {
-        try self.add(
+        return try self.add(
             transaction: .publish(
                 Transactions.publish(
                     modules: modules,
                     dependencies: dependencies
                 )
             )
-        )
+        )[0]
     }
 
     /// Upgrades modules with given dependencies, packageId, and ticket.
@@ -381,7 +353,7 @@ public class TransactionBlock {
                     ticket: ticket
                 )
             )
-        )
+        )[0]
     }
 
     /// Makes a move call with target, optional arguments, and optional type arguments.
@@ -389,13 +361,15 @@ public class TransactionBlock {
     ///   - target: A `String` representing the target of the move call.
     ///   - arguments: An optional array of `TransactionArgument` representing the arguments of the move call.
     ///   - typeArguments: An optional array of `String` representing the type arguments of the move call.
+    ///   - returnValueCount: The number of return values, greater than 1, that are returned by the move call.
     /// - Throws: Can throw an error if the addition of transaction fails.
     /// - Returns: A `TransactionArgument` representing the result of the move call.
     public func moveCall(
         target: String,
         arguments: [TransactionArgument]? = nil,
-        typeArguments: [String]? = nil
-    ) throws -> TransactionArgument {
+        typeArguments: [String]? = nil,
+        returnValueCount: UInt16? = nil
+    ) throws -> [TransactionArgument] {
         try self.add(
             transaction: .moveCall(
                 Transactions.moveCall(
@@ -403,8 +377,29 @@ public class TransactionBlock {
                     typeArguments: typeArguments,
                     arguments: arguments
                 )
-            )
+            ),
+            returnValueCount: returnValueCount
         )
+    }
+
+    /// Transfers objects to a specified address.
+    /// - Parameters:
+    ///   - objects: An array of `TransactionArgument` representing the objects to be transferred.
+    ///   - address: A `String` representing the address to transfer objects to.
+    /// - Throws: Can throw an error if the addition of transaction fails or if the creation of address fails.
+    /// - Returns: A `TransactionArgument` representing the result of the transfer object operation.
+    public func transferObject(
+        objects: [TransactionArgument],
+        address: TransactionBlockInput
+    ) throws -> TransactionArgument {
+        return try self.add(
+            transaction: .transferObjects(
+                Transactions.transferObjects(
+                    objects: objects,
+                    address: .input(address)
+                )
+            )
+        )[0]
     }
 
     /// Transfers objects to a specified address.
@@ -417,22 +412,14 @@ public class TransactionBlock {
         objects: [TransactionArgument],
         address: String
     ) throws -> TransactionArgument {
-        let address: SuiJsonValue = .address(try AccountAddress.fromHex(address))
-        let addressInput: InputType = .pure(try Inputs.pure(json: address))
         return try self.add(
             transaction: .transferObjects(
                 Transactions.transferObjects(
                     objects: objects,
-                    address: TransactionArgument.input(
-                        self.pure(
-                            value: .callArg(
-                                Input(type: addressInput)
-                            )
-                        )
-                    )
+                    address: .input(try self.pure(value: .address(try AccountAddress.fromHex(address))))
                 )
             )
-        )
+        )[0]
     }
 
     /// Makes a Move Vector with the specified type and objects.
@@ -443,16 +430,16 @@ public class TransactionBlock {
     /// - Returns: A `TransactionArgument` representing the result of the make Move Vector operation.
     public func makeMoveVec(
         type: String? = nil,
-        objects: [TransactionBlockInput]
+        objects: [TransactionArgument]
     ) throws -> TransactionArgument {
         try self.add(
             transaction: .makeMoveVec(
                 Transactions.makeMoveVec(
                     type: type,
-                    objects: objects.map { .input($0) }
+                    objects: objects
                 )
             )
-        )
+        )[0]
     }
 
     /// Retrieves a configuration value for a specified key.
@@ -601,8 +588,9 @@ public class TransactionBlock {
 
     /// Prepares transactions by resolving move modules and objects, and updating the block data builder with the resolved information.
     /// - Parameter provider: A `SuiProvider` instance used to obtain necessary information to prepare transactions.
-    /// - Throws: Various `SuiError` errors can be thrown based on different failure scenarios, such as `SuiError.moveCallSizeDoesNotMatch` when move call size does not match, `SuiError.unknownCallArgType` when the call argument type is unknown, and `SuiError.inputValueIsNotObjectId` when the input value is not object ID, and `SuiError.objectIsInvalid` when an object is invalid.
-    /// - Note: This method is asynchronous and can be awaited.
+    /// - Throws: Various `SuiError` errors can be thrown based on different failure scenarios, such as `SuiError.moveCallSizeDoesNotMatch` 
+    /// when move call size does not match, `SuiError.unknownCallArgType` when the call argument type is unknown, and `SuiError.inputValueIsNotObjectId`
+    /// when the input value is not object ID, and `SuiError.objectIsInvalid` when an object is invalid.
     private func prepareTransactions(provider: SuiProvider) async throws {
         // Retrieve the blockData from the builder property of the object
         let blockData = self.blockData.builder
@@ -610,6 +598,13 @@ public class TransactionBlock {
         // Initialize arrays to store move modules and objects that need to be resolved
         var moveModulesToResolve: [MoveCallTransaction] = []
         var objectsToResolve: [ObjectsToResolve] = []
+        var resolvedObjects: [ObjectsToResolve] = []
+        
+        for input in blockData.inputs {
+            if case .string(let str) = input.value {
+                objectsToResolve.append(ObjectsToResolve(id: try Inputs.normalizeSuiAddress(value: str), input: input, normalizedType: nil))
+            }
+        }
 
         // Loop through each transaction in the blockData's transactions to resolve move modules and objects
         try self.blockData.builder.transactions.forEach { transaction in
@@ -620,12 +615,22 @@ public class TransactionBlock {
                     list: &moveModulesToResolve,
                     inputs: self.blockData.builder.inputs
                 )
+            case .splitCoins(let splitCoin):
+                for amount in splitCoin.amounts {
+                    if case .input(let txInput) = amount {
+                        if txInput.value?.isObject != nil, !(txInput.value!.isObject) {
+                            self.blockData.builder.inputs[Int(txInput.index)].value = .callArg(Input(type: .pure(try Inputs.pure(json: txInput.value!))))
+                        }
+                    }
+                }
+            case .transferObjects(let transferObject):
+                if case .input(let txInput) = transferObject.address {
+                    if txInput.value?.isObject != nil, !(txInput.value!.isObject) {
+                        self.blockData.builder.inputs[Int(txInput.index)].value = .callArg(Input(type: .pure(try Inputs.pure(json: txInput.value!))))
+                    }
+                }
             default:
-                // Execute other types of transactions and add any objects to the list of objects to resolve
-                try transaction.transaction().executeTransaction(
-                    objects: &objectsToResolve,
-                    inputs: &(self.blockData.builder.inputs)
-                )
+                break
             }
         }
 
@@ -658,11 +663,11 @@ public class TransactionBlock {
                 try params.enumerated().forEach { (idx, param) in
                     let arg = moveCallTx.arguments[idx]
 
-                    switch arg {
-                    case .input(let blockInputArgument):
+                    if case .input(let blockInputArgument) = arg {
                         // Handle the .input case by validating the input and modifying the blockData if necessary
                         let input = blockData.inputs[Int(blockInputArgument.index)]
                         guard let inputValue = input.value else { return }
+                        if case .callArg = inputValue { return }
                         let serType = try param.getPureSerializationType(inputValue)
                         if serType != nil {
                             // If serialization type exists, update the input value in the blockData
@@ -673,11 +678,9 @@ public class TransactionBlock {
                         }
                         // Handle errors and edge cases related to input value and parameter types
                         guard param.extractStructTag() != nil || param.kind == "TypeParameter" else { throw SuiError.unknownCallArgType }
-                        guard inputValue.kind == .string else { throw SuiError.inputValueIsNotObjectId }
 
-                        switch inputValue {
-                        case .string(let string):
-                            // Append the object to resolve to the objectsToResolve array
+                        // Append the object to resolve to the objectsToResolve array
+                        if case .string(let string) = inputValue {
                             objectsToResolve.append(
                                 ObjectsToResolve(
                                     id: string,
@@ -685,10 +688,11 @@ public class TransactionBlock {
                                     normalizedType: param
                                 )
                             )
-                        default:
-                            throw SuiError.inputValueIsNotObjectId
+                            return
                         }
-                    default: return
+
+                        // Otherwise, the value is not a valid Object ID
+                        throw SuiError.inputValueIsNotObjectId
                     }
                 }
             }
@@ -712,7 +716,6 @@ public class TransactionBlock {
 
             // Resolve the fetched objects and manage the object IDs and references
             var objectsById: [String : SuiObjectResponse] = [:]
-            var resolvedIds: [String: Range<Array<ObjectsToResolve>.Index>.Element] = [:]
             zip(dedupedIds, objects).forEach { (id, object) in
                 objectsById[id] = object
             }
@@ -722,32 +725,15 @@ public class TransactionBlock {
             guard invalidObjects.isEmpty else { throw SuiError.objectIsInvalid }
 
             // Process each object to resolve and update the blockData and related structures accordingly
-            for i in objectsToResolve.indices {
-                var idx = i
-                var mutable: Bool = false
-                var objectToResolve = objectsToResolve[idx]
-
-                if case .callArg(let callArg) = objectToResolve.input.value {
-                    mutable = callArg.isMutableSharedObjectInput()
-                }
-
-                // Set mutable based on the normalized type of the object to resolve
-                mutable = mutable || (
-                    objectToResolve.normalizedType != nil &&
-                    objectToResolve.normalizedType!.extractMutableReference() != nil
-                )
-
+            for i in 0..<objectsToResolve.count {
+                var objectToResolve = objectsToResolve[i]
+                
                 guard let object = objectsById[objectToResolve.id] else { continue }
-
-                if resolvedIds[objectToResolve.id] != nil {
-                    idx = resolvedIds[objectToResolve.id]!
-                    objectToResolve = objectsToResolve[idx]
-                }
 
                 // Update the input value in the objectsToResolve array based on the initial shared version or object reference
                 guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
                     guard let objRef = object.getObjectReference() else { continue }
-                    objectsToResolve[idx].input.value = .callArg(
+                    objectToResolve.input.value = .callArg(
                         Input(
                             type: .object(
                                 .immOrOwned(
@@ -756,16 +742,30 @@ public class TransactionBlock {
                             )
                         )
                     )
-                    resolvedIds[objectToResolve.id] = idx
+                    if resolvedObjects.count > Int(objectToResolve.input.index) {
+                        resolvedObjects[Int(objectToResolve.input.index)] = objectToResolve
+                    } else {
+                        resolvedObjects.append(objectToResolve)
+                    }
                     continue
                 }
 
-                objectsToResolve[idx].input.value = .callArg(
+                let isByValue =
+                    objectToResolve.normalizedType != nil &&
+                    objectToResolve.normalizedType!.extractStructTag() == nil
+
+                // Set mutable based on the normalized type of the object to resolve
+                let mutable = isByValue || (
+                    objectToResolve.normalizedType != nil &&
+                    objectToResolve.normalizedType!.extractMutableReference() != nil
+                )
+
+                objectToResolve.input.value = .callArg(
                     Input(
                         type: .object(
                             .shared(
                                 SharedObjectArg(
-                                    objectId: objectsToResolve[idx].id,
+                                    objectId: objectToResolve.id,
                                     initialSharedVersion: UInt64(initialSharedVersion),
                                     mutable: mutable
                                 )
@@ -773,36 +773,26 @@ public class TransactionBlock {
                         )
                     )
                 )
-                resolvedIds[objectToResolve.id] = idx
-            }
-
-            // Update the blockData inputs and transactions based on the resolved objects and IDs
-            if resolvedIds.count != objectsToResolve.count {
-                self.blockData.builder.inputs = []
-                for object in objectsToResolve {
-                    self.blockData.builder.inputs.append(object.input)
-                }
-
-                for (idx, transaction) in self.blockData.builder.transactions.enumerated() {
-                    if case .moveCall(var moveCall) = transaction {
-                        for (idxArgument, argument) in moveCall.arguments.enumerated() {
-                            for object in objectsToResolve {
-                                if case .input(let txInput) = argument,
-                                   object.input.value == txInput.value,
-                                   object.input.index != txInput.index {
-                                    moveCall.arguments[idxArgument] = .input(object.input)
-                                    self.blockData.builder.transactions[idx] = .moveCall(moveCall)
-                                }
+                if resolvedObjects.count > Int(objectToResolve.input.index) {
+                    if case .callArg(let callArgResolved) = resolvedObjects[Int(objectToResolve.input.index)].input.value! {
+                        if case .callArg(let callArgToResolve) = objectToResolve.input.value {
+                            if case .object(let obj) = callArgToResolve.inputType, case .shared(var shared) = obj {
+                                shared.mutable = callArgResolved.isMutableSharedObjectInput() || shared.mutable
+                                objectToResolve.input.value = .callArg(Input(type: .object(.shared(shared))))
                             }
                         }
                     }
-                }
-            } else {
-                // If the count of resolved IDs matches the count of objects to resolve, simply update the blockData inputs
-                for objectToResolve in objectsToResolve {
-                    self.blockData.builder.inputs[Int(objectToResolve.input.index)] = objectToResolve.input
+                    resolvedObjects[Int(objectToResolve.input.index)] = objectToResolve
+                } else {
+                    resolvedObjects.append(objectToResolve)
                 }
             }
+
+            for objectToResolve in resolvedObjects {
+                self.blockData.builder.inputs[Int(objectToResolve.input.index)] = objectToResolve.input
+            }
+            
+            self.blockData.builder.inputs = self.blockData.builder.inputs.sorted { $0.index < $1.index }
         }
     }
 
@@ -874,6 +864,7 @@ public class TransactionBlock {
                 )
             }
         }
+
         self.isPreparred = true
     }
 }

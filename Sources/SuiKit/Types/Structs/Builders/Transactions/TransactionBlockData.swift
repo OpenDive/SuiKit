@@ -76,7 +76,7 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
         dataWithTag.append(contentsOf: typeTagBytes)
         dataWithTag.append(contentsOf: data)
 
-        let hashedData = try Blake2.hash(.b2b, size: 32, data: Data(dataWithTag))
+        let hashedData = try Blake2b.hash(size: 32, data: Data(dataWithTag))
         let hash = Array(hashedData)
 
         return hash.base58EncodedString

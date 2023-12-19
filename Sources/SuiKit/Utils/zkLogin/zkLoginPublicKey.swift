@@ -61,8 +61,7 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
 
     public func toSuiAddress() throws -> String {
         return try Inputs.normalizeSuiAddress(
-            value: try Blake2.hash(
-                .b2b,
+            value: try Blake2b.hash(
                 size: 32,
                 data: Data(try self.toSuiBytes())
             ).hexEncodedString()[0..<(32 * 2)]

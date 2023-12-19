@@ -163,7 +163,7 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
 
     public func signWithIntent(_ bytes: [UInt8], _ intent: IntentScope) throws -> Signature {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
-        let digest = try Blake2.hash(.b2b, size: 32, data: intentMessage)
+        let digest = try Blake2b.hash(size: 32, data: intentMessage)
         
         let signature = try self.sign(data: digest)
         return signature

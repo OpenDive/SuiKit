@@ -47,7 +47,7 @@ public struct zkLoginUtilities {
         tmp[2..<(2+addressParamBytes.count)] = addressParamBytes
         tmp[(2+addressParamBytes.count)..<(addressParamBytes.count+addressSeedBytesBigEndian.count)] = Data(addressSeedBytesBigEndian)
 
-        let blake = (try Blake2.hash(.b2b, size: 32, data: tmp))
+        let blake = (try Blake2b.hash(size: 32, data: tmp))
         return try Inputs.normalizeSuiAddress(value: blake.hexEncodedString())
     }
 

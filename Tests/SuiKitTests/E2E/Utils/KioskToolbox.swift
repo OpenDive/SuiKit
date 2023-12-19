@@ -16,12 +16,13 @@ internal struct KioskToolbox {
         let publisher = try await self.testToolbox.getPublisherObject()
         var txb = try TransactionBlock()
         let tpTx = TransferPolicyTransactionClient(params: TransferPolicyTransactionParams(kioskClient: self.kioskClient, cap: nil), transactionBlock: &txb)
-        try await tpTx.create(params: TransferPolicyBaseParams(type: "\(heroPackageId)::hero::Hero", publisher: .string(publisher)))
-        try tpTx.addLockRule()
-        try tpTx.addFloorPriceRule(minPrice: "1000")
-        try tpTx.addRoyaltyRule(percentageBps: "\(Int(try Double(10.0).percentageToBasisPoints()))", minAmount: "100")
-        try tpTx.addPersonalKioskRule()
-        try await tpTx.shareAndTransferCap(address: try self.testToolbox.address())
+        try await tpTx
+            .create(params: TransferPolicyBaseParams(type: "\(heroPackageId)::hero::Hero", publisher: .string(publisher)))
+            .addLockRule()
+            .addFloorPriceRule(minPrice: "1000")
+            .addRoyaltyRule(percentageBps: "\(Int(try Double(10.0).percentageToBasisPoints()))", minAmount: "100")
+            .addPersonalKioskRule()
+            .shareAndTransferCap(address: try self.testToolbox.address())
         let _ = try await testToolbox.executeTransactionBlock(txb: &txb)
     }
 
@@ -39,23 +40,28 @@ internal struct KioskToolbox {
         let kioskTx = try KioskTransactionClient(transactionBlock: &txb, kioskClient: self.kioskClient, kioskCap: cap)
         let policies = try await self.kioskClient.getTransferPolicies(type: itemType)
         guard policies.count == 1 else { throw SuiError.notImplemented }
-        try kioskTx.lock(itemType: itemType, itemId: .string(itemId), policy: .string(policies[0].id.hex()))
-        try kioskTx.finalize()
+        try kioskTx
+            .lock(itemType: itemType, itemId: .string(itemId), policy: .string(policies[0].id.hex()))
+            .finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &txb)
     }
 
     func existingKioskManagementFlow(cap: KioskOwnerCap, itemType: String, itemId: String) async throws {
         var txb = try TransactionBlock()
         let kioskTx = try KioskTransactionClient(transactionBlock: &txb, kioskClient: self.kioskClient, kioskCap: cap)
-        try kioskTx.place(itemType: itemType, item: .string(itemId))
-        try kioskTx.list(itemType: itemType, itemId: itemId, price: "100000")
-        try kioskTx.delist(itemType: itemType, itemId: itemId)
+        let _ = try kioskTx
+            .place(itemType: itemType, item: .string(itemId))
+            .list(itemType: itemType, itemId: itemId, price: "100000")
+            .delist(itemType: itemType, itemId: itemId)
+
         let item = try kioskTx.take(itemType: itemType, itemId: itemId)
-        try kioskTx.placeAndList(itemType: itemType, item: .objectArgument(item), price: "100000")
-        try kioskTx.delist(itemType: itemType, itemId: itemId)
-        try kioskTx.transfer(itemType: itemType, itemId: itemId, address: try self.testToolbox.address())
-        try kioskTx.withdraw(address: try self.testToolbox.address())
-        try kioskTx.finalize()
+
+        try kioskTx
+            .placeAndList(itemType: itemType, item: .objectArgument(item), price: "100000")
+            .delist(itemType: itemType, itemId: itemId)
+            .transfer(itemType: itemType, itemId: itemId, address: try self.testToolbox.address())
+            .withdraw(address: try self.testToolbox.address())
+            .finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &txb)
     }
 
@@ -63,14 +69,16 @@ internal struct KioskToolbox {
         let salePrice: UInt64 = 100_000
         var sellTxb = try TransactionBlock()
         let sellKioskTx = try KioskTransactionClient(transactionBlock: &sellTxb, kioskClient: self.kioskClient, kioskCap: sellerCap)
-        try sellKioskTx.placeAndList(itemType: itemType, item: .string(itemId), price: "\(salePrice)")
-        try sellKioskTx.finalize()
+        try sellKioskTx
+            .placeAndList(itemType: itemType, item: .string(itemId), price: "\(salePrice)")
+            .finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &sellTxb)
         
         var purchaseTxb = try TransactionBlock()
         let purchaseTx = try KioskTransactionClient(transactionBlock: &purchaseTxb, kioskClient: self.kioskClient, kioskCap: buyerCap)
-        try await purchaseTx.purchaseAndResolve(itemType: itemType, itemId: itemId, price: salePrice, sellerKiosk: .string(sellerCap.kioskId))
-        try purchaseTx.finalize()
+        try await purchaseTx
+            .purchaseAndResolve(itemType: itemType, itemId: itemId, price: salePrice, sellerKiosk: .string(sellerCap.kioskId))
+            .finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &purchaseTxb)
     }
 
@@ -78,17 +86,18 @@ internal struct KioskToolbox {
         let salePrice: UInt64 = 100_000
         var sellTxb = try TransactionBlock()
         let sellKioskTx = try KioskTransactionClient(transactionBlock: &sellTxb, kioskClient: self.kioskClient, kioskCap: sellerCap)
-        try sellKioskTx.placeAndList(itemType: itemType, item: .string(itemId), price: "\(salePrice)")
-        try sellKioskTx.finalize()
+        try sellKioskTx
+            .placeAndList(itemType: itemType, item: .string(itemId), price: "\(salePrice)")
+            .finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &sellTxb)
         
         var purchaseTxb = try TransactionBlock()
         let purchaseTx = try KioskTransactionClient(transactionBlock: &purchaseTxb, kioskClient: self.kioskClient, kioskCap: nil)
         
-        if personal != nil, personal! { try purchaseTx.createPersonal(borrow: true) }
-        else { try purchaseTx.create() }
+        if personal != nil, personal! { let _ = try purchaseTx.createPersonal(borrow: true) }
+        else { let _ = try purchaseTx.create() }
         
-        try await purchaseTx.purchaseAndResolve(itemType: itemType, itemId: itemId, price: salePrice, sellerKiosk: .string(sellerCap.kioskId))
+        let _ = try await purchaseTx.purchaseAndResolve(itemType: itemType, itemId: itemId, price: salePrice, sellerKiosk: .string(sellerCap.kioskId))
         if personal == nil || (personal != nil && !(personal!)) { try purchaseTx.shareAndTransferCap(address: try self.testToolbox.address()) }
         try purchaseTx.finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &purchaseTxb)
@@ -109,8 +118,9 @@ internal struct KioskToolbox {
     func createPersonalKiosk() async throws {
         var txb = try TransactionBlock()
         let kioskTxClient = try KioskTransactionClient(transactionBlock: &txb, kioskClient: self.kioskClient)
-        try kioskTxClient.createPersonal()
-        try kioskTxClient.finalize()
+        try kioskTxClient
+            .createPersonal()
+            .finalize()
         let _ = try await self.testToolbox.executeTransactionBlock(txb: &txb)
     }
 

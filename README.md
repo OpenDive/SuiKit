@@ -171,7 +171,8 @@ do {
         arguments: [
             .input(try tx.pure(value: .string("Example NFT"))), 
             .input(try tx.pure(value: .number(2)))
-        ]
+        ],
+        returnValueCount: 2
     )
 
     // Utilizing the multiple return values

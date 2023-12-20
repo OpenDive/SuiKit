@@ -182,10 +182,22 @@ public struct GraphQLSuiProvider {
     /// - Returns: A `CheckpointPage` object containing a list of retrieved checkpoints and pagination information.
     public func getCheckpoints(
         cursor: String? = nil,
-        limit: Int? = nil,
-        order: SortOrder = .descending
+        limit: Int? = nil
     ) async throws -> CheckpointPage {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetCheckpointsQuery(
+                first: limit != nil ? .init(integerLiteral: limit!) : .none,
+                before: cursor != nil ? .init(stringLiteral: cursor!) : .none,
+                last: limit != nil ? .init(integerLiteral: limit!) : .none,
+                after: cursor != nil ? .init(stringLiteral: cursor!) : .none
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return CheckpointPage(
+            data: data.checkpointConnection!.nodes.map { Checkpoint(graphql: $0) },
+            pageInfo: CheckpointPageInfo(graphql: data.checkpointConnection!.pageInfo)
+        )
     }
 
     /// Return transaction events.

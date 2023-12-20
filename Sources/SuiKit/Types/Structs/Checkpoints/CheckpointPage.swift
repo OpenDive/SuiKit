@@ -31,8 +31,17 @@ public struct CheckpointPage {
     public let data: [Checkpoint]
 
     /// A string representing the cursor for the next page of checkpoints. This can be used to request the next set of checkpoints in pagination.
-    public let nextCursor: String
+    public let nextCursor: String?
+
+    public let pageInfo: CheckpointPageInfo?
 
     /// A boolean indicating whether there is another page of checkpoints available after the current page.
-    public let hasNextPage: Bool
+    public let hasNextPage: Bool?
+
+    public init(data: [Checkpoint], nextCursor: String? = nil, pageInfo: CheckpointPageInfo? = nil, hasNextPage: Bool? = nil) {
+        self.data = data
+        self.nextCursor = nextCursor
+        self.hasNextPage = hasNextPage
+        self.pageInfo = pageInfo
+    }
 }

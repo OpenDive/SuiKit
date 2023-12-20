@@ -74,12 +74,12 @@ final class CheckpointTest: XCTestCase {
 
         XCTAssertEqual(checkpoints.nextCursor, "0")
         XCTAssertEqual(checkpoints.data.count, 1)
-        XCTAssertTrue(checkpoints.hasNextPage)
+        XCTAssertTrue(checkpoints.hasNextPage!)
 
         let checkpoints1 = try await toolBox.client.getCheckpoints(cursor: checkpoints.nextCursor, limit: 1, order: .ascending)
 
         XCTAssertEqual(checkpoints1.nextCursor, "1")
         XCTAssertEqual(checkpoints1.data.count, 1)
-        XCTAssertTrue(checkpoints1.hasNextPage)
+        XCTAssertTrue(checkpoints1.hasNextPage!)
     }
 }

@@ -12,8 +12,5 @@ import XCTest
 @testable import SuiKit
 
 final class GraphQLProviderTests: XCTestCase {
-    func testThatisADummyTest() async throws {
-        let provider = GraphQLSuiProvider()
-        try await provider.test()
-    }
+    
 }

@@ -18,7 +18,8 @@ let package = Package(
         .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
         .package(url: "https://github.com/tesseract-one/Bip39.swift.git", from: "0.1.1"),
         .package(url: "https://github.com/web3swift-team/web3swift.git", from: "3.2.0"),
-        .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0")
+        .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
+        .package(url: "https://github.com/apollographql/apollo-ios.git", .upToNextMajor(from: "1.0.0"))
     ],
     targets: [
         .target(
@@ -31,7 +32,8 @@ let package = Package(
                 .product(name: "AnyCodable", package: "AnyCodable"),
                 .product(name: "Bip39", package: "Bip39.swift"),
                 .product(name: "web3swift", package: "web3swift"),
-                .product(name: "JWTDecode", package: "JWTDecode.swift")
+                .product(name: "JWTDecode", package: "JWTDecode.swift"),
+                .product(name: "Apollo", package: "apollo-ios")
             ],
             path: "Sources"
         ),

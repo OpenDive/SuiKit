@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import ApolloAPI
 
 /// A structure representing the name of a dynamic field, conforming to `Codable` protocol.
 public struct DynamicFieldName: Codable {

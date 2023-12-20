@@ -34,6 +34,7 @@ import ApolloAPI
 public struct GraphQLSuiProvider {
     private var apollo = ApolloClient(url: URL(string: "https://graphql-beta.mainnet.sui.io")!)
 
+    // TODO: Implement function when write becomes available
     /// Runs the transaction in dev-inspect mode. Which allows for nearly any transaction (or Move call) with any arguments. Detailed results are provided, including both the transaction effects and any return values.
     /// - Parameters:
     ///   - transactionBlock: BCS encoded TransactionKind(as opposed to TransactionData, which include gasBudget and gasPrice).
@@ -51,6 +52,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Return transaction execution effects including the gas cost summary, while the effects are not committed to the chain.
     /// - Parameter transactionBlock: The bytes representing the transaction block to be dry run.
     /// - Returns: A `SuiTransactionBlockResponse` representing the outcome of the dry run.
@@ -61,6 +63,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Function to sign and execute a transaction block, making the transactions within
     /// the block occur on the blockchain.
     /// - Parameters:
@@ -79,6 +82,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Execute the transaction and wait for results if desired. Request types: 1. WaitForEffectsCert: waits for TransactionEffectsCert and then return to client.
     ///
     /// This mode is a proxy for transaction finality. 2. WaitForLocalExecution: waits for TransactionEffectsCert and make sure the node executed the transaction
@@ -101,6 +105,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Execute the transaction and wait for results if desired. Request types: 1. WaitForEffectsCert: waits for TransactionEffectsCert and then return to client.
     ///
     /// This mode is a proxy for transaction finality. 2. WaitForLocalExecution: waits for TransactionEffectsCert and make sure the node executed the transaction
@@ -127,7 +132,8 @@ public struct GraphQLSuiProvider {
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `String` representing the chain identifier.
     public func getChainIdentifier() async throws -> String {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(client: self.apollo, query: GetChainIdentifierQuery())
+        return result.data!.chainIdentifier
     }
 
     /// Return a checkpoint.

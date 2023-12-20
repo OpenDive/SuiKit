@@ -9,8 +9,8 @@ import Foundation
 import Apollo
 import ApolloAPI
 
-public struct GraphQLHelper {
-    public static func executeQuery<T: GraphQLQuery>(client: ApolloClient, query: T) async throws -> GraphQLResult<T.Data> {
+public struct GraphQLClient {
+    public static func fetchQuery<T: GraphQLQuery>(client: ApolloClient, query: T) async throws -> GraphQLResult<T.Data> {
         return try await withCheckedThrowingContinuation { (con: CheckedContinuation<GraphQLResult<T.Data>, Error>) in
             let _ = client.fetch(query: query) { result in
                 switch result {

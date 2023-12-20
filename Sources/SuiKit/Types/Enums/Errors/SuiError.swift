@@ -165,4 +165,7 @@ public enum SuiError: Error, Equatable {
 
     /// The Kiosk Data is invalid.
     case invalidKioskData
+
+    /// The result for the GraphQL query is missing
+    case missingGraphQLData
 }

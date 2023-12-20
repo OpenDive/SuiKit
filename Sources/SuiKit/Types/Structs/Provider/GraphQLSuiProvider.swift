@@ -132,16 +132,45 @@ public struct GraphQLSuiProvider {
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `String` representing the chain identifier.
     public func getChainIdentifier() async throws -> String {
-        let result = try await GraphQLClient.fetchQuery(client: self.apollo, query: GetChainIdentifierQuery())
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetChainIdentifierQuery()
+        )
         return result.data!.chainIdentifier
     }
 
     /// Return a checkpoint.
-    /// - Parameter id: Checkpoint identifier, can use either checkpoint digest, or checkpoint sequence number as input.
+    /// - Parameter digest: Checkpoint digest
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `Checkpoint` object representing the retrieved checkpoint.
-    public func getCheckpoint(id: String) async throws -> Checkpoint {
-        throw SuiError.notImplemented
+    public func getCheckpoint(digest: String) async throws -> Checkpoint {
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo, 
+            query: GetCheckpointQuery(
+                id: .init(
+                    CheckpointId(digest: digest)
+                )
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return Checkpoint(graphql: data)
+    }
+
+    /// Return a checkpoint.
+    /// - Parameter id: Checkpoint sequence number
+    /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
+    /// - Returns: A `Checkpoint` object representing the retrieved checkpoint.
+    public func getCheckpoint(sequenceNumber: Int) async throws -> Checkpoint {
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetCheckpointQuery(
+                id: .init(
+                    CheckpointId(sequenceNumber: sequenceNumber)
+                )
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return Checkpoint(graphql: data)
     }
 
     /// Return paginated list of checkpoints.

@@ -28,7 +28,7 @@ import SwiftyJSON
 
 public struct SuiEvent {
     /// The unique identifier of the event.
-    public let id: EventId
+    public let id: EventId?
 
     /// The identifier of the package associated with the event.
     public let packageId: objectId
@@ -64,5 +64,16 @@ public struct SuiEvent {
         self.parsedJson = input["parsedJson"]
         self.bcs = input["bcs"].string
         self.timestampMs = input["timestampMs"].string
+    }
+
+    public init(graphql: QueryEventsQuery.Data.EventConnection.Node) {
+        self.id = nil  // TODO: Turn ID into an Object
+        self.bcs = graphql.bcs
+        self.packageId = graphql.sendingModule!.package.asObject.location
+        self.parsedJson = graphql.json != nil ? JSON(parseJSON: graphql.json!) : JSON()
+        self.sender = try! AccountAddress.fromHex(graphql.senders![0].location)
+        self.timestampMs = graphql.timestamp
+        self.transactionModule = "TODO"
+        self.type = graphql.eventType!.repr
     }
 }

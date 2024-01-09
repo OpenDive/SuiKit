@@ -51,8 +51,8 @@ final class ReadEventTest: XCTestCase {
     func testThatGettingAllEventsWithPageWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         let page1 = try await toolBox.client.queryEvents(limit: 2)
-        XCTAssertNotEqual(page1.nextCursor.eventSeq, "")
-        XCTAssertNotEqual(page1.nextCursor.txDigest, "")
+        XCTAssertNotEqual(page1.nextCursor!.eventSeq, "")
+        XCTAssertNotEqual(page1.nextCursor!.txDigest, "")
     }
 
     func testThatGettingEventsBySenderPaginatedWorksAsIntended() async throws {

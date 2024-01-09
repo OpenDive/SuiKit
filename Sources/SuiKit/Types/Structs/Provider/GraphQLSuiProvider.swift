@@ -182,21 +182,29 @@ public struct GraphQLSuiProvider {
     /// - Returns: A `CheckpointPage` object containing a list of retrieved checkpoints and pagination information.
     public func getCheckpoints(
         cursor: String? = nil,
-        limit: Int? = nil
+        limit: Int? = nil,
+        order: SortOrder = .descending
     ) async throws -> CheckpointPage {
         let result = try await GraphQLClient.fetchQuery(
             client: self.apollo,
-            query: GetCheckpointsQuery(
-                first: limit != nil ? .init(integerLiteral: limit!) : .none,
-                before: cursor != nil ? .init(stringLiteral: cursor!) : .none,
-                last: limit != nil ? .init(integerLiteral: limit!) : .none,
-                after: cursor != nil ? .init(stringLiteral: cursor!) : .none
-            )
+            query: order == .ascending ?
+                GetCheckpointsQuery(
+                    first: (limit != nil ? .init(integerLiteral: limit!) : .none),
+                    before: .none,
+                    last: .none,
+                    after: .none
+                ) :
+                GetCheckpointsQuery(
+                    first: .none,
+                    before: .none,
+                    last: (limit != nil ? .init(integerLiteral: limit!) : .none),
+                    after: .none
+                )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }
         return CheckpointPage(
             data: data.checkpointConnection!.nodes.map { Checkpoint(graphql: $0) },
-            pageInfo: CheckpointPageInfo(graphql: data.checkpointConnection!.pageInfo)
+            pageInfo: PageInfo(graphql: data.checkpointConnection!.pageInfo)
         )
     }
 
@@ -605,7 +613,29 @@ public struct GraphQLSuiProvider {
         limit: Int? = nil,
         order: SortOrder? = nil
     ) async throws -> PaginatedSuiMoveEvent {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: order == .ascending ?
+            QueryEventsQuery(
+                filter: query != nil ? EventFilter(suiEventFilter: query!) : EventFilter(),
+                before: .none,
+                after: .none,
+                first: (limit != nil ? .init(integerLiteral: limit!) : .none),
+                last: .none
+            ) :
+            QueryEventsQuery(
+                filter: query != nil ? EventFilter(suiEventFilter: query!) : EventFilter(),
+                before: .none,
+                after: .none,
+                first: .none,
+                last: (limit != nil ? .init(integerLiteral: limit!) : .none)
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return PaginatedSuiMoveEvent(
+            data: data.eventConnection!.nodes.map { SuiEvent(graphql: $0) },
+            pageInfo: PageInfo(graphql: data.eventConnection!.pageInfo)
+        )
     }
 
     /// Queries transaction blocks based on provided parameters.

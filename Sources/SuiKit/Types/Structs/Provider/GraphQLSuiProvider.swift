@@ -222,7 +222,11 @@ public struct GraphQLSuiProvider {
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `String` representing the latest checkpoint sequence number.
     public func getLatestCheckpointSequenceNumber() async throws -> String {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetLatestCheckpointSequenceNumberQuery()
+        )
+        return "\(result.data!.checkpoint!.sequenceNumber)"
     }
 
     /// Retrieves the loaded child objects associated with a given digest from the Sui blockchain.

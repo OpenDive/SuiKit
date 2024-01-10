@@ -470,7 +470,20 @@ public struct GraphQLSuiProvider {
         cursor: String? = nil,
         limit: UInt? = nil
     ) async throws -> PaginatedCoins {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetCoinsQuery(
+                owner: account,
+                first: limit != nil ? .init(integerLiteral: Int(limit!)) : .none,
+                cursor: cursor != nil ? .init(stringLiteral: cursor!) : .none,
+                type: coinType != nil ? .init(stringLiteral: coinType!) : .none
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return PaginatedCoins(
+            data: data.address!.coinConnection!.nodes.map { CoinStruct(graphql: $0) },
+            pageInfo: PageInfo(graphql: data.address!.coinConnection!.pageInfo)
+        )
     }
 
     /// Return the committee information for the asked `epoch`.

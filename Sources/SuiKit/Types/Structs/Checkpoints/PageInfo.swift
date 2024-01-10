@@ -26,4 +26,11 @@ public struct PageInfo {
         self.hasNextPage = graphql.hasNextPage
         self.hasPreviousPage = graphql.hasPreviousPage
     }
+
+    public init(graphql: GetCoinsQuery.Data.Address.CoinConnection.PageInfo) {
+        self.startCursor = nil
+        self.endCursor = graphql.endCursor
+        self.hasNextPage = graphql.hasNextPage
+        self.hasPreviousPage = false
+    }
 }

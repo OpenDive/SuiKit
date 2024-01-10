@@ -415,7 +415,16 @@ public struct GraphQLSuiProvider {
     public func getAllBalances(
         account: Account
     ) async throws -> [CoinBalance] {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetAllBalancesQuery(
+                owner: try account.address(),
+                limit: .none,
+                cursor: .none
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return data.address!.balanceConnection!.nodes.map { CoinBalance(graphql: $0) }
     }
 
     /// Return all Coin objects owned by an address.

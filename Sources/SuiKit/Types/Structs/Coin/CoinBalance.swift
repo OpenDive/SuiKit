@@ -56,4 +56,11 @@ public struct CoinBalance {
         self.totalBalance = graphql.totalBalance!
         self.lockedBalance = nil
     }
+
+    public init(graphql: GetAllBalancesQuery.Data.Address.BalanceConnection.Node) {
+        self.coinType = graphql.coinType!.repr
+        self.coinObjectCount = graphql.coinObjectCount!
+        self.totalBalance = graphql.totalBalance!
+        self.lockedBalance = nil
+    }
 }

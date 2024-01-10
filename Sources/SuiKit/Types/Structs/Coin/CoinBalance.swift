@@ -42,4 +42,18 @@ public struct CoinBalance {
     /// An optional `LockedBalance` instance representing any locked balance of the coin type.
     /// Locked balance is the portion of the total balance that is restricted or not readily available for use.
     public let lockedBalance: LockedBalance?
+
+    public init(coinType: String, coinObjectCount: Int, totalBalance: String, lockedBalance: LockedBalance?) {
+        self.coinType = coinType
+        self.coinObjectCount = coinObjectCount
+        self.totalBalance = totalBalance
+        self.lockedBalance = lockedBalance
+    }
+
+    public init(graphql: GetBalanceQuery.Data.Address.Balance) {
+        self.coinType = graphql.coinType!.repr
+        self.coinObjectCount = graphql.coinObjectCount!
+        self.totalBalance = graphql.totalBalance!
+        self.lockedBalance = nil
+    }
 }

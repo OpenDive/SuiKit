@@ -57,6 +57,15 @@ public struct CoinStruct {
         )
     }
 
+    public init(coinType: String, coinObjectId: objectId, version: String, digest: TransactionDigest, balance: String, previousTransaction: TransactionDigest) {
+        self.coinType = coinType
+        self.coinObjectId = coinObjectId
+        self.version = version
+        self.digest = digest
+        self.balance = balance
+        self.previousTransaction = previousTransaction
+    }
+
     public init(graphql: GetCoinsQuery.Data.Address.CoinConnection.Node) {
         self.balance = graphql.balance!
         self.coinObjectId = graphql.asMoveObject.asObject.coinObjectId

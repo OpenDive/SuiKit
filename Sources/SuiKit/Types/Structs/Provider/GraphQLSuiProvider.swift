@@ -430,7 +430,11 @@ public struct GraphQLSuiProvider {
         cursor: String? = nil,
         limit: UInt? = nil
     ) async throws -> PaginatedCoins {
-        throw SuiError.notImplemented
+        return try await self.getCoins(
+            account: try account.toSuiAddress(),
+            cursor: cursor,
+            limit: limit
+        )
     }
 
     /// Return the total coin balance for one coin type, owned by the address owner.
@@ -443,7 +447,15 @@ public struct GraphQLSuiProvider {
         account: any PublicKeyProtocol,
         coinType: String? = nil
     ) async throws -> CoinBalance {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetBalanceQuery(
+                owner: try account.toSuiAddress(),
+                type: coinType != nil ? .init(stringLiteral: coinType!) : .none
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return CoinBalance(graphql: data.address!.balance!)
     }
 
     /// Return metadata (e.g., symbol, decimals) for a coin.

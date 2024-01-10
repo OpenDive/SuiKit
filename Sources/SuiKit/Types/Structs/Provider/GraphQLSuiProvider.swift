@@ -30,6 +30,7 @@ import Blake2
 import Web3Core
 import Apollo
 import ApolloAPI
+import BigInt
 
 public struct GraphQLSuiProvider {
     private var apollo = ApolloClient(url: URL(string: "https://graphql-beta.mainnet.sui.io")!)
@@ -474,7 +475,12 @@ public struct GraphQLSuiProvider {
     public func getCoinMetadata(
         coinType: String
     ) async throws -> SuiCoinMetadata {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetCoinMetadataQuery(coinType: coinType)
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return SuiCoinMetadata(graphql: data.coinMetadata!)
     }
 
     /// Return all Coin<`coin_type`> objects owned by an address.
@@ -626,8 +632,13 @@ public struct GraphQLSuiProvider {
     /// - Parameter coinType: The type of the coin whose total supply is to be retrieved.
     /// - Returns: A UInt64 representing the total supply of the coin type.
     /// - Throws: An error if the RPC request fails.
-    public func totalSupply(_ coinType: String) async throws -> UInt64 {
-        throw SuiError.notImplemented
+    public func totalSupply(_ coinType: String) async throws -> BigInt {
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetTotalSupplyQuery(coinType: coinType)
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return (BigInt(data.coinMetadata!.supply!, radix: 10)! * 10).power(data.coinMetadata!.decimals!)
     }
 
     /// Retrieves the annual percentage yield (APY) of validators.

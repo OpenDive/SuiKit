@@ -51,4 +51,22 @@ public struct SuiCoinMetadata {
     /// A `String` serving as a unique identifier for the coin, allowing for differentiation and
     /// reference to this specific coin instance within the system.
     let id: String
+
+    public init(decimals: UInt8, description: String, iconUrl: String?, name: String, symbol: String, id: String) {
+        self.decimals = decimals
+        self.description = description
+        self.iconUrl = iconUrl
+        self.name = name
+        self.symbol = symbol
+        self.id = id
+    }
+
+    public init(graphql: GetCoinMetadataQuery.Data.CoinMetadata) {
+        self.decimals = UInt8(graphql.decimals!)
+        self.name = graphql.name!
+        self.symbol = graphql.symbol!
+        self.description = graphql.description!
+        self.iconUrl = graphql.iconUrl
+        self.id = graphql.asMoveObject.asObject.location
+    }
 }

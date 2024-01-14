@@ -27,6 +27,8 @@ public class GetProtocolConfigQuery: GraphQLQuery {
       .field("protocolConfig", ProtocolConfig.self, arguments: ["protocolVersion": .variable("protocolVersion")]),
     ] }
 
+    /// Fetch the protocol config by protocol version (defaults to the latest protocol
+    /// version known to the GraphQL)
     public var protocolConfig: ProtocolConfig { __data["protocolConfig"] }
 
     /// ProtocolConfig
@@ -66,11 +68,11 @@ public class GetProtocolConfigQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("key", String.self),
-          .field("value", String.self),
+          .field("value", String?.self),
         ] }
 
         public var key: String { __data["key"] }
-        public var value: String { __data["value"] }
+        public var value: String? { __data["value"] }
       }
 
       /// ProtocolConfig.FeatureFlag

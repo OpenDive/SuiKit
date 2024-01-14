@@ -7,7 +7,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
   public static let operationName: String = "getAllBalances"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getAllBalances($owner: SuiAddress!, $limit: Int, $cursor: String) { address(address: $owner) { __typename balanceConnection(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename coinType { __typename repr } coinObjectCount totalBalance } } } }"#
+      #"query getAllBalances($owner: SuiAddressApollo!, $limit: Int, $cursor: String) { address(address: $owner) { __typename balanceConnection(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename coinType { __typename repr } coinObjectCount totalBalance } } } }"#
     ))
 
   public var owner: SuiAddressApollo

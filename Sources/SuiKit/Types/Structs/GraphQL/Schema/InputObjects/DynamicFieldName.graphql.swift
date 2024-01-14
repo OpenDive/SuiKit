@@ -27,7 +27,7 @@ public struct DynamicFieldNameApollo: InputObject {
     set { __data["type"] = newValue }
   }
 
-  /// The Base64 encoded bcs serialization of the DynamicField's 'name' field.
+  /// The Base64Apollo encoded bcs serialization of the DynamicField's 'name' field.
   public var bcs: Base64Apollo {
     get { __data["bcs"] }
     set { __data["bcs"] = newValue }

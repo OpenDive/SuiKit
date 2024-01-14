@@ -69,11 +69,11 @@ public struct SuiEvent {
     public init(graphql: QueryEventsQuery.Data.EventConnection.Node) {
         self.id = nil  // TODO: Turn ID into an Object
         self.bcs = graphql.bcs
-        self.packageId = graphql.sendingModule!.package.asObject.location
-        self.parsedJson = graphql.json != nil ? JSON(parseJSON: graphql.json!) : JSON()
-        self.sender = try! AccountAddress.fromHex(graphql.senders![0].location)
+        self.packageId = graphql.sendingModule!.package.asObject.address
+        self.parsedJson = JSON(parseJSON: graphql.JSONApollo)
+        self.sender = try! AccountAddress.fromHex(graphql.senders![0].address)
         self.timestampMs = graphql.timestamp
-        self.transactionModule = "TODO"
-        self.type = graphql.eventType!.repr
+        self.transactionModule = graphql.sendingModule != nil ? graphql.sendingModule!.name : "NONE"
+        self.type = graphql.type.repr
     }
 }

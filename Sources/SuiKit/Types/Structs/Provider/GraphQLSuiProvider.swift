@@ -144,71 +144,72 @@ public struct GraphQLSuiProvider {
     /// - Parameter digest: Checkpoint digest
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `Checkpoint` object representing the retrieved checkpoint.
-    public func getCheckpoint(digest: String) async throws -> Checkpoint {
-        let result = try await GraphQLClient.fetchQuery(
-            client: self.apollo, 
-            query: GetCheckpointQuery(
-                id: .init(
-                    CheckpointId(digest: digest)
-                )
-            )
-        )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return Checkpoint(graphql: data)
-    }
+//    public func getCheckpoint(digest: String) async throws -> Checkpoint {
+//        let result = try await GraphQLClient.fetchQuery(
+//            client: self.apollo, 
+//            query: GetCheckpointQuery(
+//                id: .init(
+//                    CheckpointId(digest: digest)
+//                )
+//            )
+//        )
+//        guard let data = result.data else { throw SuiError.missingGraphQLData }
+//        return Checkpoint(graphql: data)
+//    }
+//
+//    /// Return a checkpoint.
+//    /// - Parameter id: Checkpoint sequence number
+//    /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
+//    /// - Returns: A `Checkpoint` object representing the retrieved checkpoint.
+//    public func getCheckpoint(sequenceNumber: Int) async throws -> Checkpoint {
+//        let result = try await GraphQLClient.fetchQuery(
+//            client: self.apollo,
+//            query: GetCheckpointQuery(
+//                id: .init(
+//                    CheckpointId(sequenceNumber: sequenceNumber)
+//                )
+//            )
+//        )
+//        guard let data = result.data else { throw SuiError.missingGraphQLData }
+//        return Checkpoint(graphql: data)
+//    }
 
-    /// Return a checkpoint.
-    /// - Parameter id: Checkpoint sequence number
-    /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
-    /// - Returns: A `Checkpoint` object representing the retrieved checkpoint.
-    public func getCheckpoint(sequenceNumber: Int) async throws -> Checkpoint {
-        let result = try await GraphQLClient.fetchQuery(
-            client: self.apollo,
-            query: GetCheckpointQuery(
-                id: .init(
-                    CheckpointId(sequenceNumber: sequenceNumber)
-                )
-            )
-        )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return Checkpoint(graphql: data)
-    }
+//    /// Return paginated list of checkpoints.
+//    /// - Parameters:
+//    ///   - cursor: An optional paging cursor. If provided, the query will start from the next item after the specified cursor. Default to start from the first item if not specified.
+//    ///   - limit: Maximum item returned per page, default to [QUERY_MAX_RESULT_LIMIT_CHECKPOINTS] if not specified.
+//    ///   - order: A `SortOrder` enum value indicating the order of the results, defaulting to descending, defaults to ascending order, oldest record first.
+//    /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
+//    /// - Returns: A `CheckpointPage` object containing a list of retrieved checkpoints and pagination information.
+//    public func getCheckpoints(
+//        cursor: String? = nil,
+//        limit: Int? = nil,
+//        order: SortOrder = .descending
+//    ) async throws -> CheckpointPage {
+//        let result = try await GraphQLClient.fetchQuery(
+//            client: self.apollo,
+//            query: order == .ascending ?
+//                GetCheckpointsQuery(
+//                    first: (limit != nil ? .init(integerLiteral: limit!) : .none),
+//                    before: .none,
+//                    last: .none,
+//                    after: .none
+//                ) :
+//                GetCheckpointsQuery(
+//                    first: .none,
+//                    before: .none,
+//                    last: (limit != nil ? .init(integerLiteral: limit!) : .none),
+//                    after: .none
+//                )
+//        )
+//        guard let data = result.data else { throw SuiError.missingGraphQLData }
+//        return CheckpointPage(
+//            data: data.checkpointConnection!.nodes.map { Checkpoint(graphql: $0) },
+//            pageInfo: PageInfo(graphql: data.checkpointConnection!.pageInfo)
+//        )
+//    }
 
-    /// Return paginated list of checkpoints.
-    /// - Parameters:
-    ///   - cursor: An optional paging cursor. If provided, the query will start from the next item after the specified cursor. Default to start from the first item if not specified.
-    ///   - limit: Maximum item returned per page, default to [QUERY_MAX_RESULT_LIMIT_CHECKPOINTS] if not specified.
-    ///   - order: A `SortOrder` enum value indicating the order of the results, defaulting to descending, defaults to ascending order, oldest record first.
-    /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
-    /// - Returns: A `CheckpointPage` object containing a list of retrieved checkpoints and pagination information.
-    public func getCheckpoints(
-        cursor: String? = nil,
-        limit: Int? = nil,
-        order: SortOrder = .descending
-    ) async throws -> CheckpointPage {
-        let result = try await GraphQLClient.fetchQuery(
-            client: self.apollo,
-            query: order == .ascending ?
-                GetCheckpointsQuery(
-                    first: (limit != nil ? .init(integerLiteral: limit!) : .none),
-                    before: .none,
-                    last: .none,
-                    after: .none
-                ) :
-                GetCheckpointsQuery(
-                    first: .none,
-                    before: .none,
-                    last: (limit != nil ? .init(integerLiteral: limit!) : .none),
-                    after: .none
-                )
-        )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return CheckpointPage(
-            data: data.checkpointConnection!.nodes.map { Checkpoint(graphql: $0) },
-            pageInfo: PageInfo(graphql: data.checkpointConnection!.pageInfo)
-        )
-    }
-
+    // TODO: Implement endpoint function
     /// Return transaction events.
     /// - Parameter transactionDigest: The digest of the transaction for which to retrieve events.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
@@ -252,7 +253,17 @@ public struct GraphQLSuiProvider {
         module: String,
         function: String
     ) async throws -> [SuiMoveFunctionArgType] {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetMoveFunctionArgTypesQuery(packageId: package, module: module, function: function)
+        )
+        print("DEBUG: ERROR - \(result)")
+//        guard let data = result.data else { throw SuiError.missingGraphQLData }
+//        print("DEBUG: MOVE FUNCTION ARG RESULT - \(data)")
+        return []
+//        return data.object!.asMovePackage!.module!.function!.parameters.map { param in
+//            if param.signature
+//        }
     }
 
     /// Return a structured representation of Move function.
@@ -276,11 +287,20 @@ public struct GraphQLSuiProvider {
     ///   - module: The string identifier of the module to be normalized.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `SuiMoveNormalizedModule` object representing the normalized representation of the specified Move module, or `nil` if not found.
-    public func getNormalizedModuleModule(
+    public func getNormalizedMoveModule(
         package: String,
         module: String
     ) async throws -> SuiMoveNormalizedModule? {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetNormalizedMoveModuleQuery(
+                packageId: package,
+                module: module
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        print("DEBUG: DATA GET NORMALIZED MODULE - \(data.object!.asMovePackage!.module!.__data._data)")
+        return nil
     }
 
     /// Return structured representations of all modules in the given package.
@@ -542,12 +562,12 @@ public struct GraphQLSuiProvider {
     ///   - name: The Name of the dynamic field.
     /// - Returns: An optional `SuiObjectResponse` containing the information of the dynamic field object, `nil` if not found.
     /// - Throws: `SuiError.rpcError` if there are errors in the JSON RPC response.
-    public func getDynamicFieldObject(
-        parentId: String,
-        name: DynamicFieldName
-    ) async throws -> SuiObjectResponse? {
-        throw SuiError.notImplemented
-    }
+//    public func getDynamicFieldObject(
+//        parentId: String,
+//        name: DynamicFieldName
+//    ) async throws -> SuiObjectResponse? {
+//        throw SuiError.notImplemented
+//    }
 
     /// Return the list of dynamic field objects owned by an object.
     /// - Parameters:
@@ -632,14 +652,14 @@ public struct GraphQLSuiProvider {
     /// - Parameter coinType: The type of the coin whose total supply is to be retrieved.
     /// - Returns: A UInt64 representing the total supply of the coin type.
     /// - Throws: An error if the RPC request fails.
-    public func totalSupply(_ coinType: String) async throws -> BigInt {
-        let result = try await GraphQLClient.fetchQuery(
-            client: self.apollo,
-            query: GetTotalSupplyQuery(coinType: coinType)
-        )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return (BigInt(data.coinMetadata!.supply!, radix: 10)! * 10).power(data.coinMetadata!.decimals!)
-    }
+//    public func totalSupply(_ coinType: String) async throws -> BigInt {
+//        let result = try await GraphQLClient.fetchQuery(
+//            client: self.apollo,
+//            query: GetTotalSupplyQuery(coinType: coinType)
+//        )
+//        guard let data = result.data else { throw SuiError.missingGraphQLData }
+//        return (BigInt(data.coinMetadata!.supply!, radix: 10)! * 10).power(data.coinMetadata!.decimals!)
+//    }
 
     /// Retrieves the annual percentage yield (APY) of validators.
     /// - Returns: A `ValidatorApys` object representing the APYs of validators.
@@ -656,36 +676,36 @@ public struct GraphQLSuiProvider {
     ///   - order: An optional `SortOrder` enum to sort the fetched events.
     /// - Returns: A `PaginatedSuiMoveEvent` object representing the fetched events.
     /// - Throws: An error if the RPC request fails or the event parsing fails.
-    public func queryEvents(
-        query: SuiEventFilter? = nil,
-        cursor: EventId? = nil,
-        limit: Int? = nil,
-        order: SortOrder? = nil
-    ) async throws -> PaginatedSuiMoveEvent {
-        let result = try await GraphQLClient.fetchQuery(
-            client: self.apollo,
-            query: order == .ascending ?
-            QueryEventsQuery(
-                filter: query != nil ? EventFilter(suiEventFilter: query!) : EventFilter(),
-                before: .none,
-                after: .none,
-                first: (limit != nil ? .init(integerLiteral: limit!) : .none),
-                last: .none
-            ) :
-            QueryEventsQuery(
-                filter: query != nil ? EventFilter(suiEventFilter: query!) : EventFilter(),
-                before: .none,
-                after: .none,
-                first: .none,
-                last: (limit != nil ? .init(integerLiteral: limit!) : .none)
-            )
-        )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return PaginatedSuiMoveEvent(
-            data: data.eventConnection!.nodes.map { SuiEvent(graphql: $0) },
-            pageInfo: PageInfo(graphql: data.eventConnection!.pageInfo)
-        )
-    }
+//    public func queryEvents(
+//        query: SuiEventFilter? = nil,
+//        cursor: EventId? = nil,
+//        limit: Int? = nil,
+//        order: SortOrder? = nil
+//    ) async throws -> PaginatedSuiMoveEvent {
+//        let result = try await GraphQLClient.fetchQuery(
+//            client: self.apollo,
+//            query: order == .ascending ?
+//            QueryEventsQuery(
+//                filter: query != nil ? EventFilter(suiEventFilter: query!) : EventFilter(),
+//                before: .none,
+//                after: .none,
+//                first: (limit != nil ? .init(integerLiteral: limit!) : .none),
+//                last: .none
+//            ) :
+//            QueryEventsQuery(
+//                filter: query != nil ? EventFilter(suiEventFilter: query!) : EventFilter(),
+//                before: .none,
+//                after: .none,
+//                first: .none,
+//                last: (limit != nil ? .init(integerLiteral: limit!) : .none)
+//            )
+//        )
+//        guard let data = result.data else { throw SuiError.missingGraphQLData }
+//        return PaginatedSuiMoveEvent(
+//            data: data.eventConnection!.nodes.map { SuiEvent(graphql: $0) },
+//            pageInfo: PageInfo(graphql: data.eventConnection!.pageInfo)
+//        )
+//    }
 
     /// Queries transaction blocks based on provided parameters.
     /// - Parameters:

@@ -4,8 +4,8 @@
 import ApolloAPI
 
 public extension Objects {
-  static let EndOfEpochData = ApolloAPI.Object(
-    typename: "EndOfEpochData",
+  static let MoveField = ApolloAPI.Object(
+    typename: "MoveField",
     implementedInterfaces: []
   )
 }

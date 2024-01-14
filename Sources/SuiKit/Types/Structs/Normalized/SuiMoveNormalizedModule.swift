@@ -75,4 +75,14 @@ public struct SuiMoveNormalizedModule {
         self.structs = structs
         self.exposedFunctions = exposedFunctions
     }
+
+//    public init(graphql: GetNormalizedMoveModuleQuery.Data, package: String) {
+//        var structs: [String: SuiMoveNormalizedStruct] = [:]
+//        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
+//        self.fileFormatVersion = graphql.object!.asMovePackage!.module!.fileFormatVersion
+//        self.address = package
+////        self.name = graphql.object!.asMovePackage!.module!.
+//        self.name = ""
+//        self.friends = graphql.object!.asMovePackage!.module!.
+//    }
 }

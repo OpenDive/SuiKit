@@ -85,13 +85,13 @@ public struct Checkpoint: Equatable {
             GasCostSummary(graphql: graphql.checkpoint!.rollingGasSummary!) :
             nil
         self.timestampMs = graphql.checkpoint!.timestamp
-        self.validatorSignature = graphql.checkpoint!.validatorSignature
+        self.validatorSignature = graphql.checkpoint!.validatorSignatures
         self.transactions = graphql.checkpoint!.transactionBlockConnection!.nodes.map { $0.digest }
     }
 
     /// Initialize a new instance of `Checkpoint` from a GraphQL object.
     /// - Parameter graphql: A GraphQL object containing values for initalizing a new Checkpoint.
-    public init(graphql: GetCheckpointsQuery.Data.CheckpointConnection.Node) {
+    public init(graphql: GetCheckpointsQuery.Data.Checkpoints.Node) {
         self.epoch = "\(graphql.epoch!.epochId)"
         self.sequenceNumber = "\(graphql.sequenceNumber)"
         self.digest = graphql.digest
@@ -103,7 +103,7 @@ public struct Checkpoint: Equatable {
             GasCostSummary(graphql: graphql.rollingGasSummary!) :
             nil
         self.timestampMs = graphql.timestamp
-        self.validatorSignature = graphql.validatorSignature
+        self.validatorSignature = graphql.validatorSignatures
         self.transactions = graphql.transactionBlockConnection!.nodes.map { $0.digest }
     }
 }

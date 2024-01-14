@@ -13,7 +13,7 @@ public struct PageInfo {
     public var hasNextPage: Bool
     public var hasPreviousPage: Bool
 
-    public init(graphql: GetCheckpointsQuery.Data.CheckpointConnection.PageInfo) {
+    public init(graphql: GetCheckpointsQuery.Data.Checkpoints.PageInfo) {
         self.startCursor = graphql.startCursor
         self.endCursor = graphql.endCursor
         self.hasNextPage = graphql.hasNextPage

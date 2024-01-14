@@ -29,11 +29,14 @@ public enum SchemaMetadata: ApolloAPI.SchemaMetadata {
     case "Address": return SuiKit.Objects.Address
     case "Object": return SuiKit.Objects.Object
     case "Owner": return SuiKit.Objects.Owner
-    case "TransactionSignature": return SuiKit.Objects.TransactionSignature
+    case "EventConnection": return SuiKit.Objects.EventConnection
+    case "Event": return SuiKit.Objects.Event
+    case "MoveModule": return SuiKit.Objects.MoveModule
+    case "MovePackage": return SuiKit.Objects.MovePackage
+    case "MoveType": return SuiKit.Objects.MoveType
     case "TransactionBlockEffects": return SuiKit.Objects.TransactionBlockEffects
     case "Checkpoint": return SuiKit.Objects.Checkpoint
     case "BalanceChange": return SuiKit.Objects.BalanceChange
-    case "MoveType": return SuiKit.Objects.MoveType
     case "GasEffects": return SuiKit.Objects.GasEffects
     case "GasCostSummary": return SuiKit.Objects.GasCostSummary
     case "Epoch": return SuiKit.Objects.Epoch
@@ -46,25 +49,29 @@ public enum SchemaMetadata: ApolloAPI.SchemaMetadata {
     case "Validator": return SuiKit.Objects.Validator
     case "ValidatorCredentials": return SuiKit.Objects.ValidatorCredentials
     case "CheckpointConnection": return SuiKit.Objects.CheckpointConnection
-    case "MovePackage": return SuiKit.Objects.MovePackage
-    case "MoveModule": return SuiKit.Objects.MoveModule
+    case "SuinsRegistrationConnection": return SuiKit.Objects.SuinsRegistrationConnection
+    case "SuinsRegistration": return SuiKit.Objects.SuinsRegistration
+    case "MoveStruct": return SuiKit.Objects.MoveStruct
+    case "MoveField": return SuiKit.Objects.MoveField
+    case "OpenMoveType": return SuiKit.Objects.OpenMoveType
+    case "MoveStructTypeParameter": return SuiKit.Objects.MoveStructTypeParameter
     case "DynamicFieldConnection": return SuiKit.Objects.DynamicFieldConnection
     case "DynamicField": return SuiKit.Objects.DynamicField
+    case "DisplayEntry": return SuiKit.Objects.DisplayEntry
+    case "MoveFunction": return SuiKit.Objects.MoveFunction
+    case "MoveFunctionTypeParameter": return SuiKit.Objects.MoveFunctionTypeParameter
     case "CoinMetadata": return SuiKit.Objects.CoinMetadata
-    case "EndOfEpochData": return SuiKit.Objects.EndOfEpochData
-    case "CommitteeMember": return SuiKit.Objects.CommitteeMember
     case "ObjectConnection": return SuiKit.Objects.ObjectConnection
     case "MoveModuleConnection": return SuiKit.Objects.MoveModuleConnection
+    case "MoveStructConnection": return SuiKit.Objects.MoveStructConnection
+    case "MoveFunctionConnection": return SuiKit.Objects.MoveFunctionConnection
     case "ProtocolConfigs": return SuiKit.Objects.ProtocolConfigs
     case "ProtocolConfigAttr": return SuiKit.Objects.ProtocolConfigAttr
     case "ProtocolConfigFeatureFlag": return SuiKit.Objects.ProtocolConfigFeatureFlag
-    case "SuiSystemStateSummary": return SuiKit.Objects.SuiSystemStateSummary
     case "SafeMode": return SuiKit.Objects.SafeMode
     case "StakeSubsidy": return SuiKit.Objects.StakeSubsidy
     case "StorageFund": return SuiKit.Objects.StorageFund
     case "SystemParameters": return SuiKit.Objects.SystemParameters
-    case "EventConnection": return SuiKit.Objects.EventConnection
-    case "Event": return SuiKit.Objects.Event
     case "Balance": return SuiKit.Objects.Balance
     case "BalanceConnection": return SuiKit.Objects.BalanceConnection
     case "StakedSuiConnection": return SuiKit.Objects.StakedSuiConnection

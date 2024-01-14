@@ -7,8 +7,8 @@ public class MultiGetTransactionBlocksQuery: GraphQLQuery {
   public static let operationName: String = "multiGetTransactionBlocks"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query multiGetTransactionBlocks($digests: [String!]!, $limit: Int, $cursor: String, $showBalanceChanges: Boolean = false, $showEffects: Boolean = false, $showInput: Boolean = false, $showObjectChanges: Boolean = false, $showRawInput: Boolean = false) { transactionBlockConnection( first: $limit after: $cursor filter: { transactionIds: $digests } ) { __typename pageInfo { __typename hasNextPage hasPreviousPage startCursor endCursor } nodes { __typename ...RPC_TRANSACTION_FIELDS } } }"#,
-      fragments: [RPC_TRANSACTION_FIELDS.self]
+      #"query multiGetTransactionBlocks($digests: [String!]!, $limit: Int, $cursor: String, $showBalanceChanges: Boolean = false, $showEffects: Boolean = false, $showEvents: Boolean = false, $showInput: Boolean = false, $showObjectChanges: Boolean = false, $showRawInput: Boolean = false) { transactionBlockConnection( first: $limit after: $cursor filter: { transactionIds: $digests } ) { __typename pageInfo { __typename hasNextPage hasPreviousPage startCursor endCursor } nodes { __typename ...RPC_TRANSACTION_FIELDS } } }"#,
+      fragments: [RPC_EVENTS_FIELDS.self, RPC_TRANSACTION_FIELDS.self]
     ))
 
   public var digests: [String]
@@ -16,6 +16,7 @@ public class MultiGetTransactionBlocksQuery: GraphQLQuery {
   public var cursor: GraphQLNullable<String>
   public var showBalanceChanges: GraphQLNullable<Bool>
   public var showEffects: GraphQLNullable<Bool>
+  public var showEvents: GraphQLNullable<Bool>
   public var showInput: GraphQLNullable<Bool>
   public var showObjectChanges: GraphQLNullable<Bool>
   public var showRawInput: GraphQLNullable<Bool>
@@ -26,6 +27,7 @@ public class MultiGetTransactionBlocksQuery: GraphQLQuery {
     cursor: GraphQLNullable<String>,
     showBalanceChanges: GraphQLNullable<Bool> = false,
     showEffects: GraphQLNullable<Bool> = false,
+    showEvents: GraphQLNullable<Bool> = false,
     showInput: GraphQLNullable<Bool> = false,
     showObjectChanges: GraphQLNullable<Bool> = false,
     showRawInput: GraphQLNullable<Bool> = false
@@ -35,6 +37,7 @@ public class MultiGetTransactionBlocksQuery: GraphQLQuery {
     self.cursor = cursor
     self.showBalanceChanges = showBalanceChanges
     self.showEffects = showEffects
+    self.showEvents = showEvents
     self.showInput = showInput
     self.showObjectChanges = showObjectChanges
     self.showRawInput = showRawInput
@@ -46,6 +49,7 @@ public class MultiGetTransactionBlocksQuery: GraphQLQuery {
     "cursor": cursor,
     "showBalanceChanges": showBalanceChanges,
     "showEffects": showEffects,
+    "showEvents": showEvents,
     "showInput": showInput,
     "showObjectChanges": showObjectChanges,
     "showRawInput": showRawInput
@@ -125,16 +129,19 @@ public class MultiGetTransactionBlocksQuery: GraphQLQuery {
         ] }
 
         /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
-        /// This serves as a unique id for the block on chain
+        /// This serves as a unique id for the block on chain.
         public var digest: String { __data["digest"] }
-        /// The transaction block data in BCS format.
-        /// This includes data on the sender, inputs, sponsor, gas inputs, individual transactions, and user signatures.
+        /// Serialized form of this transaction's `SenderSignedData`, BCS serialized and Base64Apollo encoded.
         public var rawTransaction: SuiKit.Base64Apollo? { __data["rawTransaction"] }
-        /// The address of the user sending this transaction block
+        /// The address corresponding to the public key that signed this transaction. System
+        /// transactions do not have senders.
         public var sender: RPC_TRANSACTION_FIELDS.Sender? { __data["sender"] }
-        /// A list of signatures of all signers, senders, and potentially the gas owner if this is a sponsored transaction.
-        public var signatures: [RPC_TRANSACTION_FIELDS.Signature?]? { __data["signatures"] }
-        /// The effects field captures the results to the chain of executing this transaction
+        /// A list of all signatures, Base64Apollo-encoded, from senders, and potentially the gas owner if
+        /// this is a sponsored transaction.
+        public var signatures: [SuiKit.Base64Apollo]? { __data["signatures"] }
+        /// Events emitted by this transaction block.
+        public var events: RPC_TRANSACTION_FIELDS.Events? { __data["events"] }
+        /// The effects field captures the results to the chain of executing this transaction.
         public var effects: RPC_TRANSACTION_FIELDS.Effects? { __data["effects"] }
 
         public struct Fragments: FragmentContainer {

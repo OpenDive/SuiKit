@@ -7,5 +7,5 @@
 
 import ApolloAPI
 
-/// Arbitrary JSON data.
+/// Arbitrary JSONApollo data.
 public typealias JSONApollo = String

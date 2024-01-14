@@ -5,7 +5,7 @@
 
 public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
   public static var fragmentDefinition: StaticString {
-    #"fragment RPC_OBJECT_FIELDS on Object { __typename objectId: location bcs @include(if: $showBcs) version asMoveObject @include(if: $showType) { __typename contents { __typename type { __typename repr } } } asMoveObject @include(if: $showContent) { __typename hasPublicTransfer contents { __typename data type { __typename repr layout signature } } } asMoveObject @include(if: $showBcs) { __typename hasPublicTransfer contents { __typename bcs type { __typename repr } } } owner @include(if: $showOwner) { __typename location asAddress { __typename location } asObject { __typename location } } previousTransactionBlock @include(if: $showPreviousTransaction) { __typename digest } storageRebate @include(if: $showStorageRebate) digest version }"#
+    #"fragment RPC_OBJECT_FIELDS on Object { __typename objectId: address bcs @include(if: $showBcs) version asMoveObject @include(if: $showType) { __typename contents { __typename type { __typename repr } } } asMoveObject @include(if: $showContent) { __typename hasPublicTransfer contents { __typename data type { __typename repr layout signature } } } asMoveObject @include(if: $showBcs) { __typename hasPublicTransfer contents { __typename bcs type { __typename repr } } } owner @include(if: $showOwner) { __typename address asAddress { __typename address } asObject { __typename address } } previousTransactionBlock @include(if: $showPreviousTransaction) { __typename digest } storageRebate @include(if: $showStorageRebate) digest version display @include(if: $showDisplay) { __typename key value error } }"#
   }
 
   public let __data: DataDict
@@ -14,7 +14,7 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
   public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
   public static var __selections: [ApolloAPI.Selection] { [
     .field("__typename", String.self),
-    .field("location", alias: "objectId", SuiKit.SuiAddressApollo.self),
+    .field("address", alias: "objectId", SuiKit.SuiAddressApollo.self),
     .field("version", Int.self),
     .field("digest", String.self),
     .include(if: "showBcs", .field("bcs", SuiKit.Base64Apollo?.self)),
@@ -22,11 +22,12 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
     .include(if: "showOwner", .field("owner", Owner?.self)),
     .include(if: "showPreviousTransaction", .field("previousTransactionBlock", PreviousTransactionBlock?.self)),
     .include(if: "showStorageRebate", .field("storageRebate", SuiKit.BigIntApollo?.self)),
+    .include(if: "showDisplay", .field("display", [Display]?.self)),
   ] }
 
   /// The address of the object, named as such to avoid conflict with the address type.
   public var objectId: SuiKit.SuiAddressApollo { __data["objectId"] }
-  /// The Base64 encoded bcs serialization of the object's content.
+  /// The Base64Apollo encoded bcs serialization of the object's content.
   public var bcs: SuiKit.Base64Apollo? { __data["bcs"] }
   public var version: Int { __data["version"] }
   /// Attempts to convert the object into a MoveObject
@@ -41,6 +42,10 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
   public var storageRebate: SuiKit.BigIntApollo? { __data["storageRebate"] }
   /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
   public var digest: String { __data["digest"] }
+  /// The set of named templates defined on-chain for the type of this object,
+  /// to be handled off-chain. The server substitutes data from the object
+  /// into these templates to generate a display string per template.
+  public var display: [Display]? { __data["display"] }
 
   /// AsMoveObject
   ///
@@ -74,7 +79,7 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
         .field("contents", Contents?.self),
       ] }
 
-      /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+      /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
       /// provides the flat representation of the type signature, and the bcs of the corresponding
       /// data
       public var contents: Contents? { __data["contents"] }
@@ -130,13 +135,15 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public typealias RootEntityType = RPC_OBJECT_FIELDS.AsMoveObject
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("hasPublicTransfer", Bool?.self),
+        .field("hasPublicTransfer", Bool.self),
         .field("contents", Contents?.self),
       ] }
 
-      /// Determines whether a tx can transfer this object
-      public var hasPublicTransfer: Bool? { __data["hasPublicTransfer"] }
-      /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+      /// Determines whether a transaction can transfer this object, using the TransferObjects
+      /// transaction command or `sui::transfer::public_transfer`, both of which require the object to
+      /// have the `key` and `store` abilities.
+      public var hasPublicTransfer: Bool { __data["hasPublicTransfer"] }
+      /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
       /// provides the flat representation of the type signature, and the bcs of the corresponding
       /// data
       public var contents: Contents? { __data["contents"] }
@@ -195,13 +202,15 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public typealias RootEntityType = RPC_OBJECT_FIELDS.AsMoveObject
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("hasPublicTransfer", Bool?.self),
+        .field("hasPublicTransfer", Bool.self),
         .field("contents", Contents?.self),
       ] }
 
-      /// Determines whether a tx can transfer this object
-      public var hasPublicTransfer: Bool? { __data["hasPublicTransfer"] }
-      /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+      /// Determines whether a transaction can transfer this object, using the TransferObjects
+      /// transaction command or `sui::transfer::public_transfer`, both of which require the object to
+      /// have the `key` and `store` abilities.
+      public var hasPublicTransfer: Bool { __data["hasPublicTransfer"] }
+      /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
       /// provides the flat representation of the type signature, and the bcs of the corresponding
       /// data
       public var contents: Contents? { __data["contents"] }
@@ -259,12 +268,12 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Owner }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("location", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self),
       .field("asAddress", AsAddress?.self),
       .field("asObject", AsObject?.self),
     ] }
 
-    public var location: SuiKit.SuiAddressApollo { __data["location"] }
+    public var address: SuiKit.SuiAddressApollo { __data["address"] }
     public var asAddress: AsAddress? { __data["asAddress"] }
     public var asObject: AsObject? { __data["asObject"] }
 
@@ -278,10 +287,10 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("location", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self),
       ] }
 
-      public var location: SuiKit.SuiAddressApollo { __data["location"] }
+      public var address: SuiKit.SuiAddressApollo { __data["address"] }
     }
 
     /// Owner.AsObject
@@ -294,11 +303,11 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("location", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self),
       ] }
 
       /// The address of the object, named as such to avoid conflict with the address type.
-      public var location: SuiKit.SuiAddressApollo { __data["location"] }
+      public var address: SuiKit.SuiAddressApollo { __data["address"] }
     }
   }
 
@@ -316,7 +325,30 @@ public struct RPC_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
     ] }
 
     /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
-    /// This serves as a unique id for the block on chain
+    /// This serves as a unique id for the block on chain.
     public var digest: String { __data["digest"] }
+  }
+
+  /// Display
+  ///
+  /// Parent Type: `DisplayEntry`
+  public struct Display: SuiKit.SelectionSet {
+    public let __data: DataDict
+    public init(_dataDict: DataDict) { __data = _dataDict }
+
+    public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.DisplayEntry }
+    public static var __selections: [ApolloAPI.Selection] { [
+      .field("__typename", String.self),
+      .field("key", String.self),
+      .field("value", String?.self),
+      .field("error", String?.self),
+    ] }
+
+    /// The identifier for a particular template string of the Display object.
+    public var key: String { __data["key"] }
+    /// The template string for the key with placeholder values substituted.
+    public var value: String? { __data["value"] }
+    /// An error string describing why the template could not be rendered.
+    public var error: String? { __data["error"] }
   }
 }

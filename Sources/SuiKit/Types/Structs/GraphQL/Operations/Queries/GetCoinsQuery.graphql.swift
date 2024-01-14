@@ -7,7 +7,7 @@ public class GetCoinsQuery: GraphQLQuery {
   public static let operationName: String = "getCoins"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getCoins($owner: SuiAddress!, $first: Int, $cursor: String, $type: String = "0x2::sui::SUI") { address(address: $owner) { __typename location coinConnection(first: $first, after: $cursor, type: $type) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename balance asMoveObject { __typename contents { __typename type { __typename repr } } asObject { __typename coinObjectId: location version digest previousTransactionBlock { __typename digest } } } } } } }"#
+      #"query getCoins($owner: SuiAddressApollo!, $first: Int, $cursor: String, $type: String = "0x2::sui::SUI") { address(address: $owner) { __typename address coinConnection(first: $first, after: $cursor, type: $type) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename balance asMoveObject { __typename contents { __typename type { __typename repr } } asObject { __typename coinObjectId: address version digest previousTransactionBlock { __typename digest } } } } } } }"#
     ))
 
   public var owner: SuiAddressApollo
@@ -55,7 +55,7 @@ public class GetCoinsQuery: GraphQLQuery {
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("location", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self),
         .field("coinConnection", CoinConnection?.self, arguments: [
           "first": .variable("first"),
           "after": .variable("cursor"),
@@ -63,7 +63,7 @@ public class GetCoinsQuery: GraphQLQuery {
         ]),
       ] }
 
-      public var location: SuiKit.SuiAddressApollo { __data["location"] }
+      public var address: SuiKit.SuiAddressApollo { __data["address"] }
       /// The coin objects for the given address.
       /// The type field is a string of the inner type of the coin
       /// by which to filter (e.g., 0x2::sui::SUI).
@@ -141,7 +141,7 @@ public class GetCoinsQuery: GraphQLQuery {
               .field("asObject", AsObject.self),
             ] }
 
-            /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+            /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
             /// provides the flat representation of the type signature, and the bcs of the corresponding
             /// data
             public var contents: Contents? { __data["contents"] }
@@ -192,7 +192,7 @@ public class GetCoinsQuery: GraphQLQuery {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", alias: "coinObjectId", SuiKit.SuiAddressApollo.self),
+                .field("address", alias: "coinObjectId", SuiKit.SuiAddressApollo.self),
                 .field("version", Int.self),
                 .field("digest", String.self),
                 .field("previousTransactionBlock", PreviousTransactionBlock?.self),
@@ -220,7 +220,7 @@ public class GetCoinsQuery: GraphQLQuery {
                 ] }
 
                 /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
-                /// This serves as a unique id for the block on chain
+                /// This serves as a unique id for the block on chain.
                 public var digest: String { __data["digest"] }
               }
             }

@@ -7,7 +7,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
   public static let operationName: String = "getDynamicFields"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getDynamicFields($parentId: SuiAddress!, $first: Int, $cursor: String) { object(address: $parentId) { __typename dynamicFieldConnection(first: $first, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename name { __typename bcs json type { __typename layout repr } } value { __typename ... on MoveObject { contents { __typename type { __typename repr } json } asObject { __typename storageRebate location digest version } } } } } } }"#
+      #"query getDynamicFields($parentId: SuiAddressApollo!, $first: Int, $cursor: String) { object(address: $parentId) { __typename dynamicFieldConnection(first: $first, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename name { __typename bcs JSONApollo type { __typename layout repr } } value { __typename ... on MoveObject { contents { __typename type { __typename repr } JSONApollo } asObject { __typename storageRebate address digest version } } } } } } }"#
     ))
 
   public var parentId: SuiAddressApollo
@@ -133,24 +133,24 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("bcs", SuiKit.Base64Apollo.self),
-              .field("json", SuiKit.JSONApollo.self),
+              .field("JSONApollo", SuiKit.JSONApollo.self),
               .field("type", Type_SelectionSet.self),
             ] }
 
             public var bcs: SuiKit.Base64Apollo { __data["bcs"] }
-            /// Representation of a Move value in JSON, where:
+            /// Representation of a Move value in JSONApollo, where:
             ///
-            /// - Addresses and UIDs are represented in canonical form, as JSON strings.
-            /// - Bools are represented by JSON boolean literals.
-            /// - u8, u16, and u32 are represented as JSON numbers.
-            /// - u64, u128, and u256 are represented as JSON strings.
-            /// - Vectors are represented by JSON arrays.
-            /// - Structs are represented by JSON objects.
+            /// - Addresses, IDs, and UIDs are represented in canonical form, as JSONApollo strings.
+            /// - Bools are represented by JSONApollo boolean literals.
+            /// - u8, u16, and u32 are represented as JSONApollo numbers.
+            /// - u64, u128, and u256 are represented as JSONApollo strings.
+            /// - Vectors are represented by JSONApollo arrays.
+            /// - Structs are represented by JSONApollo objects.
             /// - Empty optional values are represented by `null`.
             ///
             /// This form is offered as a less verbose convenience in cases where the layout of the type is
             /// known by the client.
-            public var json: SuiKit.JSONApollo { __data["json"] }
+            public var JSONApollo: SuiKit.JSONApollo { __data["JSONApollo"] }
             public var type: Type_SelectionSet { __data["type"] }
 
             /// Object.DynamicFieldConnection.Node.Name.Type_SelectionSet
@@ -203,7 +203,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 .field("asObject", AsObject.self),
               ] }
 
-              /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+              /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
               /// provides the flat representation of the type signature, and the bcs of the corresponding
               /// data
               public var contents: Contents? { __data["contents"] }
@@ -222,23 +222,23 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
                   .field("type", Type_SelectionSet.self),
-                  .field("json", SuiKit.JSONApollo.self),
+                  .field("JSONApollo", SuiKit.JSONApollo.self),
                 ] }
 
                 public var type: Type_SelectionSet { __data["type"] }
-                /// Representation of a Move value in JSON, where:
+                /// Representation of a Move value in JSONApollo, where:
                 ///
-                /// - Addresses and UIDs are represented in canonical form, as JSON strings.
-                /// - Bools are represented by JSON boolean literals.
-                /// - u8, u16, and u32 are represented as JSON numbers.
-                /// - u64, u128, and u256 are represented as JSON strings.
-                /// - Vectors are represented by JSON arrays.
-                /// - Structs are represented by JSON objects.
+                /// - Addresses, IDs, and UIDs are represented in canonical form, as JSONApollo strings.
+                /// - Bools are represented by JSONApollo boolean literals.
+                /// - u8, u16, and u32 are represented as JSONApollo numbers.
+                /// - u64, u128, and u256 are represented as JSONApollo strings.
+                /// - Vectors are represented by JSONApollo arrays.
+                /// - Structs are represented by JSONApollo objects.
                 /// - Empty optional values are represented by `null`.
                 ///
                 /// This form is offered as a less verbose convenience in cases where the layout of the type is
                 /// known by the client.
-                public var json: SuiKit.JSONApollo { __data["json"] }
+                public var JSONApollo: SuiKit.JSONApollo { __data["JSONApollo"] }
 
                 /// Object.DynamicFieldConnection.Node.Value.AsMoveObject.Contents.Type_SelectionSet
                 ///
@@ -269,7 +269,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
                   .field("storageRebate", SuiKit.BigIntApollo?.self),
-                  .field("location", SuiKit.SuiAddressApollo.self),
+                  .field("address", SuiKit.SuiAddressApollo.self),
                   .field("digest", String.self),
                   .field("version", Int.self),
                 ] }
@@ -278,7 +278,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 /// This number is recalculated based on the present storage gas price.
                 public var storageRebate: SuiKit.BigIntApollo? { __data["storageRebate"] }
                 /// The address of the object, named as such to avoid conflict with the address type.
-                public var location: SuiKit.SuiAddressApollo { __data["location"] }
+                public var address: SuiKit.SuiAddressApollo { __data["address"] }
                 /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
                 public var digest: String { __data["digest"] }
                 public var version: Int { __data["version"] }

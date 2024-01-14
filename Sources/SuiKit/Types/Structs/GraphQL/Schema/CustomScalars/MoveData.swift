@@ -9,13 +9,13 @@ import ApolloAPI
 
 /// The contents of a Move Value, corresponding to the following recursive type:
 ///
-/// type MoveData =
-///     { Address: SuiAddressApollo }
-///   | { UID:     SuiAddressApollo }
+/// type MoveDataApollo =
+///     { Address: SuiAddressApolloApollo }
+///   | { UID:     SuiAddressApolloApollo }
 ///   | { Bool:    bool }
-///   | { Number:  BigInt }
+///   | { Number:  BigIntApollo }
 ///   | { String:  string }
-///   | { Vector:  [MoveData] }
-///   | { Option:   MoveData? }
-///   | { Struct:  [{ name: string, value: MoveData }] }
+///   | { Vector:  [MoveDataApollo] }
+///   | { Option:   MoveDataApollo? }
+///   | { Struct:  [{ name: string, value: MoveDataApollo }] }
 public typealias MoveDataApollo = String

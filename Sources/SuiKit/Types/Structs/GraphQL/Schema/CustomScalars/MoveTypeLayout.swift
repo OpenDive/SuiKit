@@ -9,10 +9,10 @@ import ApolloAPI
 
 /// The shape of a concrete Move Type (a type with all its type parameters instantiated with concrete types), corresponding to the following recursive type:
 ///
-/// type MoveTypeLayout =
+/// type MoveTypeLayoutApollo =
 ///     "address"
 ///   | "bool"
 ///   | "u8" | "u16" | ... | "u256"
-///   | { vector: MoveTypeLayout }
-///   | { struct: [{ name: string, layout: MoveTypeLayout }] }
+///   | { vector: MoveTypeLayoutApollo }
+///   | { struct: [{ name: string, layout: MoveTypeLayoutApollo }] }
 public typealias MoveTypeLayoutApollo = String

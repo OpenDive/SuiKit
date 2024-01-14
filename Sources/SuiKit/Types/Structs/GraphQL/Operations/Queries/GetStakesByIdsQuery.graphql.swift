@@ -7,7 +7,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
   public static let operationName: String = "getStakesByIds"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getStakesByIds($ids: [SuiAddress!]!, $limit: Int, $cursor: String) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename asMoveObject { __typename asStakedSui { __typename ...RPC_STAKE_FIELDS } } } } }"#,
+      #"query getStakesByIds($ids: [SuiAddressApollo!]!, $limit: Int, $cursor: String) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename asMoveObject { __typename asStakedSui { __typename ...RPC_STAKE_FIELDS } } } } }"#,
       fragments: [RPC_STAKE_FIELDS.self]
     ))
 
@@ -133,9 +133,9 @@ public class GetStakesByIdsQuery: GraphQLQuery {
             /// The SUI that was initially staked.
             public var principal: SuiKit.BigIntApollo? { __data["principal"] }
             /// The epoch at which this stake became active
-            public var activeEpoch: RPC_STAKE_FIELDS.ActiveEpoch? { __data["activeEpoch"] }
+            public var activatedEpoch: RPC_STAKE_FIELDS.ActivatedEpoch? { __data["activatedEpoch"] }
             /// The epoch at which this object was requested to join a stake pool
-            public var requestEpoch: RPC_STAKE_FIELDS.RequestEpoch? { __data["requestEpoch"] }
+            public var requestedEpoch: RPC_STAKE_FIELDS.RequestedEpoch? { __data["requestedEpoch"] }
             /// The corresponding `0x3::staking_pool::StakedSui` Move object.
             public var asMoveObject: RPC_STAKE_FIELDS.AsMoveObject { __data["asMoveObject"] }
             /// The estimated reward for this stake object, calculated as:

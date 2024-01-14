@@ -5,7 +5,7 @@
 
 public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
   public static var fragmentDefinition: StaticString {
-    #"fragment RPC_TRANSACTION_FIELDS on TransactionBlock { __typename digest rawTransaction: bcs @include(if: $showInput) rawTransaction: bcs @include(if: $showRawInput) sender { __typename location } signatures { __typename base64Sig } effects { __typename checkpoint { __typename sequenceNumber } timestamp balanceChanges @include(if: $showBalanceChanges) { __typename coinType { __typename repr } owner { __typename asAddress { __typename location } asObject { __typename location } } amount } dependencies @include(if: $showEffects) { __typename digest } status @include(if: $showEffects) gasEffects @include(if: $showEffects) { __typename gasObject { __typename owner { __typename asAddress { __typename location } asObject { __typename location } } digest version location } gasSummary { __typename storageCost storageRebate nonRefundableStorageFee computationCost } } executedEpoch: epoch @include(if: $showEffects) { __typename epochId } objectChanges @include(if: $showEffects) { __typename idCreated idDeleted inputState { __typename version digest location } outputState { __typename version digest location owner { __typename asAddress { __typename location } asObject { __typename location } } } } objectChanges @include(if: $showObjectChanges) { __typename idCreated idDeleted inputState { __typename version digest location asMoveObject { __typename contents { __typename type { __typename repr } } } owner { __typename asAddress { __typename location } asObject { __typename location } } } outputState { __typename version digest location asMoveObject { __typename contents { __typename type { __typename repr } } } owner { __typename asAddress { __typename location } asObject { __typename location } } } } } }"#
+    #"fragment RPC_TRANSACTION_FIELDS on TransactionBlock { __typename digest rawTransaction: bcs @include(if: $showInput) rawTransaction: bcs @include(if: $showRawInput) sender { __typename address } signatures events(first: 50) @include(if: $showEvents) { __typename nodes { __typename ...RPC_EVENTS_FIELDS } } effects { __typename checkpoint { __typename sequenceNumber } timestamp balanceChanges @include(if: $showBalanceChanges) { __typename coinType { __typename repr } owner { __typename asAddress { __typename address } asObject { __typename address } } amount } dependencies @include(if: $showEffects) { __typename digest } status @include(if: $showEffects) gasEffects @include(if: $showEffects) { __typename gasObject { __typename owner { __typename asAddress { __typename address } asObject { __typename address } } digest version address } gasSummary { __typename storageCost storageRebate nonRefundableStorageFee computationCost } } executedEpoch: epoch @include(if: $showEffects) { __typename epochId } objectChanges @include(if: $showEffects) { __typename idCreated idDeleted inputState { __typename version digest address } outputState { __typename version digest address owner { __typename asAddress { __typename address } asObject { __typename address } } } } objectChanges @include(if: $showObjectChanges) { __typename idCreated idDeleted inputState { __typename version digest address asMoveObject { __typename contents { __typename type { __typename repr } } } owner { __typename asAddress { __typename address } asObject { __typename address } } } outputState { __typename version digest address asMoveObject { __typename contents { __typename type { __typename repr } } } owner { __typename asAddress { __typename address } asObject { __typename address } } } } } }"#
   }
 
   public let __data: DataDict
@@ -16,22 +16,26 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("__typename", String.self),
     .field("digest", String.self),
     .field("sender", Sender?.self),
-    .field("signatures", [Signature?]?.self),
+    .field("signatures", [SuiKit.Base64Apollo]?.self),
     .field("effects", Effects?.self),
     .include(if: "showInput" || "showRawInput", .field("bcs", alias: "rawTransaction", SuiKit.Base64Apollo?.self)),
+    .include(if: "showEvents", .field("events", Events.self, arguments: ["first": 50])),
   ] }
 
   /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
-  /// This serves as a unique id for the block on chain
+  /// This serves as a unique id for the block on chain.
   public var digest: String { __data["digest"] }
-  /// The transaction block data in BCS format.
-  /// This includes data on the sender, inputs, sponsor, gas inputs, individual transactions, and user signatures.
+  /// Serialized form of this transaction's `SenderSignedData`, BCS serialized and Base64Apollo encoded.
   public var rawTransaction: SuiKit.Base64Apollo? { __data["rawTransaction"] }
-  /// The address of the user sending this transaction block
+  /// The address corresponding to the public key that signed this transaction. System
+  /// transactions do not have senders.
   public var sender: Sender? { __data["sender"] }
-  /// A list of signatures of all signers, senders, and potentially the gas owner if this is a sponsored transaction.
-  public var signatures: [Signature?]? { __data["signatures"] }
-  /// The effects field captures the results to the chain of executing this transaction
+  /// A list of all signatures, Base64Apollo-encoded, from senders, and potentially the gas owner if
+  /// this is a sponsored transaction.
+  public var signatures: [SuiKit.Base64Apollo]? { __data["signatures"] }
+  /// Events emitted by this transaction block.
+  public var events: Events? { __data["events"] }
+  /// The effects field captures the results to the chain of executing this transaction.
   public var effects: Effects? { __data["effects"] }
 
   /// Sender
@@ -44,26 +48,74 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("location", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self),
     ] }
 
-    public var location: SuiKit.SuiAddressApollo { __data["location"] }
+    public var address: SuiKit.SuiAddressApollo { __data["address"] }
   }
 
-  /// Signature
+  /// Events
   ///
-  /// Parent Type: `TransactionSignature`
-  public struct Signature: SuiKit.SelectionSet {
+  /// Parent Type: `EventConnection`
+  public struct Events: SuiKit.SelectionSet {
     public let __data: DataDict
     public init(_dataDict: DataDict) { __data = _dataDict }
 
-    public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.TransactionSignature }
+    public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.EventConnection }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("base64Sig", SuiKit.Base64Apollo.self),
+      .field("nodes", [Node].self),
     ] }
 
-    public var base64Sig: SuiKit.Base64Apollo { __data["base64Sig"] }
+    /// A list of nodes.
+    public var nodes: [Node] { __data["nodes"] }
+
+    /// Events.Node
+    ///
+    /// Parent Type: `Event`
+    public struct Node: SuiKit.SelectionSet {
+      public let __data: DataDict
+      public init(_dataDict: DataDict) { __data = _dataDict }
+
+      public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Event }
+      public static var __selections: [ApolloAPI.Selection] { [
+        .field("__typename", String.self),
+        .fragment(RPC_EVENTS_FIELDS.self),
+      ] }
+
+      /// The Move module containing some function that when called by
+      /// a programmable transaction block (PTB) emitted this event.
+      /// For example, if a PTB invokes A::m1::foo, which internally
+      /// calls A::m2::emit_event to emit an event,
+      /// the sending module would be A::m1.
+      public var sendingModule: RPC_EVENTS_FIELDS.SendingModule? { __data["sendingModule"] }
+      /// Addresses of the senders of the event
+      public var senders: [RPC_EVENTS_FIELDS.Sender]? { __data["senders"] }
+      public var type: RPC_EVENTS_FIELDS.Type_SelectionSet { __data["type"] }
+      /// Representation of a Move value in JSONApollo, where:
+      ///
+      /// - Addresses, IDs, and UIDs are represented in canonical form, as JSONApollo strings.
+      /// - Bools are represented by JSONApollo boolean literals.
+      /// - u8, u16, and u32 are represented as JSONApollo numbers.
+      /// - u64, u128, and u256 are represented as JSONApollo strings.
+      /// - Vectors are represented by JSONApollo arrays.
+      /// - Structs are represented by JSONApollo objects.
+      /// - Empty optional values are represented by `null`.
+      ///
+      /// This form is offered as a less verbose convenience in cases where the layout of the type is
+      /// known by the client.
+      public var JSONApollo: SuiKit.JSONApollo { __data["JSONApollo"] }
+      public var bcs: SuiKit.Base64Apollo { __data["bcs"] }
+      /// UTC timestamp in milliseconds since epoch (1/1/1970)
+      public var timestamp: SuiKit.DateTimeApollo? { __data["timestamp"] }
+
+      public struct Fragments: FragmentContainer {
+        public let __data: DataDict
+        public init(_dataDict: DataDict) { __data = _dataDict }
+
+        public var rPC_EVENTS_FIELDS: RPC_EVENTS_FIELDS { _toFragment() }
+      }
+    }
   }
 
   /// Effects
@@ -78,27 +130,33 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       .field("__typename", String.self),
       .field("checkpoint", Checkpoint?.self),
       .field("timestamp", SuiKit.DateTimeApollo?.self),
-      .include(if: "showBalanceChanges", .field("balanceChanges", [BalanceChange?]?.self)),
+      .include(if: "showBalanceChanges", .field("balanceChanges", [BalanceChange]?.self)),
       .include(if: "showEffects", [
-        .field("dependencies", [Dependency?]?.self),
-        .field("status", GraphQLEnum<SuiKit.ExecutionStatusApollo>.self),
+        .field("dependencies", [Dependency]?.self),
+        .field("status", GraphQLEnum<SuiKit.ExecutionStatusApollo>?.self),
         .field("gasEffects", GasEffects?.self),
         .field("epoch", alias: "executedEpoch", ExecutedEpoch?.self),
       ]),
-      .include(if: "showEffects" || "showObjectChanges", .field("objectChanges", [ObjectChange?]?.self)),
+      .include(if: "showEffects" || "showObjectChanges", .field("objectChanges", [ObjectChange]?.self)),
     ] }
 
+    /// The checkpoint this transaction was finalized in.
     public var checkpoint: Checkpoint? { __data["checkpoint"] }
-    /// UTC timestamp in milliseconds since epoch (1/1/1970)
-    /// representing the time when the checkpoint that contains
-    /// this transaction was created
+    /// Timestamp corresponding to the checkpoint this transaction was finalized in.
     public var timestamp: SuiKit.DateTimeApollo? { __data["timestamp"] }
-    public var balanceChanges: [BalanceChange?]? { __data["balanceChanges"] }
-    public var dependencies: [Dependency?]? { __data["dependencies"] }
+    /// The effect this transaction had on the balances (sum of coin values per coin type) of
+    /// addresses and objects.
+    public var balanceChanges: [BalanceChange]? { __data["balanceChanges"] }
+    /// Transactions whose outputs this transaction depends upon.
+    public var dependencies: [Dependency]? { __data["dependencies"] }
+    /// Whether the transaction executed successfully or not.
     public var status: GraphQLEnum<SuiKit.ExecutionStatusApollo>? { __data["status"] }
+    /// Effects to the gas object.
     public var gasEffects: GasEffects? { __data["gasEffects"] }
+    /// The epoch this transaction was finalized in.
     public var executedEpoch: ExecutedEpoch? { __data["executedEpoch"] }
-    public var objectChanges: [ObjectChange?]? { __data["objectChanges"] }
+    /// The effect this transaction had on objects on-chain.
+    public var objectChanges: [ObjectChange]? { __data["objectChanges"] }
 
     /// Effects.Checkpoint
     ///
@@ -113,7 +171,8 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         .field("sequenceNumber", Int.self),
       ] }
 
-      /// This checkpoint's position in the total order of finalised checkpoints, agreed upon by consensus.
+      /// This checkpoint's position in the total order of finalized checkpoints, agreed upon by
+      /// consensus.
       public var sequenceNumber: Int { __data["sequenceNumber"] }
     }
 
@@ -132,8 +191,11 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         .field("amount", SuiKit.BigIntApollo?.self),
       ] }
 
+      /// The inner type of the coin whose balance has changed (e.g. `0x2::sui::SUI`).
       public var coinType: CoinType? { __data["coinType"] }
+      /// The address or object whose balance has changed.
       public var owner: Owner? { __data["owner"] }
+      /// The signed balance change.
       public var amount: SuiKit.BigIntApollo? { __data["amount"] }
 
       /// Effects.BalanceChange.CoinType
@@ -180,10 +242,10 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
           ] }
 
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
         }
 
         /// Effects.BalanceChange.Owner.AsObject
@@ -196,11 +258,11 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
           ] }
 
           /// The address of the object, named as such to avoid conflict with the address type.
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
         }
       }
     }
@@ -219,7 +281,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       ] }
 
       /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
-      /// This serves as a unique id for the block on chain
+      /// This serves as a unique id for the block on chain.
       public var digest: String { __data["digest"] }
     }
 
@@ -253,7 +315,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("owner", Owner?.self),
           .field("digest", String.self),
           .field("version", Int.self),
-          .field("location", SuiKit.SuiAddressApollo.self),
+          .field("address", SuiKit.SuiAddressApollo.self),
         ] }
 
         /// The Address or Object that owns this Object.  Immutable and Shared Objects do not have
@@ -263,7 +325,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         public var digest: String { __data["digest"] }
         public var version: Int { __data["version"] }
         /// The address of the object, named as such to avoid conflict with the address type.
-        public var location: SuiKit.SuiAddressApollo { __data["location"] }
+        public var address: SuiKit.SuiAddressApollo { __data["address"] }
 
         /// Effects.GasEffects.GasObject.Owner
         ///
@@ -292,10 +354,10 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("location", SuiKit.SuiAddressApollo.self),
+              .field("address", SuiKit.SuiAddressApollo.self),
             ] }
 
-            public var location: SuiKit.SuiAddressApollo { __data["location"] }
+            public var address: SuiKit.SuiAddressApollo { __data["address"] }
           }
 
           /// Effects.GasEffects.GasObject.Owner.AsObject
@@ -308,11 +370,11 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("location", SuiKit.SuiAddressApollo.self),
+              .field("address", SuiKit.SuiAddressApollo.self),
             ] }
 
             /// The address of the object, named as such to avoid conflict with the address type.
-            public var location: SuiKit.SuiAddressApollo { __data["location"] }
+            public var address: SuiKit.SuiAddressApollo { __data["address"] }
           }
         }
       }
@@ -333,9 +395,16 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("computationCost", SuiKit.BigIntApollo?.self),
         ] }
 
+        /// Gas paid for the data stored on-chain by this transaction (in MIST).
         public var storageCost: SuiKit.BigIntApollo? { __data["storageCost"] }
+        /// Part of storage cost that can be reclaimed by cleaning up data created by this transaction
+        /// (when objects are deleted or an object is modified, which is treated as a deletion followed
+        /// by a creation) (in MIST).
         public var storageRebate: SuiKit.BigIntApollo? { __data["storageRebate"] }
+        /// Part of storage cost that is not reclaimed when data created by this transaction is cleaned
+        /// up (in MIST).
         public var nonRefundableStorageFee: SuiKit.BigIntApollo? { __data["nonRefundableStorageFee"] }
+        /// Gas paid for executing this transaction (in MIST).
         public var computationCost: SuiKit.BigIntApollo? { __data["computationCost"] }
       }
     }
@@ -353,7 +422,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         .field("epochId", Int.self),
       ] }
 
-      /// The epoch's id as a sequence number that starts at 0 and it is incremented by one at every epoch change
+      /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change
       public var epochId: Int { __data["epochId"] }
     }
 
@@ -390,9 +459,13 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("outputState", OutputState?.self),
         ] }
 
+        /// Whether the ID was created in this transaction.
         public var idCreated: Bool? { __data["idCreated"] }
+        /// Whether the ID was deleted in this transaction.
         public var idDeleted: Bool? { __data["idDeleted"] }
+        /// The contents of the object immediately before the transaction.
         public var inputState: InputState? { __data["inputState"] }
+        /// The contents of the object immediately after the transaction.
         public var outputState: OutputState? { __data["outputState"] }
 
         /// Effects.ObjectChange.InputState
@@ -407,20 +480,123 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             .field("__typename", String.self),
             .field("version", Int.self),
             .field("digest", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
           ] }
 
           public var version: Int { __data["version"] }
           /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
           public var digest: String { __data["digest"] }
           /// The address of the object, named as such to avoid conflict with the address type.
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
           /// Attempts to convert the object into a MoveObject
-          public var asMoveObject: String? { __data["asMoveObject"] }
+          public var asMoveObject: AsMoveObject? { __data["asMoveObject"] }
           /// The Address or Object that owns this Object.  Immutable and Shared Objects do not have
           /// owners.
-          public var owner: SuiAddressApollo? { __data["owner"] }
+          public var owner: Owner? { __data["owner"] }
         }
+          
+          /// Effects.ObjectChange.OutputState.Owner
+          ///
+          /// Parent Type: `Owner`
+          public struct Owner: SuiKit.SelectionSet {
+            public let __data: DataDict
+            public init(_dataDict: DataDict) { __data = _dataDict }
+
+            public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Owner }
+            public static var __selections: [ApolloAPI.Selection] { [
+              .field("__typename", String.self),
+              .field("asAddress", AsAddress?.self),
+              .field("asObject", AsObject?.self),
+            ] }
+
+            public var asAddress: AsAddress? { __data["asAddress"] }
+            public var asObject: AsObject? { __data["asObject"] }
+
+            /// Effects.ObjectChange.OutputState.Owner.AsAddress
+            ///
+            /// Parent Type: `Address`
+            public struct AsAddress: SuiKit.SelectionSet {
+              public let __data: DataDict
+              public init(_dataDict: DataDict) { __data = _dataDict }
+
+              public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
+              public static var __selections: [ApolloAPI.Selection] { [
+                .field("__typename", String.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
+              ] }
+
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
+            }
+
+            /// Effects.ObjectChange.OutputState.Owner.AsObject
+            ///
+            /// Parent Type: `Object`
+            public struct AsObject: SuiKit.SelectionSet {
+              public let __data: DataDict
+              public init(_dataDict: DataDict) { __data = _dataDict }
+
+              public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
+              public static var __selections: [ApolloAPI.Selection] { [
+                .field("__typename", String.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
+              ] }
+
+              /// The address of the object, named as such to avoid conflict with the address type.
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
+            }
+          }
+          
+          /// Effects.ObjectChange.InputState.AsMoveObject
+          ///
+          /// Parent Type: `MoveObject`
+          public struct AsMoveObject: SuiKit.SelectionSet {
+            public let __data: DataDict
+            public init(_dataDict: DataDict) { __data = _dataDict }
+
+            public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
+            public static var __selections: [ApolloAPI.Selection] { [
+              .field("__typename", String.self),
+              .field("contents", Contents?.self),
+            ] }
+
+            /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
+            /// provides the flat representation of the type signature, and the bcs of the corresponding
+            /// data
+            public var contents: Contents? { __data["contents"] }
+
+            /// Effects.ObjectChange.InputState.AsMoveObject.Contents
+            ///
+            /// Parent Type: `MoveValue`
+            public struct Contents: SuiKit.SelectionSet {
+              public let __data: DataDict
+              public init(_dataDict: DataDict) { __data = _dataDict }
+
+              public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
+              public static var __selections: [ApolloAPI.Selection] { [
+                .field("__typename", String.self),
+                .field("type", Type_SelectionSet.self),
+              ] }
+
+              public var type: Type_SelectionSet { __data["type"] }
+
+              /// Effects.ObjectChange.InputState.AsMoveObject.Contents.Type_SelectionSet
+              ///
+              /// Parent Type: `MoveType`
+              public struct Type_SelectionSet: SuiKit.SelectionSet {
+                public let __data: DataDict
+                public init(_dataDict: DataDict) { __data = _dataDict }
+
+                public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveType }
+                public static var __selections: [ApolloAPI.Selection] { [
+                  .field("__typename", String.self),
+                  .field("repr", String.self),
+                ] }
+
+                /// Flat representation of the type signature, as a displayable string.
+                public var repr: String { __data["repr"] }
+              }
+            }
+          }
 
         /// Effects.ObjectChange.OutputState
         ///
@@ -434,7 +610,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             .field("__typename", String.self),
             .field("version", Int.self),
             .field("digest", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
             .field("owner", Owner?.self),
           ] }
 
@@ -442,12 +618,64 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
           public var digest: String { __data["digest"] }
           /// The address of the object, named as such to avoid conflict with the address type.
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
           /// The Address or Object that owns this Object.  Immutable and Shared Objects do not have
           /// owners.
           public var owner: Owner? { __data["owner"] }
           /// Attempts to convert the object into a MoveObject
-          public var asMoveObject: String? { __data["asMoveObject"] }
+          public var asMoveObject: AsMoveObject? { __data["asMoveObject"] }
+            
+            /// Effects.ObjectChange.InputState.AsMoveObject
+            ///
+            /// Parent Type: `MoveObject`
+            public struct AsMoveObject: SuiKit.SelectionSet {
+              public let __data: DataDict
+              public init(_dataDict: DataDict) { __data = _dataDict }
+
+              public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
+              public static var __selections: [ApolloAPI.Selection] { [
+                .field("__typename", String.self),
+                .field("contents", Contents?.self),
+              ] }
+
+              /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
+              /// provides the flat representation of the type signature, and the bcs of the corresponding
+              /// data
+              public var contents: Contents? { __data["contents"] }
+
+              /// Effects.ObjectChange.InputState.AsMoveObject.Contents
+              ///
+              /// Parent Type: `MoveValue`
+              public struct Contents: SuiKit.SelectionSet {
+                public let __data: DataDict
+                public init(_dataDict: DataDict) { __data = _dataDict }
+
+                public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
+                public static var __selections: [ApolloAPI.Selection] { [
+                  .field("__typename", String.self),
+                  .field("type", Type_SelectionSet.self),
+                ] }
+
+                public var type: Type_SelectionSet { __data["type"] }
+
+                /// Effects.ObjectChange.InputState.AsMoveObject.Contents.Type_SelectionSet
+                ///
+                /// Parent Type: `MoveType`
+                public struct Type_SelectionSet: SuiKit.SelectionSet {
+                  public let __data: DataDict
+                  public init(_dataDict: DataDict) { __data = _dataDict }
+
+                  public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveType }
+                  public static var __selections: [ApolloAPI.Selection] { [
+                    .field("__typename", String.self),
+                    .field("repr", String.self),
+                  ] }
+
+                  /// Flat representation of the type signature, as a displayable string.
+                  public var repr: String { __data["repr"] }
+                }
+              }
+            }
 
           /// Effects.ObjectChange.OutputState.Owner
           ///
@@ -476,10 +704,10 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
               ] }
 
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
             }
 
             /// Effects.ObjectChange.OutputState.Owner.AsObject
@@ -492,11 +720,11 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
               ] }
 
               /// The address of the object, named as such to avoid conflict with the address type.
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
             }
           }
         }
@@ -518,9 +746,13 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("outputState", OutputState?.self),
         ] }
 
+        /// Whether the ID was created in this transaction.
         public var idCreated: Bool? { __data["idCreated"] }
+        /// Whether the ID was deleted in this transaction.
         public var idDeleted: Bool? { __data["idDeleted"] }
+        /// The contents of the object immediately before the transaction.
         public var inputState: InputState? { __data["inputState"] }
+        /// The contents of the object immediately after the transaction.
         public var outputState: OutputState? { __data["outputState"] }
 
         /// Effects.ObjectChange.InputState
@@ -535,7 +767,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             .field("__typename", String.self),
             .field("version", Int.self),
             .field("digest", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
             .field("asMoveObject", AsMoveObject?.self),
             .field("owner", Owner?.self),
           ] }
@@ -544,7 +776,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
           public var digest: String { __data["digest"] }
           /// The address of the object, named as such to avoid conflict with the address type.
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
           /// Attempts to convert the object into a MoveObject
           public var asMoveObject: AsMoveObject? { __data["asMoveObject"] }
           /// The Address or Object that owns this Object.  Immutable and Shared Objects do not have
@@ -564,7 +796,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               .field("contents", Contents?.self),
             ] }
 
-            /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+            /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
             /// provides the flat representation of the type signature, and the bcs of the corresponding
             /// data
             public var contents: Contents? { __data["contents"] }
@@ -630,10 +862,10 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
               ] }
 
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
             }
 
             /// Effects.ObjectChange.InputState.Owner.AsObject
@@ -646,11 +878,11 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
               ] }
 
               /// The address of the object, named as such to avoid conflict with the address type.
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
             }
           }
         }
@@ -667,7 +899,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             .field("__typename", String.self),
             .field("version", Int.self),
             .field("digest", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
             .field("asMoveObject", AsMoveObject?.self),
             .field("owner", Owner?.self),
           ] }
@@ -676,7 +908,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
           public var digest: String { __data["digest"] }
           /// The address of the object, named as such to avoid conflict with the address type.
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
           /// Attempts to convert the object into a MoveObject
           public var asMoveObject: AsMoveObject? { __data["asMoveObject"] }
           /// The Address or Object that owns this Object.  Immutable and Shared Objects do not have
@@ -696,7 +928,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               .field("contents", Contents?.self),
             ] }
 
-            /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+            /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
             /// provides the flat representation of the type signature, and the bcs of the corresponding
             /// data
             public var contents: Contents? { __data["contents"] }
@@ -762,10 +994,10 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
               ] }
 
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
             }
 
             /// Effects.ObjectChange.OutputState.Owner.AsObject
@@ -778,11 +1010,11 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
               ] }
 
               /// The address of the object, named as such to avoid conflict with the address type.
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
             }
           }
         }

@@ -7,7 +7,8 @@ public class QueryEventsQuery: GraphQLQuery {
   public static let operationName: String = "queryEvents"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query queryEvents($filter: EventFilter!, $before: String, $after: String, $first: Int, $last: Int) { eventConnection( filter: $filter first: $first after: $after last: $last before: $before ) { __typename pageInfo { __typename hasNextPage hasPreviousPage endCursor startCursor } nodes { __typename sendingModule { __typename package { __typename asObject { __typename location } } name } senders { __typename location } eventType { __typename repr } json bcs timestamp } } }"#
+      #"query queryEvents($filter: EventFilter!, $before: String, $after: String, $first: Int, $last: Int) { eventConnection( filter: $filter first: $first after: $after last: $last before: $before ) { __typename pageInfo { __typename hasNextPage hasPreviousPage endCursor startCursor } nodes { __typename ...RPC_EVENTS_FIELDS } } }"#,
+      fragments: [RPC_EVENTS_FIELDS.self]
     ))
 
   public var filter: EventFilter
@@ -110,110 +111,40 @@ public class QueryEventsQuery: GraphQLQuery {
         public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Event }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("sendingModule", SendingModule?.self),
-          .field("senders", [Sender]?.self),
-          .field("eventType", EventType?.self),
-          .field("json", String?.self),
-          .field("bcs", SuiKit.Base64Apollo?.self),
-          .field("timestamp", SuiKit.DateTimeApollo?.self),
+          .fragment(RPC_EVENTS_FIELDS.self),
         ] }
 
-        /// The Move module that the event was emitted in.
-        public var sendingModule: SendingModule? { __data["sendingModule"] }
-        public var senders: [Sender]? { __data["senders"] }
-        /// Package, module, and type of the event
-        public var eventType: EventType? { __data["eventType"] }
-        /// JSON string representation of the event
-        public var json: String? { __data["json"] }
-        /// Base64 encoded bcs bytes of the Move event
-        public var bcs: SuiKit.Base64Apollo? { __data["bcs"] }
+        /// The Move module containing some function that when called by
+        /// a programmable transaction block (PTB) emitted this event.
+        /// For example, if a PTB invokes A::m1::foo, which internally
+        /// calls A::m2::emit_event to emit an event,
+        /// the sending module would be A::m1.
+        public var sendingModule: RPC_EVENTS_FIELDS.SendingModule? { __data["sendingModule"] }
+        /// Addresses of the senders of the event
+        public var senders: [RPC_EVENTS_FIELDS.Sender]? { __data["senders"] }
+        public var type: RPC_EVENTS_FIELDS.Type_SelectionSet { __data["type"] }
+        /// Representation of a Move value in JSONApollo, where:
+        ///
+        /// - Addresses, IDs, and UIDs are represented in canonical form, as JSONApollo strings.
+        /// - Bools are represented by JSONApollo boolean literals.
+        /// - u8, u16, and u32 are represented as JSONApollo numbers.
+        /// - u64, u128, and u256 are represented as JSONApollo strings.
+        /// - Vectors are represented by JSONApollo arrays.
+        /// - Structs are represented by JSONApollo objects.
+        /// - Empty optional values are represented by `null`.
+        ///
+        /// This form is offered as a less verbose convenience in cases where the layout of the type is
+        /// known by the client.
+        public var JSONApollo: SuiKit.JSONApollo { __data["JSONApollo"] }
+        public var bcs: SuiKit.Base64Apollo { __data["bcs"] }
         /// UTC timestamp in milliseconds since epoch (1/1/1970)
         public var timestamp: SuiKit.DateTimeApollo? { __data["timestamp"] }
 
-        /// EventConnection.Node.SendingModule
-        ///
-        /// Parent Type: `MoveModule`
-        public struct SendingModule: SuiKit.SelectionSet {
+        public struct Fragments: FragmentContainer {
           public let __data: DataDict
           public init(_dataDict: DataDict) { __data = _dataDict }
 
-          public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveModule }
-          public static var __selections: [ApolloAPI.Selection] { [
-            .field("__typename", String.self),
-            .field("package", Package.self),
-            .field("name", String.self),
-          ] }
-
-          /// The package that this Move module was defined in
-          public var package: Package { __data["package"] }
-          /// The module's (unqualified) name.
-          public var name: String { __data["name"] }
-
-          /// EventConnection.Node.SendingModule.Package
-          ///
-          /// Parent Type: `MovePackage`
-          public struct Package: SuiKit.SelectionSet {
-            public let __data: DataDict
-            public init(_dataDict: DataDict) { __data = _dataDict }
-
-            public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
-            public static var __selections: [ApolloAPI.Selection] { [
-              .field("__typename", String.self),
-              .field("asObject", AsObject.self),
-            ] }
-
-            public var asObject: AsObject { __data["asObject"] }
-
-            /// EventConnection.Node.SendingModule.Package.AsObject
-            ///
-            /// Parent Type: `Object`
-            public struct AsObject: SuiKit.SelectionSet {
-              public let __data: DataDict
-              public init(_dataDict: DataDict) { __data = _dataDict }
-
-              public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
-              public static var __selections: [ApolloAPI.Selection] { [
-                .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
-              ] }
-
-              /// The address of the object, named as such to avoid conflict with the address type.
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
-            }
-          }
-        }
-
-        /// EventConnection.Node.Sender
-        ///
-        /// Parent Type: `Address`
-        public struct Sender: SuiKit.SelectionSet {
-          public let __data: DataDict
-          public init(_dataDict: DataDict) { __data = _dataDict }
-
-          public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
-          public static var __selections: [ApolloAPI.Selection] { [
-            .field("__typename", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
-          ] }
-
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
-        }
-
-        /// EventConnection.Node.EventType
-        ///
-        /// Parent Type: `MoveType`
-        public struct EventType: SuiKit.SelectionSet {
-          public let __data: DataDict
-          public init(_dataDict: DataDict) { __data = _dataDict }
-
-          public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveType }
-          public static var __selections: [ApolloAPI.Selection] { [
-            .field("__typename", String.self),
-            .field("repr", String.self),
-          ] }
-
-          /// Flat representation of the type signature, as a displayable string.
-          public var repr: String { __data["repr"] }
+          public var rPC_EVENTS_FIELDS: RPC_EVENTS_FIELDS { _toFragment() }
         }
       }
     }

@@ -21,6 +21,8 @@ public class GetTotalTransactionBlocksQuery: GraphQLQuery {
       .field("checkpoint", Checkpoint?.self),
     ] }
 
+    /// Fetch checkpoint information by sequence number or digest (defaults to the latest available
+    /// checkpoint).
     public var checkpoint: Checkpoint? { __data["checkpoint"] }
 
     /// Checkpoint
@@ -36,7 +38,7 @@ public class GetTotalTransactionBlocksQuery: GraphQLQuery {
         .field("networkTotalTransactions", Int?.self),
       ] }
 
-      /// Tracks the total number of transaction blocks in the network at the time of the checkpoint.
+      /// The total number of transaction blocks in the network by the end of this checkpoint.
       public var networkTotalTransactions: Int? { __data["networkTotalTransactions"] }
     }
   }

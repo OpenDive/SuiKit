@@ -4,9 +4,8 @@
 import ApolloAPI
 
 public extension Objects {
-  /// Effect on an individual Object (keyed by its ID).
-  static let ObjectChange = ApolloAPI.Object(
-    typename: "ObjectChange",
+  static let MoveFunctionConnection = ApolloAPI.Object(
+    typename: "MoveFunctionConnection",
     implementedInterfaces: []
   )
 }

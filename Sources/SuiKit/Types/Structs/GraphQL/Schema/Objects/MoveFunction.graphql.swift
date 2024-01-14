@@ -4,8 +4,9 @@
 import ApolloAPI
 
 public extension Objects {
-  static let TransactionSignature = ApolloAPI.Object(
-    typename: "TransactionSignature",
+  /// Signature of a function, defined in a Move module.
+  static let MoveFunction = ApolloAPI.Object(
+    typename: "MoveFunction",
     implementedInterfaces: []
   )
 }

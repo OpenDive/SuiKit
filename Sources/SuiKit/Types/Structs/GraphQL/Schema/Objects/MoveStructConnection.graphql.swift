@@ -4,8 +4,8 @@
 import ApolloAPI
 
 public extension Objects {
-  static let CommitteeMember = ApolloAPI.Object(
-    typename: "CommitteeMember",
+  static let MoveStructConnection = ApolloAPI.Object(
+    typename: "MoveStructConnection",
     implementedInterfaces: []
   )
 }

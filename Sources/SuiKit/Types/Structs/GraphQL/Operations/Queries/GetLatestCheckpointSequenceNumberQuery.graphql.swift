@@ -21,6 +21,8 @@ public class GetLatestCheckpointSequenceNumberQuery: GraphQLQuery {
       .field("checkpoint", Checkpoint?.self),
     ] }
 
+    /// Fetch checkpoint information by sequence number or digest (defaults to the latest available
+    /// checkpoint).
     public var checkpoint: Checkpoint? { __data["checkpoint"] }
 
     /// Checkpoint
@@ -36,7 +38,8 @@ public class GetLatestCheckpointSequenceNumberQuery: GraphQLQuery {
         .field("sequenceNumber", Int.self),
       ] }
 
-      /// This checkpoint's position in the total order of finalised checkpoints, agreed upon by consensus.
+      /// This checkpoint's position in the total order of finalized checkpoints, agreed upon by
+      /// consensus.
       public var sequenceNumber: Int { __data["sequenceNumber"] }
     }
   }

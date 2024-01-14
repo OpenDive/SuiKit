@@ -7,7 +7,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
   public static let operationName: String = "getOwnedObjects"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getOwnedObjects($owner: SuiAddress!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false, $filter: ObjectFilter) { address(address: $owner) { __typename objectConnection(first: $limit, after: $cursor, filter: $filter) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } } }"#,
+      #"query getOwnedObjects($owner: SuiAddressApollo!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false, $filter: ObjectFilter) { address(address: $owner) { __typename objectConnection(first: $limit, after: $cursor, filter: $filter) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } } }"#,
       fragments: [RPC_OBJECT_FIELDS.self]
     ))
 
@@ -16,6 +16,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
   public var cursor: GraphQLNullable<String>
   public var showBcs: GraphQLNullable<Bool>
   public var showContent: GraphQLNullable<Bool>
+  public var showDisplay: GraphQLNullable<Bool>
   public var showType: GraphQLNullable<Bool>
   public var showOwner: GraphQLNullable<Bool>
   public var showPreviousTransaction: GraphQLNullable<Bool>
@@ -28,6 +29,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
     cursor: GraphQLNullable<String>,
     showBcs: GraphQLNullable<Bool> = false,
     showContent: GraphQLNullable<Bool> = false,
+    showDisplay: GraphQLNullable<Bool> = false,
     showType: GraphQLNullable<Bool> = false,
     showOwner: GraphQLNullable<Bool> = false,
     showPreviousTransaction: GraphQLNullable<Bool> = false,
@@ -39,6 +41,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
     self.cursor = cursor
     self.showBcs = showBcs
     self.showContent = showContent
+    self.showDisplay = showDisplay
     self.showType = showType
     self.showOwner = showOwner
     self.showPreviousTransaction = showPreviousTransaction
@@ -52,6 +55,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
     "cursor": cursor,
     "showBcs": showBcs,
     "showContent": showContent,
+    "showDisplay": showDisplay,
     "showType": showType,
     "showOwner": showOwner,
     "showPreviousTransaction": showPreviousTransaction,
@@ -143,7 +147,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
 
           /// The address of the object, named as such to avoid conflict with the address type.
           public var objectId: SuiKit.SuiAddressApollo { __data["objectId"] }
-          /// The Base64 encoded bcs serialization of the object's content.
+          /// The Base64Apollo encoded bcs serialization of the object's content.
           public var bcs: SuiKit.Base64Apollo? { __data["bcs"] }
           public var version: Int { __data["version"] }
           /// Attempts to convert the object into a MoveObject
@@ -158,6 +162,10 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
           public var storageRebate: SuiKit.BigIntApollo? { __data["storageRebate"] }
           /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
           public var digest: String { __data["digest"] }
+          /// The set of named templates defined on-chain for the type of this object,
+          /// to be handled off-chain. The server substitutes data from the object
+          /// into these templates to generate a display string per template.
+          public var display: [RPC_OBJECT_FIELDS.Display]? { __data["display"] }
 
           public struct Fragments: FragmentContainer {
             public let __data: DataDict
@@ -192,7 +200,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
                 RPC_OBJECT_FIELDS.AsMoveObject.self
               ] }
 
-              /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+              /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
               /// provides the flat representation of the type signature, and the bcs of the corresponding
               /// data
               public var contents: Contents? { __data["contents"] }
@@ -243,9 +251,11 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
                 RPC_OBJECT_FIELDS.AsMoveObject.self
               ] }
 
-              /// Determines whether a tx can transfer this object
-              public var hasPublicTransfer: Bool? { __data["hasPublicTransfer"] }
-              /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+              /// Determines whether a transaction can transfer this object, using the TransferObjects
+              /// transaction command or `sui::transfer::public_transfer`, both of which require the object to
+              /// have the `key` and `store` abilities.
+              public var hasPublicTransfer: Bool { __data["hasPublicTransfer"] }
+              /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
               /// provides the flat representation of the type signature, and the bcs of the corresponding
               /// data
               public var contents: Contents? { __data["contents"] }
@@ -296,9 +306,11 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
                 RPC_OBJECT_FIELDS.AsMoveObject.self
               ] }
 
-              /// Determines whether a tx can transfer this object
-              public var hasPublicTransfer: Bool? { __data["hasPublicTransfer"] }
-              /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+              /// Determines whether a transaction can transfer this object, using the TransferObjects
+              /// transaction command or `sui::transfer::public_transfer`, both of which require the object to
+              /// have the `key` and `store` abilities.
+              public var hasPublicTransfer: Bool { __data["hasPublicTransfer"] }
+              /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
               /// provides the flat representation of the type signature, and the bcs of the corresponding
               /// data
               public var contents: Contents? { __data["contents"] }

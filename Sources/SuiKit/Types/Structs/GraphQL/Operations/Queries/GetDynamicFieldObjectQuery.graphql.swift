@@ -7,7 +7,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
   public static let operationName: String = "getDynamicFieldObject"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getDynamicFieldObject($parentId: SuiAddress!, $name: DynamicFieldName!) { object(address: $parentId) { __typename dynamicObjectField(name: $name) { __typename name { __typename type { __typename repr } } value { __typename ... on MoveObject { contents { __typename json type { __typename repr } } asObject { __typename location digest version } } } } } }"#
+      #"query getDynamicFieldObject($parentId: SuiAddressApollo!, $name: DynamicFieldNameApollo!) { object(address: $parentId) { __typename dynamicObjectField(name: $name) { __typename name { __typename type { __typename repr } } value { __typename ... on MoveObject { contents { __typename data type { __typename layout repr } } hasPublicTransfer asObject { __typename address digest version display { __typename key value error } } } } } } }"#
     ))
 
   public var parentId: SuiAddressApollo
@@ -52,7 +52,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
 
       /// Access a dynamic object field on an object using its name.
       /// Names are arbitrary Move values whose type have `copy`, `drop`, and `store`, and are specified
-      /// using their type, and their BCS contents, Base64 encoded.
+      /// using their type, and their BCS contents, Base64Apollo encoded.
       /// The value of a dynamic object field can also be accessed off-chain directly via its address (e.g. using `Query.object`).
       /// Dynamic fields on wrapped objects can be accessed by using the same API under the Owner type.
       public var dynamicObjectField: DynamicObjectField? { __data["dynamicObjectField"] }
@@ -138,13 +138,18 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
             public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("contents", Contents?.self),
+              .field("hasPublicTransfer", Bool.self),
               .field("asObject", AsObject.self),
             ] }
 
-            /// Displays the contents of the MoveObject in a JSON string and through graphql types.  Also
+            /// Displays the contents of the MoveObject in a JSONApollo string and through graphql types.  Also
             /// provides the flat representation of the type signature, and the bcs of the corresponding
             /// data
             public var contents: Contents? { __data["contents"] }
+            /// Determines whether a transaction can transfer this object, using the TransferObjects
+            /// transaction command or `sui::transfer::public_transfer`, both of which require the object to
+            /// have the `key` and `store` abilities.
+            public var hasPublicTransfer: Bool { __data["hasPublicTransfer"] }
             /// Attempts to convert the Move object into an Object
             /// This provides additional information such as version and digest on the top-level
             public var asObject: AsObject { __data["asObject"] }
@@ -159,23 +164,12 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("json", SuiKit.JSONApollo.self),
+                .field("data", SuiKit.MoveDataApollo.self),
                 .field("type", Type_SelectionSet.self),
               ] }
 
-              /// Representation of a Move value in JSON, where:
-              ///
-              /// - Addresses and UIDs are represented in canonical form, as JSON strings.
-              /// - Bools are represented by JSON boolean literals.
-              /// - u8, u16, and u32 are represented as JSON numbers.
-              /// - u64, u128, and u256 are represented as JSON strings.
-              /// - Vectors are represented by JSON arrays.
-              /// - Structs are represented by JSON objects.
-              /// - Empty optional values are represented by `null`.
-              ///
-              /// This form is offered as a less verbose convenience in cases where the layout of the type is
-              /// known by the client.
-              public var json: SuiKit.JSONApollo { __data["json"] }
+              /// Structured contents of a Move value.
+              public var data: SuiKit.MoveDataApollo { __data["data"] }
               public var type: Type_SelectionSet { __data["type"] }
 
               /// Object.DynamicObjectField.Value.AsMoveObject.Contents.Type_SelectionSet
@@ -188,9 +182,12 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                 public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveType }
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
+                  .field("layout", SuiKit.MoveTypeLayoutApollo.self),
                   .field("repr", String.self),
                 ] }
 
+                /// Structured representation of the "shape" of values that match this type.
+                public var layout: SuiKit.MoveTypeLayoutApollo { __data["layout"] }
                 /// Flat representation of the type signature, as a displayable string.
                 public var repr: String { __data["repr"] }
               }
@@ -206,16 +203,44 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
               public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("location", SuiKit.SuiAddressApollo.self),
+                .field("address", SuiKit.SuiAddressApollo.self),
                 .field("digest", String.self),
                 .field("version", Int.self),
+                .field("display", [Display]?.self),
               ] }
 
               /// The address of the object, named as such to avoid conflict with the address type.
-              public var location: SuiKit.SuiAddressApollo { __data["location"] }
+              public var address: SuiKit.SuiAddressApollo { __data["address"] }
               /// 32-byte hash that identifies the object's current contents, encoded as a Base58 string.
               public var digest: String { __data["digest"] }
               public var version: Int { __data["version"] }
+              /// The set of named templates defined on-chain for the type of this object,
+              /// to be handled off-chain. The server substitutes data from the object
+              /// into these templates to generate a display string per template.
+              public var display: [Display]? { __data["display"] }
+
+              /// Object.DynamicObjectField.Value.AsMoveObject.AsObject.Display
+              ///
+              /// Parent Type: `DisplayEntry`
+              public struct Display: SuiKit.SelectionSet {
+                public let __data: DataDict
+                public init(_dataDict: DataDict) { __data = _dataDict }
+
+                public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.DisplayEntry }
+                public static var __selections: [ApolloAPI.Selection] { [
+                  .field("__typename", String.self),
+                  .field("key", String.self),
+                  .field("value", String?.self),
+                  .field("error", String?.self),
+                ] }
+
+                /// The identifier for a particular template string of the Display object.
+                public var key: String { __data["key"] }
+                /// The template string for the key with placeholder values substituted.
+                public var value: String? { __data["value"] }
+                /// An error string describing why the template could not be rendered.
+                public var error: String? { __data["error"] }
+              }
             }
           }
         }

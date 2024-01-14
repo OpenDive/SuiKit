@@ -21,6 +21,7 @@ public class GetReferenceGasPriceQuery: GraphQLQuery {
       .field("epoch", Epoch?.self),
     ] }
 
+    /// Fetch epoch information by ID (defaults to the latest epoch).
     public var epoch: Epoch? { __data["epoch"] }
 
     /// Epoch

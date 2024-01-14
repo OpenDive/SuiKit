@@ -7,7 +7,7 @@ public class GetCoinMetadataQuery: GraphQLQuery {
   public static let operationName: String = "getCoinMetadata"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getCoinMetadata($coinType: String!) { coinMetadata(coinType: $coinType) { __typename decimals name symbol description iconUrl asMoveObject { __typename asObject { __typename location } } } }"#
+      #"query getCoinMetadata($coinType: String!) { coinMetadata(coinType: $coinType) { __typename decimals name symbol description iconUrl asMoveObject { __typename asObject { __typename address } } } }"#
     ))
 
   public var coinType: String
@@ -86,11 +86,11 @@ public class GetCoinMetadataQuery: GraphQLQuery {
           public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("location", SuiKit.SuiAddressApollo.self),
+            .field("address", SuiKit.SuiAddressApollo.self),
           ] }
 
           /// The address of the object, named as such to avoid conflict with the address type.
-          public var location: SuiKit.SuiAddressApollo { __data["location"] }
+          public var address: SuiKit.SuiAddressApollo { __data["address"] }
         }
       }
     }

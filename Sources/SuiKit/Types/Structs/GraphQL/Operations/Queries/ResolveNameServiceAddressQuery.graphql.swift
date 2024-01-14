@@ -7,7 +7,7 @@ public class ResolveNameServiceAddressQuery: GraphQLQuery {
   public static let operationName: String = "resolveNameServiceAddress"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query resolveNameServiceAddress($name: String!) { resolveNameServiceAddress(name: $name) { __typename location } }"#
+      #"query resolveNameServiceAddress($name: String!) { resolveNameServiceAddress(name: $name) { __typename address } }"#
     ))
 
   public var name: String
@@ -40,10 +40,10 @@ public class ResolveNameServiceAddressQuery: GraphQLQuery {
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Address }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("location", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self),
       ] }
 
-      public var location: SuiKit.SuiAddressApollo { __data["location"] }
+      public var address: SuiKit.SuiAddressApollo { __data["address"] }
     }
   }
 }

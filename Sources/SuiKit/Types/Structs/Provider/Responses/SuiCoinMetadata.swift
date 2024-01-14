@@ -67,6 +67,6 @@ public struct SuiCoinMetadata {
         self.symbol = graphql.symbol!
         self.description = graphql.description!
         self.iconUrl = graphql.iconUrl
-        self.id = graphql.asMoveObject.asObject.location
+        self.id = graphql.asMoveObject.asObject.address
     }
 }

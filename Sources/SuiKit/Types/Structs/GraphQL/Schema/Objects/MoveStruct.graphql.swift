@@ -4,9 +4,9 @@
 import ApolloAPI
 
 public extension Objects {
-  /// Effect on an individual Object (keyed by its ID).
-  static let ObjectChange = ApolloAPI.Object(
-    typename: "ObjectChange",
+  /// Description of a type, defined in a Move module.
+  static let MoveStruct = ApolloAPI.Object(
+    typename: "MoveStruct",
     implementedInterfaces: []
   )
 }

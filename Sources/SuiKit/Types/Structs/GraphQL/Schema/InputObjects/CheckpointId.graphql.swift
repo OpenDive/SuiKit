@@ -20,6 +20,13 @@ public struct CheckpointId: InputObject {
       "sequenceNumber": sequenceNumber
     ])
   }
+    
+    public init(digest: String? = nil, sequenceNumber: Int? = nil) {
+        __data = InputDict([
+            "digest": digest != nil ? GraphQLNullable.some(digest) : GraphQLNullable.none,
+            "sequenceNumber": sequenceNumber != nil ? GraphQLNullable.some(sequenceNumber) : GraphQLNullable.none
+        ])
+    }
 
   public var digest: GraphQLNullable<String> {
     get { __data["digest"] }

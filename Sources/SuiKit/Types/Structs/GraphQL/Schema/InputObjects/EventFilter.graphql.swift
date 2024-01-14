@@ -23,6 +23,23 @@ public struct EventFilter: InputObject {
       "eventType": eventType
     ])
   }
+    
+    public init(
+        suiEventFilter: SuiEventFilter
+    ) throws {
+        switch suiEventFilter {
+        case .sender(let sender):
+            __data = InputDict(["sender": sender])
+        case .transaction(let transaction):
+            __data = InputDict(["transactionDigest": transaction])
+        case .moveModule(let moveModuleFilter):
+            __data = InputDict(["eventModule": "\(moveModuleFilter.package)::\(moveModuleFilter.module)"])
+        case .moveEventType(let moveEventType):
+            __data = InputDict(["eventType": moveEventType])
+        default:
+            throw SuiError.notImplemented
+        }
+    }
 
   public var sender: GraphQLNullable<SuiAddressApollo> {
     get { __data["sender"] }

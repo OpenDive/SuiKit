@@ -7,7 +7,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
   public static let operationName: String = "getNormalizedMoveModulesByPackage"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getNormalizedMoveModulesByPackage($packageId: SuiAddressApollo!, $limit: Int = 50, $cursor: String) { object(address: $packageId) { __typename asMovePackage { __typename asObject { __typename address } modules(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_MOVE_MODULE_FIELDS } } } } }"#,
+      #"query getNormalizedMoveModulesByPackage($packageId: SuiAddress!, $limit: Int = 50, $cursor: String) { object(address: $packageId) { __typename asMovePackage { __typename asObject { __typename address } modules(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_MOVE_MODULE_FIELDS } } } } }"#,
       fragments: [RPC_MOVE_FUNCTION_FIELDS.self, RPC_MOVE_MODULE_FIELDS.self, RPC_MOVE_STRUCT_FIELDS.self]
     ))
 

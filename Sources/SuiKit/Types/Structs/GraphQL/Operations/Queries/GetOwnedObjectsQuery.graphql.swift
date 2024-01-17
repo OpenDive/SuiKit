@@ -7,7 +7,7 @@ public class GetOwnedObjectsQuery: GraphQLQuery {
   public static let operationName: String = "getOwnedObjects"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getOwnedObjects($owner: SuiAddressApollo!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false, $filter: ObjectFilter) { address(address: $owner) { __typename objectConnection(first: $limit, after: $cursor, filter: $filter) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } } }"#,
+      #"query getOwnedObjects($owner: SuiAddress!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false, $filter: ObjectFilter) { address(address: $owner) { __typename objectConnection(first: $limit, after: $cursor, filter: $filter) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } } }"#,
       fragments: [RPC_OBJECT_FIELDS.self]
     ))
 

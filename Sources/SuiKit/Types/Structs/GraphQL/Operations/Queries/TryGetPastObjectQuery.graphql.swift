@@ -7,7 +7,7 @@ public class TryGetPastObjectQuery: GraphQLQuery {
   public static let operationName: String = "tryGetPastObject"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query tryGetPastObject($id: SuiAddressApollo!, $version: Int, $showBcs: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showStorageRebate: Boolean = false) { object(address: $id, version: $version) { __typename ...RPC_OBJECT_FIELDS } }"#,
+      #"query tryGetPastObject($id: SuiAddress!, $version: Int, $showBcs: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showStorageRebate: Boolean = false) { object(address: $id, version: $version) { __typename ...RPC_OBJECT_FIELDS } }"#,
       fragments: [RPC_OBJECT_FIELDS.self]
     ))
 

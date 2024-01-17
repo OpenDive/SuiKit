@@ -7,7 +7,7 @@ public class GetStakesQuery: GraphQLQuery {
   public static let operationName: String = "getStakes"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getStakes($owner: SuiAddressApollo!, $limit: Int, $cursor: String) { address(address: $owner) { __typename stakedSuiConnection(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_STAKE_FIELDS } } } }"#,
+      #"query getStakes($owner: SuiAddress!, $limit: Int, $cursor: String) { address(address: $owner) { __typename stakedSuiConnection(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_STAKE_FIELDS } } } }"#,
       fragments: [RPC_STAKE_FIELDS.self]
     ))
 

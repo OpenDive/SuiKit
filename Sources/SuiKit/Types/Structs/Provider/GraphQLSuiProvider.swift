@@ -33,7 +33,11 @@ import ApolloAPI
 import BigInt
 
 public struct GraphQLSuiProvider {
-    private var apollo = ApolloClient(url: URL(string: "https://graphql-beta.mainnet.sui.io")!)
+    private var apollo: ApolloClient
+
+    public init(connection: any ConnectionProtocol) {
+        self.apollo = ApolloClient(url: URL(string: connection.graphql!)!)
+    }
 
     // TODO: Implement function when write becomes available
     /// Runs the transaction in dev-inspect mode. Which allows for nearly any transaction (or Move call) with any arguments. Detailed results are provided, including both the transaction effects and any return values.
@@ -257,13 +261,10 @@ public struct GraphQLSuiProvider {
             client: self.apollo,
             query: GetMoveFunctionArgTypesQuery(packageId: package, module: module, function: function)
         )
-        print("DEBUG: ERROR - \(result)")
-//        guard let data = result.data else { throw SuiError.missingGraphQLData }
-//        print("DEBUG: MOVE FUNCTION ARG RESULT - \(data)")
-        return []
-//        return data.object!.asMovePackage!.module!.function!.parameters.map { param in
-//            if param.signature
-//        }
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return data.object!.asMovePackage!.module!.function!.parameters!.map {
+            SuiMoveFunctionArgType(graphql: $0)
+        }
     }
 
     /// Return a structured representation of Move function.

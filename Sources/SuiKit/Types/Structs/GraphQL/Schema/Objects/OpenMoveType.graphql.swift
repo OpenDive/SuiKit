@@ -10,4 +10,14 @@ public extension Objects {
     typename: "OpenMoveType",
     implementedInterfaces: []
   )
+    
+    static let Signature = ApolloAPI.Object(
+        typename: "Signature",
+        implementedInterfaces: []
+    )
+    
+    static let Body = ApolloAPI.Object(
+        typename: "Body",
+        implementedInterfaces: []
+    )
 }

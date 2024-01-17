@@ -7,7 +7,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
   public static let operationName: String = "getDynamicFieldObject"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getDynamicFieldObject($parentId: SuiAddressApollo!, $name: DynamicFieldNameApollo!) { object(address: $parentId) { __typename dynamicObjectField(name: $name) { __typename name { __typename type { __typename repr } } value { __typename ... on MoveObject { contents { __typename data type { __typename layout repr } } hasPublicTransfer asObject { __typename address digest version display { __typename key value error } } } } } } }"#
+      #"query getDynamicFieldObject($parentId: SuiAddress!, $name: DynamicFieldNameApollo!) { object(address: $parentId) { __typename dynamicObjectField(name: $name) { __typename name { __typename type { __typename repr } } value { __typename ... on MoveObject { contents { __typename data type { __typename layout repr } } hasPublicTransfer asObject { __typename address digest version display { __typename key value error } } } } } } }"#
     ))
 
   public var parentId: SuiAddressApollo

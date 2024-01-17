@@ -7,7 +7,7 @@ public class GetCoinsQuery: GraphQLQuery {
   public static let operationName: String = "getCoins"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getCoins($owner: SuiAddressApollo!, $first: Int, $cursor: String, $type: String = "0x2::sui::SUI") { address(address: $owner) { __typename address coinConnection(first: $first, after: $cursor, type: $type) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename balance asMoveObject { __typename contents { __typename type { __typename repr } } asObject { __typename coinObjectId: address version digest previousTransactionBlock { __typename digest } } } } } } }"#
+      #"query getCoins($owner: SuiAddress!, $first: Int, $cursor: String, $type: String = "0x2::sui::SUI") { address(address: $owner) { __typename address coinConnection(first: $first, after: $cursor, type: $type) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename balance asMoveObject { __typename contents { __typename type { __typename repr } } asObject { __typename coinObjectId: address version digest previousTransactionBlock { __typename digest } } } } } } }"#
     ))
 
   public var owner: SuiAddressApollo

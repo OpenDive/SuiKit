@@ -33,6 +33,8 @@ public protocol ConnectionProtocol {
     /// Optional URL for a faucet service to obtain tokens.
     /// Default is nil, meaning no faucet is configured.
     var faucet: String? { get }
+    
+    var graphql: String? { get }
 
     /// Optional URL for a WebSocket connection.
     /// Default is nil, meaning no WebSocket is configured.

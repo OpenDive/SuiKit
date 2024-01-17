@@ -7,7 +7,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
   public static let operationName: String = "getStakesByIds"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getStakesByIds($ids: [SuiAddressApollo!]!, $limit: Int, $cursor: String) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename asMoveObject { __typename asStakedSui { __typename ...RPC_STAKE_FIELDS } } } } }"#,
+      #"query getStakesByIds($ids: [SuiAddress!]!, $limit: Int, $cursor: String) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename asMoveObject { __typename asStakedSui { __typename ...RPC_STAKE_FIELDS } } } } }"#,
       fragments: [RPC_STAKE_FIELDS.self]
     ))
 

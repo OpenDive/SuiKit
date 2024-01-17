@@ -7,7 +7,7 @@ public class ResolveNameServiceNamesQuery: GraphQLQuery {
   public static let operationName: String = "resolveNameServiceNames"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query resolveNameServiceNames($address: SuiAddressApollo!, $limit: Int, $cursor: String) { address(address: $address) { __typename suinsRegistrations(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename domain } } } }"#
+      #"query resolveNameServiceNames($address: SuiAddress!, $limit: Int, $cursor: String) { address(address: $address) { __typename suinsRegistrations(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename domain } } } }"#
     ))
 
   public var address: SuiAddressApollo

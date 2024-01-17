@@ -7,7 +7,7 @@ public class GetNormalizedMoveFunctionQuery: GraphQLQuery {
   public static let operationName: String = "getNormalizedMoveFunction"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getNormalizedMoveFunction($packageId: SuiAddressApollo!, $module: String!, $function: String!) { object(address: $packageId) { __typename address asMovePackage { __typename module(name: $module) { __typename fileFormatVersion function(name: $function) { __typename ...RPC_MOVE_FUNCTION_FIELDS } } } } }"#,
+      #"query getNormalizedMoveFunction($packageId: SuiAddress!, $module: String!, $function: String!) { object(address: $packageId) { __typename address asMovePackage { __typename module(name: $module) { __typename fileFormatVersion function(name: $function) { __typename ...RPC_MOVE_FUNCTION_FIELDS } } } } }"#,
       fragments: [RPC_MOVE_FUNCTION_FIELDS.self]
     ))
 

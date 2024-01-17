@@ -7,7 +7,7 @@ public class GetObjectQuery: GraphQLQuery {
   public static let operationName: String = "getObject"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getObject($id: SuiAddressApollo!, $showBcs: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showStorageRebate: Boolean = false) { object(address: $id) { __typename ...RPC_OBJECT_FIELDS } }"#,
+      #"query getObject($id: SuiAddress!, $showBcs: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showStorageRebate: Boolean = false) { object(address: $id) { __typename ...RPC_OBJECT_FIELDS } }"#,
       fragments: [RPC_OBJECT_FIELDS.self]
     ))
 

@@ -7,7 +7,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
   public static let operationName: String = "multiGetObjects"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query multiGetObjects($ids: [SuiAddressApollo!]!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } }"#,
+      #"query multiGetObjects($ids: [SuiAddress!]!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } }"#,
       fragments: [RPC_OBJECT_FIELDS.self]
     ))
 

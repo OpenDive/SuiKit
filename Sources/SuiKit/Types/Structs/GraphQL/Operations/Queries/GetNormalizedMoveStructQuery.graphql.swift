@@ -7,7 +7,7 @@ public class GetNormalizedMoveStructQuery: GraphQLQuery {
   public static let operationName: String = "getNormalizedMoveStruct"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getNormalizedMoveStruct($packageId: SuiAddressApollo!, $module: String!, $struct: String!) { object(address: $packageId) { __typename asMovePackage { __typename asObject { __typename address } module(name: $module) { __typename fileFormatVersion struct(name: $struct) { __typename ...RPC_MOVE_STRUCT_FIELDS } } } } }"#,
+      #"query getNormalizedMoveStruct($packageId: SuiAddress!, $module: String!, $struct: String!) { object(address: $packageId) { __typename asMovePackage { __typename asObject { __typename address } module(name: $module) { __typename fileFormatVersion struct(name: $struct) { __typename ...RPC_MOVE_STRUCT_FIELDS } } } } }"#,
       fragments: [RPC_MOVE_STRUCT_FIELDS.self]
     ))
 

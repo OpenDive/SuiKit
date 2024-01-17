@@ -7,7 +7,7 @@ public class GetBalanceQuery: GraphQLQuery {
   public static let operationName: String = "getBalance"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getBalance($owner: SuiAddressApollo!, $type: String = "0x2::sui::SUI") { address(address: $owner) { __typename balance(type: $type) { __typename coinType { __typename repr } coinObjectCount totalBalance } } }"#
+      #"query getBalance($owner: SuiAddress!, $type: String = "0x2::sui::SUI") { address(address: $owner) { __typename balance(type: $type) { __typename coinType { __typename repr } coinObjectCount totalBalance } } }"#
     ))
 
   public var owner: SuiAddressApollo

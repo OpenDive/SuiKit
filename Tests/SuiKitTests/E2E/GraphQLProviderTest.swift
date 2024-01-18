@@ -77,4 +77,11 @@ final class GraphQLProviderTest: XCTestCase {
         let graphQLCoins = try await toolBox.graphQLProvider.getCoins(account: try toolBox.account.address())
         XCTAssertEqual(graphQLCoins.data.map { $0.previousTransaction }, rpcCoins.data.map { $0.previousTransaction })
     }
+
+    func testThatGettingAllCoinsWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcCoins = try await toolBox.client.getAllCoins(account: toolBox.account.publicKey)
+        let graphQLCoins = try await toolBox.graphQLProvider.getAllCoins(account: toolBox.account.publicKey)
+        XCTAssertEqual(graphQLCoins.data.map { $0.previousTransaction }, rpcCoins.data.map { $0.previousTransaction })
+    }
 }

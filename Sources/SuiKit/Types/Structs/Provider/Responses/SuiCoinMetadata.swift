@@ -27,7 +27,7 @@ import Foundation
 
 /// Represents metadata associated with a SuiCoin, providing details and information
 /// related to a specific coin in the system.
-public struct SuiCoinMetadata {
+public struct SuiCoinMetadata: Equatable {
     /// An `UInt8` value representing the number of decimals to which the coin can be divided.
     /// This attribute is useful for representing fractional values of the coin.
     let decimals: UInt8

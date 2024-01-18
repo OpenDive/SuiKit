@@ -98,4 +98,11 @@ final class GraphQLProviderTest: XCTestCase {
         let graphQLBalances = try await toolBox.graphQLProvider.getAllBalances(account: toolBox.account)
         XCTAssertEqual(rpcBalances, graphQLBalances)
     }
+
+    func testThatGettingCoinMetadataSWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcMetadata = try await toolBox.client.getCoinMetadata(coinType: "0x2::sui::SUI")
+        let graphQLMetadata = try await toolBox.graphQLProvider.getCoinMetadata(coinType: "0x2::sui::SUI")
+        XCTAssertEqual(rpcMetadata, graphQLMetadata)
+    }
 }

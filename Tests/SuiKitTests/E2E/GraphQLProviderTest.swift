@@ -11,14 +11,70 @@ import SwiftyJSON
 @testable import SuiKit
 
 final class GraphQLProviderTest: XCTestCase {
-    
-    func testThatGettingArgTypesFromMoveFunctionWorksAsIntended() async throws {
-        let provider = GraphQLSuiProvider(connection: LocalnetConnection())
-        let argTypes = try await provider.getMoveFunctionArgTypes(
-            package: "0x0000000000000000000000000000000000000000000000000000000000000002",
-            module: "balance",
-            function: "increase_supply"
+    var toolBox: TestToolbox?
+    var packageId: String?
+    var parentObjectId: String?
+
+    override func setUp() async throws {
+        self.toolBox = try await TestToolbox(true)
+        self.packageId = try await self.fetchToolBox().publishPackage("dynamic-fields").packageId
+
+        let ownedObjects = try await self.fetchToolBox()
+            .client.getOwnedObjects(
+                owner: try self.fetchToolBox().account.publicKey.toSuiAddress(),
+                filter: SuiObjectDataFilter.structType(
+                    "\(try self.fetchPackageId())::dynamic_fields_test::Test"
+                ),
+                options: SuiObjectDataOptions(showType: true)
+            )
+        self.parentObjectId = ownedObjects.data[0].data!.objectId
+
+        let toolBox = try self.fetchToolBox()
+        try await toolBox.setup()
+        var tx = try TransactionBlock()
+        let coin = try tx.splitCoin(
+            coin: tx.gas,
+            amounts: [tx.pure(value: .number(1))]
         )
-        print(argTypes)
+        let _ = try tx.transferObject(objects: [coin], address: toolBox.defaultRecipient)
+        try tx.setSenderIfNotSet(sender: try toolBox.account.publicKey.toSuiAddress())
+
+        let result = try await toolBox.client.signAndExecuteTransactionBlock(
+            transactionBlock: &tx,
+            signer: toolBox.account
+        )
+        let _ = try await self.fetchToolBox().client.waitForTransaction(tx: result.digest)
+        try await Task.sleep(nanoseconds: 10_000_000_000)  // Buffer for waiting on the Sui Indexer to catch up with the RPC Node
+    }
+
+    private func fetchToolBox() throws -> TestToolbox {
+        guard let toolBox = self.toolBox else {
+            XCTFail("Failed to get Toolbox")
+            throw NSError(domain: "Failed to get Toolbox", code: -1)
+        }
+        return toolBox
+    }
+
+    private func fetchPackageId() throws -> String {
+        guard let packageId = self.packageId else {
+            XCTFail("Failed to get Package ID")
+            throw NSError(domain: "Failed to get Package ID", code: -1)
+        }
+        return packageId
+    }
+
+    private func fetchParentObjectId() throws -> String {
+        guard let parentObjectId = self.parentObjectId else {
+            XCTFail("Failed to get Parent Object ID")
+            throw NSError(domain: "Failed to get Parent Object ID", code: -1)
+        }
+        return parentObjectId
+    }
+
+    func testThatGettingCoinsWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcCoins = try await toolBox.client.getCoins(account: try toolBox.account.address())
+        let graphQLCoins = try await toolBox.graphQLProvider.getCoins(account: try toolBox.account.address())
+        XCTAssertEqual(graphQLCoins.data.map { $0.previousTransaction }, rpcCoins.data.map { $0.previousTransaction })
     }
 }

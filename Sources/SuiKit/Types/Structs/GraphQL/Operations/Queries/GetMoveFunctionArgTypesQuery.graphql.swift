@@ -70,7 +70,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
                     .field("__typename", String.self),
                     .field("module", Module?.self, arguments: ["name": .variable("module")]),
                 ] }
-                
+
                 /// A representation of the module called `name` in this package, including the
                 /// structs and functions it defines.
                 public var module: Module? { __data["module"] }

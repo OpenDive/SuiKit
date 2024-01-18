@@ -7,7 +7,7 @@
 
 import Foundation
 
-public struct PageInfo {
+public struct PageInfo: Equatable {
     public var startCursor: String?
     public var endCursor: String?
     public var hasNextPage: Bool

@@ -44,6 +44,6 @@ final class CoinTest: XCTestCase {
             typeArguments: []
         )
         let coins = try await toolbox.getCoins()
-        XCTAssertEqual(try Coin.getCoinStructTag(coinTypeArg: coins.data[0].coinType), suiStructTag)
+        XCTAssertEqual(try Coin.getCoinStructTag(coinTypeArg: coins.data[0].coinType.toString()), suiStructTag)
     }
 }

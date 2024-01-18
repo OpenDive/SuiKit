@@ -27,7 +27,7 @@ import Foundation
 
 /// Represents a paginated set of `CoinStruct`, often used to handle large sets of coins
 /// and retrieve them page by page to minimize load and optimize performance.
-public struct PaginatedCoins {
+public struct PaginatedCoins: Equatable {
     /// An array of `CoinStruct` representing the coin structures contained in the current page.
     public let data: [CoinStruct]
 

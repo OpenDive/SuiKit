@@ -522,14 +522,14 @@ public struct GraphQLSuiProvider {
             client: self.apollo,
             query: GetCoinsQuery(
                 owner: account,
-                first: limit != nil ? .init(integerLiteral: Int(limit!)) : .none,
-                cursor: cursor != nil ? .init(stringLiteral: cursor!) : .none,
-                type: coinType != nil ? .init(stringLiteral: coinType!) : .none
+                first: limit != nil ? .init(integerLiteral: Int(limit!)) : .null,
+                cursor: cursor != nil ? .init(stringLiteral: cursor!) : .null,
+                type: coinType != nil ? .init(stringLiteral: coinType!) : .null
             )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }
         return PaginatedCoins(
-            data: data.address!.coinConnection!.nodes.map { CoinStruct(graphql: $0) },
+            data: try data.address!.coinConnection!.nodes.map { try CoinStruct(graphql: $0) },
             pageInfo: PageInfo(graphql: data.address!.coinConnection!.pageInfo)
         )
     }

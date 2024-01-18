@@ -762,7 +762,7 @@ public struct SuiProvider {
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
             coinPages.append(
-                CoinStruct(
+                try CoinStruct(
                     coinType: value["coinType"].stringValue,
                     coinObjectId: value["coinObjectId"].stringValue,
                     version: value["version"].stringValue,
@@ -871,9 +871,9 @@ public struct SuiProvider {
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         var coinPages: [CoinStruct] = []
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        for (_, value): (String, JSON) in result["data"] {
+        for value in result["data"].arrayValue {
             coinPages.append(
-                CoinStruct(
+                try CoinStruct(
                     coinType: value["coinType"].stringValue,
                     coinObjectId: value["coinObjectId"].stringValue,
                     version: value["version"].stringValue,

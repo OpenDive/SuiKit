@@ -112,4 +112,19 @@ final class GraphQLProviderTest: XCTestCase {
         let graphQLSupply = try await toolBox.graphQLProvider.totalSupply("0x2::sui::SUI")
         XCTAssertEqual(rpcSupply, graphQLSupply)
     }
+
+    func testThatGettingMoveFunctionArgTypesWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcMoveFunction = try await toolBox.client.getMoveFunctionArgTypes(
+            package: "0x2", 
+            module: "coin",
+            function: "balance"
+        )
+        let graphQLMoveFunction = try await toolBox.client.getMoveFunctionArgTypes(
+            package: "0x2",
+            module: "coin",
+            function: "balance"
+        )
+        XCTAssertEqual(rpcMoveFunction, graphQLMoveFunction)
+    }
 }

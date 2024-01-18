@@ -84,4 +84,11 @@ final class GraphQLProviderTest: XCTestCase {
         let graphQLCoins = try await toolBox.graphQLProvider.getAllCoins(account: toolBox.account.publicKey)
         XCTAssertEqual(graphQLCoins.data.map { $0.previousTransaction }, rpcCoins.data.map { $0.previousTransaction })
     }
+
+    func testThatGettingBalanceWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcBalance = try await toolBox.client.getBalance(account: toolBox.account.publicKey)
+        let graphQLBalance = try await toolBox.graphQLProvider.getBalance(account: toolBox.account.publicKey)
+        XCTAssertEqual(rpcBalance, graphQLBalance)
+    }
 }

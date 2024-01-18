@@ -446,7 +446,7 @@ public struct GraphQLSuiProvider {
             )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return data.address!.balanceConnection!.nodes.map { CoinBalance(graphql: $0) }
+        return try data.address!.balanceConnection!.nodes.map { try CoinBalance(graphql: $0) }
     }
 
     /// Return all Coin objects owned by an address.
@@ -486,7 +486,7 @@ public struct GraphQLSuiProvider {
             )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return CoinBalance(graphql: data.address!.balance!)
+        return try CoinBalance(graphql: data.address!.balance!)
     }
 
     /// Return metadata (e.g., symbol, decimals) for a coin.

@@ -722,7 +722,7 @@ public struct SuiProvider {
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"] {
             let lockedBalance = value["lockedBalance"]
             balances.append(
-                CoinBalance(
+                try CoinBalance(
                     coinType: value["coinType"].stringValue,
                     coinObjectCount: value["coinObjectCount"].intValue,
                     totalBalance: value["totalBalance"].stringValue,
@@ -800,7 +800,7 @@ public struct SuiProvider {
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
         let lockedBalance = value["lockedBalance"]
-        return CoinBalance(
+        return try CoinBalance(
             coinType: value["coinType"].stringValue,
             coinObjectCount: value["coinObjectCount"].intValue,
             totalBalance: value["totalBalance"].stringValue,

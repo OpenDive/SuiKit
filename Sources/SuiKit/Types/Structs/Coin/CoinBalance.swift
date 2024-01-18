@@ -26,10 +26,10 @@
 import Foundation
 
 /// Represents the balance details of a specific coin type in a user's account or wallet.
-public struct CoinBalance {
+public struct CoinBalance: Equatable {
     /// A string that represents the type of coin.
     /// This could be the name or the identifier of the coin/cryptocurrency.
-    public let coinType: String
+    public let coinType: StructTag
 
     /// An integer representing the count of coin objects within the specified coin type.
     /// Coin objects are instances or units of the coin type.
@@ -43,22 +43,22 @@ public struct CoinBalance {
     /// Locked balance is the portion of the total balance that is restricted or not readily available for use.
     public let lockedBalance: LockedBalance?
 
-    public init(coinType: String, coinObjectCount: Int, totalBalance: String, lockedBalance: LockedBalance?) {
-        self.coinType = coinType
+    public init(coinType: String, coinObjectCount: Int, totalBalance: String, lockedBalance: LockedBalance?) throws {
+        self.coinType = try StructTag.fromStr(coinType)
         self.coinObjectCount = coinObjectCount
         self.totalBalance = totalBalance
         self.lockedBalance = lockedBalance
     }
 
-    public init(graphql: GetBalanceQuery.Data.Address.Balance) {
-        self.coinType = graphql.coinType!.repr
+    public init(graphql: GetBalanceQuery.Data.Address.Balance) throws {
+        self.coinType = try StructTag.fromStr(graphql.coinType!.repr)
         self.coinObjectCount = graphql.coinObjectCount!
         self.totalBalance = graphql.totalBalance!
         self.lockedBalance = nil
     }
 
-    public init(graphql: GetAllBalancesQuery.Data.Address.BalanceConnection.Node) {
-        self.coinType = graphql.coinType!.repr
+    public init(graphql: GetAllBalancesQuery.Data.Address.BalanceConnection.Node) throws {
+        self.coinType = try StructTag.fromStr(graphql.coinType!.repr)
         self.coinObjectCount = graphql.coinObjectCount!
         self.totalBalance = graphql.totalBalance!
         self.lockedBalance = nil

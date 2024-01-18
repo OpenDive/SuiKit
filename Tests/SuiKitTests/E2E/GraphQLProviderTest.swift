@@ -99,10 +99,17 @@ final class GraphQLProviderTest: XCTestCase {
         XCTAssertEqual(rpcBalances, graphQLBalances)
     }
 
-    func testThatGettingCoinMetadataSWorksAsIntendedFromGraphQL() async throws {
+    func testThatGettingCoinMetadataWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let rpcMetadata = try await toolBox.client.getCoinMetadata(coinType: "0x2::sui::SUI")
         let graphQLMetadata = try await toolBox.graphQLProvider.getCoinMetadata(coinType: "0x2::sui::SUI")
         XCTAssertEqual(rpcMetadata, graphQLMetadata)
+    }
+
+    func testThatGettingTotalSupplyWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcSupply = try await toolBox.client.totalSupply("0x2::sui::SUI")
+        let graphQLSupply = try await toolBox.graphQLProvider.totalSupply("0x2::sui::SUI")
+        XCTAssertEqual(rpcSupply, graphQLSupply)
     }
 }

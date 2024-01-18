@@ -27,6 +27,7 @@ import Foundation
 import SwiftyJSON
 import AnyCodable
 import Blake2
+import BigInt
 import Web3Core
 
 /// The RPC Provider used to interact with the Sui blockchain.
@@ -1217,12 +1218,15 @@ public struct SuiProvider {
     /// - Parameter coinType: The type of the coin whose total supply is to be retrieved.
     /// - Returns: A UInt64 representing the total supply of the coin type.
     /// - Throws: An error if the RPC request fails.
-    public func totalSupply(_ coinType: String) async throws -> UInt64 {
+    public func totalSupply(_ coinType: String) async throws -> BigInt {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getTotalSupply", [AnyCodable(coinType)])
         )
-        return try JSONDecoder().decode(JSON.self, from: data)["result"]["value"].uInt64Value
+        let resultString = try JSONDecoder().decode(JSON.self, from: data)["result"]["value"].stringValue
+        guard let result = BigInt(resultString, radix: 10) else { throw NSError(domain: "Unable to convert to BigInt", code: -1) }
+        // return (BigInt(data.coinMetadata!.supply!, radix: 10)! * 10).power(data.coinMetadata!.decimals!)
+        return result
     }
 
     /// Retrieves the annual percentage yield (APY) of validators.

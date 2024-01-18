@@ -89,8 +89,29 @@ public struct SuiMoveNormalizedStructType: Equatable, KeyProtocol, CustomStringC
         }
     }
 
+    public init?(graphQLInput: JSON) {
+        guard let address = try? AccountAddress.fromHex(
+            graphQLInput["package"].stringValue
+        ) else { return nil }
+
+        self.address = address
+        self.module = graphQLInput["module"].stringValue
+        self.name = graphQLInput["type"].stringValue
+        self.typeArguments = graphQLInput["typeParameters"].arrayValue.compactMap {
+            SuiMoveNormalizedType.parseGraphQLInner(nil, $0)
+        }
+    }
+
     public var description: String {
-        "\(self.address.hex())::\(self.module)::\(self.name)"
+        "\(self.address.hex())::\(self.module)::\(self.name)" + (self.typeArguments.isEmpty ? "" : "<\(self.typeArguments.map { "\($0), " })>")
+    }
+
+    public static func ==(lhs: SuiMoveNormalizedStructType, rhs: SuiMoveNormalizedStructType) -> Bool {
+        return
+            lhs.address == rhs.address &&
+            lhs.module == rhs.module &&
+            lhs.name == rhs.name &&
+            lhs.typeArguments == rhs.typeArguments
     }
 
     /// Compares the current struct with another to determine if they are of the same struct.

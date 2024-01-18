@@ -2,6 +2,7 @@
 // This file was automatically generated and should not be edited.
 
 @_exported import ApolloAPI
+import SwiftyJSON
 
 public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
   public static var fragmentDefinition: StaticString {
@@ -50,11 +51,11 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("signature", SuiKit.OpenMoveTypeSignatureApollo.self),
+      .field("signature", AnyHashable.self),
     ] }
 
     /// Structured representation of the type signature.
-    public var signature: SuiKit.OpenMoveTypeSignatureApollo { __data["signature"] }
+    public var signature: AnyHashable { __data["signature"] }
   }
 
   /// TypeParameter
@@ -84,12 +85,12 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("repr", String.self),
-      .field("signature", SuiKit.OpenMoveTypeSignatureApollo.self),
+      .field("signature", AnyHashable.self),
     ] }
 
     /// Flat representation of the type signature, as a displayable string.
     public var repr: String { __data["repr"] }
     /// Structured representation of the type signature.
-    public var signature: SuiKit.OpenMoveTypeSignatureApollo { __data["signature"] }
+    public var signature: AnyHashable { __data["signature"] }
   }
 }

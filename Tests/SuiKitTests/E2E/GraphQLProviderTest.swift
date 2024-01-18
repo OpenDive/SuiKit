@@ -17,8 +17,11 @@ final class GraphQLProviderTest: XCTestCase {
 
     override func setUp() async throws {
         self.toolBox = try await TestToolbox(true)
+    }
+    
+    private func setUpWithPackage() async throws {
         self.packageId = try await self.fetchToolBox().publishPackage("dynamic-fields").packageId
-
+        
         let ownedObjects = try await self.fetchToolBox()
             .client.getOwnedObjects(
                 owner: try self.fetchToolBox().account.publicKey.toSuiAddress(),
@@ -28,7 +31,9 @@ final class GraphQLProviderTest: XCTestCase {
                 options: SuiObjectDataOptions(showType: true)
             )
         self.parentObjectId = ownedObjects.data[0].data!.objectId
+    }
 
+    private func setUpWithTransaction() async throws {
         let toolBox = try self.fetchToolBox()
         try await toolBox.setup()
         var tx = try TransactionBlock()
@@ -38,7 +43,7 @@ final class GraphQLProviderTest: XCTestCase {
         )
         let _ = try tx.transferObject(objects: [coin], address: toolBox.defaultRecipient)
         try tx.setSenderIfNotSet(sender: try toolBox.account.publicKey.toSuiAddress())
-
+        
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
             transactionBlock: &tx,
             signer: toolBox.account
@@ -72,6 +77,7 @@ final class GraphQLProviderTest: XCTestCase {
     }
 
     func testThatGettingCoinsWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
         let toolBox = try self.fetchToolBox()
         let rpcCoins = try await toolBox.client.getCoins(account: try toolBox.account.address())
         let graphQLCoins = try await toolBox.graphQLProvider.getCoins(account: try toolBox.account.address())
@@ -79,6 +85,7 @@ final class GraphQLProviderTest: XCTestCase {
     }
 
     func testThatGettingAllCoinsWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
         let toolBox = try self.fetchToolBox()
         let rpcCoins = try await toolBox.client.getAllCoins(account: toolBox.account.publicKey)
         let graphQLCoins = try await toolBox.graphQLProvider.getAllCoins(account: toolBox.account.publicKey)
@@ -86,6 +93,7 @@ final class GraphQLProviderTest: XCTestCase {
     }
 
     func testThatGettingBalanceWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
         let toolBox = try self.fetchToolBox()
         let rpcBalance = try await toolBox.client.getBalance(account: toolBox.account.publicKey)
         let graphQLBalance = try await toolBox.graphQLProvider.getBalance(account: toolBox.account.publicKey)
@@ -93,6 +101,7 @@ final class GraphQLProviderTest: XCTestCase {
     }
 
     func testThatGettingAllBalancesWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
         let toolBox = try self.fetchToolBox()
         let rpcBalances = try await toolBox.client.getAllBalances(account: toolBox.account)
         let graphQLBalances = try await toolBox.graphQLProvider.getAllBalances(account: toolBox.account)
@@ -124,6 +133,21 @@ final class GraphQLProviderTest: XCTestCase {
             package: "0x2",
             module: "coin",
             function: "balance"
+        )
+        XCTAssertEqual(rpcMoveFunction, graphQLMoveFunction)
+    }
+
+    func testThatGettingMoveFunctionWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcMoveFunction = try await toolBox.client.getNormalizedMoveFunction(
+            package: "0x2",
+            moduleName: "coin",
+            functionName: "balance"
+        )
+        let graphQLMoveFunction = try await toolBox.graphQLProvider.getNormalizedMoveFunction(
+            package: "0x2",
+            moduleName: "coin",
+            functionName: "balance"
         )
         XCTAssertEqual(rpcMoveFunction, graphQLMoveFunction)
     }

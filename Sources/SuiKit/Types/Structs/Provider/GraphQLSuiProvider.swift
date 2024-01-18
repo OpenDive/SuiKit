@@ -279,7 +279,16 @@ public struct GraphQLSuiProvider {
         moduleName: String,
         functionName: String
     ) async throws -> SuiMoveNormalizedFunction? {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetNormalizedMoveFunctionQuery(
+                packageId: package,
+                module: moduleName,
+                function: functionName
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return SuiMoveNormalizedFunction(graphql: data)
     }
 
     /// Return a structured representation of Move module.

@@ -40,7 +40,7 @@ public enum SuiMoveFunctionArgType: Equatable {
     public init(graphql: GetMoveFunctionArgTypesQuery.Data.Object.AsMovePackage.Module.Function.Parameter) {
         let jsonGraphQL = JSON(graphql.signature)
 
-        if jsonGraphQL["body"]["datatype"].exists() {
+        if !(jsonGraphQL["body"]["datatype"].exists()) {
             self = .pure
             return
         }

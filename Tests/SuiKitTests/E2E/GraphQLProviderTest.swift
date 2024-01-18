@@ -120,7 +120,7 @@ final class GraphQLProviderTest: XCTestCase {
             module: "coin",
             function: "balance"
         )
-        let graphQLMoveFunction = try await toolBox.client.getMoveFunctionArgTypes(
+        let graphQLMoveFunction = try await toolBox.graphQLProvider.getMoveFunctionArgTypes(
             package: "0x2",
             module: "coin",
             function: "balance"

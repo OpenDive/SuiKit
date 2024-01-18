@@ -91,4 +91,11 @@ final class GraphQLProviderTest: XCTestCase {
         let graphQLBalance = try await toolBox.graphQLProvider.getBalance(account: toolBox.account.publicKey)
         XCTAssertEqual(rpcBalance, graphQLBalance)
     }
+
+    func testThatGettingAllBalancesWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcBalances = try await toolBox.client.getAllBalances(account: toolBox.account)
+        let graphQLBalances = try await toolBox.graphQLProvider.getAllBalances(account: toolBox.account)
+        XCTAssertEqual(rpcBalances, graphQLBalances)
+    }
 }

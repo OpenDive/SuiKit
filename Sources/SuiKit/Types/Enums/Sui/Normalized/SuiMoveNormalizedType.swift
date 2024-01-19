@@ -197,21 +197,21 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
         var body = json["body"]
         if override != nil { body = override! }
         switch body.stringValue {
-        case "Bool":
+        case "bool":
             return .bool
-        case "U8":
+        case "u8":
             return .u8
-        case "U16":
+        case "u16":
             return .u16
-        case "U32":
+        case "u32":
             return .u32
-        case "U64":
+        case "u64":
             return .u64
-        case "U128":
+        case "u128":
             return .u128
-        case "U256":
+        case "u256":
             return .u256
-        case "Address":
+        case "address":
             return .address
         default:
             break
@@ -223,7 +223,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             )
         }
         if body["vector"].exists() {
-            guard let vector = Self.parseJSON(body["vector"]) else { return nil }
+            guard let vector = Self.parseGraphQLInner(nil, body["vector"]) else { return nil }
             return .vector(vector)
         }
         if body["typeParameter"].exists() {

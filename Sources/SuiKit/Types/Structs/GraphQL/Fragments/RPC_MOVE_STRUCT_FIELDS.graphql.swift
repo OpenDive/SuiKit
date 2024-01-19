@@ -59,11 +59,11 @@ public struct RPC_MOVE_STRUCT_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("signature", SuiKit.OpenMoveTypeSignatureApollo.self),
+        .field("signature", AnyHashable.self),
       ] }
 
       /// Structured representation of the type signature.
-      public var signature: SuiKit.OpenMoveTypeSignatureApollo { __data["signature"] }
+      public var signature: AnyHashable { __data["signature"] }
     }
   }
 

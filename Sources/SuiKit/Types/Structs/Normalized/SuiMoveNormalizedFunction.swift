@@ -75,6 +75,15 @@ public struct SuiMoveNormalizedFunction: Equatable {
         self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
     }
 
+    public init?(function: RPC_MOVE_MODULE_FIELDS.Functions.Node) {
+        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
+        self.visibility = visibility
+        self.isEntry = function.isEntry ?? false
+        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
+        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+    }
+
     /// Initializes a new instance of `SuiMoveNormalizedFunction` from a JSON representation.
     /// Returns `nil` if there is an issue with the JSON input.
     ///

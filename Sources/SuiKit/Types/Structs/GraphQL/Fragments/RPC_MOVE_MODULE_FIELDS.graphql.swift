@@ -5,7 +5,7 @@
 
 public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
   public static var fragmentDefinition: StaticString {
-    #"fragment RPC_MOVE_MODULE_FIELDS on MoveModule { __typename name friends(first: 50) { __typename nodes { __typename name package { __typename asObject { __typename address } } } } structs(first: 50) { __typename nodes { __typename ...RPC_MOVE_STRUCT_FIELDS } } fileFormatVersion functions(first: 50) { __typename nodes { __typename ...RPC_MOVE_FUNCTION_FIELDS } } }"#
+    #"fragment RPC_MOVE_MODULE_FIELDS on MoveModule { name friends(first: 50) { nodes { name package { asObject { address } } } } structs(first: 50) { nodes { ...RPC_MOVE_STRUCT_FIELDS } } fileFormatVersion functions(first: 50) { nodes { ...RPC_MOVE_FUNCTION_FIELDS } } }"#
   }
 
   public let __data: DataDict
@@ -13,12 +13,11 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
   public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveModule }
   public static var __selections: [ApolloAPI.Selection] { [
-    .field("__typename", String.self),
     .field("name", String.self),
-    .field("friends", Friends.self, arguments: ["first": 50]),
-    .field("structs", Structs?.self, arguments: ["first": 50]),
+    .field("friends", Friends.self, arguments: ["first": .scalar(50)]),
+    .field("structs", Structs?.self, arguments: ["first": .scalar(50)]),
     .field("fileFormatVersion", Int.self),
-    .field("functions", Functions?.self, arguments: ["first": 50]),
+    .field("functions", Functions?.self, arguments: ["first": .scalar(50)]),
   ] }
 
   /// The module's (unqualified) name.
@@ -42,7 +41,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveModuleConnection }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("__typename", String.self),
       .field("nodes", [Node].self),
     ] }
 
@@ -58,7 +56,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveModule }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("__typename", String.self),
         .field("name", String.self),
         .field("package", Package.self),
       ] }
@@ -77,7 +74,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
         public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
         public static var __selections: [ApolloAPI.Selection] { [
-          .field("__typename", String.self),
           .field("asObject", AsObject.self),
         ] }
 
@@ -92,7 +88,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
           public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
           public static var __selections: [ApolloAPI.Selection] { [
-            .field("__typename", String.self),
             .field("address", SuiKit.SuiAddressApollo.self),
           ] }
 
@@ -112,7 +107,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveStructConnection }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("__typename", String.self),
       .field("nodes", [Node].self),
     ] }
 
@@ -128,7 +122,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveStruct }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("__typename", String.self),
         .fragment(RPC_MOVE_STRUCT_FIELDS.self),
       ] }
 
@@ -162,12 +155,18 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveFunctionConnection }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("__typename", String.self),
       .field("nodes", [Node].self),
     ] }
 
     /// A list of nodes.
     public var nodes: [Node] { __data["nodes"] }
+      
+      public func filterUsable() -> [Node] {
+          return self.nodes.filter {
+              ($0.visibility != nil && ($0.visibility! == .public || $0.visibility! == .friend)) ||
+              ($0.isEntry != nil && $0.isEntry!)
+          }
+      }
 
     /// Functions.Node
     ///
@@ -178,7 +177,6 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
 
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveFunction }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("__typename", String.self),
         .fragment(RPC_MOVE_FUNCTION_FIELDS.self),
       ] }
 

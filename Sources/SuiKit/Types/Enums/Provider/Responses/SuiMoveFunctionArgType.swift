@@ -33,29 +33,34 @@ import SwiftyJSON
 public enum SuiMoveFunctionArgType: Equatable {
     /// The argument is a pure value and doesn't involve any object references.
     case pure
-    
+
     /// The argument is an object. The kind of the object (immutable/mutable reference or by value) is specified.
     case object(ObjectValueKind)
 
     public init(graphql: GetMoveFunctionArgTypesQuery.Data.Object.AsMovePackage.Module.Function.Parameter) {
-        let jsonGraphQL = JSON(graphql.signature)
+        self = Self.fromHashable(hash: graphql.signature)
+    }
+
+    public init(graphql: RPC_MOVE_STRUCT_FIELDS.Field.Type_SelectionSet) {
+        self = Self.fromHashable(hash: graphql.signature)
+    }
+
+    private static func fromHashable(hash: AnyHashable) -> SuiMoveFunctionArgType {
+        let jsonGraphQL = JSON(hash)
 
         if !(jsonGraphQL["body"]["datatype"].exists()) {
-            self = .pure
-            return
+            return .pure
         }
 
         if jsonGraphQL["ref"].stringValue == "&" {
-            self = .object(.byImmutableReference)
-            return
+            return .object(.byImmutableReference)
         }
 
         if jsonGraphQL["ref"].stringValue == "&mut" {
-            self = .object(.byMutableReference)
-            return
+            return .object(.byMutableReference)
         }
 
-        self = .object(.byValue)
+        return .object(.byValue)
     }
 }
 

@@ -7,28 +7,24 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
   public static let operationName: String = "getNormalizedMoveModulesByPackage"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query getNormalizedMoveModulesByPackage($packageId: SuiAddress!, $limit: Int = 50, $cursor: String) { object(address: $packageId) { __typename asMovePackage { __typename asObject { __typename address } modules(first: $limit, after: $cursor) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_MOVE_MODULE_FIELDS } } } } }"#,
+      #"query getNormalizedMoveModulesByPackage($packageId: SuiAddress!, $limit: Int = 50) { object(address: $packageId) { asMovePackage { asObject { address } modules(first: $limit) { pageInfo { hasNextPage endCursor } nodes { ...RPC_MOVE_MODULE_FIELDS } } } } }"#,
       fragments: [RPC_MOVE_FUNCTION_FIELDS.self, RPC_MOVE_MODULE_FIELDS.self, RPC_MOVE_STRUCT_FIELDS.self]
     ))
 
   public var packageId: SuiAddressApollo
   public var limit: GraphQLNullable<Int>
-  public var cursor: GraphQLNullable<String>
 
   public init(
     packageId: SuiAddressApollo,
-    limit: GraphQLNullable<Int> = 50,
-    cursor: GraphQLNullable<String>
+    limit: GraphQLNullable<Int> = 50
   ) {
     self.packageId = packageId
     self.limit = limit
-    self.cursor = cursor
   }
 
   public var __variables: Variables? { [
     "packageId": packageId,
-    "limit": limit,
-    "cursor": cursor
+    "limit": limit
   ] }
 
   public struct Data: SuiKit.SelectionSet {
@@ -37,7 +33,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("packageId")]),
+        .field("object", Object?.self, arguments: ["address": .variable("packageId"), "first": .variable("limit")]),
     ] }
 
     public var object: Object? { __data["object"] }
@@ -51,7 +47,6 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
       public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("__typename", String.self),
         .field("asMovePackage", AsMovePackage?.self),
       ] }
 
@@ -67,12 +62,8 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
         public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
         public static var __selections: [ApolloAPI.Selection] { [
-          .field("__typename", String.self),
           .field("asObject", AsObject.self),
-          .field("modules", Modules?.self, arguments: [
-            "first": .variable("limit"),
-            "after": .variable("cursor")
-          ]),
+          .field("modules", Modules?.self),
         ] }
 
         public var asObject: AsObject { __data["asObject"] }
@@ -88,7 +79,6 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
           public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Object }
           public static var __selections: [ApolloAPI.Selection] { [
-            .field("__typename", String.self),
             .field("address", SuiKit.SuiAddressApollo.self),
           ] }
 
@@ -105,7 +95,6 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
           public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveModuleConnection }
           public static var __selections: [ApolloAPI.Selection] { [
-            .field("__typename", String.self),
             .field("pageInfo", PageInfo.self),
             .field("nodes", [Node].self),
           ] }
@@ -124,7 +113,6 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
             public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.PageInfo }
             public static var __selections: [ApolloAPI.Selection] { [
-              .field("__typename", String.self),
               .field("hasNextPage", Bool.self),
               .field("endCursor", String?.self),
             ] }
@@ -144,7 +132,6 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
             public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveModule }
             public static var __selections: [ApolloAPI.Selection] { [
-              .field("__typename", String.self),
               .fragment(RPC_MOVE_MODULE_FIELDS.self),
             ] }
 

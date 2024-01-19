@@ -309,7 +309,6 @@ public struct GraphQLSuiProvider {
             )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }
-        print("DEBUG: DATA GET NORMALIZED MODULE - \(data.object!.asMovePackage!.module!.__data._data)")
         return nil
     }
 
@@ -320,7 +319,16 @@ public struct GraphQLSuiProvider {
     public func getNormalizedMoveModulesByPackage(
         package: String
     ) async throws -> SuiMoveNormalizedModules {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetNormalizedMoveModulesByPackageQuery(
+                packageId: package
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return data.object!.asMovePackage!.modules?.nodes.reduce(into: [String: SuiMoveNormalizedModule]()) {
+            $0[$1.name] = SuiMoveNormalizedModule(graphql: $1, package: package)
+        } ?? [:]
     }
 
     /// Return a structured representation of Move struct.

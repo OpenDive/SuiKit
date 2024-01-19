@@ -6,7 +6,7 @@ import SwiftyJSON
 
 public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
   public static var fragmentDefinition: StaticString {
-    #"fragment RPC_MOVE_FUNCTION_FIELDS on MoveFunction { __typename name visibility isEntry parameters { __typename signature } typeParameters { __typename constraints } return { __typename repr signature } }"#
+    #"fragment RPC_MOVE_FUNCTION_FIELDS on MoveFunction { name visibility isEntry parameters { signature } typeParameters { constraints } return { repr signature } }"#
   }
 
   public let __data: DataDict
@@ -14,7 +14,6 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
 
   public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveFunction }
   public static var __selections: [ApolloAPI.Selection] { [
-    .field("__typename", String.self),
     .field("name", String.self),
     .field("visibility", GraphQLEnum<SuiKit.MoveVisibility>?.self),
     .field("isEntry", Bool?.self),
@@ -50,7 +49,6 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("__typename", String.self),
       .field("signature", AnyHashable.self),
     ] }
 
@@ -67,7 +65,6 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.MoveFunctionTypeParameter }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("__typename", String.self),
       .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self),
     ] }
 
@@ -83,7 +80,6 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("__typename", String.self),
       .field("repr", String.self),
       .field("signature", AnyHashable.self),
     ] }

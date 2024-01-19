@@ -403,7 +403,7 @@ public struct SuiProvider {
     ///   - module: The string identifier of the module to be normalized.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `SuiMoveNormalizedModule` object representing the normalized representation of the specified Move module, or `nil` if not found.
-    public func getNormalizedModuleModule(
+    public func getNormalizedMoveModule(
         package: String,
         module: String
     ) async throws -> SuiMoveNormalizedModule? {

@@ -309,7 +309,7 @@ public struct GraphQLSuiProvider {
             )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }
-        return nil
+        return SuiMoveNormalizedModule(graphql: data.object!.asMovePackage!.module!, package: package)
     }
 
     /// Return structured representations of all modules in the given package.

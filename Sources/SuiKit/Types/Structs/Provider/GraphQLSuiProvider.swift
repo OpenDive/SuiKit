@@ -343,7 +343,16 @@ public struct GraphQLSuiProvider {
         module: String,
         structure: String
     ) async throws -> SuiMoveNormalizedStruct? {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetNormalizedMoveStructQuery(
+                packageId: package,
+                module: module,
+                struct: structure
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return SuiMoveNormalizedStruct(structure: data.object!.asMovePackage!.module!.struct!)
     }
 
     /// Return the object information for a specified object.

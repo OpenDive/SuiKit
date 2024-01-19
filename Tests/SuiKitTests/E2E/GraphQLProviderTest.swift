@@ -161,8 +161,23 @@ final class GraphQLProviderTest: XCTestCase {
     
     func testThatGettingNormalizedMoveModuleWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
-        let rpcMovePackage = try await toolBox.client.getNormalizedMoveModule(package: "0x2", module: "coin")
-        let graphqlMovePackage = try await toolBox.graphQLProvider.getNormalizedMoveModule(package: "0x2", module: "coin")
-        XCTAssertEqual(graphqlMovePackage, rpcMovePackage)
+        let rpcMoveModule = try await toolBox.client.getNormalizedMoveModule(package: "0x2", module: "coin")
+        let graphqlMoveModule  = try await toolBox.graphQLProvider.getNormalizedMoveModule(package: "0x2", module: "coin")
+        XCTAssertEqual(graphqlMoveModule, rpcMoveModule)
+    }
+
+    func testThatGettingNormalizedMoveStructWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let rpcMoveStruct = try await toolBox.client.getNormalizedMoveStruct(
+            package: "0x2",
+            module: "coin",
+            structure: "Coin"
+        )
+        let graphqlMoveStruct = try await toolBox.graphQLProvider.getNormalizedMoveStruct(
+            package: "0x2",
+            module: "coin",
+            structure: "Coin"
+        )
+        XCTAssertEqual(graphqlMoveStruct, rpcMoveStruct)
     }
 }

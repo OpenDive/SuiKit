@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Represents information related to an upgrade.
-public struct UpgradeInfo {
+public struct UpgradeInfo: Equatable  {
     /// A `String` representing the ID of the upgraded element.
     public var upgradedId: String
 

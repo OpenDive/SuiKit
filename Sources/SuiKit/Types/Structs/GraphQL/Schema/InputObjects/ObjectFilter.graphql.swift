@@ -23,6 +23,28 @@ public struct ObjectFilter: InputObject {
       "objectKeys": objectKeys
     ])
   }
+    
+    public init(filter: SuiObjectDataFilter) throws {
+        __data = InputDict([:])
+        switch filter {
+        case .structType(let structType):
+            __data["type"] = structType
+        case .addressOwner(let addressOwner):
+            __data["owner"] = addressOwner
+        case .objectOwner(let objectOwner):
+            __data["owner"] = objectOwner
+        case .objectId(let objectId):
+            __data["objectIds"] = [objectId]
+        case .objectIds(let objectIds):
+            __data["objectIds"] = objectIds
+        default:
+            throw SuiError.notImplemented
+        }
+    }
+
+    public init() {
+        __data = InputDict([:])
+    }
 
   /// This field is used to specify the type of objects that should be included in the query
   /// results.

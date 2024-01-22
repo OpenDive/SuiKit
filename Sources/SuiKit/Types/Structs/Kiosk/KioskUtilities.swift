@@ -248,7 +248,7 @@ public struct KioskUtilities {
                 limit: limit
             )
             data.append(contentsOf: result.data)
-            hasNextPage = result.hasNextPage
+            hasNextPage = result.hasNextPage!
             cursor = result.nextCursor
         }
 

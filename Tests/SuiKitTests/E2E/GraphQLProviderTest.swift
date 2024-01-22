@@ -180,4 +180,24 @@ final class GraphQLProviderTest: XCTestCase {
         )
         XCTAssertEqual(graphqlMoveStruct, rpcMoveStruct)
     }
+
+    func testThatGettingOwnedObjectsWorksAsIntendedFromGraphql() async throws {
+        try await self.setUpWithTransaction()
+        let toolBox = try self.fetchToolBox()
+        let objectOptions = SuiObjectDataOptions(
+            showBcs: true,
+            showContent: true,
+            showDisplay: true,
+            showOwner: true,
+            showPreviousTransaction: true,
+            showStorageRebate: true,
+            showType: true
+        )
+        let rpcObjects = try await toolBox.client.getOwnedObjects(owner: try toolBox.address(), options: objectOptions)
+        let graphQLObjects = try await toolBox.graphQLProvider.getOwnedObjects(owner: try toolBox.address(), options: objectOptions)
+
+        XCTAssertEqual(rpcObjects.data.map { $0.data?.owner }, graphQLObjects.data.map { $0.data?.owner })
+        XCTAssertEqual(rpcObjects.data.map { $0.data?.digest }, graphQLObjects.data.map { $0.data?.digest })
+        XCTAssertEqual(rpcObjects.data.map { $0.data?.previousTransaction }, graphQLObjects.data.map { $0.data?.previousTransaction })
+    }
 }

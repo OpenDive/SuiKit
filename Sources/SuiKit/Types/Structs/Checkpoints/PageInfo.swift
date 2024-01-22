@@ -33,4 +33,11 @@ public struct PageInfo: Equatable {
         self.hasNextPage = graphql.hasNextPage
         self.hasPreviousPage = false
     }
+
+    public init(graphql: GetOwnedObjectsQuery.Data.Address.ObjectConnection.PageInfo) {
+        self.startCursor = nil
+        self.endCursor = graphql.endCursor
+        self.hasNextPage = graphql.hasNextPage
+        self.hasPreviousPage = false
+    }
 }

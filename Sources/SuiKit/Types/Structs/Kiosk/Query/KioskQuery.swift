@@ -167,7 +167,7 @@ public struct KioskQuery {
             kioskOwnerCaps: ownerCaps,
             kioskIds: kioskIdList,
             nextCursor: fetchedOwnedKioskCaps.nextCursor,
-            hasNextPage: fetchedOwnedKioskCaps.hasNextPage
+            hasNextPage: fetchedOwnedKioskCaps.hasNextPage!
         )
     }
 

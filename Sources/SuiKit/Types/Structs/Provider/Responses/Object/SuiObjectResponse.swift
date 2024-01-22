@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// A structure representing the response from a request for a SuiObject, containing either the object data or an error.
-public struct SuiObjectResponse {
+public struct SuiObjectResponse: Equatable {
     /// An optional `ObjectResponseError` representing any error that occurred during the request for the SuiObject.
     public var error: ObjectResponseError?
 

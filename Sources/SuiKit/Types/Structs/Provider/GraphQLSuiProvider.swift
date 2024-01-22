@@ -643,7 +643,34 @@ public struct GraphQLSuiProvider {
         cursor: String? = nil,
         limit: Int? = nil
     ) async throws -> PaginatedObjectsResponse {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetOwnedObjectsQuery(
+                owner: owner,
+                limit: limit != nil ? .init(integerLiteral: limit!) : .none,
+                cursor: cursor != nil ? .init(stringLiteral: cursor!) : .none,
+                showBcs: options?.showBcs ?? false,
+                showContent: options?.showContent ?? false,
+                showType: options?.showType ?? false,
+                showOwner: options?.showOwner ?? false,
+                showPreviousTransaction: options?.showPreviousTransaction ?? false,
+                showStorageRebate: options?.showStorageRebate ?? false,
+                filter: filter != nil ? .init(ObjectFilter(filter: filter!)) : .none
+            )
+        )
+        print(result.data!.address!.objectConnection!)
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return PaginatedObjectsResponse(
+            data: data.address!.objectConnection!.nodes.map {
+                SuiObjectResponse(
+                    error: nil,
+                    data: SuiObjectData(graphql: $0, showBcs: options?.showBcs ?? false)
+                )
+            },
+            pageInfo: PageInfo(
+                graphql: data.address!.objectConnection!.pageInfo
+            )
+        )
     }
 
     /// Return the reference gas price for the network.

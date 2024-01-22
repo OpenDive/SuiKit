@@ -365,7 +365,20 @@ public struct GraphQLSuiProvider {
         objectId: String,
         options: SuiObjectDataOptions? = nil
     ) async throws -> SuiObjectResponse? {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetObjectQuery(
+                id: objectId,
+                showBcs: options?.showBcs ?? false,
+                showOwner: options?.showOwner ?? false, 
+                showPreviousTransaction: options?.showPreviousTransaction ?? false,
+                showContent: options?.showContent ?? false,
+                showType: options?.showType ?? false,
+                showStorageRebate: options?.showStorageRebate ?? false
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return SuiObjectResponse(error: nil, data: SuiObjectData(graphql: data.object!))
     }
 
     /// Return the protocol config table for the given version number. If the version number is not specified, If none is specified, the node uses the version of the latest epoch it has processed.
@@ -658,7 +671,6 @@ public struct GraphQLSuiProvider {
                 filter: filter != nil ? .init(ObjectFilter(filter: filter!)) : .none
             )
         )
-        print(result.data!.address!.objectConnection!)
         guard let data = result.data else { throw SuiError.missingGraphQLData }
         return PaginatedObjectsResponse(
             data: data.address!.objectConnection!.nodes.map {

@@ -200,4 +200,26 @@ final class GraphQLProviderTest: XCTestCase {
         XCTAssertEqual(rpcObjects.data.map { $0.data?.digest }, graphQLObjects.data.map { $0.data?.digest })
         XCTAssertEqual(rpcObjects.data.map { $0.data?.previousTransaction }, graphQLObjects.data.map { $0.data?.previousTransaction })
     }
+
+    func testThatGettingObjectWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
+        let toolBox = try self.fetchToolBox()
+        let gasCoin = try await toolBox.getCoins()
+        let objectOptions = SuiObjectDataOptions(
+            showBcs: true,
+            showContent: true,
+            showDisplay: true,
+            showOwner: true,
+            showPreviousTransaction: true,
+            showStorageRebate: true,
+            showType: true
+        )
+        
+        let rpcObject = try await toolBox.client.getObject(objectId: gasCoin.data[0].coinObjectId, options: objectOptions)
+        let graphQLObject = try await toolBox.graphQLProvider.getObject(objectId: gasCoin.data[0].coinObjectId, options: objectOptions)
+        
+        XCTAssertEqual(rpcObject?.data?.objectId, graphQLObject?.data?.objectId)
+        XCTAssertEqual(rpcObject?.data?.digest, graphQLObject?.data?.digest)
+        XCTAssertEqual(rpcObject?.data?.previousTransaction, graphQLObject?.data?.previousTransaction)
+    }
 }

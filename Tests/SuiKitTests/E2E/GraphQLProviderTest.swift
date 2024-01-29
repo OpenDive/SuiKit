@@ -255,6 +255,13 @@ final class GraphQLProviderTest: XCTestCase {
         let toolBox = try self.fetchToolBox()
         let referenceRpc = try await toolBox.client.getReferenceGasPrice()
         let referenceGraphQL = try await toolBox.graphQLProvider.getReferenceGasPrice()
-        XCTAssertEqual(referenceRpc, referenceRpc)
+        XCTAssertEqual(referenceRpc, referenceGraphQL)
+    }
+    
+    func testThatGettingLastestCheckpointSequenceNumberWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let sequenceeRpc = try await toolBox.client.getLatestCheckpointSequenceNumber()
+        let sequenceGraphQL = try await toolBox.graphQLProvider.getLatestCheckpointSequenceNumber()
+        XCTAssertGreaterThanOrEqual(sequenceeRpc, sequenceGraphQL)
     }
 }

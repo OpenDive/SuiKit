@@ -229,4 +229,18 @@ final class GraphQLProviderTest: XCTestCase {
         let protocolGraphQL = try await toolBox.graphQLProvider.getProtocolConfig()
         XCTAssertEqual(protocolRpc, protocolGraphQL)
     }
+    
+    func testThatGettingCheckpointWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let checkpointRpc = try await toolBox.client.getCheckpoint(id: "3")
+        let checkpointGraphQL = try await toolBox.graphQLProvider.getCheckpoint(sequenceNumber: 3)
+        XCTAssertEqual(checkpointRpc, checkpointGraphQL)
+    }
+    
+    func testThatGettingCheckpointsWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let checkpointsRpc = try await toolBox.client.getCheckpoints(cursor: "0", limit: 5, order: .ascending)
+        let checkpointsGraphQL = try await toolBox.graphQLProvider.getCheckpoints(cursor: "MA", limit: 5, order: .ascending)
+        XCTAssertEqual(checkpointsRpc.data, checkpointsGraphQL.data)
+    }
 }

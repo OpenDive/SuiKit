@@ -5,7 +5,7 @@
 
 public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
   public static var fragmentDefinition: StaticString {
-    #"fragment RPC_Checkpoint_Fields on Checkpoint { __typename digest epoch { __typename epochId } rollingGasSummary { __typename computationCost storageCost storageRebate nonRefundableStorageFee } networkTotalTransactions previousCheckpointDigest sequenceNumber timestamp transactionBlockConnection { __typename nodes { __typename digest } } validatorSignatures }"#
+    #"fragment RPC_Checkpoint_Fields on Checkpoint { __typename digest epoch { __typename epochId } rollingGasSummary { __typename computationCost storageCost storageRebate nonRefundableStorageFee } networkTotalTransactions previousCheckpointDigest sequenceNumber timestamp transactionBlocks { __typename nodes { __typename digest } } validatorSignatures }"#
   }
 
   public let __data: DataDict
@@ -21,7 +21,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
     .field("previousCheckpointDigest", String?.self),
     .field("sequenceNumber", Int.self),
     .field("timestamp", SuiKit.DateTimeApollo.self),
-    .field("transactionBlockConnection", TransactionBlockConnection?.self),
+    .field("transactionBlocks", TransactionBlocks?.self),
     .field("validatorSignatures", SuiKit.Base64Apollo.self),
   ] }
 
@@ -46,7 +46,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
   /// Transactions that access time in this checkpoint will observe this timestamp.
   public var timestamp: SuiKit.DateTimeApollo { __data["timestamp"] }
   /// Transactions in this checkpoint.
-  public var transactionBlockConnection: TransactionBlockConnection? { __data["transactionBlockConnection"] }
+    public var transactionBlocks: TransactionBlocks? { __data["transactionBlocks"] }
   /// This is an aggregation of signatures from a quorum of validators for the checkpoint
   /// proposal.
   public var validatorSignatures: SuiKit.Base64Apollo { __data["validatorSignatures"] }
@@ -100,7 +100,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
   /// TransactionBlockConnection
   ///
   /// Parent Type: `TransactionBlockConnection`
-  public struct TransactionBlockConnection: SuiKit.SelectionSet {
+  public struct TransactionBlocks: SuiKit.SelectionSet {
     public let __data: DataDict
     public init(_dataDict: DataDict) { __data = _dataDict }
 

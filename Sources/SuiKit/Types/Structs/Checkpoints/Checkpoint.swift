@@ -84,7 +84,7 @@ public struct Checkpoint: Equatable {
         self.epochRollingGasCostSummary = graphql.checkpoint!.rollingGasSummary != nil ? 
             GasCostSummary(graphql: graphql.checkpoint!.rollingGasSummary!) :
             nil
-        self.timestampMs = graphql.checkpoint!.timestamp
+        self.timestampMs = "\(DateFormatter.unixTimestamp(from: graphql.checkpoint!.timestamp)!)"
         self.validatorSignature = graphql.checkpoint!.validatorSignatures
         self.transactions = graphql.checkpoint!.transactionBlockConnection!.nodes.map { $0.digest }
     }
@@ -102,7 +102,7 @@ public struct Checkpoint: Equatable {
         self.epochRollingGasCostSummary = graphql.rollingGasSummary != nil ?
             GasCostSummary(graphql: graphql.rollingGasSummary!) :
             nil
-        self.timestampMs = graphql.timestamp
+        self.timestampMs = "\(DateFormatter.unixTimestamp(from: graphql.timestamp)!)"
         self.validatorSignature = graphql.validatorSignatures
         self.transactions = graphql.transactionBlockConnection!.nodes.map { $0.digest }
     }

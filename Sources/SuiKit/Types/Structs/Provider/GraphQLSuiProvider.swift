@@ -192,18 +192,18 @@ public struct GraphQLSuiProvider {
     ) async throws -> CheckpointPage {
         let result = try await GraphQLClient.fetchQuery(
             client: self.apollo,
-            query: order == .ascending ?
+            query: order == .descending ?
+                GetCheckpointsQuery(
+                    first: .none,
+                    before: (cursor != nil ? .init(stringLiteral: cursor!) : .none),
+                    last: (limit != nil ? .init(integerLiteral: limit!) : .none),
+                    after: .none
+                ) :
                 GetCheckpointsQuery(
                     first: (limit != nil ? .init(integerLiteral: limit!) : .none),
                     before: .none,
                     last: .none,
-                    after: .none
-                ) :
-                GetCheckpointsQuery(
-                    first: .none,
-                    before: .none,
-                    last: (limit != nil ? .init(integerLiteral: limit!) : .none),
-                    after: .none
+                    after: (cursor != nil ? .init(stringLiteral: cursor!) : .none)
                 )
         )
         guard let data = result.data else { throw SuiError.missingGraphQLData }

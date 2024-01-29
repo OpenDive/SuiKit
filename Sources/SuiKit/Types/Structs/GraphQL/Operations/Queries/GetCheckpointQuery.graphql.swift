@@ -66,7 +66,7 @@ public class GetCheckpointQuery: GraphQLQuery {
       /// Transactions that access time in this checkpoint will observe this timestamp.
       public var timestamp: SuiKit.DateTimeApollo { __data["timestamp"] }
       /// Transactions in this checkpoint.
-      public var transactionBlockConnection: RPC_Checkpoint_Fields.TransactionBlockConnection? { __data["transactionBlockConnection"] }
+      public var transactionBlockConnection: RPC_Checkpoint_Fields.TransactionBlocks? { __data["transactionBlocks"] }
       /// This is an aggregation of signatures from a quorum of validators for the checkpoint
       /// proposal.
       public var validatorSignatures: SuiKit.Base64Apollo { __data["validatorSignatures"] }

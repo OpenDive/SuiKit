@@ -697,8 +697,10 @@ public struct GraphQLSuiProvider {
     /// Return the reference gas price for the network.
     /// - Returns: A UInt64 representing the reference gas price.
     /// - Throws: An error if the RPC request fails.
-    public func getGasPrice() async throws -> UInt64 {
-        throw SuiError.notImplemented
+    public func getReferenceGasPrice() async throws -> BigInt {
+        let result = try await GraphQLClient.fetchQuery(client: self.apollo, query: GetReferenceGasPriceQuery())
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return BigInt(data.epoch!.referenceGasPrice!, radix: 10)!
     }
 
     /// Retrieves the staking information for a given owner.

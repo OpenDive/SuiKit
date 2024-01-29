@@ -250,4 +250,11 @@ final class GraphQLProviderTest: XCTestCase {
         let totalTxBlocksGraphQL = try await toolBox.graphQLProvider.getTotalTransactionBlocks()
         XCTAssertGreaterThanOrEqual(totalTxBlocksRpc, totalTxBlocksGraphQL)
     }
+    
+    func testThatGettingReferenceGasPriceWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let referenceRpc = try await toolBox.client.getReferenceGasPrice()
+        let referenceGraphQL = try await toolBox.graphQLProvider.getReferenceGasPrice()
+        XCTAssertEqual(referenceRpc, referenceRpc)
+    }
 }

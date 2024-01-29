@@ -1100,12 +1100,12 @@ public struct SuiProvider {
     /// Return the reference gas price for the network.
     /// - Returns: A UInt64 representing the reference gas price.
     /// - Throws: An error if the RPC request fails.
-    public func getGasPrice() async throws -> UInt64 {
+    public func getReferenceGasPrice() async throws -> BigInt {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getReferenceGasPrice", [])
         )
-        return JSON(data)["result"].uInt64Value
+        return BigInt(JSON(data)["result"].stringValue, radix: 10)!
     }
 
     /// Retrieves the staking information for a given owner.

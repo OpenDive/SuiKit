@@ -243,4 +243,11 @@ final class GraphQLProviderTest: XCTestCase {
         let checkpointsGraphQL = try await toolBox.graphQLProvider.getCheckpoints(cursor: "MA", limit: 5, order: .ascending)
         XCTAssertEqual(checkpointsRpc.data, checkpointsGraphQL.data)
     }
+    
+    func testThatGettingTotalTransactionBlocksWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let totalTxBlocksRpc = try await toolBox.client.getTotalTransactionBlocks()
+        let totalTxBlocksGraphQL = try await toolBox.graphQLProvider.getTotalTransactionBlocks()
+        XCTAssertGreaterThanOrEqual(totalTxBlocksRpc, totalTxBlocksGraphQL)
+    }
 }

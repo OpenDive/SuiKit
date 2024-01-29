@@ -546,12 +546,12 @@ public struct SuiProvider {
     /// Return the total number of transaction blocks known to the server.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `UInt64` representing the total number of transaction blocks.
-    public func getTotalTransactionBlocks() async throws -> UInt64 {
+    public func getTotalTransactionBlocks() async throws -> BigInt {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("sui_getTotalTransactionBlocks", [])
         )
-        return JSON(data)["result"].uInt64Value
+        return BigInt(JSON(data)["result"].stringValue, radix: 10)!
     }
 
     /// Return the transaction response object.

@@ -401,8 +401,10 @@ public struct GraphQLSuiProvider {
     /// Return the total number of transaction blocks known to the server.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `UInt64` representing the total number of transaction blocks.
-    public func getTotalTransactionBlocks() async throws -> UInt64 {
-        throw SuiError.notImplemented
+    public func getTotalTransactionBlocks() async throws -> BigInt {
+        let result = try await GraphQLClient.fetchQuery(client: self.apollo, query: GetTotalTransactionBlocksQuery())
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return BigInt(data.checkpoint!.networkTotalTransactions!)
     }
 
     /// Return the transaction response object.

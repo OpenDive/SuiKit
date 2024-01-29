@@ -222,4 +222,11 @@ final class GraphQLProviderTest: XCTestCase {
         XCTAssertEqual(rpcObject?.data?.digest, graphQLObject?.data?.digest)
         XCTAssertEqual(rpcObject?.data?.previousTransaction, graphQLObject?.data?.previousTransaction)
     }
+    
+    func testThatGettingProtocolConfigWorksAsIntendedFromGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let protocolRpc = try await toolBox.client.getProtocolConfig()
+        let protocolGraphQL = try await toolBox.graphQLProvider.getProtocolConfig()
+        XCTAssertEqual(protocolRpc, protocolGraphQL)
+    }
 }

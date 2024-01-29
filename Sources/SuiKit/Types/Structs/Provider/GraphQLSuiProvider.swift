@@ -388,7 +388,14 @@ public struct GraphQLSuiProvider {
     public func getProtocolConfig(
         version: String? = nil
     ) async throws -> ProtocolConfig {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetProtocolConfigQuery(
+                protocolVersion: version != nil ? .init(integerLiteral: Int(version!)!) : .none
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return ProtocolConfig(graphql: data.protocolConfig)
     }
 
     /// Return the total number of transaction blocks known to the server.

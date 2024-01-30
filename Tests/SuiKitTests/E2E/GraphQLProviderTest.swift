@@ -158,7 +158,7 @@ final class GraphQLProviderTest: XCTestCase {
         let graphqlMovePackage = try await toolBox.graphQLProvider.getNormalizedMoveModulesByPackage(package: "0x2")
         XCTAssertEqual(graphqlMovePackage["coin"], rpcMovePackage["coin"])
     }
-    
+
     func testThatGettingNormalizedMoveModuleWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let rpcMoveModule = try await toolBox.client.getNormalizedMoveModule(package: "0x2", module: "coin")
@@ -214,7 +214,7 @@ final class GraphQLProviderTest: XCTestCase {
             showStorageRebate: true,
             showType: true
         )
-        
+
         let rpcObject = try await toolBox.client.getObject(objectId: gasCoin.data[0].coinObjectId, options: objectOptions)
         let graphQLObject = try await toolBox.graphQLProvider.getObject(objectId: gasCoin.data[0].coinObjectId, options: objectOptions)
         
@@ -222,46 +222,53 @@ final class GraphQLProviderTest: XCTestCase {
         XCTAssertEqual(rpcObject?.data?.digest, graphQLObject?.data?.digest)
         XCTAssertEqual(rpcObject?.data?.previousTransaction, graphQLObject?.data?.previousTransaction)
     }
-    
+
     func testThatGettingProtocolConfigWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let protocolRpc = try await toolBox.client.getProtocolConfig()
         let protocolGraphQL = try await toolBox.graphQLProvider.getProtocolConfig()
         XCTAssertEqual(protocolRpc, protocolGraphQL)
     }
-    
+
     func testThatGettingCheckpointWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let checkpointRpc = try await toolBox.client.getCheckpoint(id: "3")
         let checkpointGraphQL = try await toolBox.graphQLProvider.getCheckpoint(sequenceNumber: 3)
         XCTAssertEqual(checkpointRpc, checkpointGraphQL)
     }
-    
+
     func testThatGettingCheckpointsWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let checkpointsRpc = try await toolBox.client.getCheckpoints(cursor: "0", limit: 5, order: .ascending)
         let checkpointsGraphQL = try await toolBox.graphQLProvider.getCheckpoints(cursor: "MA", limit: 5, order: .ascending)
         XCTAssertEqual(checkpointsRpc.data, checkpointsGraphQL.data)
     }
-    
+
     func testThatGettingTotalTransactionBlocksWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let totalTxBlocksRpc = try await toolBox.client.getTotalTransactionBlocks()
         let totalTxBlocksGraphQL = try await toolBox.graphQLProvider.getTotalTransactionBlocks()
         XCTAssertGreaterThanOrEqual(totalTxBlocksRpc, totalTxBlocksGraphQL)
     }
-    
+
     func testThatGettingReferenceGasPriceWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let referenceRpc = try await toolBox.client.getReferenceGasPrice()
         let referenceGraphQL = try await toolBox.graphQLProvider.getReferenceGasPrice()
         XCTAssertEqual(referenceRpc, referenceGraphQL)
     }
-    
+
     func testThatGettingLastestCheckpointSequenceNumberWorksAsIntendedFromGraphQL() async throws {
         let toolBox = try self.fetchToolBox()
         let sequenceeRpc = try await toolBox.client.getLatestCheckpointSequenceNumber()
         let sequenceGraphQL = try await toolBox.graphQLProvider.getLatestCheckpointSequenceNumber()
         XCTAssertGreaterThanOrEqual(sequenceeRpc, sequenceGraphQL)
+    }
+
+    func testThatGettingChainIdentifiersWorksAsIntendedForGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let chainRpc = try await toolBox.client.getChainIdentifier()
+        let chainGraphQL = try await toolBox.graphQLProvider.getChainIdentifier()
+        XCTAssertEqual(chainRpc, chainGraphQL)
     }
 }

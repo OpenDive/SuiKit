@@ -48,6 +48,17 @@ public enum RawData: Equatable  {
         )
     }
 
+    public init(graphql: MultiGetObjectsQuery.Data.ObjectConnection.Node.AsMoveObject, version: String) {
+        self = .moveObject(
+            MoveObjectRaw(
+                bcsBytes: JSON(graphql.ifShowBcs!.contents!.bcs).stringValue,
+                hasPublicTransfer: graphql.ifShowBcs!.hasPublicTransfer,
+                type: graphql.ifShowBcs!.contents!.type.repr,
+                version: version
+            )
+        )
+    }
+
     public init(graphql: GetObjectQuery.Data.Object.AsMoveObject, version: String) {
         self = .moveObject(
             MoveObjectRaw(

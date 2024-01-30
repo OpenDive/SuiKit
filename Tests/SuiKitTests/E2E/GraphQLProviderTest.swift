@@ -278,4 +278,26 @@ final class GraphQLProviderTest: XCTestCase {
         let apyGraphQL = try await toolBox.graphQLProvider.getValidatorsApy()
         XCTAssertEqual(apyRpc, apyGraphQL)
     }
+
+    func testThatGettingMultipleObjectsWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
+        let toolBox = try self.fetchToolBox()
+        let gasCoin = try await toolBox.getCoins()
+        let objectOptions = SuiObjectDataOptions(
+            showBcs: true,
+            showContent: true,
+            showDisplay: true,
+            showOwner: true,
+            showPreviousTransaction: true,
+            showStorageRebate: true,
+            showType: true
+        )
+
+        let rpcObject = try await toolBox.client.getMultiObjects(ids: [gasCoin.data[0].coinObjectId], options: objectOptions)
+        let graphQLObject = try await toolBox.graphQLProvider.getMultiObjects(ids: [gasCoin.data[0].coinObjectId], options: objectOptions)
+        
+        XCTAssertEqual(rpcObject[0].data?.objectId, graphQLObject[0].data?.objectId)
+        XCTAssertEqual(rpcObject[0].data?.digest, graphQLObject[0].data?.digest)
+        XCTAssertEqual(rpcObject[0].data?.previousTransaction, graphQLObject[0].data?.previousTransaction)
+    }
 }

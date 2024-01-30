@@ -7,7 +7,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
   public static let operationName: String = "multiGetObjects"
   public static let operationDocument: ApolloAPI.OperationDocument = .init(
     definition: .init(
-      #"query multiGetObjects($ids: [SuiAddress!]!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false) { objectConnection(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } }"#,
+      #"query multiGetObjects($ids: [SuiAddress!]!, $limit: Int, $cursor: String, $showBcs: Boolean = false, $showContent: Boolean = false, $showDisplay: Boolean = false, $showType: Boolean = false, $showOwner: Boolean = false, $showPreviousTransaction: Boolean = false, $showStorageRebate: Boolean = false) { objects(first: $limit, after: $cursor, filter: { objectIds: $ids }) { __typename pageInfo { __typename hasNextPage endCursor } nodes { __typename ...RPC_OBJECT_FIELDS } } }"#,
       fragments: [RPC_OBJECT_FIELDS.self]
     ))
 
@@ -65,14 +65,14 @@ public class MultiGetObjectsQuery: GraphQLQuery {
 
     public static var __parentType: ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("objectConnection", ObjectConnection?.self, arguments: [
+      .field("objects", ObjectConnection?.self, arguments: [
         "first": .variable("limit"),
         "after": .variable("cursor"),
         "filter": ["objectIds": .variable("ids")]
       ]),
     ] }
 
-    public var objectConnection: ObjectConnection? { __data["objectConnection"] }
+    public var objectConnection: ObjectConnection? { __data["objects"] }
 
     /// ObjectConnection
     ///
@@ -135,7 +135,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
         public var asMoveObject: AsMoveObject? { __data["asMoveObject"] }
         /// The Address or Object that owns this Object.  Immutable and Shared Objects do not have
         /// owners.
-        public var owner: RPC_OBJECT_FIELDS.Owner? { __data["owner"] }
+        public var owner: AnyHashable? { __data["owner"] }
         /// The transaction block that created this version of the object.
         public var previousTransactionBlock: RPC_OBJECT_FIELDS.PreviousTransactionBlock? { __data["previousTransactionBlock"] }
         /// The amount of SUI we would rebate if this object gets deleted or mutated.
@@ -197,8 +197,8 @@ public class MultiGetObjectsQuery: GraphQLQuery {
 
               public var type: Type_SelectionSet { __data["type"] }
               /// Structured contents of a Move value.
-              public var data: SuiKit.MoveDataApollo { __data["data"] }
-              public var bcs: SuiKit.Base64Apollo { __data["bcs"] }
+              public var data: AnyHashable { __data["data"] }
+              public var bcs: AnyHashable { __data["bcs"] }
 
               /// ObjectConnection.Node.AsMoveObject.IfShowType.Contents.Type_SelectionSet
               ///
@@ -212,9 +212,9 @@ public class MultiGetObjectsQuery: GraphQLQuery {
                 /// Flat representation of the type signature, as a displayable string.
                 public var repr: String { __data["repr"] }
                 /// Structured representation of the "shape" of values that match this type.
-                public var layout: SuiKit.MoveTypeLayoutApollo { __data["layout"] }
+                public var layout: AnyHashable { __data["layout"] }
                 /// Structured representation of the type signature.
-                public var signature: SuiKit.MoveTypeSignatureApollo { __data["signature"] }
+                public var signature: AnyHashable { __data["signature"] }
               }
             }
           }
@@ -252,8 +252,8 @@ public class MultiGetObjectsQuery: GraphQLQuery {
 
               public var type: Type_SelectionSet { __data["type"] }
               /// Structured contents of a Move value.
-              public var data: SuiKit.MoveDataApollo { __data["data"] }
-              public var bcs: SuiKit.Base64Apollo { __data["bcs"] }
+              public var data: AnyHashable { __data["data"] }
+              public var bcs: AnyHashable { __data["bcs"] }
 
               /// ObjectConnection.Node.AsMoveObject.IfShowContent.Contents.Type_SelectionSet
               ///
@@ -267,9 +267,9 @@ public class MultiGetObjectsQuery: GraphQLQuery {
                 /// Flat representation of the type signature, as a displayable string.
                 public var repr: String { __data["repr"] }
                 /// Structured representation of the "shape" of values that match this type.
-                public var layout: SuiKit.MoveTypeLayoutApollo { __data["layout"] }
+                public var layout: AnyHashable { __data["layout"] }
                 /// Structured representation of the type signature.
-                public var signature: SuiKit.MoveTypeSignatureApollo { __data["signature"] }
+                public var signature: AnyHashable { __data["signature"] }
               }
             }
           }
@@ -307,8 +307,8 @@ public class MultiGetObjectsQuery: GraphQLQuery {
 
               public var type: Type_SelectionSet { __data["type"] }
               /// Structured contents of a Move value.
-              public var data: SuiKit.MoveDataApollo { __data["data"] }
-              public var bcs: SuiKit.Base64Apollo { __data["bcs"] }
+              public var data: AnyHashable { __data["data"] }
+              public var bcs: AnyHashable { __data["bcs"] }
 
               /// ObjectConnection.Node.AsMoveObject.IfShowBcs.Contents.Type_SelectionSet
               ///
@@ -322,9 +322,9 @@ public class MultiGetObjectsQuery: GraphQLQuery {
                 /// Flat representation of the type signature, as a displayable string.
                 public var repr: String { __data["repr"] }
                 /// Structured representation of the "shape" of values that match this type.
-                public var layout: SuiKit.MoveTypeLayoutApollo { __data["layout"] }
+                public var layout: AnyHashable { __data["layout"] }
                 /// Structured representation of the type signature.
-                public var signature: SuiKit.MoveTypeSignatureApollo { __data["signature"] }
+                public var signature: AnyHashable { __data["signature"] }
               }
             }
           }

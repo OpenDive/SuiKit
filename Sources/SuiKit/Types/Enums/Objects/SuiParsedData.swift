@@ -50,6 +50,20 @@ public enum SuiParsedData: Equatable  {
             )
         )
     }
+    
+    public init(graphql: MultiGetObjectsQuery.Data.ObjectConnection.Node.AsMoveObject) {
+        let fields: [String: AnyHashable] = [
+            "data": graphql.ifShowContent!.contents!.data,
+            "layout": graphql.ifShowContent!.contents!.type.layout
+        ]
+        self = .moveObject(
+            MoveObject(
+                fields: JSON(fields),
+                hasPublicTransfer: graphql.ifShowContent!.hasPublicTransfer,
+                type: graphql.ifShowContent!.contents!.type.repr
+            )
+        )
+    }
 
     public init(graphql: GetObjectQuery.Data.Object.AsMoveObject) {
         let fields: [String: AnyHashable] = [

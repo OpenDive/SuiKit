@@ -430,7 +430,28 @@ public struct GraphQLSuiProvider {
         ids: [objectId],
         options: SuiObjectDataOptions? = nil
     ) async throws -> [SuiObjectResponse] {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: MultiGetObjectsQuery(
+                ids: ids,
+                limit: .init(integerLiteral: ids.count),
+                cursor: .none,
+                showBcs: options?.showBcs ?? false,
+                showContent: options?.showContent ?? false,
+                showDisplay: options?.showDisplay ?? false,
+                showType: options?.showType ?? false,
+                showOwner: options?.showOwner ?? false,
+                showPreviousTransaction: options?.showPreviousTransaction ?? false,
+                showStorageRebate: options?.showStorageRebate ?? false
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return data.objectConnection!.nodes.map { object in
+            SuiObjectResponse(error: nil, data: SuiObjectData(
+                graphql: object,
+                showBcs: options?.showBcs ?? false
+            ))
+        }
     }
 
     /// Returns an ordered list of transaction responses The method will throw an error if the input contains any duplicate or the input size exceeds `QUERY_MAX_RESULT_LIMIT`.

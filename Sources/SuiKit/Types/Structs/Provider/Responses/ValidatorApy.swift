@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Represents the Annual Percentage Yield (APY) related information for a validator.
-public struct ValidatorApy {
+public struct ValidatorApy: Equatable {
     /// A `String` representing the address of the validator. This is a unique identifier
     /// used to reference a specific validator within the network.
     public var address: String
@@ -35,10 +35,15 @@ public struct ValidatorApy {
     /// A `UInt64` value representing the Annual Percentage Yield (APY) of the validator.
     /// The APY is a percentage that indicates the profitability of the validator on an annual basis,
     /// allowing delegators to assess the potential return on their staked assets.
-    public var apy: UInt64
+    public var apy: UInt64?
+
+    public init(address: String, apy: UInt64? = nil) {
+        self.address = address
+        self.apy = apy
+    }
 
     public init(input: JSON) {
         self.address = input["address"].stringValue
-        self.apy = input["apy"].uInt64Value
+        self.apy = input["apy"].uInt64 ?? 0
     }
 }

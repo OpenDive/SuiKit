@@ -1237,7 +1237,7 @@ public struct SuiProvider {
             try self.getServerUrl(),
             SuiRequest("suix_getValidatorsApy", [])
         )
-        let result = JSON(data)["reslt"]
+        let result = JSON(data)["result"]
         return ValidatorApys(input: result)
     }
 

@@ -742,7 +742,12 @@ public struct GraphQLSuiProvider {
     /// - Returns: A `ValidatorApys` object representing the APYs of validators.
     /// - Throws: An error if the RPC request fails.
     public func getValidatorsApy() async throws -> ValidatorApys {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: GetValidatorsApyQuery()
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        return ValidatorApys(graphql: data)
     }
 
     /// Queries events from the blockchain with provided filters.

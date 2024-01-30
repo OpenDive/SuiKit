@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Represents a collection of `ValidatorApy` instances associated with a specific epoch.
-public struct ValidatorApys {
+public struct ValidatorApys: Equatable {
     /// An array containing `ValidatorApy` instances, each of which represents
     /// the Annual Percentage Yield (APY) of a specific validator.
     public var apys: [ValidatorApy]
@@ -41,5 +41,15 @@ public struct ValidatorApys {
     public init(input: JSON) {
         self.apys = input["apys"].arrayValue.map { ValidatorApy(input: $0) }
         self.epoch = input["epoch"].stringValue
+    }
+    
+    public init(graphql: GetValidatorsApyQuery.Data) {
+        self.apys = graphql.epoch!.validatorSet!.activeValidators!.map { validator in
+            ValidatorApy(
+                address: validator.address.address,
+                apy: validator.apy != nil ? UInt64((validator.apy! / 100)) : nil
+            )
+        }
+        self.epoch = "\(graphql.epoch!.epochId)"
     }
 }

@@ -271,4 +271,11 @@ final class GraphQLProviderTest: XCTestCase {
         let chainGraphQL = try await toolBox.graphQLProvider.getChainIdentifier()
         XCTAssertEqual(chainRpc, chainGraphQL)
     }
+
+    func testThatGettingValidatorAPYsWorksAsIntendedForGraphQL() async throws {
+        let toolBox = try self.fetchToolBox()
+        let apyRpc = try await toolBox.client.getValidatorsApy()
+        let apyGraphQL = try await toolBox.graphQLProvider.getValidatorsApy()
+        XCTAssertEqual(apyRpc, apyGraphQL)
+    }
 }

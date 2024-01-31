@@ -303,7 +303,6 @@ final class GraphQLProviderTest: XCTestCase {
 
     func testThatGettingPastObjectWorksAsIntendedFromGraphQL() async throws {
         try await self.setUpWithTransaction()
-        try await Task.sleep(nanoseconds: 10_000_000_000)
         let toolBox = try self.fetchToolBox()
         let gasCoin = try await toolBox.getCoins()
         let objectOptions = SuiObjectDataOptions(

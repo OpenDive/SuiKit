@@ -300,4 +300,36 @@ final class GraphQLProviderTest: XCTestCase {
         XCTAssertEqual(rpcObject[0].data?.digest, graphQLObject[0].data?.digest)
         XCTAssertEqual(rpcObject[0].data?.previousTransaction, graphQLObject[0].data?.previousTransaction)
     }
+
+    func testThatGettingPastObjectWorksAsIntendedFromGraphQL() async throws {
+        try await self.setUpWithTransaction()
+        try await Task.sleep(nanoseconds: 10_000_000_000)
+        let toolBox = try self.fetchToolBox()
+        let gasCoin = try await toolBox.getCoins()
+        let objectOptions = SuiObjectDataOptions(
+            showBcs: true,
+            showContent: true,
+            showDisplay: true,
+            showOwner: true,
+            showPreviousTransaction: true,
+            showStorageRebate: true,
+            showType: true
+        )
+
+        let rpcObject = try await toolBox.client.tryGetPastObject(
+            id: gasCoin.data[0].coinObjectId, version: 2, options: objectOptions
+        )
+        let graphQLObject = try await toolBox.graphQLProvider.tryGetPastObject(
+            id: gasCoin.data[0].coinObjectId, version: 2, options: objectOptions
+        )
+
+        if 
+            case .versionFound(let rpcFound) = rpcObject!,
+            case .versionFound(let graphQlFound) = graphQLObject
+        {
+            XCTAssertEqual(rpcFound.objectId, graphQlFound.objectId)
+            XCTAssertEqual(rpcFound.digest, graphQlFound.digest)
+            XCTAssertEqual(rpcFound.previousTransaction, graphQlFound.previousTransaction)
+        }
+    }
 }

@@ -57,6 +57,25 @@ public struct SuiObjectData: Equatable  {
 
     /// A `String` representing the version of the object.
     public let version: String
+
+    public init(graphql: TryGetPastObjectQuery.Data.Object, showBcs: Bool = false) {
+        self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil
+        self.content = graphql.asMoveObject!.ifShowContent != nil ? SuiParsedData(graphql: graphql.asMoveObject!) : nil
+        self.digest = graphql.digest
+        self.display = graphql.display != nil ? DisplayFieldsResponse(graphql: graphql.display!) : nil
+        self.objectId = graphql.objectId
+        self.owner = graphql.owner != nil ?
+            JSON(graphql.owner!)["owner"]["asObject"]["address"].exists() ?
+                .objectOwner(JSON(graphql.owner!)["owner"]["asObject"]["address"].stringValue) :
+                JSON(graphql.owner!)["owner"]["asAddress"]["address"].exists() ?
+                    .addressOwner(JSON(graphql.owner!)["owner"]["asAddress"]["address"].stringValue) :
+                nil :
+            nil
+        self.previousTransaction = graphql.previousTransactionBlock != nil ? graphql.previousTransactionBlock!.digest : nil
+        self.storageRebate = graphql.storageRebate
+        self.type = graphql.asMoveObject!.ifShowType != nil ? graphql.asMoveObject!.ifShowType!.contents!.type.repr : nil
+        self.version = "\(graphql.version)"
+    }
     
     public init(graphql: GetObjectQuery.Data.Object, showBcs: Bool = false) {
         self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil

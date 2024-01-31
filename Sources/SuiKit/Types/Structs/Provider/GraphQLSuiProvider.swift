@@ -481,7 +481,22 @@ public struct GraphQLSuiProvider {
         version: Int,
         options: SuiObjectDataOptions? = nil
     ) async throws -> ObjectRead? {
-        throw SuiError.notImplemented
+        let result = try await GraphQLClient.fetchQuery(
+            client: self.apollo,
+            query: TryGetPastObjectQuery(
+                id: id,
+                version: .init(integerLiteral: version),
+                showBcs: options?.showBcs ?? false,
+                showOwner: options?.showOwner ?? false,
+                showPreviousTransaction: options?.showPreviousTransaction ?? false,
+                showContent: options?.showContent ?? false,
+                showType: options?.showType ?? false,
+                showStorageRebate: options?.showStorageRebate ?? false
+            )
+        )
+        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        // TODO: Implement proper error handling.
+        return .versionFound(SuiObjectData(graphql: data.object!, showBcs: options?.showBcs ?? false))
     }
 
     /// Return the object information for a specified version.

@@ -34,13 +34,19 @@ public struct PaginatedCoins: Equatable {
     /// A string representing the object identifier (objectId) for the next cursor in the pagination.
     /// It is used to retrieve the next page of `CoinStruct` objects.
     public let nextCursor: objectId?
-    
+
+    /// The object corresponding to the information of the current coin page.
     public let pageInfo: PageInfo?
 
     /// A boolean value indicating whether there is a next page available in the pagination.
     public let hasNextPage: Bool?
 
-    public init(data: [CoinStruct], nextCursor: objectId? = nil, pageInfo: PageInfo? = nil, hasNextPage: Bool? = nil) {
+    public init(
+        data: [CoinStruct],
+        nextCursor: objectId? = nil,
+        pageInfo: PageInfo? = nil, 
+        hasNextPage: Bool? = nil
+    ) {
         self.data = data
         self.nextCursor = nextCursor
         self.pageInfo = pageInfo

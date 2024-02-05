@@ -40,7 +40,8 @@ public struct PaginatedObjectsResponse {
     /// An optional string representing the cursor for the next page of objects.
     /// `nil` if there are no more pages available.
     public var nextCursor: String?
-    
+
+    /// Page info object for the given Object Response page.
     public var pageInfo: PageInfo?
 
     public init(data: [SuiObjectResponse], pageInfo: PageInfo? = nil, hasNextPage: Bool? = nil, nextCursor: String? = nil) {

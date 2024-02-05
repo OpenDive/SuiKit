@@ -1,5 +1,5 @@
 //
-//  SuiProvider.swift
+//  GraphQLSuiProvider.swift
 //  SuiKit
 //
 //  Copyright (c) 2023 OpenDive
@@ -235,6 +235,7 @@ public struct GraphQLSuiProvider {
         return "\(result.data!.checkpoint!.sequenceNumber)"
     }
 
+    // TODO: Implement function when write becomes available
     /// Retrieves the loaded child objects associated with a given digest from the Sui blockchain.
     /// - Parameter digest: The digest string of the parent object.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
@@ -407,6 +408,7 @@ public struct GraphQLSuiProvider {
         return BigInt(data.checkpoint!.networkTotalTransactions!)
     }
 
+    // TODO: Implement function when write becomes available
     /// Return the transaction response object.
     /// - Parameters:
     ///   - digest: A `String` representing the digest of the queried transaction.
@@ -454,6 +456,7 @@ public struct GraphQLSuiProvider {
         }
     }
 
+    // TODO: Implement function when write becomes available
     /// Returns an ordered list of transaction responses The method will throw an error if the input contains any duplicate or the input size exceeds `QUERY_MAX_RESULT_LIMIT`.
     /// - Parameters:
     ///   - digests: An array of `String` representing the digests of the transaction blocks to be retrieved.
@@ -499,6 +502,7 @@ public struct GraphQLSuiProvider {
         return .versionFound(SuiObjectData(graphql: data.object!, showBcs: options?.showBcs ?? false))
     }
 
+    // TODO: Implement function when write becomes available
     /// Return the object information for a specified version.
     ///
     /// There is no software-level guarantee/SLA that objects with past versions can be retrieved by this API, even if the object and version exists/existed. The result may vary across nodes depending on their pruning policies.
@@ -618,6 +622,7 @@ public struct GraphQLSuiProvider {
         )
     }
 
+    // TODO: Implement function when write becomes available
     /// Return the committee information for the asked `epoch`.
     /// - Parameter epoch: he epoch of interest. If None, default to the latest epoch.
     /// - Returns: A `CommitteeInfo` object containing the information of the committee for the specified epoch.
@@ -628,6 +633,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Return the dynamic field object information for a specified object.
     /// - Parameters:
     ///   - parentId: The ID of the queried parent object.
@@ -641,6 +647,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Return the dynamic field object information for a specified object.
     /// - Parameters:
     ///   - parentId: The ID of the queried parent object.
@@ -674,6 +681,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Return the latest SUI system state object on-chain.
     /// - Returns: A `JSON` object containing the information of the latest Sui system state.
     /// - Throws: `SuiError.rpcError` if there are errors in the JSON RPC response.
@@ -739,6 +747,7 @@ public struct GraphQLSuiProvider {
         return BigInt(data.epoch!.referenceGasPrice!, radix: 10)!
     }
 
+    // TODO: Implement function when write becomes available
     /// Retrieves the staking information for a given owner.
     /// - Parameter owner: The address of the owner whose staking information is to be retrieved.
     /// - Returns: An array of `DelegatedStake` objects representing the staking information.
@@ -749,6 +758,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Retrieves the staking information for given stake IDs.
     ///
     /// If a Stake was withdrawn its status will be Unstaked.
@@ -844,6 +854,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Resolves a nameservice address to its corresponding account address.
     /// - Parameter name: A string representing the nameservice address to resolve.
     /// - Returns: An `AccountAddress` representing the resolved account address.
@@ -853,7 +864,6 @@ public struct GraphQLSuiProvider {
     }
 
     // TODO: Implement Resolve Name Service Names
-
     /// Waits for a transaction to be processed and retrieves the transaction block.
     /// - Parameters:
     ///   - tx: A string representing the transaction hash.
@@ -867,6 +877,7 @@ public struct GraphQLSuiProvider {
         throw SuiError.notImplemented
     }
 
+    // TODO: Implement function when write becomes available
     /// Checks if a transaction block is valid by ensuring it has a timestamp.
     /// - Parameters:
     ///   - tx: A string representing the transaction hash.

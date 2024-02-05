@@ -36,7 +36,7 @@ public struct DisplayFieldsResponse: Equatable  {
     /// An optional instance of `ObjectResponseError` representing any error that occurred while generating the response.
     /// This will be `nil` if there is no error to report.
     public var error: ObjectResponseError?
-    
+
     public init(data: [String : String]? = nil, error: ObjectResponseError? = nil) {
         self.data = data
         self.error = error

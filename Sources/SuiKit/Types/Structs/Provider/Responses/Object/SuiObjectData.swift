@@ -76,7 +76,7 @@ public struct SuiObjectData: Equatable  {
         self.type = graphql.asMoveObject!.ifShowType != nil ? graphql.asMoveObject!.ifShowType!.contents!.type.repr : nil
         self.version = "\(graphql.version)"
     }
-    
+
     public init(graphql: GetObjectQuery.Data.Object, showBcs: Bool = false) {
         self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil
         self.content = graphql.asMoveObject!.ifShowContent != nil ? SuiParsedData(graphql: graphql.asMoveObject!) : nil

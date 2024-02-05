@@ -29,12 +29,14 @@ import Foundation
 ///
 /// - `ED25519`: Represents the Ed25519 cryptographic algorithm.
 /// - `SECP256K1`: Represents the SECP256K1 cryptographic algorithm.
+/// - `SECP256R1`: Represents the SECP256R1 (P256) cryptographic algorithm.
 public enum SignatureScheme: String {
     /// Represents the Ed25519 cryptographic algorithm.
     case ED25519
 
     /// Represents the SECP256K1 cryptographic algorithm.
     case SECP256K1
-    
+
+    /// Represents the SECP256R1 cryptographic algorithm.
     case SECP256R1
 }

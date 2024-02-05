@@ -70,4 +70,40 @@ public struct Checkpoint: Equatable {
         self.validatorSignature = input["validatorSignature"].string
         self.transactions = input["transactions"].arrayValue.map { $0.stringValue }
     }
+
+    /// Initialize a new instance of `Checkpoint` from a GraphQL object.
+    /// - Parameter graphql: A GraphQL object containing values for initalizing a new Checkpoint.
+    public init(graphql: GetCheckpointQuery.Data) {
+        self.epoch = "\(graphql.checkpoint!.epoch!.epochId)"
+        self.sequenceNumber = "\(graphql.checkpoint!.sequenceNumber)"
+        self.digest = graphql.checkpoint!.digest
+        self.networkTotalTransactions = graphql.checkpoint!.networkTotalTransactions != nil ? 
+            "\(graphql.checkpoint!.networkTotalTransactions!)" :
+            nil
+        self.previousDigest = graphql.checkpoint!.previousCheckpointDigest
+        self.epochRollingGasCostSummary = graphql.checkpoint!.rollingGasSummary != nil ? 
+            GasCostSummary(graphql: graphql.checkpoint!.rollingGasSummary!) :
+            nil
+        self.timestampMs = "\(DateFormatter.unixTimestamp(from: graphql.checkpoint!.timestamp)!)"
+        self.validatorSignature = graphql.checkpoint!.validatorSignatures
+        self.transactions = graphql.checkpoint!.transactionBlockConnection!.nodes.map { $0.digest }
+    }
+
+    /// Initialize a new instance of `Checkpoint` from a GraphQL object.
+    /// - Parameter graphql: A GraphQL object containing values for initalizing a new Checkpoint.
+    public init(graphql: GetCheckpointsQuery.Data.Checkpoints.Node) {
+        self.epoch = "\(graphql.epoch!.epochId)"
+        self.sequenceNumber = "\(graphql.sequenceNumber)"
+        self.digest = graphql.digest
+        self.networkTotalTransactions = graphql.networkTotalTransactions != nil ?
+            "\(graphql.networkTotalTransactions!)" :
+            nil
+        self.previousDigest = graphql.previousCheckpointDigest
+        self.epochRollingGasCostSummary = graphql.rollingGasSummary != nil ?
+            GasCostSummary(graphql: graphql.rollingGasSummary!) :
+            nil
+        self.timestampMs = "\(DateFormatter.unixTimestamp(from: graphql.timestamp)!)"
+        self.validatorSignature = graphql.validatorSignatures
+        self.transactions = graphql.transactionBlockConnection!.nodes.map { $0.digest }
+    }
 }

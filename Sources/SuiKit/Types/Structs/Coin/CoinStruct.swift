@@ -8,9 +8,9 @@
 import Foundation
 
 /// Represents the details of a specific coin object.
-public struct CoinStruct {
+public struct CoinStruct: Equatable {
     /// A string representing the type of the coin, e.g., Bitcoin, Ethereum.
-    public let coinType: String
+    public let coinType: StructTag
 
     /// An `objectId` representing the unique identifier of the coin object.
     public let coinObjectId: objectId
@@ -55,6 +55,31 @@ public struct CoinStruct {
             version: self.version,
             digest: self.digest
         )
+    }
+
+    public init(
+        coinType: String,
+        coinObjectId: objectId,
+        version: String,
+        digest: TransactionDigest,
+        balance: String,
+        previousTransaction: TransactionDigest
+    ) throws {
+        self.coinType = try StructTag.fromStr(coinType)
+        self.coinObjectId = coinObjectId
+        self.version = version
+        self.digest = digest
+        self.balance = balance
+        self.previousTransaction = previousTransaction
+    }
+
+    public init(graphql: GetCoinsQuery.Data.Address.CoinConnection.Node) throws {
+        self.balance = graphql.balance!
+        self.coinObjectId = graphql.asMoveObject.asObject.coinObjectId
+        self.coinType = try StructTag.fromStr(graphql.asMoveObject.contents!.type.repr)
+        self.digest = graphql.asMoveObject.asObject.digest
+        self.previousTransaction = graphql.asMoveObject.asObject.previousTransactionBlock!.digest
+        self.version = "\(graphql.asMoveObject.asObject.version)"
     }
 }
 

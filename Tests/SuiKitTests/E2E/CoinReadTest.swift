@@ -87,11 +87,11 @@ final class CoinReadTest: XCTestCase {
 
         let allCoins = try await toolBox.client.getAllCoins(account: toolBox.account.publicKey)
         XCTAssertEqual(allCoins.data.count, 5)
-        XCTAssertFalse(allCoins.hasNextPage)
+        XCTAssertFalse(allCoins.hasNextPage!)
 
         let publisherAllCoins = try await publisherToolBox.client.getAllCoins(account: publisherToolBox.account.publicKey)
         XCTAssertEqual(publisherAllCoins.data.count, 3)
-        XCTAssertFalse(publisherAllCoins.hasNextPage)
+        XCTAssertFalse(publisherAllCoins.hasNextPage!)
 
         let someSuiCoins = try await toolBox.client.getCoins(
             account: try toolBox.account.publicKey.toSuiAddress(),
@@ -100,7 +100,7 @@ final class CoinReadTest: XCTestCase {
             limit: 3
         )
         XCTAssertEqual(someSuiCoins.data.count, 3)
-        XCTAssertTrue(someSuiCoins.hasNextPage)
+        XCTAssertTrue(someSuiCoins.hasNextPage!)
     }
 
     func testThatGettingBalanceWithAndWithoutTypeWorksAsIntended() async throws {
@@ -108,7 +108,7 @@ final class CoinReadTest: XCTestCase {
         let publisherToolBox = try self.fetchPublisherToolBox()
 
         let suiBalance = try await toolBox.client.getBalance(account: toolBox.account.publicKey)
-        XCTAssertEqual(suiBalance.coinType, "0x2::sui::SUI")
+        XCTAssertEqual(suiBalance.coinType, try StructTag.fromStr("0x2::sui::SUI"))
         XCTAssertEqual(suiBalance.coinObjectCount, 5)
         XCTAssertGreaterThan(Int(suiBalance.totalBalance) ?? 0, 0)
 
@@ -116,7 +116,7 @@ final class CoinReadTest: XCTestCase {
             account: publisherToolBox.account.publicKey,
             coinType: try self.fetchTestType()
         )
-        XCTAssertEqual(testBalance.coinType, try self.fetchTestType())
+        XCTAssertEqual(testBalance.coinType, try StructTag.fromStr(try self.fetchTestType()))
         XCTAssertEqual(testBalance.coinObjectCount, 2)
         XCTAssertEqual(Int(testBalance.totalBalance) ?? -1, 11)
 

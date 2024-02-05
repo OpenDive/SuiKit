@@ -581,7 +581,7 @@ public class TransactionBlock {
         }
         self.setGasPrice(
             price: BigInt(
-                try await provider.getGasPrice()
+                try await provider.getReferenceGasPrice()
             )
         )
     }

@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// `ObjectOwner` represents the possible types of ownership for objects.
-public enum ObjectOwner: KeyProtocol {
+public enum ObjectOwner: KeyProtocol, Equatable {
     /// Represents an object owned by an address. The associated value is a `String` containing the address.
     case addressOwner(String)
 

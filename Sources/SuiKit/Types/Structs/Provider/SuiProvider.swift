@@ -27,6 +27,7 @@ import Foundation
 import SwiftyJSON
 import AnyCodable
 import Blake2
+import BigInt
 import Web3Core
 
 /// The RPC Provider used to interact with the Sui blockchain.
@@ -402,7 +403,7 @@ public struct SuiProvider {
     ///   - module: The string identifier of the module to be normalized.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `SuiMoveNormalizedModule` object representing the normalized representation of the specified Move module, or `nil` if not found.
-    public func getNormalizedModuleModule(
+    public func getNormalizedMoveModule(
         package: String,
         module: String
     ) async throws -> SuiMoveNormalizedModule? {
@@ -545,12 +546,12 @@ public struct SuiProvider {
     /// Return the total number of transaction blocks known to the server.
     /// - Throws: A `SuiError` if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: A `UInt64` representing the total number of transaction blocks.
-    public func getTotalTransactionBlocks() async throws -> UInt64 {
+    public func getTotalTransactionBlocks() async throws -> BigInt {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("sui_getTotalTransactionBlocks", [])
         )
-        return JSON(data)["result"].uInt64Value
+        return BigInt(JSON(data)["result"].stringValue, radix: 10)!
     }
 
     /// Return the transaction response object.
@@ -722,7 +723,7 @@ public struct SuiProvider {
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"] {
             let lockedBalance = value["lockedBalance"]
             balances.append(
-                CoinBalance(
+                try CoinBalance(
                     coinType: value["coinType"].stringValue,
                     coinObjectCount: value["coinObjectCount"].intValue,
                     totalBalance: value["totalBalance"].stringValue,
@@ -762,7 +763,7 @@ public struct SuiProvider {
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
             coinPages.append(
-                CoinStruct(
+                try CoinStruct(
                     coinType: value["coinType"].stringValue,
                     coinObjectId: value["coinObjectId"].stringValue,
                     version: value["version"].stringValue,
@@ -800,7 +801,7 @@ public struct SuiProvider {
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
         let lockedBalance = value["lockedBalance"]
-        return CoinBalance(
+        return try CoinBalance(
             coinType: value["coinType"].stringValue,
             coinObjectCount: value["coinObjectCount"].intValue,
             totalBalance: value["totalBalance"].stringValue,
@@ -871,9 +872,9 @@ public struct SuiProvider {
         guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
         var coinPages: [CoinStruct] = []
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        for (_, value): (String, JSON) in result["data"] {
+        for value in result["data"].arrayValue {
             coinPages.append(
-                CoinStruct(
+                try CoinStruct(
                     coinType: value["coinType"].stringValue,
                     coinObjectId: value["coinObjectId"].stringValue,
                     version: value["version"].stringValue,
@@ -1099,12 +1100,12 @@ public struct SuiProvider {
     /// Return the reference gas price for the network.
     /// - Returns: A UInt64 representing the reference gas price.
     /// - Throws: An error if the RPC request fails.
-    public func getGasPrice() async throws -> UInt64 {
+    public func getReferenceGasPrice() async throws -> BigInt {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getReferenceGasPrice", [])
         )
-        return JSON(data)["result"].uInt64Value
+        return BigInt(JSON(data)["result"].stringValue, radix: 10)!
     }
 
     /// Retrieves the staking information for a given owner.
@@ -1217,12 +1218,15 @@ public struct SuiProvider {
     /// - Parameter coinType: The type of the coin whose total supply is to be retrieved.
     /// - Returns: A UInt64 representing the total supply of the coin type.
     /// - Throws: An error if the RPC request fails.
-    public func totalSupply(_ coinType: String) async throws -> UInt64 {
+    public func totalSupply(_ coinType: String) async throws -> BigInt {
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest("suix_getTotalSupply", [AnyCodable(coinType)])
         )
-        return try JSONDecoder().decode(JSON.self, from: data)["result"]["value"].uInt64Value
+        let resultString = try JSONDecoder().decode(JSON.self, from: data)["result"]["value"].stringValue
+        guard let result = BigInt(resultString, radix: 10) else { throw NSError(domain: "Unable to convert to BigInt", code: -1) }
+        // return (BigInt(data.coinMetadata!.supply!, radix: 10)! * 10).power(data.coinMetadata!.decimals!)
+        return result
     }
 
     /// Retrieves the annual percentage yield (APY) of validators.
@@ -1233,7 +1237,7 @@ public struct SuiProvider {
             try self.getServerUrl(),
             SuiRequest("suix_getValidatorsApy", [])
         )
-        let result = JSON(data)["reslt"]
+        let result = JSON(data)["result"]
         return ValidatorApys(input: result)
     }
 

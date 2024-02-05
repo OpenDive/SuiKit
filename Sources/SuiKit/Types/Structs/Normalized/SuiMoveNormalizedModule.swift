@@ -28,7 +28,7 @@ import SwiftyJSON
 
 /// Represents a normalized SuiMove Module, containing various details about the module including its address,
 /// name, friend modules, structs, and exposed functions.
-public struct SuiMoveNormalizedModule {
+public struct SuiMoveNormalizedModule: Equatable {
     /// Specifies the file format version of the module.
     public let fileFormatVersion: Int
 
@@ -60,7 +60,11 @@ public struct SuiMoveNormalizedModule {
         }
 
         for (exposedKey, exposedValue) in input["exposedFunctions"].dictionaryValue {
-            exposedFunctions[exposedKey] = SuiMoveNormalizedFunction(input: exposedValue)
+            if
+                (exposedValue["visibility"].stringValue == "Friend" || exposedValue["visibility"].stringValue == "Public") ||
+                (exposedValue["isEntry"].boolValue) {
+                exposedFunctions[exposedKey] = SuiMoveNormalizedFunction(input: exposedValue)
+            }
         }
 
         self.fileFormatVersion = input["fileFormatVersion"].intValue
@@ -71,6 +75,68 @@ public struct SuiMoveNormalizedModule {
                 address: $0["address"].stringValue,
                 name: $0["name"].stringValue
             )
+        }
+        self.structs = structs
+        self.exposedFunctions = exposedFunctions
+    }
+    
+    public init(graphql: GetNormalizedMoveModuleQuery.Data.Object.AsMovePackage.Module, package: String) {
+        let module = graphql
+        var structs: [String: SuiMoveNormalizedStruct] = [:]
+        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
+
+        if let structures = module.structs {
+            for structure in structures.nodes {
+                structs[structure.name] = SuiMoveNormalizedStruct(
+                    structure: structure
+                )
+            }
+        }
+
+        if let functions = module.functions {
+            for function in functions.filterUsable() {
+                if let value = SuiMoveNormalizedFunction(function: function) {
+                    exposedFunctions[function.name] = value
+                }
+            }
+        }
+
+        self.fileFormatVersion = module.fileFormatVersion
+        self.address = package
+        self.name = module.name
+        self.friends = module.friends.nodes.map {
+            SuiMoveModuleId(address: $0.package.asObject.address, name: $0.name)
+        }
+        self.structs = structs
+        self.exposedFunctions = exposedFunctions
+    }
+
+    public init(graphql: GetNormalizedMoveModulesByPackageQuery.Data.Object.AsMovePackage.Modules.Node, package: String) {
+        let module = graphql
+        var structs: [String: SuiMoveNormalizedStruct] = [:]
+        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
+
+        if let structures = module.structs {
+            for structure in structures.nodes {
+                structs[structure.name] = SuiMoveNormalizedStruct(
+                    structure: structure
+                )
+            }
+        }
+
+        if let functions = module.functions {
+            for function in functions.filterUsable() {
+                if let value = SuiMoveNormalizedFunction(function: function) {
+                    exposedFunctions[function.name] = value
+                }
+            }
+        }
+
+        self.fileFormatVersion = module.fileFormatVersion
+        self.address = package
+        self.name = module.name
+        self.friends = module.friends.nodes.map {
+            SuiMoveModuleId(address: $0.package.asObject.address, name: $0.name)
         }
         self.structs = structs
         self.exposedFunctions = exposedFunctions

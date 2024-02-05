@@ -24,6 +24,7 @@
 //
 
 import Foundation
+import SwiftyJSON
 
 /// `SuiMoveFunctionArgType` represents the type of an argument in a Move function.
 ///
@@ -32,8 +33,34 @@ import Foundation
 public enum SuiMoveFunctionArgType: Equatable {
     /// The argument is a pure value and doesn't involve any object references.
     case pure
-    
+
     /// The argument is an object. The kind of the object (immutable/mutable reference or by value) is specified.
     case object(ObjectValueKind)
+
+    public init(graphql: GetMoveFunctionArgTypesQuery.Data.Object.AsMovePackage.Module.Function.Parameter) {
+        self = Self.fromHashable(hash: graphql.signature)
+    }
+
+    public init(graphql: RPC_MOVE_STRUCT_FIELDS.Field.Type_SelectionSet) {
+        self = Self.fromHashable(hash: graphql.signature)
+    }
+
+    private static func fromHashable(hash: AnyHashable) -> SuiMoveFunctionArgType {
+        let jsonGraphQL = JSON(hash)
+
+        if !(jsonGraphQL["body"]["datatype"].exists()) {
+            return .pure
+        }
+
+        if jsonGraphQL["ref"].stringValue == "&" {
+            return .object(.byImmutableReference)
+        }
+
+        if jsonGraphQL["ref"].stringValue == "&mut" {
+            return .object(.byMutableReference)
+        }
+
+        return .object(.byValue)
+    }
 }
 

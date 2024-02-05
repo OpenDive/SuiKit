@@ -31,8 +31,17 @@ public struct PaginatedSuiMoveEvent {
     public let data: [SuiEvent]
 
     /// An `EventId` object representing the cursor to the next page of events.
-    public let nextCursor: EventId
+    public let nextCursor: EventId?
+    
+    public let pageInfo: PageInfo?
 
     /// A Boolean value indicating whether there is a next page of events available.
-    public let hasNextPage: Bool
+    public let hasNextPage: Bool?
+
+    public init(data: [SuiEvent], nextCursor: EventId? = nil, pageInfo: PageInfo? = nil, hasNextPage: Bool? = nil) {
+        self.data = data
+        self.nextCursor = nextCursor
+        self.pageInfo = pageInfo
+        self.hasNextPage = hasNextPage
+    }
 }

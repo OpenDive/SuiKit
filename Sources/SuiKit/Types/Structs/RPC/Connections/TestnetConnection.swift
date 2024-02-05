@@ -28,6 +28,7 @@ import Foundation
 public struct TestnetConnection: ConnectionProtocol {
     public var fullNode: String = "https://fullnode.testnet.sui.io:443/"
     public var faucet: String? = "https://faucet.testnet.sui.io/gas"
+    public var graphql: String? = "https://graphql-beta.testnet.sui.io/"
 
     public init() { }
 }

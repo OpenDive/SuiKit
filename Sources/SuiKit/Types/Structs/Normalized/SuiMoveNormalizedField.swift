@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents a normalized field within a SuiMove structure or contract.
-public struct SuiMoveNormalizedField {
+public struct SuiMoveNormalizedField: Equatable {
     /// Holds the name of the field, serving as an identifier within its containing entity.
     public let name: String
 

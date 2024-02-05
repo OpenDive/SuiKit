@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Represents a normalized function within a SuiMove entity.
-public struct SuiMoveNormalizedFunction {
+public struct SuiMoveNormalizedFunction: Equatable {
     /// Defines the visibility of the function (e.g. public, private).
     public let visibility: SuiMoveVisibility
 
@@ -65,6 +65,25 @@ public struct SuiMoveNormalizedFunction {
         self.returnValues = returnValues
     }
 
+    public init?(graphql: GetNormalizedMoveFunctionQuery.Data) {
+        let function = graphql.object!.asMovePackage!.module!.function!
+        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
+        self.visibility = visibility
+        self.isEntry = function.isEntry ?? false
+        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
+        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+    }
+
+    public init?(function: RPC_MOVE_MODULE_FIELDS.Functions.Node) {
+        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
+        self.visibility = visibility
+        self.isEntry = function.isEntry ?? false
+        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
+        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+    }
+
     /// Initializes a new instance of `SuiMoveNormalizedFunction` from a JSON representation.
     /// Returns `nil` if there is an issue with the JSON input.
     ///
@@ -75,7 +94,7 @@ public struct SuiMoveNormalizedFunction {
         self.isEntry = input["isEntry"].boolValue
         self.typeParameters = input["typeParameters"].arrayValue.map { SuiMoveAbilitySet(input: $0) }
         self.parameters = input["parameters"].arrayValue.compactMap { SuiMoveNormalizedType.parseJSON($0) }
-        self.returnValues = input["returnValues"].arrayValue.compactMap { SuiMoveNormalizedType.parseJSON($0) }
+        self.returnValues = input["return"].arrayValue.compactMap { SuiMoveNormalizedType.parseJSON($0) }
     }
 
     /// Determines if the function has transaction context.

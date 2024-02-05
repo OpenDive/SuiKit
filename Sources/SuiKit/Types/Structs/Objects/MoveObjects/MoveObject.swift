@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Represents a Move Object in Move programming language, detailing its fields, type, and whether it has public transfer enabled.
-public struct MoveObject {
+public struct MoveObject: Equatable  {
     /// An optional `MoveStruct` representing the fields of the Move object.
     /// It is `nil` if the Move object does not have any fields.
     public var fields: JSON?
@@ -37,4 +37,10 @@ public struct MoveObject {
 
     /// A `String` representing the type of the Move object.
     public var type: String
+
+    public init(fields: JSON? = nil, hasPublicTransfer: Bool, type: String) {
+        self.fields = fields
+        self.hasPublicTransfer = hasPublicTransfer
+        self.type = type
+    }
 }

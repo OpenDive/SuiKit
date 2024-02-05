@@ -53,4 +53,11 @@ public struct GasCostSummary: Equatable {
         self.storageRebate = input["storageRebate"].stringValue
         self.nonRefundableStorageFee = input["nonRefundableStorageFee"].stringValue
     }
+
+    public init(graphql: RPC_Checkpoint_Fields.RollingGasSummary) {
+        self.computationCost = graphql.computationCost ?? ""
+        self.storageCost = graphql.storageCost ?? ""
+        self.storageRebate = graphql.storageRebate ?? ""
+        self.nonRefundableStorageFee = graphql.nonRefundableStorageFee ?? ""
+    }
 }

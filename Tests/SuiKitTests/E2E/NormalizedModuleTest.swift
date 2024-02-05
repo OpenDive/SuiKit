@@ -65,7 +65,7 @@ final class NormalizedModuleTest: XCTestCase {
 
     func testThatGettingNormalizedModuleModulesWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        guard let normalized = try await toolBox.client.getNormalizedModuleModule(
+        guard let normalized = try await toolBox.client.getNormalizedMoveModule(
             package: self.defaultPackage,
             module: self.defaultModule
         ) else {

@@ -35,9 +35,19 @@ public struct PaginatedObjectsResponse {
 
     /// A Boolean value indicating whether there are more pages of objects available to be retrieved.
     /// `true` if there are more pages available, otherwise `false`.
-    public var hasNextPage: Bool
+    public var hasNextPage: Bool?
 
     /// An optional string representing the cursor for the next page of objects.
     /// `nil` if there are no more pages available.
     public var nextCursor: String?
+
+    /// Page info object for the given Object Response page.
+    public var pageInfo: PageInfo?
+
+    public init(data: [SuiObjectResponse], pageInfo: PageInfo? = nil, hasNextPage: Bool? = nil, nextCursor: String? = nil) {
+        self.data = data
+        self.hasNextPage = hasNextPage
+        self.nextCursor = nextCursor
+        self.pageInfo = pageInfo
+    }
 }

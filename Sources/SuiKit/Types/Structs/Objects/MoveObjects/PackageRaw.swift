@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents the raw data structure for a Package in the Move programming language.
-public struct PackageRaw {
+public struct PackageRaw: Equatable  {
     /// A `String` representing the unique identifier of the package.
     public var id: String
 

@@ -180,6 +180,63 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
         }
     }
 
+    public static func parseGraphQL(_ data: AnyHashable) -> SuiMoveNormalizedType? {
+        if JSON(data)["ref"].exists() && JSON(data)["ref"].string == "&mut" {
+            guard let mutableReference = Self.parseGraphQLInner(data) else { return nil }
+            return .mutableReference(mutableReference)
+        }
+        if JSON(data)["ref"].exists() && JSON(data)["ref"].string == "&" {
+            guard let reference = Self.parseGraphQLInner(data) else { return nil }
+            return .reference(reference)
+        }
+        return parseGraphQLInner(data)
+    }
+    
+    internal static func parseGraphQLInner(_ data: AnyHashable? = nil, _ override: JSON? = nil) -> SuiMoveNormalizedType? {
+        let json = data != nil ? JSON(data!) : JSON()
+        var body = json["body"]
+        if override != nil { body = override! }
+        switch body.stringValue {
+        case "bool":
+            return .bool
+        case "u8":
+            return .u8
+        case "u16":
+            return .u16
+        case "u32":
+            return .u32
+        case "u64":
+            return .u64
+        case "u128":
+            return .u128
+        case "u256":
+            return .u256
+        case "address":
+            return .address
+        default:
+            break
+        }
+        if body["datatype"].exists() {
+            guard let structure = SuiMoveNormalizedStructType(graphQLInput: body["datatype"]) else { return nil }
+            return .structure(
+                structure
+            )
+        }
+        if body["vector"].exists() {
+            guard let vector = Self.parseGraphQLInner(nil, body["vector"]) else { return nil }
+            return .vector(vector)
+        }
+        if body["typeParameter"].exists() {
+            return .typeParameter(
+                TypeParameter(
+                    typeParameter: UInt16(body["typeParameter"].int16Value)
+                )
+            )
+        }
+
+        return nil
+    }
+
     /// Function to parse JSON into a `SuiMoveNormalizedType`.
     /// - Parameter data: The JSON data to parse.
     /// - Returns: Returns a `SuiMoveNormalizedType` if it could be parsed, otherwise returns `nil`.

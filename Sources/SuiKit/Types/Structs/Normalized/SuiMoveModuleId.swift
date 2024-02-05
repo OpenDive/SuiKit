@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents the unique identifier for a SuiMove module.
-public struct SuiMoveModuleId {
+public struct SuiMoveModuleId: Equatable {
     /// Holds the address of the SuiMove module, serving as a part of its unique identifier.
     public let address: String
 

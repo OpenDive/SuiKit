@@ -100,6 +100,19 @@ public struct Signature: Equatable, KeyProtocol {
             let pubKeyBytes = Array(bytes[(1 + signature.count)...])
             let pubKey = try SECP256K1PublicKey(data: Data(pubKeyBytes))
             return Signature(signature: Data(signature), publickey: pubKey.key, signatureScheme: .SECP256K1)
+        } else if signatureScheme == "SECP256R1" {
+            if #available(macOS 13.0, *) {
+                let signature = Array(bytes[1...(bytes.count - SECP256R1PublicKey.LENGTH)])
+                let pubKeyBytes = Array(bytes[(1 + signature.count)...])
+                let pubKey = try SECP256R1PublicKey(data: Data(pubKeyBytes))
+                return Signature(
+                    signature: Data(signature),
+                    publickey: pubKey.key.compressedRepresentation,
+                    signatureScheme: .SECP256R1
+                )
+            } else {
+                throw AccountError.cannotBeDeserialized
+            }
         } else {
             throw AccountError.cannotBeDeserialized
         }

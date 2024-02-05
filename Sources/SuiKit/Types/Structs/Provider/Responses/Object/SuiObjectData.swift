@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// A structure representing SuiObjectData, containing various information about an object.
-public struct SuiObjectData {
+public struct SuiObjectData: Equatable  {
     /// An optional `RawData` representing the Binary Canonical Serialization (BCS) of the object.
     public let bcs: RawData?
 
@@ -50,13 +50,89 @@ public struct SuiObjectData {
     public let previousTransaction: String?
 
     /// An optional `Int` representing the storage rebate of the object.
-    public let storageRebate: Int?
+    public let storageRebate: String?
 
     /// An optional `String` representing the type of the object.
     public let type: String?
 
     /// A `String` representing the version of the object.
     public let version: String
+
+    public init(graphql: TryGetPastObjectQuery.Data.Object, showBcs: Bool = false) {
+        self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil
+        self.content = graphql.asMoveObject!.ifShowContent != nil ? SuiParsedData(graphql: graphql.asMoveObject!) : nil
+        self.digest = graphql.digest
+        self.display = graphql.display != nil ? DisplayFieldsResponse(graphql: graphql.display!) : nil
+        self.objectId = graphql.objectId
+        self.owner = graphql.owner != nil ?
+            JSON(graphql.owner!)["owner"]["asObject"]["address"].exists() ?
+                .objectOwner(JSON(graphql.owner!)["owner"]["asObject"]["address"].stringValue) :
+                JSON(graphql.owner!)["owner"]["asAddress"]["address"].exists() ?
+                    .addressOwner(JSON(graphql.owner!)["owner"]["asAddress"]["address"].stringValue) :
+                nil :
+            nil
+        self.previousTransaction = graphql.previousTransactionBlock != nil ? graphql.previousTransactionBlock!.digest : nil
+        self.storageRebate = graphql.storageRebate
+        self.type = graphql.asMoveObject!.ifShowType != nil ? graphql.asMoveObject!.ifShowType!.contents!.type.repr : nil
+        self.version = "\(graphql.version)"
+    }
+
+    public init(graphql: GetObjectQuery.Data.Object, showBcs: Bool = false) {
+        self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil
+        self.content = graphql.asMoveObject!.ifShowContent != nil ? SuiParsedData(graphql: graphql.asMoveObject!) : nil
+        self.digest = graphql.digest
+        self.display = graphql.display != nil ? DisplayFieldsResponse(graphql: graphql.display!) : nil
+        self.objectId = graphql.objectId
+        self.owner = graphql.owner != nil ?
+            JSON(graphql.owner!)["owner"]["asObject"]["address"].exists() ?
+                .objectOwner(JSON(graphql.owner!)["owner"]["asObject"]["address"].stringValue) :
+                JSON(graphql.owner!)["owner"]["asAddress"]["address"].exists() ?
+                    .addressOwner(JSON(graphql.owner!)["owner"]["asAddress"]["address"].stringValue) :
+                nil :
+            nil
+        self.previousTransaction = graphql.previousTransactionBlock != nil ? graphql.previousTransactionBlock!.digest : nil
+        self.storageRebate = graphql.storageRebate
+        self.type = graphql.asMoveObject!.ifShowType != nil ? graphql.asMoveObject!.ifShowType!.contents!.type.repr : nil
+        self.version = "\(graphql.version)"
+    }
+
+    public init(graphql: MultiGetObjectsQuery.Data.ObjectConnection.Node, showBcs: Bool = false) {
+        self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil
+        self.content = graphql.asMoveObject!.ifShowContent != nil ? SuiParsedData(graphql: graphql.asMoveObject!) : nil
+        self.digest = graphql.digest
+        self.display = graphql.display != nil ? DisplayFieldsResponse(graphql: graphql.display!) : nil
+        self.objectId = graphql.objectId
+        self.owner = graphql.owner != nil ?
+            JSON(graphql.owner!)["owner"]["asObject"]["address"].exists() ?
+                .objectOwner(JSON(graphql.owner!)["owner"]["asObject"]["address"].stringValue) :
+                JSON(graphql.owner!)["owner"]["asAddress"]["address"].exists() ?
+                    .addressOwner(JSON(graphql.owner!)["owner"]["asAddress"]["address"].stringValue) :
+                nil :
+            nil
+        self.previousTransaction = graphql.previousTransactionBlock != nil ? graphql.previousTransactionBlock!.digest : nil
+        self.storageRebate = graphql.storageRebate
+        self.type = graphql.asMoveObject!.ifShowType != nil ? graphql.asMoveObject!.ifShowType!.contents!.type.repr : nil
+        self.version = "\(graphql.version)"
+    }
+
+    public init(graphql: GetOwnedObjectsQuery.Data.Address.ObjectConnection.Node, showBcs: Bool = false) {
+        self.bcs = showBcs ? RawData(graphql: graphql.asMoveObject!, version: "\(graphql.version)") : nil
+        self.content = graphql.asMoveObject!.ifShowContent != nil ? SuiParsedData(graphql: graphql.asMoveObject!) : nil
+        self.digest = graphql.digest
+        self.display = graphql.display != nil ? DisplayFieldsResponse(graphql: graphql.display!) : nil
+        self.objectId = graphql.objectId
+        self.owner = graphql.owner != nil ?
+            JSON(graphql.owner!)["owner"]["asObject"]["address"].exists() ?
+                .objectOwner(JSON(graphql.owner!)["owner"]["asObject"]["address"].stringValue) :
+                JSON(graphql.owner!)["owner"]["asAddress"]["address"].exists() ?
+                    .addressOwner(JSON(graphql.owner!)["owner"]["asAddress"]["address"].stringValue) :
+                nil :
+            nil
+        self.previousTransaction = graphql.previousTransactionBlock != nil ? graphql.previousTransactionBlock!.digest : nil
+        self.storageRebate = graphql.storageRebate
+        self.type = graphql.asMoveObject!.ifShowType != nil ? graphql.asMoveObject!.ifShowType!.contents!.type.repr : nil
+        self.version = "\(graphql.version)"
+    }
 
     public init(
         bcs: RawData?,
@@ -77,7 +153,7 @@ public struct SuiObjectData {
         self.objectId = objectId
         self.owner = owner
         self.previousTransaction = previousTransaction
-        self.storageRebate = storageRebate
+        self.storageRebate = storageRebate != nil ? "\(storageRebate!)" : nil
         self.type = type
         self.version = version
     }
@@ -90,7 +166,7 @@ public struct SuiObjectData {
         self.objectId = data["objectId"].stringValue
         self.owner = ObjectOwner.parseJSON(data["owner"])
         self.previousTransaction = data["previousTransaction"].stringValue
-        self.storageRebate = data["storageRebate"].int
+        self.storageRebate = data["storageRebate"].string
         self.type = data["type"].string
         self.version = data["version"].stringValue
     }

@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Enumeration representing visibility levels in the SuiMove environment.
-public enum SuiMoveVisibility: String {
+public enum SuiMoveVisibility: String, Equatable {
     /// Represents a private visibility level, accessible only within the same module.
     case Private
 
@@ -45,6 +45,16 @@ public enum SuiMoveVisibility: String {
         case "Private": return .Private
         case "Public": return .Public
         case "Friend": return .Friend
+        default: return nil
+        }
+    }
+
+    public static func parseGraphQL(_ data: GraphQLEnum<MoveVisibility>?) -> SuiMoveVisibility? {
+        guard data != nil else { return nil }
+        switch data! {
+        case .friend: return .Friend
+        case .public: return .Public
+        case .private: return .Private
         default: return nil
         }
     }

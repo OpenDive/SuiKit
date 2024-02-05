@@ -1,8 +1,26 @@
 //
-//  File.swift
+//  GraphQLProviderTest.swift
+//  SuiKit
 //
+//  Copyright (c) 2023 OpenDive
 //
-//  Created by Marcus Arnett on 1/11/24.
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
@@ -18,7 +36,7 @@ final class GraphQLProviderTest: XCTestCase {
     override func setUp() async throws {
         self.toolBox = try await TestToolbox(true)
     }
-    
+
     private func setUpWithPackage() async throws {
         self.packageId = try await self.fetchToolBox().publishPackage("dynamic-fields").packageId
         
@@ -49,6 +67,7 @@ final class GraphQLProviderTest: XCTestCase {
             signer: toolBox.account
         )
         let _ = try await self.fetchToolBox().client.waitForTransaction(tx: result.digest)
+        // TODO: Remove once the GraphQL endpoint becomes default with the example validator.
         try await Task.sleep(nanoseconds: 10_000_000_000)  // Buffer for waiting on the Sui Indexer to catch up with the RPC Node
     }
 
@@ -66,14 +85,6 @@ final class GraphQLProviderTest: XCTestCase {
             throw NSError(domain: "Failed to get Package ID", code: -1)
         }
         return packageId
-    }
-
-    private func fetchParentObjectId() throws -> String {
-        guard let parentObjectId = self.parentObjectId else {
-            XCTFail("Failed to get Parent Object ID")
-            throw NSError(domain: "Failed to get Parent Object ID", code: -1)
-        }
-        return parentObjectId
     }
 
     func testThatGettingCoinsWorksAsIntendedFromGraphQL() async throws {
@@ -217,7 +228,7 @@ final class GraphQLProviderTest: XCTestCase {
 
         let rpcObject = try await toolBox.client.getObject(objectId: gasCoin.data[0].coinObjectId, options: objectOptions)
         let graphQLObject = try await toolBox.graphQLProvider.getObject(objectId: gasCoin.data[0].coinObjectId, options: objectOptions)
-        
+
         XCTAssertEqual(rpcObject?.data?.objectId, graphQLObject?.data?.objectId)
         XCTAssertEqual(rpcObject?.data?.digest, graphQLObject?.data?.digest)
         XCTAssertEqual(rpcObject?.data?.previousTransaction, graphQLObject?.data?.previousTransaction)
@@ -295,7 +306,7 @@ final class GraphQLProviderTest: XCTestCase {
 
         let rpcObject = try await toolBox.client.getMultiObjects(ids: [gasCoin.data[0].coinObjectId], options: objectOptions)
         let graphQLObject = try await toolBox.graphQLProvider.getMultiObjects(ids: [gasCoin.data[0].coinObjectId], options: objectOptions)
-        
+
         XCTAssertEqual(rpcObject[0].data?.objectId, graphQLObject[0].data?.objectId)
         XCTAssertEqual(rpcObject[0].data?.digest, graphQLObject[0].data?.digest)
         XCTAssertEqual(rpcObject[0].data?.previousTransaction, graphQLObject[0].data?.previousTransaction)

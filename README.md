@@ -50,7 +50,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 | Platform | Minimum Swift Version | Installation | Status |
 | --- | --- | --- | --- |
 | iOS 16.0+ / macOS 13.0+ / tvOS 16.0+ / watchOS 9.0+ | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested |
-| iOS 15.0 / macOS 12.0 / tvOS 15.0 / watchOS 8.0 | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested (no SECP256R1, no Kiosk) |
+| iOS 13.0-15.0 / macOS 11.0-12.0 / tvOS 13.0-15.0 / watchOS 7.0-8.0 | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested (no SECP256R1, no Kiosk) |
 
 ## Installation
 

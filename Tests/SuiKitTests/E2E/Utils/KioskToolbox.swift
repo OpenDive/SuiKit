@@ -8,6 +8,7 @@
 import Foundation
 import SuiKit
 
+@available(iOS 16.0, *)
 internal struct KioskToolbox {
     public let testToolbox: TestToolbox
     public let kioskClient: KioskClient

@@ -247,4 +247,4 @@ Credit goes to [The Sui Foundation](https://sui.io) for providing the needed inf
 
 ## License
 
-SuiKit is released under the MIT license.
+SuiKit is released under the MIT license. As well, SuiKit utilizes some code from the [web3swift package](https://github.com/web3swift-team/web3swift/) that enables functionality for SECP256K1 and BIP32 derivations. That following code is under the Apache 2.0 license.

@@ -2,7 +2,7 @@
 //  SECP256K1PrivateKey.swift
 //  SuiKit
 //
-//  Copyright (c) 2023 OpenDive
+//  Copyright (c) 2024 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -71,56 +71,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         guard let privateKeyArray = Self.generatePrivateKey() else { throw AccountError.invalidGeneratedKey }
         self.key = privateKeyArray
     }
-    
-    public static func generatePrivateKey() -> Data? {
-        for _ in 0...1024 {
-            guard let keyData = Self.randomBytes(length: 32) else {
-                continue
-            }
-            guard Self.verifyPrivateKey(privateKey: keyData) else {
-                continue
-            }
-            return keyData
-        }
-        return nil
-    }
-    
-    public static func verifyPrivateKey(privateKey: Data) -> Bool {
-        guard let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)), privateKey.count == 32 else { return false }
-        let result = privateKey.withUnsafeBytes { privateKeyRBPointer -> Int32? in
-            if let privateKeyRPointer = privateKeyRBPointer.baseAddress, privateKeyRBPointer.count > 0 {
-                let privateKeyPointer = privateKeyRPointer.assumingMemoryBound(to: UInt8.self)
-                let res = secp256k1_ec_seckey_verify(context, privateKeyPointer)
-                return res
-            } else {
-                return nil
-            }
-        }
-        guard let res = result, res == 1 else {
-            return false
-        }
-        return true
-    }
-    
-    internal static func randomBytes(length: Int) -> Data? {
-        for _ in 0...1024 {
-            var data = Data(repeating: 0, count: length)
-            let result = data.withUnsafeMutableBytes { mutableRBBytes -> Int32? in
-                if let mutableRBytes = mutableRBBytes.baseAddress, mutableRBBytes.count > 0 {
-                    let mutableBytes = mutableRBytes.assumingMemoryBound(to: UInt8.self)
-                    return SecRandomCopyBytes(kSecRandomDefault, length, mutableBytes)
-                } else {
-                    return nil
-                }
-            }
-            if let res = result, res == errSecSuccess {
-                return data
-            } else {
-                continue
-            }
-        }
-        return nil
-    }
 
     public init(_ mnemonics: String, _ path: String = SECP256K1PrivateKey.defaultDerivationPath) throws {
         guard SECP256K1PrivateKey.isValidBIP32Path(path) else { throw AccountError.invalidDerivationPath }
@@ -167,6 +117,36 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         return try SECP256K1PublicKey(data: result)
     }
     
+    public static func generatePrivateKey() -> Data? {
+        for _ in 0...1024 {
+            guard let keyData = Self.randomBytes(length: 32) else {
+                continue
+            }
+            guard Self.verifyPrivateKey(privateKey: keyData) else {
+                continue
+            }
+            return keyData
+        }
+        return nil
+    }
+    
+    public static func verifyPrivateKey(privateKey: Data) -> Bool {
+        guard let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)), privateKey.count == 32 else { return false }
+        let result = privateKey.withUnsafeBytes { privateKeyRBPointer -> Int32? in
+            if let privateKeyRPointer = privateKeyRBPointer.baseAddress, privateKeyRBPointer.count > 0 {
+                let privateKeyPointer = privateKeyRPointer.assumingMemoryBound(to: UInt8.self)
+                let res = secp256k1_ec_seckey_verify(context, privateKeyPointer)
+                return res
+            } else {
+                return nil
+            }
+        }
+        guard let res = result, res == 1 else {
+            return false
+        }
+        return true
+    }
+    
     public static func combineSerializedPublicKeys(keys: [Data], outputCompressed: Bool = false) -> Data? {
         let numToCombine = keys.count
         guard let context = context, numToCombine >= 1 else { return nil }
@@ -197,30 +177,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         }
         let serializedKey = Self.serializePublicKey(publicKey: &publicKey, compressed: outputCompressed)
         return serializedKey
-    }
-    
-    internal static func parsePublicKey(serializedKey: Data) -> secp256k1_pubkey? {
-        guard
-            let context = context,
-            (serializedKey.count == 33 || serializedKey.count == 65)
-        else {
-            return nil
-        }
-        let keyLen: Int = Int(serializedKey.count)
-        var publicKey = secp256k1_pubkey()
-        let result = serializedKey.withUnsafeBytes { (serializedKeyRawBufferPointer: UnsafeRawBufferPointer) -> Int32? in
-            if let serializedKeyRawPointer = serializedKeyRawBufferPointer.baseAddress, serializedKeyRawBufferPointer.count > 0 {
-                let serializedKeyPointer = serializedKeyRawPointer.assumingMemoryBound(to: UInt8.self)
-                let res = secp256k1_ec_pubkey_parse(context, &publicKey, serializedKeyPointer, keyLen)
-                return res
-            } else {
-                return nil
-            }
-        }
-        guard let res = result, res != 0 else {
-            return nil
-        }
-        return publicKey
     }
     
     public static func serializePublicKey(publicKey: inout secp256k1_pubkey, compressed: Bool = false) -> Data? {
@@ -257,25 +213,6 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
         guard var publicKey = Self.privateKeyToPublicKey(privateKey: privateKey) else { return nil }
         guard let serializedKey = serializePublicKey(publicKey: &publicKey, compressed: compressed) else { return nil }
         return serializedKey
-    }
-    
-    internal static func privateKeyToPublicKey(privateKey: Data) -> secp256k1_pubkey? {
-        guard let context = context else { return nil }
-        if privateKey.count != 32 { return nil }
-        var publicKey = secp256k1_pubkey()
-        let result = privateKey.withUnsafeBytes { (pkRawBufferPointer: UnsafeRawBufferPointer) -> Int32? in
-            if let pkRawPointer = pkRawBufferPointer.baseAddress, pkRawBufferPointer.count > 0 {
-                let privateKeyPointer = pkRawPointer.assumingMemoryBound(to: UInt8.self)
-                let res = secp256k1_ec_pubkey_create(context, &publicKey, privateKeyPointer)
-                return res
-            } else {
-                return nil
-            }
-        }
-        guard let res = result, res != 0 else {
-            return nil
-        }
-        return publicKey
     }
 
     public func sign(data: Data) throws -> Signature {
@@ -364,6 +301,69 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     private static func mnemonicToSeed(_ mnemonics: String) throws -> [UInt8] {
         let mnemonic = try Mnemonic(mnemonic: mnemonics.components(separatedBy: " "))
         return mnemonic.seed()
+    }
+
+    internal static func privateKeyToPublicKey(privateKey: Data) -> secp256k1_pubkey? {
+        guard let context = context else { return nil }
+        if privateKey.count != 32 { return nil }
+        var publicKey = secp256k1_pubkey()
+        let result = privateKey.withUnsafeBytes { (pkRawBufferPointer: UnsafeRawBufferPointer) -> Int32? in
+            if let pkRawPointer = pkRawBufferPointer.baseAddress, pkRawBufferPointer.count > 0 {
+                let privateKeyPointer = pkRawPointer.assumingMemoryBound(to: UInt8.self)
+                let res = secp256k1_ec_pubkey_create(context, &publicKey, privateKeyPointer)
+                return res
+            } else {
+                return nil
+            }
+        }
+        guard let res = result, res != 0 else {
+            return nil
+        }
+        return publicKey
+    }
+
+    internal static func parsePublicKey(serializedKey: Data) -> secp256k1_pubkey? {
+        guard
+            let context = context,
+            (serializedKey.count == 33 || serializedKey.count == 65)
+        else {
+            return nil
+        }
+        let keyLen: Int = Int(serializedKey.count)
+        var publicKey = secp256k1_pubkey()
+        let result = serializedKey.withUnsafeBytes { (serializedKeyRawBufferPointer: UnsafeRawBufferPointer) -> Int32? in
+            if let serializedKeyRawPointer = serializedKeyRawBufferPointer.baseAddress, serializedKeyRawBufferPointer.count > 0 {
+                let serializedKeyPointer = serializedKeyRawPointer.assumingMemoryBound(to: UInt8.self)
+                let res = secp256k1_ec_pubkey_parse(context, &publicKey, serializedKeyPointer, keyLen)
+                return res
+            } else {
+                return nil
+            }
+        }
+        guard let res = result, res != 0 else {
+            return nil
+        }
+        return publicKey
+    }
+
+    internal static func randomBytes(length: Int) -> Data? {
+        for _ in 0...1024 {
+            var data = Data(repeating: 0, count: length)
+            let result = data.withUnsafeMutableBytes { mutableRBBytes -> Int32? in
+                if let mutableRBytes = mutableRBBytes.baseAddress, mutableRBBytes.count > 0 {
+                    let mutableBytes = mutableRBytes.assumingMemoryBound(to: UInt8.self)
+                    return SecRandomCopyBytes(kSecRandomDefault, length, mutableBytes)
+                } else {
+                    return nil
+                }
+            }
+            if let res = result, res == errSecSuccess {
+                return data
+            } else {
+                continue
+            }
+        }
+        return nil
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> SECP256K1PrivateKey {

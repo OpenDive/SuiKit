@@ -27,11 +27,13 @@ import Foundation
 import CryptoKit
 import Blake2
 import Bip39
-import Web3Core
 import BigInt
-import LocalAuthentication
 
-@available(macOS 13.0, iOS 16.0, *)
+#if os(iOS) || os(macOS) || os(watchOS) || os(visionOS)
+import LocalAuthentication
+#endif
+
+@available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 public struct SECP256R1PrivateKey: PrivateKeyProtocol {
     public static let LENGTH: Int = 32
 
@@ -53,14 +55,17 @@ public struct SECP256R1PrivateKey: PrivateKeyProtocol {
     }
 
     public init(hasBiometrics: Bool = false) throws {
-        guard SecureEnclave.isAvailable else { throw AccountError.incompatibleOS }
-        let authContext = LAContext()
-
         if hasBiometrics {
+            #if os(iOS) || os(macOS) || os(watchOS) || os(visionOS)
+            guard SecureEnclave.isAvailable else { throw AccountError.incompatibleOS }
+            let authContext = LAContext()
             let accessControl = Self.getBioSecAccessControl()
             self.key = try SecureEnclave.P256.Signing.PrivateKey(accessControl: accessControl, authenticationContext: authContext)
+            #else
+            self.key = try SecureEnclave.P256.Signing.PrivateKey()
+            #endif
         } else {
-            self.key = try SecureEnclave.P256.Signing.PrivateKey(authenticationContext: authContext)
+            self.key = try SecureEnclave.P256.Signing.PrivateKey()
         }
     }
 

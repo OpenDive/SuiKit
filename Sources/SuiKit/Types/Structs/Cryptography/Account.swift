@@ -53,7 +53,7 @@ public struct Account: Equatable, Hashable {
             let privateKey = try SECP256K1PrivateKey()
             try self.init(privateKey: privateKey, accountType: accountType)
         case .secp256r1:
-            if #available(macOS 13.0, iOS 16.0, *) {
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 let privateKey = try SECP256R1PrivateKey(hasBiometrics: hasBiometrics)
                 try self.init(privateKey: privateKey, accountType: accountType)
             } else {
@@ -80,7 +80,7 @@ public struct Account: Equatable, Hashable {
             let privateKey = try SECP256K1PrivateKey(key: privateKey)
             try self.init(privateKey: privateKey, accountType: accountType)
         case .secp256r1:
-            if #available(macOS 13.0, iOS 16.0, *) {
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 let privateKey = try SECP256R1PrivateKey(key: privateKey)
                 try self.init(privateKey: privateKey, accountType: accountType)
             } else {
@@ -142,7 +142,7 @@ public struct Account: Equatable, Hashable {
             self.publicKey = try privateKey.publicKey()
             self.accountType = keyType
         case .secp256r1:
-            if #available(macOS 13.0, iOS 16.0, *) {
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 let privateKey = try SECP256R1PrivateKey(hexString: hexString)
                 self.privateKey = privateKey
                 self.publicKey = try privateKey.publicKey()
@@ -198,7 +198,7 @@ public struct Account: Equatable, Hashable {
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
         case .secp256r1:
-            if #available(macOS 13.0, iOS 16.0, *) {
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 let privateKey = try SECP256R1PrivateKey(mnemonic)
                 self.privateKey = privateKey
                 self.publicKey = try privateKey.publicKey()
@@ -227,7 +227,7 @@ public struct Account: Equatable, Hashable {
             self.privateKey = privateKey
             self.publicKey = try privateKey.publicKey()
         case .secp256r1:
-            if #available(macOS 13.0, iOS 16.0, *) {
+            if #available(macOS 13.0, iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
                 let privateKey = try SECP256R1PrivateKey(value: value)
                 self.privateKey = privateKey
                 self.publicKey = try privateKey.publicKey()

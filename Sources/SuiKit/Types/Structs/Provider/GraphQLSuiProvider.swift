@@ -27,7 +27,6 @@ import Foundation
 import SwiftyJSON
 import AnyCodable
 import Blake2
-import Web3Core
 import Apollo
 import ApolloAPI
 import BigInt

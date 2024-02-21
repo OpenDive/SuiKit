@@ -25,7 +25,6 @@
 
 import Foundation
 import XCTest
-import Web3Core
 @testable import SuiKit
 
 final class SECP256K1WalletTest: XCTestCase {

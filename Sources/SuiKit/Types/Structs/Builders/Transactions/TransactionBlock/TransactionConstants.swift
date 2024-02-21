@@ -26,8 +26,8 @@
 import Foundation
 
 public struct TransactionConstants {
-    public static let MAX_GAS_OBJECTS = 256
-    public static let MAX_GAS = 50_000_000_000
-    public static let GAS_SAFE_OVERHEAD = 1_000
-    public static let MAX_OBJECTS_PER_FETCH = 50
+    public static let MAX_GAS_OBJECTS: UInt64 = 256
+    public static let MAX_GAS: UInt64 = 50_000_000_000
+    public static let GAS_SAFE_OVERHEAD: UInt64 = 1_000
+    public static let MAX_OBJECTS_PER_FETCH: UInt64 = 50
 }

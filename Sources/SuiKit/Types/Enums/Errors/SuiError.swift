@@ -168,4 +168,7 @@ public enum SuiError: Error, Equatable {
 
     /// The result for the GraphQL query is missing
     case missingGraphQLData
+
+    /// There was an error with parsing data for RIPEMD160 functions
+    case DataError
 }

@@ -26,7 +26,6 @@
 import Foundation
 import XCTest
 @testable import SuiKit
-import Web3Core
 
 final class BCSTest: XCTestCase {
     private func ref() -> SuiObjectRef {

@@ -126,6 +126,19 @@ extension String {
             return self.count / 2
         }
     }
+
+    /// Strips whitespaces and newlines on both ends.
+    func trim() -> String {
+        trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    public func stripHexPrefix() -> String {
+        if self.hasPrefix("0x") {
+            let indexStart = self.index(self.startIndex, offsetBy: 2)
+            return String(self[indexStart...])
+        }
+        return self
+    }
 }
 
 fileprivate func convertHex(_ s: String.UnicodeScalarView, i: String.UnicodeScalarIndex, appendTo d: [UInt8]) -> [UInt8] {

@@ -25,12 +25,11 @@
 
 import Foundation
 import XCTest
-import Web3Core
 import CryptoKit
 import BigInt
 @testable import SuiKit
 
-@available(iOS 16.0, *)
+@available(iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 final class SECP256R1WalletTest: XCTestCase {
     let validSecp256r1SecretKey: [UInt8] = [
         66, 37, 141, 205, 161, 76, 241, 17, 198, 2, 184, 151, 27, 140, 200, 67, 233, 30, 70, 202, 144, 81, 81, 192, 39, 68, 166, 176, 23, 230, 147, 22

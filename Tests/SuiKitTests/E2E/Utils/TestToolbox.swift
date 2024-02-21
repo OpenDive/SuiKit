@@ -276,7 +276,7 @@ internal class TestToolbox {
     }
 
     private func getModule(_ name: String) throws -> JSON {
-        if #available(iOS 16.0, *) {
+        if #available(iOS 16.0, tvOS 16.0, watchOS 9.0, *) {
             guard let fileUrl = Bundle.test.resourceURL?.appending(component: "Resources/\(name).json") else {
                 throw NSError(domain: "package is missing", code: -1)
             }

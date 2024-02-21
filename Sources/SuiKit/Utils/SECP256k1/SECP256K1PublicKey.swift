@@ -26,7 +26,6 @@
 import Foundation
 import secp256k1
 import Blake2
-import Web3Core
 
 public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     /// The length of the key in bytes

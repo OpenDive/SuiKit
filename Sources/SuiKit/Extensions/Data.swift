@@ -26,6 +26,56 @@
 import CommonCrypto
 import Foundation
 
+extension Data {
+    /// Converts hexadecimal string representation of some bytes into actual bytes.
+    /// Notes:
+    ///  - empty string will return `nil`;
+    ///  - empty hex string, meaning it's equal to `"0x"`, will return empty `Data` object.
+    /// - Parameter hex: bytes represented as string.
+    /// - Returns: optional raw bytes.
+    public static func fromHex(_ hex: String) -> Data? {
+        let hex = hex.lowercased().trim()
+        guard !hex.isEmpty else { return nil }
+        guard hex != "0x" else { return Data() }
+        let bytes = [UInt8](hex: hex.stripHexPrefix())
+        return bytes.isEmpty ? nil : Data(bytes)
+    }
+    
+    func setLengthLeft(_ toBytes: UInt64, isNegative: Bool = false) -> Data? {
+        let existingLength = UInt64(self.count)
+        if existingLength == toBytes {
+            return Data(self)
+        } else if existingLength > toBytes {
+            return nil
+        }
+        var data: Data
+        if isNegative {
+            data = Data(repeating: UInt8(255), count: Int(toBytes - existingLength))
+        } else {
+            data = Data(repeating: UInt8(0), count: Int(toBytes - existingLength))
+        }
+        data.append(self)
+        return data
+    }
+
+    func setLengthRight(_ toBytes: UInt64, isNegative: Bool = false) -> Data? {
+        let existingLength = UInt64(self.count)
+        if existingLength == toBytes {
+            return Data(self)
+        } else if existingLength > toBytes {
+            return nil
+        }
+        var data: Data = Data()
+        data.append(self)
+        if isNegative {
+            data.append(Data(repeating: UInt8(255), count: Int(toBytes - existingLength)))
+        } else {
+            data.append(Data(repeating: UInt8(0), count: Int(toBytes - existingLength)))
+        }
+        return data
+    }
+}
+
 public extension Data {
     /// Two octet checksum as defined in RFC-4880. Sum of all octets, mod 65536
     func checksum() -> UInt16 {

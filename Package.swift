@@ -1,10 +1,11 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 5.5.0
+// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "SuiKit",
-    platforms: [.iOS(.v13), .macOS(.v11), .watchOS(.v6), .tvOS(.v13), .custom("xros", versionString: "1.0")],
+    platforms: [.iOS(.v13), .macOS(.v11), .watchOS(.v7), .tvOS(.v13)],
     products: [
         .library(
             name: "SuiKit",
@@ -17,25 +18,28 @@ let package = Package(
         .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.2.0"),
         .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
         .package(url: "https://github.com/tesseract-one/Bip39.swift.git", from: "0.1.1"),
-        .package(url: "https://github.com/web3swift-team/web3swift.git", from: "3.2.0"),
         .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
-        .package(url: "https://github.com/apollographql/apollo-ios.git", .upToNextMajor(from: "1.0.0"))
+        .package(url: "https://github.com/apollographql/apollo-ios.git", .upToNextMajor(from: "1.0.0")),
+        .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0")
     ],
     targets: [
         .target(
+            name: "secp256k1"
+        ),
+        .target(
             name: "SuiKit",
             dependencies: [
+                .product(name: "BigInt", package: "BigInt"),
                 .product(name: "UInt256", package: "UInt256"),
                 .product(name: "ed25519swift", package: "ed25519swift"),
                 .product(name: "SwiftyJSON", package: "swiftyjson"),
                 .product(name: "Blake2", package: "Blake2.swift"),
                 .product(name: "AnyCodable", package: "AnyCodable"),
                 .product(name: "Bip39", package: "Bip39.swift"),
-                .product(name: "web3swift", package: "web3swift"),
+                .product(name: "Apollo", package: "apollo-ios"),
                 .product(name: "JWTDecode", package: "JWTDecode.swift"),
-                .product(name: "Apollo", package: "apollo-ios")
-            ],
-            path: "Sources"
+                "secp256k1"
+            ]
         ),
         .testTarget(
             name: "SuiKitTests",

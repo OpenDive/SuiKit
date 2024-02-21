@@ -28,7 +28,6 @@ import SwiftyJSON
 import AnyCodable
 import Blake2
 import BigInt
-import Web3Core
 
 /// The RPC Provider used to interact with the Sui blockchain.
 public struct SuiProvider {

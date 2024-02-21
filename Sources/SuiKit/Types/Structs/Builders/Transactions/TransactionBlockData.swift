@@ -26,7 +26,6 @@
 import Foundation
 import BigInt
 import CryptoKit
-import Web3Core
 import Blake2
 
 public struct TransactionBlockDataBuilder: KeyProtocol {

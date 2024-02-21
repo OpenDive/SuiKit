@@ -25,12 +25,11 @@
 
 import Foundation
 import XCTest
-import Web3Core
 import CryptoKit
 import BigInt
 @testable import SuiKit
 
-@available(iOS 16.0, *)
+@available(iOS 16.0, tvOS 16.0, watchOS 9.0, *)
 final class SECP256R1PublicKeyTest: XCTestCase {
     struct PublicKeyTestStructure {
         let rawPublicKey: String

@@ -24,7 +24,6 @@
 //
 
 import Foundation
-import Web3Core
 import SwiftyJSON
 
 /// Represents a reference to a Sui Object and conforms to `KeyProtocol`.

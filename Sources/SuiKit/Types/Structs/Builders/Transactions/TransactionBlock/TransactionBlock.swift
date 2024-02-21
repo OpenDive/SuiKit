@@ -37,7 +37,7 @@ public class TransactionBlock {
     private var isPreparred: Bool = false
 
     /// A dictionary containing default offline limits with string keys and integer values.
-    public static let defaultOfflineLimits: [String: Int] = [
+    public static let defaultOfflineLimits: [String: UInt64] = [
         "maxPureArgumentSize": 16 * 1024,
         "maxTxGas": 50_000_000_000,
         "maxGasObjects": 256,
@@ -463,7 +463,7 @@ public class TransactionBlock {
             guard let defaultValue = Self.defaultOfflineLimits[key.rawValue] else {
                 throw SuiError.cannotFindProtocolConfig
             }
-            return defaultValue
+            return Int(defaultValue)
         }
 
         // Unwrap protocolConfig's attributes for the given key.
@@ -550,7 +550,7 @@ public class TransactionBlock {
             }
         }
 
-        let range = 0..<min(TransactionConstants.MAX_GAS_OBJECTS, filteredCoins.count)
+        let range = 0..<min(Int(TransactionConstants.MAX_GAS_OBJECTS), filteredCoins.count)
         let paymentCoins = filteredCoins[range].map { coin in
             SuiObjectRef(
                 objectId: coin.coinObjectId,
@@ -702,7 +702,7 @@ public class TransactionBlock {
         if !(objectsToResolve.isEmpty) {
             // Chunk the object IDs to fetch and initialize an array to store the fetched objects
             let dedupedIds = objectsToResolve.map { $0.id }
-            let objectChunks = dedupedIds.chunked(into: TransactionConstants.MAX_OBJECTS_PER_FETCH)
+            let objectChunks = dedupedIds.chunked(into: Int(TransactionConstants.MAX_OBJECTS_PER_FETCH))
             var objects: [SuiObjectResponse] = []
 
             // Fetch objects in chunks asynchronously and append them to the objects array
@@ -844,7 +844,7 @@ public class TransactionBlock {
                     throw SuiError.failedDryRun
                 }
 
-                let safeOverhead = TransactionConstants.GAS_SAFE_OVERHEAD * (
+                let safeOverhead = Int(TransactionConstants.GAS_SAFE_OVERHEAD) * (
                     Int(blockData.builder.gasConfig.price ?? "1")!
                 )
 

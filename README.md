@@ -61,7 +61,7 @@ The [Swift Package Manager](https://swift.org/package-manager/) allows for devel
 
 * File > Swift Packages > Add Package Dependency
 * Add `https://github.com/opendive/SuiKit.git`
-* Select "Up to next Major" with "1.1.1"
+* Select "Up to next Major" with "1.2.1"
 
 #### SPM Through Xcode Package
 

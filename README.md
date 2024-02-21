@@ -37,7 +37,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 - [x] SuiNS support.
 - [x] Kiosk Support.
 - [x] Native Swift BCS Implementation.
-- [x] Swift Concurrency Support back to iOS 13, macOS 10.15, tvOS 13, and watchOS 6.
+- [x] Swift Concurrency Support back to iOS 13, macOS 11.0, tvOS 13, and watchOS 7.
 - [x] Comprehensive Unit and End To End Test coverage.
 
 ## ToDo
@@ -49,7 +49,8 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 | Platform | Minimum Swift Version | Installation | Status |
 | --- | --- | --- | --- |
-| iOS 13.0+ / macOS 10.15+ / tvOS 13.0+ / watchOS 6.0+ | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested |
+| iOS 16.0+ / macOS 13.0+ / tvOS 16.0+ / watchOS 9.0+ | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested |
+| iOS 15.0 / macOS 12.0 / tvOS 15.0 / watchOS 8.0 | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested (no SECP256R1, no Kiosk) |
 
 ## Installation
 
@@ -69,7 +70,7 @@ Once you have your Swift package set up, add the Git link within the `dependenci
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/opendive/SuiKit.git", .upToNextMajor(from: "1.1.1"))
+    .package(url: "https://github.com/opendive/SuiKit.git", .upToNextMajor(from: "1.2.1"))
 ]
 ```
 

@@ -25,7 +25,7 @@
 
 import Foundation
 
-public struct zkLoginSignatureInputsClaim: KeyProtocol, Equatable {
+public struct zkLoginSignatureInputsClaim: KeyProtocol, Equatable, Codable {
     public var value: String
     public var indexMod4: UInt8
 

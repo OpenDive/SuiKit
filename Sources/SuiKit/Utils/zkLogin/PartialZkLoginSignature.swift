@@ -1,5 +1,5 @@
 //
-//  zkLoginSignatureInputs.swift
+//  PartialZkLoginSignature.swift
 //  SuiKit
 //
 //  Copyright (c) 2024 OpenDive
@@ -25,37 +25,22 @@
 
 import Foundation
 
-public struct zkLoginSignatureInputs: KeyProtocol, Equatable {
+public struct PartialZkLoginSignature: KeyProtocol, Equatable, Codable {
     public var proofPoints: zkLoginSignatureInputsProofPoints
     public var issBase64Details: zkLoginSignatureInputsClaim
     public var headerBase64: String
-    public var userSignature: String
-
-    public init(
-        proofPoints: zkLoginSignatureInputsProofPoints,
-        issBase64Details: zkLoginSignatureInputsClaim,
-        headerBase64: String,
-        userSignature: String
-    ) {
-        self.proofPoints = proofPoints
-        self.issBase64Details = issBase64Details
-        self.headerBase64 = headerBase64
-        self.userSignature = userSignature
-    }
 
     public func serialize(_ serializer: Serializer) throws {
         try Serializer._struct(serializer, value: self.proofPoints)
         try Serializer._struct(serializer, value: self.issBase64Details)
         try Serializer.str(serializer, self.headerBase64)
-        try Serializer.str(serializer, self.userSignature)
     }
 
-    public static func deserialize(from deserializer: Deserializer) throws -> zkLoginSignatureInputs {
-        return zkLoginSignatureInputs(
+    public static func deserialize(from deserializer: Deserializer) throws -> PartialZkLoginSignature {
+        return PartialZkLoginSignature(
             proofPoints: try Deserializer._struct(deserializer),
             issBase64Details: try Deserializer._struct(deserializer),
-            headerBase64: try Deserializer.string(deserializer),
-            userSignature: try Deserializer.string(deserializer)
+            headerBase64: try Deserializer.string(deserializer)
         )
     }
 }

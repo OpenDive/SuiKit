@@ -25,7 +25,7 @@
 
 import Foundation
 
-public struct zkLoginSignatureInputsProofPoints: KeyProtocol, Equatable {
+public struct zkLoginSignatureInputsProofPoints: KeyProtocol, Equatable, Codable {
     public var a: [String]
     public var b: [[String]]
     public var c: [String]

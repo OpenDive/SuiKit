@@ -30,6 +30,12 @@ public struct zkLoginSignatureInputsProofPoints: KeyProtocol, Equatable, Codable
     public var b: [[String]]
     public var c: [String]
 
+    public init(a: [String], b: [[String]], c: [String]) {
+        self.a = a
+        self.b = b
+        self.c = c
+    }
+
     public func serialize(_ serializer: Serializer) throws {
         try serializer.sequence(self.a, Serializer.str)
         try serializer.uleb128(UInt(self.b.count))

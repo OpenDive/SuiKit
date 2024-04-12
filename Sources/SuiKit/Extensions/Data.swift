@@ -84,6 +84,14 @@ public extension Data {
         }
         return UInt16(s % 65535)
     }
+
+    func base64urlEncodedString() -> String {
+        var result = self.base64EncodedString()
+        result = result.replacingOccurrences(of: "+", with: "-")
+        result = result.replacingOccurrences(of: "/", with: "_")
+        result = result.replacingOccurrences(of: "=", with: "")
+        return result
+    }
 }
 
 public extension Data {

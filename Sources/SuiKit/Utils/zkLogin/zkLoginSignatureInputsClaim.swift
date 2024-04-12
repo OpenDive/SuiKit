@@ -29,6 +29,11 @@ public struct zkLoginSignatureInputsClaim: KeyProtocol, Equatable, Codable {
     public var value: String
     public var indexMod4: UInt8
 
+    public init(value: String, indexMod4: UInt8) {
+        self.value = value
+        self.indexMod4 = indexMod4
+    }
+
     public func serialize(_ serializer: Serializer) throws {
         try Serializer.str(serializer, self.value)
         try Serializer.u8(serializer, self.indexMod4)

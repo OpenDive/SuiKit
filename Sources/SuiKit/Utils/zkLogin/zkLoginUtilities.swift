@@ -59,22 +59,15 @@ public struct zkLoginUtilities {
     }
 
     public static func toPaddedBigEndianBytes(num: BigInt, width: Int) -> [UInt8] {
-        let hex = String(num, radix: 16, uppercase: false)
-
-        // Padding and Slicing
-        let paddedHex = String(hex).leftPad(toLength: width * 2, withPad: "0")
-
-        // Convert Hex String to Bytes
-        var bytes = [UInt8]()
-        for i in stride(from: 0, to: paddedHex.count, by: 2) {
-            let start = paddedHex.index(paddedHex.startIndex, offsetBy: i)
-            let end = paddedHex.index(paddedHex.startIndex, offsetBy: i + 2)
-            let byteString = paddedHex[start..<end]
-            if let byte = UInt8(byteString, radix: 16) {
-                bytes.append(byte)
-            }
+        let hex = String(num, radix: 16)
+        let paddedHex = String(repeating: "0", count: max(0, width * 2 - hex.count)) + hex
+        let finalHex = paddedHex.suffix(width * 2)
+        return stride(from: 0, to: width * 2, by: 2).map {
+            let startIndex = finalHex.index(finalHex.startIndex, offsetBy: $0)
+            let endIndex = finalHex.index(startIndex, offsetBy: 2)
+            let byteString = finalHex[startIndex..<endIndex]
+            return UInt8(byteString, radix: 16)!
         }
-        return bytes
     }
 
     public static func findFirstNonZeroIndex(bytes: [UInt8]) -> Int {

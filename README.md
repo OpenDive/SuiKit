@@ -3,7 +3,6 @@
 [![Swift](https://img.shields.io/badge/Swift-5.5_5.6_5.7-orange?style=flat-square)](https://img.shields.io/badge/Swift-5.5_5.6_5.7-Orange?style=flat-square)
 [![Platforms](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS-green?style=flat-square)](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS-green?style=flat-square)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
-[![Swift](https://github.com/OpenDive/SuiKit/actions/workflows/swift.yml/badge.svg)](https://github.com/OpenDive/SuiKit/actions/workflows/swift.yml)
 
 SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchain easy.
 
@@ -43,6 +42,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 - [ ] Complete documentation of SuiKit.
 - [ ] Implement Resolve Name Service Names.
+- [ ] Reimplementation of tests for Swift versions 5.9 - 6.0.
 
 ## Requirements
 

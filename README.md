@@ -50,7 +50,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 | Platform | Minimum Swift Version | Installation | Status |
 | --- | --- | --- | --- |
 | iOS 16.0+ / macOS 13.0+ / tvOS 16.0+ / watchOS 9.0+ | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested |
-| iOS 13.0-15.0 / macOS 11.0-12.0 / tvOS 13.0-15.0 / watchOS 7.0-8.0 | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested (no SECP256R1, no Kiosk) |
+| iOS 14.0-15.0 / macOS 11.0-12.0 / tvOS 13.0-15.0 / watchOS 7.0-8.0 | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested (no SECP256R1, no Kiosk) |
 
 ## Installation
 
@@ -62,7 +62,7 @@ The [Swift Package Manager](https://swift.org/package-manager/) allows for devel
 
 * File > Swift Packages > Add Package Dependency
 * Add `https://github.com/opendive/SuiKit.git`
-* Select "Up to next Major" with "1.2.1"
+* Select "Up to next Major" with "1.2.2"
 
 #### SPM Through Xcode Package
 
@@ -70,7 +70,7 @@ Once you have your Swift package set up, add the Git link within the `dependenci
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/opendive/SuiKit.git", .upToNextMajor(from: "1.2.1"))
+    .package(url: "https://github.com/opendive/SuiKit.git", .upToNextMajor(from: "1.2.2"))
 ]
 ```
 
@@ -244,8 +244,8 @@ We welcome anyone to contribute to the project through posting issues, if they e
 
 ## Credits
 
-Credit goes to [The Sui Foundation](https://sui.io) for providing the needed infrastructure for the Sui blockchain network, as well with their extensive RPC documentation.
+Credit goes to [The Sui Foundation](https://sui.io) for providing the needed infrastructure for the Sui blockchain network, as well with their extensive RPC and Sui Move documentation.
 
 ## License
 
-SuiKit is released under the MIT license. As well, SuiKit utilizes some code from the [web3swift package](https://github.com/web3swift-team/web3swift/) that enables functionality for SECP256K1 and BIP32 derivations. That following code is under the Apache 2.0 license.
+SuiKit is released under the MIT license. As well, SuiKit utilizes some code from the [web3swift package](https://github.com/web3swift-team/web3swift/) that enables functionality for SECP256K1 and BIP32 derivations. That following code is under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.txt).

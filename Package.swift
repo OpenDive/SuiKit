@@ -1,11 +1,10 @@
 // swift-tools-version: 5.5.0
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
     name: "SuiKit",
-    platforms: [.iOS(.v13), .macOS(.v11), .watchOS(.v7), .tvOS(.v13)],
+    platforms: [.iOS(.v14), .macOS(.v11), .watchOS(.v7), .tvOS(.v13)],
     products: [
         .library(
             name: "SuiKit",

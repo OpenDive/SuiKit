@@ -7,7 +7,10 @@
 
 import Foundation
 
-extension AnyHashable: ScalarType, OutputTypeConvertible, AnyScalarType {
+extension AnyHashable: @retroactive GraphQLOperationVariableValue {}
+extension AnyHashable: @retroactive JSONDecodable {}
+extension AnyHashable: @retroactive JSONEncodable {}
+extension AnyHashable: @retroactive ScalarType, @retroactive OutputTypeConvertible, @retroactive AnyScalarType {
     public init(_jsonValue value: JSONValue) throws {
         self = value
     }

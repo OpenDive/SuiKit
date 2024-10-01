@@ -72,7 +72,7 @@ extension SecureEnclave.P256.Signing.PrivateKey: KeyValueProtocol, @retroactive 
 #else
 /// Represents a `P256`public key.
 extension P256.Signing.PublicKey: Equatable {}
-extension P256.Signing.PublicKey: KeyValueProtocol, @retroactive Hashable  {
+extension P256.Signing.PublicKey: KeyValueProtocol, Hashable  {
     public static func == (lhs: P256.Signing.PublicKey, rhs: P256.Signing.PublicKey) -> Bool {
         return lhs.rawRepresentation == rhs.rawRepresentation
     }
@@ -86,7 +86,7 @@ extension P256.Signing.PublicKey: KeyValueProtocol, @retroactive Hashable  {
 
 /// Represents a `P256`private key.
 extension SecureEnclave.P256.Signing.PrivateKey: Equatable {}
-extension SecureEnclave.P256.Signing.PrivateKey: KeyValueProtocol, @retroactive Hashable {
+extension SecureEnclave.P256.Signing.PrivateKey: KeyValueProtocol, Hashable {
     public static func == (lhs: SecureEnclave.P256.Signing.PrivateKey, rhs: SecureEnclave.P256.Signing.PrivateKey) -> Bool {
         return lhs.dataRepresentation == rhs.dataRepresentation
     }

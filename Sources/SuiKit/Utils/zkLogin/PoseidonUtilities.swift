@@ -27,7 +27,7 @@ import Foundation
 import BigInt
 
 public struct PoseidonUtilities {
-    private static let poseidonNumToHashFN: [any Poseidon] = [
+    nonisolated(unsafe) private static let poseidonNumToHashFN: [any Poseidon] = [
         Poseidon1(),
         Poseidon2(),
         Poseidon3(),

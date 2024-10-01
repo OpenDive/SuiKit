@@ -39,8 +39,8 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
 
     /// Default derivation path for the private key.
     public static let defaultDerivationPath: String = "m/54'/784'/0'/0/0"
-    
-    static let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY))
+
+    nonisolated(unsafe) static let context = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY))
 
     /// The length of the key in bytes
     public static let LENGTH: Int = 32

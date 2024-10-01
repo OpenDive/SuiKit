@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents an error message, conforming to `Equatable` for comparing instances.
-public struct ErrorMessage: Equatable {
+public struct ErrorMessage: Error, Equatable {
     /// A `String` containing the textual description of the error.
     public let message: String
 

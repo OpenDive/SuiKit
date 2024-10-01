@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import UInt256
+@preconcurrency import UInt256
 
 /// The max UInt8 value
 let MAX_U8 = UInt8.max
@@ -39,7 +39,7 @@ let MAX_U32 = UInt32.max
 let MAX_U64 = UInt64.max
 
 /// The max UInt128 value
-let MAX_U128 = UInt128.max
+nonisolated(unsafe) let MAX_U128 = UInt128.max
 
 /// The max UInt256 value
 let MAX_U256 = UInt256.max

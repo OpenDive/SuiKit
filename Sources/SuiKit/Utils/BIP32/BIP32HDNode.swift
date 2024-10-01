@@ -47,7 +47,7 @@ extension UInt32 {
 }
 
 public class HDNode {
-    private static var maxIterationIndex = UInt32(1) << 31
+    nonisolated(unsafe) private static var maxIterationIndex = UInt32(1) << 31
 
     /// Contains private and public prefixes for serialization.
     /// See [BIP-32's serialization format](https://github.com/bitcoin/bips/blob/master/bip-0032.mediawiki#serialization-format) for more info.

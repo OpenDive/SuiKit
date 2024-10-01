@@ -26,7 +26,7 @@
 import Foundation
 
 /// `RPCError` is a class representing an error encountered while performing a Remote Procedure Call (RPC).
-class RPCError: Error {
+class RPCError: @unchecked Sendable, Error {
     /// Represents the request associated with the RPC error.
     let req: RPCErrorRequest
 

@@ -1,4 +1,5 @@
 {
+  "originHash" : "44432f12e2bc0e3a87f87add50af5acd05663b2ae4d75717790fab51d4b25ce3",
   "pins" : [
     {
       "identity" : "anycodable",
@@ -93,10 +94,10 @@
     {
       "identity" : "uint256",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/hyugit/UInt256.git",
+      "location" : "https://github.com/MarcoDotIO/UInt256.git",
       "state" : {
-        "revision" : "1a499a1bf08afd10b9fcd0fd6d90b6dd9196be50",
-        "version" : "0.2.2"
+        "branch" : "master",
+        "revision" : "6e87f1d243ac63efb7ff069e4ed55ddccb0ca8cf"
       }
     },
     {
@@ -109,5 +110,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

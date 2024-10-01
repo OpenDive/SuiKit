@@ -26,25 +26,25 @@
 import Foundation
 
 public struct RuleAddresses {
-    public static let royaltyRuleAddress: [KioskNetwork: String] = [
+    nonisolated(unsafe) public static let royaltyRuleAddress: [KioskNetwork: String] = [
         KioskNetwork.testnet: "bd8fc1947cf119350184107a3087e2dc27efefa0dd82e25a1f699069fe81a585",
         KioskNetwork.mainnet: "0x434b5bd8f6a7b05fede0ff46c6e511d71ea326ed38056e3bcd681d2d7c2a7879",
         KioskNetwork.custom: ""
     ]
 
-    public static let kioskLockRuleAddress: [KioskNetwork: String] = [
+    nonisolated(unsafe) public static let kioskLockRuleAddress: [KioskNetwork: String] = [
         KioskNetwork.testnet: "bd8fc1947cf119350184107a3087e2dc27efefa0dd82e25a1f699069fe81a585",
         KioskNetwork.mainnet: "0x434b5bd8f6a7b05fede0ff46c6e511d71ea326ed38056e3bcd681d2d7c2a7879",
         KioskNetwork.custom: ""
     ]
 
-    public static let floorPriceRuleAddres: [KioskNetwork: String] = [
+    nonisolated(unsafe) public static let floorPriceRuleAddres: [KioskNetwork: String] = [
         KioskNetwork.testnet: "0x06f6bdd3f2e2e759d8a4b9c252f379f7a05e72dfe4c0b9311cdac27b8eb791b1",
         KioskNetwork.mainnet: "0x34cc6762780f4f6f153c924c0680cfe2a1fb4601e7d33cc28a92297b62de1e0e",
         KioskNetwork.custom: ""
     ]
 
-    public static let personalKioskRuleAddress: [KioskNetwork: String] = [
+    nonisolated(unsafe) public static let personalKioskRuleAddress: [KioskNetwork: String] = [
         KioskNetwork.testnet: "0x06f6bdd3f2e2e759d8a4b9c252f379f7a05e72dfe4c0b9311cdac27b8eb791b1",
         KioskNetwork.mainnet: "0x34cc6762780f4f6f153c924c0680cfe2a1fb4601e7d33cc28a92297b62de1e0e",
         KioskNetwork.custom: ""

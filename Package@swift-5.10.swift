@@ -1,4 +1,4 @@
-// swift-tools-version: 6.0
+// swift-tools-version: 5.10
 
 import PackageDescription
 
@@ -11,7 +11,7 @@ let package = Package(
             targets: ["SuiKit"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/MarcoDotIO/UInt256.git", branch: "master"),
+        .package(url: "https://github.com/hyugit/UInt256.git", from: "0.2.2"),
         .package(url: "https://github.com/pebble8888/ed25519swift.git", from: "1.2.7"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "4.0.0"),
         .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.2.0"),
@@ -58,5 +58,5 @@ let package = Package(
             ]
         ),
     ],
-    swiftLanguageVersions: [.version("6")]
+    swiftLanguageVersions: [.v5]
 )

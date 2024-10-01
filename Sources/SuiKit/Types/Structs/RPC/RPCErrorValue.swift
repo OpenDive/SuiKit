@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents a structured error value for Remote Procedure Call (RPC).
-public struct RPCErrorValue: Equatable {
+public struct RPCErrorValue: Error, Equatable {
     /// A unique identifier for the RPC call. It can be `nil` if the error is in response to a
     /// notification (i.e., a request where a response is not expected).
     public let id: Int?

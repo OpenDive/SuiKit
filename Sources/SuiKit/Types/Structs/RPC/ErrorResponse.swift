@@ -35,5 +35,5 @@ public struct ErrorResponse: Codable, Error {
 
     /// An `ErrorObject` containing details about the error that occurred during
     /// the processing of the request.
-    public let error: ErrorObject
+    nonisolated(unsafe) public let error: ErrorObject
 }

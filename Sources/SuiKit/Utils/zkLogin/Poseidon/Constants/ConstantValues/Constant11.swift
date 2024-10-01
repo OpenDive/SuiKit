@@ -25,7 +25,7 @@
 
 import Foundation
 
-public let Constant11 = ConstantKey(
+nonisolated(unsafe) public let Constant11 = ConstantKey(
     C: [
         "FRLfATW2aSWJ8HEUCmB0nPd1xkKzANovtK1cbiOtTl8=",
          "KxCa4DftMDYc9lRLL0zljzVliYltaohJSC7T+bZuEZg=",

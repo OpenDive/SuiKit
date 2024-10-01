@@ -1,5 +1,5 @@
-# TODO: Look into spinning local Sui instance for E2E CI / CD Tests
-# TODO: Once an official release is implemented for Swift 6, replace NeedleInAJayStack call with swift-actions
+# TODO: Look into spinning local Sui instance for E2E CI / CD Tests.
+# TODO: Once an official release is implemented for Swift 6, replace NeedleInAJayStack call with swift-actions.
 
 name: Swift Build
 
@@ -10,13 +10,16 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
-    name: Swift build for 6.0
+  build-macos:
+    name: Swift build (macOS) for ${{ matrix.swift }}
     runs-on: macos-latest
+    strategy:
+      matrix:
+        swift: ["5.10", "6"]
     steps:
       - uses: actions/checkout@v4
       - uses: NeedleInAJayStack/setup-swift@4e17dcd69a660eea371d715802c219601e76f50a
         with:
-          swift-version: "6"
+          swift-version: ${{ matrix.swift }}
       - name: Build Phase
         run: swift build -v

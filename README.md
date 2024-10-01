@@ -37,7 +37,6 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 - [x] SuiNS support.
 - [x] Kiosk Support.
 - [x] Native Swift BCS Implementation.
-- [x] Swift Concurrency Support back to iOS 13, macOS 11.0, tvOS 13, and watchOS 7.
 - [x] Comprehensive Unit and End To End Test coverage.
 
 ## ToDo
@@ -49,8 +48,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 
 | Platform | Minimum Swift Version | Installation | Status |
 | --- | --- | --- | --- |
-| iOS 16.0+ / macOS 13.0+ / tvOS 16.0+ / watchOS 9.0+ | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested |
-| iOS 14.0-15.0 / macOS 11.0-12.0 / tvOS 13.0-15.0 / watchOS 7.0-8.0 | 5.5 | [Swift Package Manager](#swift-package-manager) | Fully Tested (no SECP256R1, no Kiosk) |
+| iOS 17.0+ / macOS 14.0+ / tvOS 17.0+ / watchOS 10.0+ | 5.9 | [Swift Package Manager](#swift-package-manager) | Fully Tested |
 
 ## Installation
 
@@ -248,4 +246,4 @@ Credit goes to [The Sui Foundation](https://sui.io) for providing the needed inf
 
 ## License
 
-SuiKit is released under the MIT license. As well, SuiKit utilizes some code from the [web3swift package](https://github.com/web3swift-team/web3swift/) that enables functionality for SECP256K1 and BIP32 derivations. That following code is under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.txt).
+SuiKit is released under the MIT license. As well, SuiKit utilizes some code from the [web3swift package](https://github.com/web3swift-team/web3swift/) that enables functionality for SECP256K1 and BIP32 derivations. That following code is under the [Apache 2.0 license](https://www.apache.org/licenses/LICENSE-2.0.txt). The licenses for both are included in this package under LICENSE.md and COPYING.

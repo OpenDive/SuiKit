@@ -47,5 +47,5 @@ let package = Package(
             resources: [.copy("Resources")]
         ),
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageVersions: [.version("5.9")]
 )

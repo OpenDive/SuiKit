@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "SuiKit",
-    platforms: [.iOS(.v17), .macOS(.v10_14), .watchOS(.v10), .tvOS(.v17)],
+    platforms: [.iOS(.v17), .macOS(.v11), .watchOS(.v10), .tvOS(.v17)],
     products: [
         .library(
             name: "SuiKit",
@@ -44,7 +44,18 @@ let package = Package(
             name: "SuiKitTests",
             dependencies: ["SuiKit"],
             path: "Tests",
-            resources: [.copy("Resources")]
+            resources: [
+                .copy("Resources/coin-metadata.json"),
+                .copy("Resources/display-test.json"),
+                .copy("Resources/dynamic-fields.json"),
+                .copy("Resources/entry-point-types.json"),
+                .copy("Resources/entry-point-vector.json"),
+                .copy("Resources/hero.json"),
+                .copy("Resources/id-entry-args.json"),
+                .copy("Resources/kiosk.json"),
+                .copy("Resources/serializer.json"),
+                .copy("Resources/serializer-upgrade.json")
+            ]
         ),
     ],
     swiftLanguageVersions: [.v5]

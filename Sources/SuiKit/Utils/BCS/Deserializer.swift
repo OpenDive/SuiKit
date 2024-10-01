@@ -24,7 +24,12 @@
 //
 
 import Foundation
+
+#if swift(>=6.0)
 @preconcurrency import UInt256
+#else
+import UInt256
+#endif
 
 /// The max UInt8 value
 let MAX_U8 = UInt8.max

@@ -25,7 +25,7 @@
 
 import Foundation
 
-#if $RetroactiveAttribute
+#if swift(>=6.0)
 extension AnyHashable: @retroactive GraphQLOperationVariableValue {}
 extension AnyHashable: @retroactive JSONDecodable {}
 extension AnyHashable: @retroactive JSONEncodable {}

@@ -34,7 +34,7 @@ public protocol GenericPasswordConvertible: CustomStringConvertible {
     var rawRepresentation: Data { get }
 }
 
-#if hasFeature(RetroactiveAttribute)
+#if $RetroactiveAttribute
 extension SecureEnclave.P256.Signing.PrivateKey: @retroactive CustomStringConvertible {}
 extension SecureEnclave.P256.Signing.PrivateKey: GenericPasswordConvertible {
     public var description: String {

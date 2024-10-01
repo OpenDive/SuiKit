@@ -41,7 +41,7 @@ extension Data: KeyValueProtocol {
 // TODO: Look into proper architecture for handling cases such as this
 // TODO: where we need to represent a type that can either have a
 // TODO: Data key or a P256 key.
-#if hasFeature(RetroactiveAttribute)
+#if $RetroactiveAttribute
 /// Represents a `P256`public key.
 extension P256.Signing.PublicKey: @retroactive Equatable {}
 extension P256.Signing.PublicKey: KeyValueProtocol, @retroactive Hashable  {

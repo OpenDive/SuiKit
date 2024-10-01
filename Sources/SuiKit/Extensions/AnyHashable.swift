@@ -25,7 +25,7 @@
 
 import Foundation
 
-#if hasFeature(RetroactiveAttribute)
+#if $RetroactiveAttribute
 extension AnyHashable: @retroactive GraphQLOperationVariableValue {}
 extension AnyHashable: @retroactive JSONDecodable {}
 extension AnyHashable: @retroactive JSONEncodable {}

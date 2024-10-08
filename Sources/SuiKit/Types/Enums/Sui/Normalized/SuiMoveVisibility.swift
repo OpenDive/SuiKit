@@ -48,15 +48,5 @@ public enum SuiMoveVisibility: String, Equatable {
         default: return nil
         }
     }
-
-    public static func parseGraphQL(_ data: GraphQLEnum<MoveVisibility>?) -> SuiMoveVisibility? {
-        guard data != nil else { return nil }
-        switch data! {
-        case .friend: return .Friend
-        case .public: return .Public
-        case .private: return .Private
-        default: return nil
-        }
-    }
 }
 

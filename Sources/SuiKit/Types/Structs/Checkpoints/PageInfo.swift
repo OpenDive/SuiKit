@@ -38,32 +38,4 @@ public struct PageInfo: Equatable {
 
     /// Whether or not there is another page before the current page.
     public var hasPreviousPage: Bool
-
-    public init(graphql: GetCheckpointsQuery.Data.Checkpoints.PageInfo) {
-        self.startCursor = graphql.startCursor
-        self.endCursor = graphql.endCursor
-        self.hasNextPage = graphql.hasNextPage
-        self.hasPreviousPage = graphql.hasPreviousPage
-    }
-
-    public init(graphql: QueryEventsQuery.Data.EventConnection.PageInfo) {
-        self.startCursor = graphql.startCursor
-        self.endCursor = graphql.endCursor
-        self.hasNextPage = graphql.hasNextPage
-        self.hasPreviousPage = graphql.hasPreviousPage
-    }
-
-    public init(graphql: GetCoinsQuery.Data.Address.CoinConnection.PageInfo) {
-        self.startCursor = nil
-        self.endCursor = graphql.endCursor
-        self.hasNextPage = graphql.hasNextPage
-        self.hasPreviousPage = false
-    }
-
-    public init(graphql: GetOwnedObjectsQuery.Data.Address.ObjectConnection.PageInfo) {
-        self.startCursor = nil
-        self.endCursor = graphql.endCursor
-        self.hasNextPage = graphql.hasNextPage
-        self.hasPreviousPage = false
-    }
 }

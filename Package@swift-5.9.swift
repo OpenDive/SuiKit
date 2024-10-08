@@ -18,7 +18,6 @@ let package = Package(
         .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
         .package(url: "https://github.com/tesseract-one/Bip39.swift.git", from: "0.1.1"),
         .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
-        .package(url: "https://github.com/apollographql/apollo-ios.git", .upToNextMajor(from: "1.0.0")),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0")
     ],
     targets: [
@@ -35,7 +34,6 @@ let package = Package(
                 .product(name: "Blake2", package: "Blake2.swift"),
                 .product(name: "AnyCodable", package: "AnyCodable"),
                 .product(name: "Bip39", package: "Bip39.swift"),
-                .product(name: "Apollo", package: "apollo-ios"),
                 .product(name: "JWTDecode", package: "JWTDecode.swift"),
                 "secp256k1"
             ]

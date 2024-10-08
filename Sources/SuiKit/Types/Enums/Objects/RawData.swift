@@ -37,50 +37,6 @@ public enum RawData: Equatable  {
     /// Represents raw data for a package object. The associated value is a `PackageRaw` containing the package object's raw data.
     case packageObject(PackageRaw)
 
-    public init(graphql: TryGetPastObjectQuery.Data.Object.AsMoveObject, version: String) {
-        self = .moveObject(
-            MoveObjectRaw(
-                bcsBytes: JSON(graphql.ifShowBcs!.contents!.bcs).stringValue,
-                hasPublicTransfer: graphql.ifShowBcs!.hasPublicTransfer,
-                type: graphql.ifShowBcs!.contents!.type.repr,
-                version: version
-            )
-        )
-    }
-
-    public init(graphql: GetOwnedObjectsQuery.Data.Address.ObjectConnection.Node.AsMoveObject, version: String) {
-        self = .moveObject(
-            MoveObjectRaw(
-                bcsBytes: JSON(graphql.ifShowBcs!.contents!.bcs).stringValue,
-                hasPublicTransfer: graphql.ifShowBcs!.hasPublicTransfer,
-                type: graphql.ifShowBcs!.contents!.type.repr,
-                version: version
-            )
-        )
-    }
-
-    public init(graphql: MultiGetObjectsQuery.Data.ObjectConnection.Node.AsMoveObject, version: String) {
-        self = .moveObject(
-            MoveObjectRaw(
-                bcsBytes: JSON(graphql.ifShowBcs!.contents!.bcs).stringValue,
-                hasPublicTransfer: graphql.ifShowBcs!.hasPublicTransfer,
-                type: graphql.ifShowBcs!.contents!.type.repr,
-                version: version
-            )
-        )
-    }
-
-    public init(graphql: GetObjectQuery.Data.Object.AsMoveObject, version: String) {
-        self = .moveObject(
-            MoveObjectRaw(
-                bcsBytes: JSON(graphql.ifShowBcs!.contents!.bcs).stringValue,
-                hasPublicTransfer: graphql.ifShowBcs!.hasPublicTransfer,
-                type: graphql.ifShowBcs!.contents!.type.repr,
-                version: version
-            )
-        )
-    }
-
     /// Parses a `JSON` object to determine the type of raw data it contains and returns a corresponding `RawData` instance.
     ///
     /// - Parameters:

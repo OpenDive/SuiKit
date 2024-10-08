@@ -60,13 +60,4 @@ public struct SuiCoinMetadata: Equatable {
         self.symbol = symbol
         self.id = id
     }
-
-    public init(graphql: GetCoinMetadataQuery.Data.CoinMetadata) {
-        self.decimals = UInt8(graphql.decimals!)
-        self.name = graphql.name!
-        self.symbol = graphql.symbol!
-        self.description = graphql.description!
-        self.iconUrl = graphql.iconUrl
-        self.id = graphql.asMoveObject.asObject.address
-    }
 }

@@ -42,14 +42,4 @@ public struct ValidatorApys: Equatable {
         self.apys = input["apys"].arrayValue.map { ValidatorApy(input: $0) }
         self.epoch = input["epoch"].stringValue
     }
-
-    public init(graphql: GetValidatorsApyQuery.Data) {
-        self.apys = graphql.epoch!.validatorSet!.activeValidators!.map { validator in
-            ValidatorApy(
-                address: validator.address.address,
-                apy: validator.apy != nil ? UInt64((validator.apy! / 100)) : nil
-            )
-        }
-        self.epoch = "\(graphql.epoch!.epochId)"
-    }
 }

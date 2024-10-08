@@ -66,38 +66,5 @@ public struct ProtocolConfig: Equatable {
         self.minSupportedProtocolVersion = minSupportedProtocolVersion
         self.protocolVersion = protocolVersion
     }
-
-    public init(graphql: GetProtocolConfigQuery.Data.ProtocolConfig) {
-        var attributesDict: [String: ProtocolConfigValue?] = [:]
-        let attributeTypeMap: [String: (String) -> ProtocolConfigValue] = [
-            "max_arguments": { .u32($0) },
-            "max_gas_payment_objects": { .u32($0) },
-            "max_modules_in_publish": { .u32($0) },
-            "max_programmable_tx_commands": { .u32($0) },
-            "max_pure_argument_size": { .u32($0) },
-            "max_type_argument_depth": { .u32($0) },
-            "max_type_arguments": { .u32($0) },
-            "move_binary_format_version": { .u32($0) },
-            "random_beacon_reduction_allowed_delta": { .u16($0) },
-            "scoring_decision_cutoff_value": { .f64($0) },
-            "scoring_decision_mad_divisor": { .f64($0) }
-        ]
-        graphql.configs.forEach { feature in
-            if feature.value != nil, feature.key != "random_beacon_reduction_allowed_delta" {
-                if let variableType = attributeTypeMap[feature.key] {
-                    attributesDict[feature.key] = variableType(feature.value!)
-                } else {
-                    attributesDict[feature.key] = .u64(feature.value!)
-                }
-            }
-        }
-        self.attributes = attributesDict
-        self.maxSupportedProtocolVersion = "\(graphql.protocolVersion)"
-        self.minSupportedProtocolVersion = "1"
-        self.protocolVersion = "\(graphql.protocolVersion)"
-        self.featureFlags = graphql.featureFlags.reduce(into: [String: Bool]()) { (flags, obj) in
-            flags[obj.key] = obj.value
-        }
-    }
 }
 

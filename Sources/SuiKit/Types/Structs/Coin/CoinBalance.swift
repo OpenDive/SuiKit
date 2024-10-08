@@ -54,18 +54,4 @@ public struct CoinBalance: Equatable {
         self.totalBalance = totalBalance
         self.lockedBalance = lockedBalance
     }
-
-    public init(graphql: GetBalanceQuery.Data.Address.Balance) throws {
-        self.coinType = try StructTag.fromStr(graphql.coinType!.repr)
-        self.coinObjectCount = graphql.coinObjectCount!
-        self.totalBalance = graphql.totalBalance!
-        self.lockedBalance = nil
-    }
-
-    public init(graphql: GetAllBalancesQuery.Data.Address.BalanceConnection.Node) throws {
-        self.coinType = try StructTag.fromStr(graphql.coinType!.repr)
-        self.coinObjectCount = graphql.coinObjectCount!
-        self.totalBalance = graphql.totalBalance!
-        self.lockedBalance = nil
-    }
 }

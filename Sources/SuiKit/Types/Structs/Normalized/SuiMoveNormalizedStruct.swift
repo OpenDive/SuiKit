@@ -53,54 +53,6 @@ public struct SuiMoveNormalizedStruct: Equatable {
         self.typeParameters = typeParameters
         self.fields = fields
     }
-    
-    public init(structure: GetNormalizedMoveStructQuery.Data.Object.AsMovePackage.Module.Struct) {
-        self.abilities = structure.abilities != nil ?
-            SuiMoveAbilitySet(abilities: structure.abilities!.compactMap { $0.value?.rawValue }) :
-            SuiMoveAbilitySet(abilities: [])
-
-        self.typeParameters = structure.typeParameters != nil ?
-            structure.typeParameters!.map {
-                SuiMoveStructTypeParameter(
-                    constraints: SuiMoveAbilitySet(abilities: $0.constraints.compactMap { $0.value?.rawValue }),
-                    isPhantom: $0.isPhantom
-                )
-            } :
-            []
-
-        self.fields = structure.fields != nil ?
-            structure.fields!.map {
-                SuiMoveNormalizedField(
-                    name: $0.name,
-                    type: SuiMoveNormalizedType.parseGraphQL($0.type!.signature)!
-                )
-            }:
-            []
-    }
-
-    public init(structure: RPC_MOVE_MODULE_FIELDS.Structs.Node) {
-        self.abilities = structure.abilities != nil ?
-            SuiMoveAbilitySet(abilities: structure.abilities!.compactMap { $0.value?.rawValue }) :
-            SuiMoveAbilitySet(abilities: [])
-
-        self.typeParameters = structure.typeParameters != nil ?
-            structure.typeParameters!.map {
-                SuiMoveStructTypeParameter(
-                    constraints: SuiMoveAbilitySet(abilities: $0.constraints.compactMap { $0.value?.rawValue }),
-                    isPhantom: $0.isPhantom
-                )
-            } :
-            []
-
-        self.fields = structure.fields != nil ?
-            structure.fields!.map {
-                SuiMoveNormalizedField(
-                    name: $0.name,
-                    type: SuiMoveNormalizedType.parseGraphQL($0.type!.signature)!
-                )
-            }:
-            []
-    }
 
     /// Initializes a new instance of `SuiMoveNormalizedStruct` from a JSON representation.
     /// Returns `nil` if there is an issue with the JSON input.

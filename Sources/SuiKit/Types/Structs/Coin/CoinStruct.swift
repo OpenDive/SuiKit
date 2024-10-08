@@ -72,15 +72,6 @@ public struct CoinStruct: Equatable {
         self.balance = balance
         self.previousTransaction = previousTransaction
     }
-
-    public init(graphql: GetCoinsQuery.Data.Address.CoinConnection.Node) throws {
-        self.balance = graphql.balance!
-        self.coinObjectId = graphql.asMoveObject.asObject.coinObjectId
-        self.coinType = try StructTag.fromStr(graphql.asMoveObject.contents!.type.repr)
-        self.digest = graphql.asMoveObject.asObject.digest
-        self.previousTransaction = graphql.asMoveObject.asObject.previousTransactionBlock!.digest
-        self.version = "\(graphql.asMoveObject.asObject.version)"
-    }
 }
 
 public typealias objectId = String

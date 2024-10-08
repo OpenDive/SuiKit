@@ -42,20 +42,6 @@ public struct DisplayFieldsResponse: Equatable  {
         self.error = error
     }
 
-    public init(graphql: [RPC_OBJECT_FIELDS.Display]) {
-        var data: [String: String] = [:]
-        var error: ObjectResponseError? = nil
-        for displayItem in graphql {
-            if displayItem.error != nil {
-                error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
-            } else if displayItem.value != nil {
-                data[displayItem.key] = displayItem.value!
-            }
-        }
-        self.data = data.isEmpty ? nil : data
-        self.error = error
-    }
-
     public static func parseJSON(_ input: JSON) -> DisplayFieldsResponse? {
         var error: ObjectResponseError? = nil
         if input["error"].exists() {

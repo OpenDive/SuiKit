@@ -43,6 +43,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 - [ ] Complete documentation of SuiKit.
 - [ ] Implement Resolve Name Service Names.
 - [ ] Reimplementation of GitHub Action workflows for Swift versions 5.9 - 6.0.
+- [ ] Reimplementation of GraphQL Endpoints for Swift 6.0 Concurrency Restrictions
 
 ## Requirements
 

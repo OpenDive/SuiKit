@@ -1,0 +1,96 @@
+{
+  "originHash" : "ea19320c60ab5b01af0c44482512d8d777febcd2558cf34a1e78a5c3dd9cab87",
+  "pins" : [
+    {
+      "identity" : "anycodable",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Flight-School/AnyCodable",
+      "state" : {
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "0.6.7"
+      }
+    },
+    {
+      "identity" : "bigint",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/attaswift/BigInt.git",
+      "state" : {
+        "revision" : "793a7fac0bfc318e85994bf6900652e827aef33e",
+        "version" : "5.4.1"
+      }
+    },
+    {
+      "identity" : "bip39.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/Bip39.swift.git",
+      "state" : {
+        "revision" : "bb2b82539d685e1457493b695cdc8e4dcff97c92",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "blake2.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/Blake2.swift.git",
+      "state" : {
+        "revision" : "29c55c8fe42d6661e5a32cc5bbbad1fff64fd01e",
+        "version" : "0.2.0"
+      }
+    },
+    {
+      "identity" : "cryptoswift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
+      "state" : {
+        "revision" : "678d442c6f7828def400a70ae15968aef67ef52d",
+        "version" : "1.8.3"
+      }
+    },
+    {
+      "identity" : "ed25519swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/pebble8888/ed25519swift.git",
+      "state" : {
+        "revision" : "1e821f5516049f5b83aca8cb3b982910cf8c028c",
+        "version" : "1.2.8"
+      }
+    },
+    {
+      "identity" : "jwtdecode.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/auth0/JWTDecode.swift",
+      "state" : {
+        "revision" : "1e153ef009969543191970c66b7c60163c0b4a65",
+        "version" : "3.2.0"
+      }
+    },
+    {
+      "identity" : "swiftyjson",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/SwiftyJSON/SwiftyJSON.git",
+      "state" : {
+        "revision" : "2b6054efa051565954e1d2b9da831680026cd768",
+        "version" : "4.3.0"
+      }
+    },
+    {
+      "identity" : "uint256",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/MarcoDotIO/UInt256.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "3dc471e8489ed2a1b16ac63c3bd243d97ac8478b"
+      }
+    },
+    {
+      "identity" : "uncommoncrypto.swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/tesseract-one/UncommonCrypto.swift.git",
+      "state" : {
+        "revision" : "075344faec47dadba98bef6a319e310c98be0820",
+        "version" : "0.2.1"
+      }
+    }
+  ],
+  "version" : 3
+}

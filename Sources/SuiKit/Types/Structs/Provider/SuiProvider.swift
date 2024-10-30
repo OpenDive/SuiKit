@@ -1091,8 +1091,8 @@ public struct SuiProvider {
         }
         return PaginatedObjectsResponse(
             data: objects,
-            hasNextPage: result["hasNextPage"].boolValue,
-            nextCursor: result["nextCursor"].string
+            hasNextPage: result["result"]["hasNextPage"].boolValue,
+            nextCursor: result["result"]["nextCursor"].string
         )
     }
 

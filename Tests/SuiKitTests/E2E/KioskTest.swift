@@ -101,7 +101,7 @@ final class KioskTest: XCTestCase {
         try kioskTx.finalize()
         let _ = try await self.toolBox!.executeTransactionBlock(txb: &txb)
     }
-    
+
     func testThatPurchasingAndResolvingItemsUnderAllRuleSetsWorksAsIntended() async throws {
         let heroId = try await self.kioskToolbox!.mintHero(packageId: self.heroPackageId!)
         let kioskOwnerCaps = try await self.kioskToolbox!.kioskClient.getOwnedKiosks(address: try self.toolBox!.address()).kioskOwnerCaps

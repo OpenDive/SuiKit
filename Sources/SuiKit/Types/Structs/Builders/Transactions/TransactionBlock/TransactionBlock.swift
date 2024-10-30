@@ -270,6 +270,26 @@ public class TransactionBlock {
         )[0]
     }
 
+    /// Splits a coin into multiple amounts.
+    /// - Parameters:
+    ///   - coin: A `TransactionArgument` representing the coin to be split.
+    ///   - amounts: An array of `TransactionArgument` representing the amounts to split the coin into.
+    /// - Throws: Can throw an error if the addition of transaction fails.
+    /// - Returns: A `TransactionArgument` representing the result of the split coin operation.
+    public func splitCoin(
+        coin: TransactionArgument,
+        amounts: [TransactionArgument]
+    ) throws -> TransactionArgument {
+        try self.add(
+            transaction: .splitCoins(
+                Transactions.splitCoins(
+                    coins: coin,
+                    amounts: amounts
+                )
+            )
+        )[0]
+    }
+
     /// Merges multiple source coins into a single destination coin.
     /// - Parameters:
     ///   - destination: A `TransactionArgument` representing the destination coin.

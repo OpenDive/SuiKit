@@ -171,4 +171,7 @@ public enum SuiError: Error, Equatable {
 
     /// There was an error with parsing data for RIPEMD160 functions
     case DataError
+    
+    /// There was an error fetching objects where the fetch request had an empty response
+    case emptyResponse
 }

@@ -38,9 +38,8 @@ public struct ResolveRules {
             typeArguments: [param.itemType],
             returnValueCount: 2
         )
-        guard 
-            let amountArg = resultCalculateAmount.first,
-            case .input(let amount) = amountArg
+        guard
+            let amount = resultCalculateAmount.first
         else { throw SuiError.notImplemented }
         let feeCoin = try tx.splitCoin(coin: tx.gas, amounts: [amount])
         let transferRequest = param.transferRequest.toTransactionArgument()

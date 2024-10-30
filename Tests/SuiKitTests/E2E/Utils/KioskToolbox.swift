@@ -46,7 +46,8 @@ internal struct KioskToolbox {
         try kioskTx
             .lock(itemType: itemType, itemId: .string(itemId), policy: .string(policies[0].id.hex()))
             .finalize()
-        let _ = try await self.testToolbox.executeTransactionBlock(txb: &txb)
+        let tx_res = try await self.testToolbox.executeTransactionBlock(txb: &txb)
+        let _ = try await self.testToolbox.client.waitForTransaction(tx: tx_res.digest)
     }
 
     func existingKioskManagementFlow(cap: KioskOwnerCap, itemType: String, itemId: String) async throws {

@@ -1,13 +1,13 @@
 {
-  "originHash" : "ea19320c60ab5b01af0c44482512d8d777febcd2558cf34a1e78a5c3dd9cab87",
+  "originHash" : "e70a66a8225b4b9c22c484e12194e1675fbccdad5e630ccbf0464429d557d73a",
   "pins" : [
     {
       "identity" : "anycodable",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/Flight-School/AnyCodable",
+      "location" : "https://github.com/kolyuchiy/AnyCodable",
       "state" : {
-        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
-        "version" : "0.6.7"
+        "branch" : "add-sendable",
+        "revision" : "a457aa6962bd790eeafd65be9d37f62d2c15a71a"
       }
     },
     {
@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/attaswift/BigInt.git",
       "state" : {
-        "revision" : "793a7fac0bfc318e85994bf6900652e827aef33e",
-        "version" : "5.4.1"
+        "revision" : "114343a705df4725dfe7ab8a2a326b8883cfd79c",
+        "version" : "5.5.1"
       }
     },
     {
@@ -42,8 +42,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/krzyzanowskim/CryptoSwift.git",
       "state" : {
-        "revision" : "678d442c6f7828def400a70ae15968aef67ef52d",
-        "version" : "1.8.3"
+        "revision" : "729e01bc9b9dab466ac85f21fb9ee2bc1c61b258",
+        "version" : "1.8.4"
       }
     },
     {
@@ -79,7 +79,7 @@
       "location" : "https://github.com/MarcoDotIO/UInt256.git",
       "state" : {
         "branch" : "master",
-        "revision" : "6e87f1d243ac63efb7ff069e4ed55ddccb0ca8cf"
+        "revision" : "ea633500311c4fd0711ff58ea8182d28745dee6e"
       }
     },
     {

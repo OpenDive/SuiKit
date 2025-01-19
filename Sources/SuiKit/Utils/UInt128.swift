@@ -34,7 +34,7 @@ public enum UInt128Errors : Error {
 // MARK: - Data Type
 /// A 128-bit unsigned integer value type.
 /// Storage is based upon a tuple of 2, 64-bit, unsigned integers.
-public struct UInt128 {
+public struct UInt128: Sendable {
     // MARK: Instance Properties
     /// Internal value is presented as a tuple of 2 64-bit
     /// unsigned integers.

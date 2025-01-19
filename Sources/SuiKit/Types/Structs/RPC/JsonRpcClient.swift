@@ -79,29 +79,16 @@ public struct JsonRpcClient {
     /// - Throws: Encoding errors if the request cannot be encoded.
     public static func sendSuiJsonRpc(_ url: URL, _ request: SuiRequest) async throws -> Data {
         var requestUrl = URLRequest(url: url)
-        requestUrl.allHTTPHeaderFields = [
-            "Content-Type": "application/json"
-        ]
+        requestUrl.allHTTPHeaderFields = ["Content-Type": "application/json"]
         requestUrl.httpMethod = "POST"
 
         do {
             let requestData = try JSONEncoder().encode(request)
             requestUrl.httpBody = requestData
+            let (data, _) = try await URLSession.shared.data(for: requestUrl)
+            return data
         } catch {
             throw SuiError.encodingError
-        }
-
-        return try await withCheckedThrowingContinuation { (con: CheckedContinuation<Data, Error>) in
-            let task = URLSession.shared.dataTask(with: requestUrl) { data, _, error in
-                if let error = error {
-                    con.resume(throwing: error)
-                } else if let data = data {
-                    con.resume(returning: data)
-                } else {
-                    con.resume(returning: Data())
-                }
-            }
-            task.resume()
         }
     }
 

@@ -29,7 +29,7 @@ import AnyCodable
 /// Protocol defining the requirements for an RPC (Remote Procedure Call) error request.
 /// Conforming types are expected to provide a method name and arguments for the RPC call
 /// that resulted in an error. This helps in logging, debugging, or handling the error appropriately.
-public protocol RPCErrorRequest {
+public protocol RPCErrorRequest: Sendable {
     /// The name of the method that was called when the error occurred.
     /// This is generally expected to be the function or API endpoint name.
     var method: String { get set }
@@ -38,4 +38,3 @@ public protocol RPCErrorRequest {
     /// Using `AnyCodable` allows for a flexible array that can contain multiple types, as long as they conform to `Codable`.
     var args: [AnyCodable] { get set }
 }
-

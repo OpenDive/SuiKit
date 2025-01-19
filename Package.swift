@@ -15,7 +15,7 @@ let package = Package(
         .package(url: "https://github.com/pebble8888/ed25519swift.git", from: "1.2.7"),
         .package(url: "https://github.com/SwiftyJSON/SwiftyJSON.git", from: "4.0.0"),
         .package(url: "https://github.com/tesseract-one/Blake2.swift.git", from: "0.2.0"),
-        .package(url: "https://github.com/Flight-School/AnyCodable", from: "0.6.0"),
+        .package(url: "https://github.com/kolyuchiy/AnyCodable", branch: "add-sendable"),
         .package(url: "https://github.com/tesseract-one/Bip39.swift.git", from: "0.1.1"),
         .package(url: "https://github.com/auth0/JWTDecode.swift", from: "3.1.0"),
         .package(url: "https://github.com/attaswift/BigInt.git", from: "5.3.0")
@@ -56,5 +56,5 @@ let package = Package(
             ]
         ),
     ],
-    swiftLanguageVersions: [.version("6")]
+    swiftLanguageModes: [.version("6")]
 )

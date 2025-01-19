@@ -25,4 +25,4 @@
 
 import Foundation
 
-class FaucetRateLimitError: @unchecked Sendable, Error {}
+final class FaucetRateLimitError: Sendable, Error {}

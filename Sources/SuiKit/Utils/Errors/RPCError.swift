@@ -26,20 +26,20 @@
 import Foundation
 
 /// `RPCError` is a class representing an error encountered while performing a Remote Procedure Call (RPC).
-class RPCError: @unchecked Sendable, Error {
+final class RPCError: Sendable, Error {
     /// Represents the request associated with the RPC error.
     let req: RPCErrorRequest
 
     /// Represents the error code, if any, associated with the RPC error. The type of this property is `Any?` as the error code can be of any type.
-    let code: Any?
+    let code: String?
 
     /// Represents additional error data, if any, associated with the RPC error. The type of this property is `Any?` as the error data can be of any type.
-    let data: Any?
+    let data: Data?
 
     /// Represents the underlying cause of the RPC error, if any.
     let cause: Error?
 
-    init(options: (req: RPCErrorRequest, code: Any?, data: Any?, cause: Error?)) {
+    init(options: (req: RPCErrorRequest, code: String?, data: Data?, cause: Error?)) {
         self.req = options.req
         self.code = options.code
         self.data = options.data

@@ -26,7 +26,7 @@
 import Foundation
 
 /// Represents information about a coin from a faucet in the Sui ecosystem.
-public struct FaucetCoinInfo: Codable {
+public struct FaucetCoinInfo: Codable, Sendable {
     /// Represents the amount of coins.
     public let amount: Int
 

@@ -26,7 +26,7 @@
 import Foundation
 import SwiftyJSON
 
-public struct FaucetClient {
+public struct FaucetClient: Sendable {
     /// A connection conforming to `ConnectionProtocol` to interact with.
     public let connection: any ConnectionProtocol
 

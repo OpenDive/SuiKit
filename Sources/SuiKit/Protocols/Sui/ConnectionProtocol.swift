@@ -26,7 +26,7 @@
 import Foundation
 
 /// Protocol defining the requirements for a connection configuration.
-public protocol ConnectionProtocol {
+public protocol ConnectionProtocol: Sendable {
     /// The URL or IP address of the full node to connect to.
     var fullNode: String { get }
 

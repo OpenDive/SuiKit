@@ -2,7 +2,7 @@
 //  SuiMoveNormalizedFunction.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,25 @@ public struct SuiMoveNormalizedFunction: Equatable {
 
     /// Represents the types of the values that the function can return.
     public let returnValues: [SuiMoveNormalizedType]
+    
+    public init?(graphql: GetNormalizedMoveFunctionQuery.Data) {
+        let function = graphql.object!.asMovePackage!.module!.function!
+        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
+        self.visibility = visibility
+        self.isEntry = function.isEntry ?? false
+        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
+        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+    }
+
+    public init?(function: RPC_MOVE_MODULE_FIELDS.Functions.Node) {
+        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
+        self.visibility = visibility
+        self.isEntry = function.isEntry ?? false
+        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
+        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
+    }
 
     /// Initializes a new instance of `SuiMoveNormalizedFunction` with the provided parameters.
     ///

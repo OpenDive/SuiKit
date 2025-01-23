@@ -57,6 +57,15 @@ public struct CoinStruct: Equatable {
         )
     }
 
+    public init(graphql: GetCoinsQuery.Data.Address.Coins.Node) throws {
+        self.balance = graphql.coinBalance!
+        self.coinObjectId = graphql.address
+        self.coinType = try StructTag.fromStr(graphql.contents!.type.repr)
+        self.digest = graphql.digest!
+        self.previousTransaction = graphql.previousTransactionBlock!.digest!
+        self.version = graphql.version
+    }
+
     public init(
         coinType: String,
         coinObjectId: objectId,

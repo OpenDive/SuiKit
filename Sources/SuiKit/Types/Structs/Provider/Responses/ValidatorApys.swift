@@ -2,7 +2,7 @@
 //  ValidatorApys.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,16 @@ public struct ValidatorApys: Equatable {
     /// the validators’ APYs are applicable. It acts as a time reference
     /// to organize the APY data in the blockchain's timeline.
     public var epoch: String
+
+    public init(graphql: GetValidatorsApyQuery.Data) {
+        self.apys = graphql.epoch!.validatorSet!.activeValidators.nodes.map { validator in
+            ValidatorApy(
+                address: validator.address.address,
+                apy: validator.apy != nil ? UInt64((validator.apy! / 100)) : nil
+            )
+        }
+        self.epoch = "\(graphql.epoch!.epochId)"
+    }
 
     public init(input: JSON) {
         self.apys = input["apys"].arrayValue.map { ValidatorApy(input: $0) }

@@ -2,7 +2,7 @@
 //  CoinBalance.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,20 @@ public struct CoinBalance: Equatable {
     /// An optional `LockedBalance` instance representing any locked balance of the coin type.
     /// Locked balance is the portion of the total balance that is restricted or not readily available for use.
     public let lockedBalance: LockedBalance?
+
+    public init(graphql: GetBalanceQuery.Data.Address.Balance) throws {
+        self.coinType = try StructTag.fromStr(graphql.coinType.repr)
+        self.coinObjectCount = Int(graphql.coinObjectCount!)!
+        self.totalBalance = graphql.totalBalance!
+        self.lockedBalance = nil
+    }
+
+    public init(graphql: GetAllBalancesQuery.Data.Address.Balances.Node) throws {
+        self.coinType = try StructTag.fromStr(graphql.coinType.repr)
+        self.coinObjectCount = Int(graphql.coinObjectCount!)!
+        self.totalBalance = graphql.totalBalance!
+        self.lockedBalance = nil
+    }
 
     public init(
         coinType: String,

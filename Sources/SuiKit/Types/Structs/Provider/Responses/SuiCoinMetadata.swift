@@ -2,7 +2,7 @@
 //  SuiCoinMetadata.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,15 @@ public struct SuiCoinMetadata: Equatable {
     /// A `String` serving as a unique identifier for the coin, allowing for differentiation and
     /// reference to this specific coin instance within the system.
     let id: String
+
+    public init(graphql: GetCoinMetadataQuery.Data.CoinMetadata) {
+        self.decimals = UInt8(graphql.decimals!)
+        self.name = graphql.name!
+        self.symbol = graphql.symbol!
+        self.description = graphql.description!
+        self.iconUrl = graphql.iconUrl
+        self.id = graphql.address
+    }
 
     public init(decimals: UInt8, description: String, iconUrl: String?, name: String, symbol: String, id: String) {
         self.decimals = decimals

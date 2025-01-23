@@ -2,7 +2,7 @@
 //  TestToolbox.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -34,14 +34,17 @@ internal class TestToolbox {
 
     let account: Account
     let client: SuiProvider
+    let graphQLProvider: GraphQLSuiProvider
 
     init(
         account: Account,
         client: SuiProvider = SuiProvider(connection: LocalnetConnection()),
+        graphQLClient: GraphQLSuiProvider = GraphQLSuiProvider(connection: LocalnetConnection()),
         _ needsFunds: Bool = true
     ) async throws {
         self.account = account
         self.client = client
+        self.graphQLProvider = graphQLClient
 
         if needsFunds { try await self.setup() }
     }
@@ -49,6 +52,7 @@ internal class TestToolbox {
     init(_ needsFunds: Bool = true) async throws {
         self.account = try Account()
         self.client = SuiProvider(connection: LocalnetConnection())
+        self.graphQLProvider = GraphQLSuiProvider(connection: LocalnetConnection())
         if needsFunds { try await self.setup() }
     }
 

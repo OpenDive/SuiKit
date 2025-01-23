@@ -2,7 +2,7 @@
 //  SuiMoveFunctionArgType.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,14 @@ public enum SuiMoveFunctionArgType: Equatable {
 
     /// The argument is an object. The kind of the object (immutable/mutable reference or by value) is specified.
     case object(ObjectValueKind)
+    
+    public init(graphql: GetMoveFunctionArgTypesQuery.Data.Object.AsMovePackage.Module.Function.Parameter) {
+        self = Self.fromHashable(hash: graphql.signature)
+    }
+
+    public init(graphql: RPC_MOVE_STRUCT_FIELDS.Field.Type_SelectionSet) {
+        self = Self.fromHashable(hash: graphql.signature)
+    }
 
     private static func fromHashable(hash: AnyHashable) -> SuiMoveFunctionArgType {
         let jsonGraphQL = JSON(hash)

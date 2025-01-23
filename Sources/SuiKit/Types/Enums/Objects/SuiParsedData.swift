@@ -2,7 +2,7 @@
 //  SuiParsedData.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,62 @@ public enum SuiParsedData: Equatable  {
 
     /// Represents a parsed Move package. The associated value is a `MovePackage` containing the disassembled or decomposed package information.
     case movePackage(MovePackage)
+    
+    public init(graphql: TryGetPastObjectQuery.Data.Object.AsMoveObject) {
+        let fields: [String: AnyHashable] = [
+            "data": graphql.ifShowContent!.contents!.data,
+            "layout": graphql.ifShowContent!.contents!.type.layout
+        ]
+        self = .moveObject(
+            MoveObject(
+                fields: JSON(fields),
+                hasPublicTransfer: graphql.ifShowContent!.hasPublicTransfer,
+                type: graphql.ifShowContent!.contents!.type.repr
+            )
+        )
+    }
+    
+    public init(graphql: GetOwnedObjectsQuery.Data.Address.Objects.Node) {
+        let fields: [String: AnyHashable] = [
+            "data": graphql.contents!.ifShowContent!.data,
+            "layout": graphql.contents!.ifShowContent!.type.layout!
+        ]
+        self = .moveObject(
+            MoveObject(
+                fields: JSON(fields),
+                hasPublicTransfer: graphql.hasPublicTransfer!,
+                type: graphql.contents!.ifShowContent!.type.repr
+            )
+        )
+    }
+    
+    public init(graphql: MultiGetObjectsQuery.Data.Objects.Node) {
+        let fields: [String: AnyHashable] = [
+            "data": graphql.asMoveObject!.ifShowContent!.contents!.data,
+            "layout": graphql.asMoveObject!.ifShowContent!.contents!.type.layout
+        ]
+        self = .moveObject(
+            MoveObject(
+                fields: JSON(fields),
+                hasPublicTransfer: graphql.asMoveObject!.ifShowContent!.hasPublicTransfer,
+                type: graphql.asMoveObject!.ifShowContent!.contents!.type.repr
+            )
+        )
+    }
+
+    public init(graphql: GetObjectQuery.Data.Object) {
+        let fields: [String: AnyHashable] = [
+            "data": graphql.asMoveObject!.ifShowContent!.contents!.data,
+            "layout": graphql.asMoveObject!.ifShowContent!.contents!.type.layout
+        ]
+        self = .moveObject(
+            MoveObject(
+                fields: JSON(fields),
+                hasPublicTransfer: graphql.asMoveObject!.ifShowContent!.hasPublicTransfer,
+                type: graphql.asMoveObject!.ifShowContent!.contents!.type.repr
+            )
+        )
+    }
 
     /// Parses a JSON object to determine the type of parsed data and returns an instance of `SuiParsedData`.
     ///

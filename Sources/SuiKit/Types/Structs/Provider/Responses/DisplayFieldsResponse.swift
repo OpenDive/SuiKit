@@ -2,7 +2,7 @@
 //  DisplayFieldsResponse.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,34 @@ public struct DisplayFieldsResponse: Equatable  {
     /// An optional instance of `ObjectResponseError` representing any error that occurred while generating the response.
     /// This will be `nil` if there is no error to report.
     public var error: ObjectResponseError?
+
+    public init(graphql: [RPC_OBJECT_FIELDS.Display]) {
+        var data: [String: String] = [:]
+        var error: ObjectResponseError? = nil
+        for displayItem in graphql {
+            if displayItem.error != nil {
+                error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
+            } else if displayItem.value != nil {
+                data[displayItem.key] = displayItem.value!
+            }
+        }
+        self.data = data.isEmpty ? nil : data
+        self.error = error
+    }
+
+    public init(graphql: [RPC_MOVE_OBJECT_FIELDS.Display]) {
+        var data: [String: String] = [:]
+        var error: ObjectResponseError? = nil
+        for displayItem in graphql {
+            if displayItem.error != nil {
+                error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
+            } else if displayItem.value != nil {
+                data[displayItem.key] = displayItem.value!
+            }
+        }
+        self.data = data.isEmpty ? nil : data
+        self.error = error
+    }
 
     public init(data: [String : String]? = nil, error: ObjectResponseError? = nil) {
         self.data = data

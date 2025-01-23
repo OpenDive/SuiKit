@@ -2,7 +2,7 @@
 //  SuiMoveVisibility.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,16 @@ public enum SuiMoveVisibility: String, Equatable {
 
     /// Represents a friend visibility level, accessible only by designated friend modules.
     case Friend
+    
+    public static func parseGraphQL(_ data: GraphQLEnum<MoveVisibility>?) -> SuiMoveVisibility? {
+        guard data != nil else { return nil }
+        switch data! {
+        case .friend: return .Friend
+        case .public: return .Public
+        case .private: return .Private
+        default: return nil
+        }
+    }
 
     /// Function to parse a JSON object into a `SuiMoveVisibility` enum.
     /// - Parameter data: The JSON data to parse.

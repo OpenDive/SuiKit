@@ -1,5 +1,5 @@
 {
-  "schemaNamespace" : "sui-graphql",
+  "schemaNamespace" : "schemaSui",
   "input" : {
     "operationSearchPaths" : [
       "**/*.graphql"
@@ -14,7 +14,7 @@
       }
     },
     "schemaTypes" : {
-      "path" : "./sui-graphql",
+      "path" : "./schemaSui",
       "moduleType" : {
         "swiftPackageManager" : {
         }

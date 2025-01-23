@@ -2,7 +2,7 @@
 //  LocalnetConnection.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +28,7 @@ import Foundation
 public struct LocalnetConnection: ConnectionProtocol {
     public var fullNode: String = "http://127.0.0.1:9000/"
     public var faucet: String? = "http://127.0.0.1:9123/gas"
-    public var graphql: String? = "http://127.0.0.1:9124/"
+    public var graphql: String? = "http://127.0.0.1:9125/"
 
     public init() { }
 }

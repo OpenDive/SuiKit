@@ -2,7 +2,7 @@
 //  CoinBalance.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,10 @@ public struct SuiMoveAbilitySet: Equatable {
     /// - Parameter abilities: An array of abilities in string format.
     public init(abilities: [String]) {
         self.abilities = abilities.map { $0.capitalized }
+    }
+    
+    public init(graphql: RPC_MOVE_FUNCTION_FIELDS.TypeParameter) {
+        self.abilities = graphql.constraints.map { $0.value!.rawValue.capitalized }
     }
 
     /// Initializes a new instance of `SuiMoveAbilitySet` with the abilities extracted from the given JSON.

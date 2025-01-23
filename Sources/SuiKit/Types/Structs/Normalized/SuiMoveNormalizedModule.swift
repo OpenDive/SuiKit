@@ -2,7 +2,7 @@
 //  SuiMoveNormalizedModule.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,68 @@ public struct SuiMoveNormalizedModule: Equatable {
 
     /// A dictionary containing the exposed functions of the module, where the key is the name of the function and the value is an instance of `SuiMoveNormalizedFunction`.
     public let exposedFunctions: [String: SuiMoveNormalizedFunction]
+    
+    public init(graphql: GetNormalizedMoveModuleQuery.Data.Object.AsMovePackage.Module, package: String) {
+        let module = graphql
+        var structs: [String: SuiMoveNormalizedStruct] = [:]
+        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
+
+        if let structures = module.structs {
+            for structure in structures.nodes {
+                structs[structure.name] = SuiMoveNormalizedStruct(
+                    structure: structure
+                )
+            }
+        }
+
+        if let functions = module.functions {
+            for function in functions.filterUsable() {
+                if let value = SuiMoveNormalizedFunction(function: function) {
+                    exposedFunctions[function.name] = value
+                }
+            }
+        }
+
+        self.fileFormatVersion = module.fileFormatVersion
+        self.address = package
+        self.name = module.name
+        self.friends = module.friends.nodes.map {
+            SuiMoveModuleId(address: $0.package.address, name: $0.name)
+        }
+        self.structs = structs
+        self.exposedFunctions = exposedFunctions
+    }
+
+    public init(graphql: GetNormalizedMoveModulesByPackageQuery.Data.Object.AsMovePackage.Modules.Node, package: String) {
+        let module = graphql
+        var structs: [String: SuiMoveNormalizedStruct] = [:]
+        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
+
+        if let structures = module.structs {
+            for structure in structures.nodes {
+                structs[structure.name] = SuiMoveNormalizedStruct(
+                    structure: structure
+                )
+            }
+        }
+
+        if let functions = module.functions {
+            for function in functions.filterUsable() {
+                if let value = SuiMoveNormalizedFunction(function: function) {
+                    exposedFunctions[function.name] = value
+                }
+            }
+        }
+
+        self.fileFormatVersion = module.fileFormatVersion
+        self.address = package
+        self.name = module.name
+        self.friends = module.friends.nodes.map {
+            SuiMoveModuleId(address: $0.package.address, name: $0.name)
+        }
+        self.structs = structs
+        self.exposedFunctions = exposedFunctions
+    }
 
     /// Initializes a new instance of `SuiMoveNormalizedModule` from a JSON representation.
     /// Returns `nil` if there is an issue with the JSON input.

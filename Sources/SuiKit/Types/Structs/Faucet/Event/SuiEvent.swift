@@ -2,7 +2,7 @@
 //  SuiEvent.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,17 @@ public struct SuiEvent {
 
     /// An optional string representing the timestamp of the event in milliseconds.
     public let timestampMs: String?
+
+    public init(graphql: QueryEventsQuery.Data.Events.Node) {
+        self.id = nil  // TODO: Turn ID into an Object
+        self.bcs = graphql.contents.bcs
+        self.packageId = graphql.sendingModule!.package.address
+        self.parsedJson = JSON(parseJSON: graphql.JSONApollo)
+        self.sender = try! AccountAddress.fromHex(graphql.sender!.address)
+        self.timestampMs = graphql.timestamp
+        self.transactionModule = graphql.sendingModule != nil ? graphql.sendingModule!.name : "NONE"
+        self.type = graphql.contents.type.repr
+    }
 
     /// Initializes a new `SuiEvent` with the provided JSON input.
     /// - Parameter input: A JSON object containing the event data.

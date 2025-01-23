@@ -2,7 +2,7 @@
 //  PageInfo.swift
 //  SuiKit
 //
-//  Copyright (c) 2024 OpenDive
+//  Copyright (c) 2024-2025 OpenDive
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -38,4 +38,32 @@ public struct PageInfo: Equatable {
 
     /// Whether or not there is another page before the current page.
     public var hasPreviousPage: Bool
+    
+    public init(graphql: GetCheckpointsQuery.Data.Checkpoints.PageInfo) {
+        self.startCursor = graphql.startCursor
+        self.endCursor = graphql.endCursor
+        self.hasNextPage = graphql.hasNextPage
+        self.hasPreviousPage = graphql.hasPreviousPage
+    }
+
+    public init(graphql: QueryEventsQuery.Data.Events.PageInfo) {
+        self.startCursor = graphql.startCursor
+        self.endCursor = graphql.endCursor
+        self.hasNextPage = graphql.hasNextPage
+        self.hasPreviousPage = graphql.hasPreviousPage
+    }
+
+    public init(graphql: GetCoinsQuery.Data.Address.Coins.PageInfo) {
+        self.startCursor = nil
+        self.endCursor = graphql.endCursor
+        self.hasNextPage = graphql.hasNextPage
+        self.hasPreviousPage = false
+    }
+
+    public init(graphql: GetOwnedObjectsQuery.Data.Address.Objects.PageInfo) {
+        self.startCursor = nil
+        self.endCursor = graphql.endCursor
+        self.hasNextPage = graphql.hasNextPage
+        self.hasPreviousPage = false
+    }
 }

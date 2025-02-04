@@ -26,16 +26,31 @@
 import Foundation
 import SwiftyJSON
 
+#if swift(>=6.0)
 public struct FaucetClient: Sendable {
     /// A connection conforming to `ConnectionProtocol` to interact with.
     public let connection: any ConnectionProtocol
-
+    
     /// Initializes a new `FaucetClient` with the given connection.
     /// - Parameter connection: A connection conforming to `ConnectionProtocol`.
     public init(connection: any ConnectionProtocol) {
         self.connection = connection
     }
+}
+#elseif swift(<6.0)
+public struct FaucetClient {
+    /// A connection conforming to `ConnectionProtocol` to interact with.
+    public let connection: any ConnectionProtocol
+    
+    /// Initializes a new `FaucetClient` with the given connection.
+    /// - Parameter connection: A connection conforming to `ConnectionProtocol`.
+    public init(connection: any ConnectionProtocol) {
+        self.connection = connection
+    }
+}
+#endif
 
+public extension FaucetClient {
     /// Requests coin info for the given account address from the faucet.
     /// - Parameter address: The account address to request coin info for.
     /// - Returns: A `FaucetCoinInfo` object containing details about the transferred coins.
@@ -44,7 +59,7 @@ public struct FaucetClient: Sendable {
     ///     - `SuiError.invalidUrl` if the faucet URL is invalid.
     ///     - `SuiError.faucetRateLimitError` if the request is rate limited.
     ///     - `SuiError.invalidJsonData` if the received JSON data is invalid.
-    public func funcAccount(_ address: String) async throws -> FaucetCoinInfo {
+    func funcAccount(_ address: String) async throws -> FaucetCoinInfo {
         guard let baseUrl = connection.faucet else {
             throw SuiError.faucetUrlRequired
         }

@@ -25,8 +25,10 @@
 
 import Apollo
 
+#if swift(>=6.0)
 // TODO: Once Apollo iOS supports Swift 6 concurrency, remove the bellow
 // https://github.com/apollographql/apollo-ios/issues/3411
 extension GraphQLResult: @unchecked @retroactive Sendable {}
 extension GraphQLError: @unchecked Sendable {}
 extension [GraphQLError]: @unchecked Sendable {}
+#endif

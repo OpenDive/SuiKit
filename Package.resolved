@@ -1,5 +1,5 @@
 {
-  "originHash" : "488640b09dec8ad73e7e6b98c033ba1248661f6c4db7fac81fc0f30fc7876d8f",
+  "originHash" : "316f118566f42b90cb90987b3efd2d60b2908d2661ebc8a2bd0711f8e0300149",
   "pins" : [
     {
       "identity" : "anycodable",
@@ -96,8 +96,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/MarcoDotIO/UInt256.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "ea633500311c4fd0711ff58ea8182d28745dee6e"
+        "revision" : "ea633500311c4fd0711ff58ea8182d28745dee6e",
+        "version" : "1.0.0"
       }
     },
     {

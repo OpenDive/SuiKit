@@ -24,7 +24,7 @@
 //
 
 import Foundation
-
+#if swift(>=6.0)
 /// Protocol defining the requirements for a connection configuration.
 public protocol ConnectionProtocol: Sendable {
     /// The URL or IP address of the full node to connect to.
@@ -40,6 +40,23 @@ public protocol ConnectionProtocol: Sendable {
     /// Default is nil, meaning no WebSocket is configured.
     var websocket: String? { get }
 }
+#elseif swift(<6.0)
+/// Protocol defining the requirements for a connection configuration.
+public protocol ConnectionProtocol {
+    /// The URL or IP address of the full node to connect to.
+    var fullNode: String { get }
+
+    /// Optional URL for a faucet service to obtain tokens.
+    /// Default is nil, meaning no faucet is configured.
+    var faucet: String? { get }
+    
+    var graphql: String? { get }
+
+    /// Optional URL for a WebSocket connection.
+    /// Default is nil, meaning no WebSocket is configured.
+    var websocket: String? { get }
+}
+#endif
 
 // MARK: - Default Implementations
 public extension ConnectionProtocol {

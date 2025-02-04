@@ -26,6 +26,7 @@
 import Foundation
 import AnyCodable
 
+#if swift(>=6.0)
 /// Protocol defining the requirements for an RPC (Remote Procedure Call) error request.
 /// Conforming types are expected to provide a method name and arguments for the RPC call
 /// that resulted in an error. This helps in logging, debugging, or handling the error appropriately.
@@ -38,3 +39,17 @@ public protocol RPCErrorRequest: Sendable {
     /// Using `AnyCodable` allows for a flexible array that can contain multiple types, as long as they conform to `Codable`.
     var args: [AnyCodable] { get set }
 }
+#elseif swift(<6.0)
+/// Protocol defining the requirements for an RPC (Remote Procedure Call) error request.
+/// Conforming types are expected to provide a method name and arguments for the RPC call
+/// that resulted in an error. This helps in logging, debugging, or handling the error appropriately.
+public protocol RPCErrorRequest {
+    /// The name of the method that was called when the error occurred.
+    /// This is generally expected to be the function or API endpoint name.
+    var method: String { get set }
+
+    /// The list of arguments that were passed to the method during the call that resulted in an error.
+    /// Using `AnyCodable` allows for a flexible array that can contain multiple types, as long as they conform to `Codable`.
+    var args: [AnyCodable] { get set }
+}
+#endif

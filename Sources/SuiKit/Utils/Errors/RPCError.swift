@@ -25,6 +25,7 @@
 
 import Foundation
 
+#if swift(>=6.0)
 /// `RPCError` is a class representing an error encountered while performing a Remote Procedure Call (RPC).
 final class RPCError: Sendable, Error {
     /// Represents the request associated with the RPC error.
@@ -46,3 +47,26 @@ final class RPCError: Sendable, Error {
         self.cause = options.cause
     }
 }
+#elseif swift(<6.0)
+/// `RPCError` is a class representing an error encountered while performing a Remote Procedure Call (RPC).
+final class RPCError: Error {
+    /// Represents the request associated with the RPC error.
+    let req: RPCErrorRequest
+
+    /// Represents the error code, if any, associated with the RPC error. The type of this property is `Any?` as the error code can be of any type.
+    let code: String?
+
+    /// Represents additional error data, if any, associated with the RPC error. The type of this property is `Any?` as the error data can be of any type.
+    let data: Data?
+
+    /// Represents the underlying cause of the RPC error, if any.
+    let cause: Error?
+
+    init(options: (req: RPCErrorRequest, code: String?, data: Data?, cause: Error?)) {
+        self.req = options.req
+        self.code = options.code
+        self.data = options.data
+        self.cause = options.cause
+    }
+}
+#endif

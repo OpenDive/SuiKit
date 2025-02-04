@@ -25,4 +25,8 @@
 
 import Foundation
 
+#if swift(>=6.0)
 final class FaucetRateLimitError: Sendable, Error {}
+#elseif swift(<6.0)
+final class FaucetRateLimitError: Error {}
+#endif

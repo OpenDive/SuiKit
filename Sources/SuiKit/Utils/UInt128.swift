@@ -31,6 +31,7 @@ public enum UInt128Errors : Error {
     case invalidString
 }
 
+#if swift(>=6.0)
 // MARK: - Data Type
 /// A 128-bit unsigned integer value type.
 /// Storage is based upon a tuple of 2, 64-bit, unsigned integers.
@@ -77,6 +78,54 @@ public struct UInt128: Sendable {
         self = result
     }
 }
+#elseif swift(<6.0)
+// MARK: - Data Type
+/// A 128-bit unsigned integer value type.
+/// Storage is based upon a tuple of 2, 64-bit, unsigned integers.
+public struct UInt128 {
+    // MARK: Instance Properties
+    /// Internal value is presented as a tuple of 2 64-bit
+    /// unsigned integers.
+    internal var value: (upperBits: UInt64, lowerBits: UInt64)
+
+    /// Counts up the significant bits in stored data.
+    public var significantBits: UInt128 {
+        return UInt128(UInt128.bitWidth - leadingZeroBitCount)
+    }
+
+    /// Undocumented private variable required for passing this type
+    /// to a BinaryFloatingPoint type. See FloatingPoint.swift.gyb in
+    /// the Swift stdlib/public/core directory.
+    internal var signBitIndex: Int {
+        return 127 - leadingZeroBitCount
+    }
+
+    // MARK: Initializers
+    /// Designated initializer for the UInt128 type.
+    public init(upperBits: UInt64, lowerBits: UInt64) {
+        value.upperBits = upperBits
+        value.lowerBits = lowerBits
+    }
+
+    public init() {
+        self.init(upperBits: 0, lowerBits: 0)
+    }
+
+    /// Initialize a UInt128 value from a string.
+    /// Returns `nil` if input cannot be converted to a UInt128 value.
+    ///
+    /// - parameter source: the string that will be converted into a
+    ///   UInt128 value. Defaults to being analyzed as a base10 number,
+    ///   but can be prefixed with `0b` for base2, `0o` for base8
+    ///   or `0x` for base16.
+    public init?(_ source: String) {
+        guard let result = UInt128._valueFromString(source) else {
+            return nil
+        }
+        self = result
+    }
+}
+#endif
 
 // MARK: - FixedWidthInteger Conformance
 extension UInt128 : FixedWidthInteger {

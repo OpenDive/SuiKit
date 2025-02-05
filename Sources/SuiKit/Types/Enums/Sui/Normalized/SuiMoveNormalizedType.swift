@@ -141,6 +141,8 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             default:
                 return nil
             }
+        case .structure(let structure):
+                return structure
         default:
             return nil
         }

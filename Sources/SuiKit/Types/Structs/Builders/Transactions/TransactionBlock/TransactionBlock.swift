@@ -729,12 +729,7 @@ public class TransactionBlock {
             try await objectChunks.asyncForEach {
                 let result = try await provider.getMultiObjects(
                     ids: $0,
-                    options: SuiObjectDataOptions(
-                        showContent: true,
-                        showDisplay: true,
-                        showOwner: true,
-                        showType: true
-                    )
+                    options: SuiObjectDataOptions(showOwner: true)
                 )
                 objects.append(contentsOf: result)
             }
@@ -758,15 +753,28 @@ public class TransactionBlock {
                 // Update the input value in the objectsToResolve array based on the initial shared version or object reference
                 guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
                     guard let objRef = object.getObjectReference() else { continue }
-                    objectToResolve.input.value = .callArg(
-                        Input(
-                            type: .object(
-                                .immOrOwned(
-                                    ImmOrOwned(ref: objRef)
+                    guard let objectData = object.data else { continue }
+                    if(objectData.owner == .objectOwner(objectData.objectId) ) {
+                        objectToResolve.input.value = .callArg(
+                            Input(
+                                type: .object(
+                                    .receiving(
+                                        ReceivingObject(ref: objRef)
+                                    )
                                 )
                             )
                         )
-                    )
+                    } else {
+                        objectToResolve.input.value = .callArg(
+                            Input(
+                                type: .object(
+                                    .immOrOwned(
+                                        ImmOrOwned(ref: objRef)
+                                    )
+                                )
+                            )
+                        )
+                    }
                     if resolvedObjects.count > Int(objectToResolve.input.index) {
                         resolvedObjects[Int(objectToResolve.input.index)] = objectToResolve
                     } else {

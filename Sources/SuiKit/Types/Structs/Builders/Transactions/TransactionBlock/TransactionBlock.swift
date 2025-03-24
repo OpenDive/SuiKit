@@ -729,7 +729,12 @@ public class TransactionBlock {
             try await objectChunks.asyncForEach {
                 let result = try await provider.getMultiObjects(
                     ids: $0,
-                    options: SuiObjectDataOptions(showOwner: true)
+                    options: SuiObjectDataOptions(
+                        showContent: true,
+                        showDisplay: true,
+                        showOwner: true,
+                        showType: true
+                    )
                 )
                 objects.append(contentsOf: result)
             }

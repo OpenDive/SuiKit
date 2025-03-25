@@ -754,7 +754,13 @@ public class TransactionBlock {
                 guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
                     guard let objRef = object.getObjectReference() else { continue }
                     guard let objectData = object.data else { continue }
-                    if(objectData.owner == .objectOwner(objectData.objectId) ) {
+                    
+                    let isReceiving = try
+                    objectToResolve.normalizedType?.extractStructTag()?.address.hex() == Inputs.normalizeSuiAddress(value: "0x2") &&
+                    objectToResolve.normalizedType?.extractStructTag()?.name == "transfer" &&
+                    objectToResolve.normalizedType?.extractStructTag()?.module == "Receiving"
+                    
+                    if(isReceiving) {
                         objectToResolve.input.value = .callArg(
                             Input(
                                 type: .object(

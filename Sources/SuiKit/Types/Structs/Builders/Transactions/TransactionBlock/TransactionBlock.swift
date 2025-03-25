@@ -757,8 +757,8 @@ public class TransactionBlock {
                     
                     let isReceiving = try
                     objectToResolve.normalizedType?.extractStructTag()?.address.hex() == Inputs.normalizeSuiAddress(value: "0x2") &&
-                    objectToResolve.normalizedType?.extractStructTag()?.name == "transfer" &&
-                    objectToResolve.normalizedType?.extractStructTag()?.module == "Receiving"
+                    objectToResolve.normalizedType?.extractStructTag()?.module == "transfer" &&
+                    objectToResolve.normalizedType?.extractStructTag()?.name == "Receiving"
                     
                     if(isReceiving) {
                         objectToResolve.input.value = .callArg(

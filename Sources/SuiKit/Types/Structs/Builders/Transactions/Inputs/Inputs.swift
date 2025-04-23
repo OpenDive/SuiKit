@@ -60,6 +60,22 @@ public struct Inputs {
         )
         return .immOrOwned(immOrOwned)
     }
+    
+    /// Creates an `ObjectArg` of type `.receiving` from the provided `SuiObjectRef`.
+    ///
+    /// - Parameter suiObjectRef: The `SuiObjectRef` used to initialize the `ObjectArg`.
+    /// - Throws: If unable to normalize the SUI address contained in `suiObjectRef`.
+    /// - Returns: An `ObjectArg` object initialized with the `.receiving` variant.
+    public static func receivingRef(suiObjectRef: SuiObjectRef) throws -> ObjectArg {
+        let receiving = ReceivingObject(
+            ref: SuiObjectRef(
+                objectId: try normalizeSuiAddress(value: suiObjectRef.objectId),
+                version: suiObjectRef.version,
+                digest: suiObjectRef.digest
+            )
+        )
+        return .receiving(receiving)
+    }
 
     /// Creates an `ObjectArg` of type `.shared` from the provided `SharedObjectRef`.
     ///
@@ -100,6 +116,10 @@ public struct Inputs {
         if case .shared(let shared) = arg.object {
             return try normalizeSuiAddress(value: shared.objectId)
         }
+        
+        if case .receiving(let receiving) = arg.object {
+            return try normalizeSuiAddress(value: receiving.ref.objectId)
+        }
 
         throw SuiError.notImplemented
     }
@@ -115,6 +135,8 @@ public struct Inputs {
             return try normalizeSuiAddress(value: immOwned.ref.objectId)
         case .shared(let shared):
             return try normalizeSuiAddress(value: shared.objectId)
+        case .receiving(let receiving):
+            return try normalizeSuiAddress(value: receiving.ref.objectId)
         }
     }
     

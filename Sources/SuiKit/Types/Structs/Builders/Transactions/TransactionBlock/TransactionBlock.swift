@@ -753,15 +753,34 @@ public class TransactionBlock {
                 // Update the input value in the objectsToResolve array based on the initial shared version or object reference
                 guard let initialSharedVersion = object.getSharedObjectInitialVersion() else {
                     guard let objRef = object.getObjectReference() else { continue }
-                    objectToResolve.input.value = .callArg(
-                        Input(
-                            type: .object(
-                                .immOrOwned(
-                                    ImmOrOwned(ref: objRef)
+                    guard let objectData = object.data else { continue }
+                    
+                    let isReceiving = try
+                    objectToResolve.normalizedType?.extractStructTag()?.address.hex() == Inputs.normalizeSuiAddress(value: "0x2") &&
+                    objectToResolve.normalizedType?.extractStructTag()?.module == "transfer" &&
+                    objectToResolve.normalizedType?.extractStructTag()?.name == "Receiving"
+                    
+                    if(isReceiving) {
+                        objectToResolve.input.value = .callArg(
+                            Input(
+                                type: .object(
+                                    .receiving(
+                                        ReceivingObject(ref: objRef)
+                                    )
                                 )
                             )
                         )
-                    )
+                    } else {
+                        objectToResolve.input.value = .callArg(
+                            Input(
+                                type: .object(
+                                    .immOrOwned(
+                                        ImmOrOwned(ref: objRef)
+                                    )
+                                )
+                            )
+                        )
+                    }
                     if resolvedObjects.count > Int(objectToResolve.input.index) {
                         resolvedObjects[Int(objectToResolve.input.index)] = objectToResolve
                     } else {

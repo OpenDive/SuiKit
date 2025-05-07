@@ -23,7 +23,7 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "secp256k1‑sui"
+            name: "secp256k1sui"
         ),
         .target(
             name: "SuiKit",
@@ -37,7 +37,7 @@ let package = Package(
                 .product(name: "Bip39", package: "Bip39.swift"),
                 .product(name: "JWTDecode", package: "JWTDecode.swift"),
                 .product(name: "Apollo", package: "apollo-ios"),
-                "secp256k1‑sui"
+                "secp256k1sui"
             ]
         ),
         .testTarget(

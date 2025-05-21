@@ -3,10 +3,10 @@
     {
       "identity" : "anycodable",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kolyuchiy/AnyCodable",
+      "location" : "https://github.com/MarcoDotIO/AnyCodable",
       "state" : {
-        "branch" : "add-sendable",
-        "revision" : "a457aa6962bd790eeafd65be9d37f62d2c15a71a"
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "1.0.0"
       }
     },
     {

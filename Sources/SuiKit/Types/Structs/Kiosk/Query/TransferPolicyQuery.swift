@@ -112,7 +112,9 @@ public struct TransferPolicyQuery {
         client: SuiProvider,
         address: String
     ) async throws -> [TransferPolicyCap] {
-        guard address.isValidSuiAddress() else { throw SuiError.invalidSuiAddress }
+        guard address.isValidSuiAddress() else { throw SuiError.customError(
+            message: "Invalid Sui address"
+        ) }
 
         let filter: SuiObjectDataFilter = .matchAll(
             [

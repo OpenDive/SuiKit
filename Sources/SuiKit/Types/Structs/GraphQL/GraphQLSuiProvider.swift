@@ -156,7 +156,7 @@ public struct GraphQLSuiProvider {
                 )
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return Checkpoint(graphql: data)
     }
 
@@ -173,7 +173,7 @@ public struct GraphQLSuiProvider {
                 )
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return Checkpoint(graphql: data)
     }
 
@@ -205,7 +205,7 @@ public struct GraphQLSuiProvider {
                     after: (cursor != nil ? .init(stringLiteral: cursor!) : .none)
                 )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return CheckpointPage(
             data: data.checkpoints.nodes.map { Checkpoint(graphql: $0) },
             pageInfo: PageInfo(graphql: data.checkpoints.pageInfo)
@@ -261,7 +261,7 @@ public struct GraphQLSuiProvider {
             client: self.apollo,
             query: GetMoveFunctionArgTypesQuery(packageId: package, module: module, function: function)
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return data.object!.asMovePackage!.module!.function!.parameters!.map {
             SuiMoveFunctionArgType(graphql: $0)
         }
@@ -287,7 +287,7 @@ public struct GraphQLSuiProvider {
                 function: functionName
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return SuiMoveNormalizedFunction(graphql: data)
     }
 
@@ -308,7 +308,7 @@ public struct GraphQLSuiProvider {
                 module: module
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return SuiMoveNormalizedModule(graphql: data.object!.asMovePackage!.module!, package: package)
     }
 
@@ -328,7 +328,7 @@ public struct GraphQLSuiProvider {
                     GraphQLNullable<String>.init(stringLiteral: cursor!)
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return data.object!.asMovePackage!.modules?.nodes.reduce(into: [String: SuiMoveNormalizedModule]()) {
             $0[$1.name] = SuiMoveNormalizedModule(graphql: $1, package: package)
         } ?? [:]
@@ -354,7 +354,7 @@ public struct GraphQLSuiProvider {
                 struct: structure
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return SuiMoveNormalizedStruct(structure: data.object!.asMovePackage!.module!.struct!)
     }
 
@@ -380,7 +380,7 @@ public struct GraphQLSuiProvider {
                 showStorageRebate: options?.showStorageRebate ?? false
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return SuiObjectResponse(error: nil, data: SuiObjectData(graphql: data.object!))
     }
 
@@ -397,7 +397,7 @@ public struct GraphQLSuiProvider {
                 protocolVersion: version != nil ? .init(stringLiteral: version!) : .none
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return ProtocolConfig(graphql: data.protocolConfig)
     }
 
@@ -406,7 +406,7 @@ public struct GraphQLSuiProvider {
     /// - Returns: A `UInt64` representing the total number of transaction blocks.
     public func getTotalTransactionBlocks() async throws -> BigInt {
         let result = try await GraphQLClient.fetchQuery(client: self.apollo, query: GetTotalTransactionBlocksQuery())
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return BigInt(stringLiteral: data.checkpoint!.networkTotalTransactions!)
     }
 
@@ -449,7 +449,7 @@ public struct GraphQLSuiProvider {
                 showStorageRebate: options?.showStorageRebate ?? false
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return data.objects.nodes.map { object in
             SuiObjectResponse(error: nil, data: SuiObjectData(
                 graphql: object,
@@ -499,7 +499,7 @@ public struct GraphQLSuiProvider {
                 showStorageRebate: options?.showStorageRebate ?? false
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         // TODO: Implement proper error handling.
         return .versionFound(SuiObjectData(graphql: data.object!, showBcs: options?.showBcs ?? false))
     }
@@ -535,7 +535,7 @@ public struct GraphQLSuiProvider {
                 cursor: .none
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return try data.address!.balances.nodes.map { try CoinBalance(graphql: $0) }
     }
 
@@ -575,7 +575,7 @@ public struct GraphQLSuiProvider {
                 type: coinType != nil ? .init(stringLiteral: coinType!) : .none
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return try CoinBalance(graphql: data.address!.balance!)
     }
 
@@ -590,7 +590,7 @@ public struct GraphQLSuiProvider {
             client: self.apollo,
             query: GetCoinMetadataQuery(coinType: coinType)
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return SuiCoinMetadata(graphql: data.coinMetadata!)
     }
 
@@ -617,7 +617,7 @@ public struct GraphQLSuiProvider {
                 type: coinType != nil ? .init(stringLiteral: coinType!) : .null
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return PaginatedCoins(
             data: try data.address!.coins.nodes.map { try CoinStruct(graphql: $0) },
             pageInfo: PageInfo(graphql: data.address!.coins.pageInfo)
@@ -726,7 +726,7 @@ public struct GraphQLSuiProvider {
                 filter: filter != nil ? .init(ObjectFilter(filter: filter!)) : .none
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return PaginatedObjectsResponse(
             data: data.address!.objects.nodes.map {
                 SuiObjectResponse(
@@ -745,7 +745,7 @@ public struct GraphQLSuiProvider {
     /// - Throws: An error if the RPC request fails.
     public func getReferenceGasPrice() async throws -> BigInt {
         let result = try await GraphQLClient.fetchQuery(client: self.apollo, query: GetReferenceGasPriceQuery())
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return BigInt(data.epoch!.referenceGasPrice!, radix: 10)!
     }
 
@@ -782,7 +782,7 @@ public struct GraphQLSuiProvider {
             client: self.apollo,
             query: GetTotalSupplyQuery(coinType: coinType)
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return BigInt(data.coinMetadata!.supply!, radix: 10)! * BigInt(10).power(data.coinMetadata!.decimals!)
     }
 
@@ -794,7 +794,7 @@ public struct GraphQLSuiProvider {
             client: self.apollo,
             query: GetValidatorsApyQuery()
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return ValidatorApys(graphql: data)
     }
 
@@ -830,7 +830,7 @@ public struct GraphQLSuiProvider {
                 last: (limit != nil ? .init(integerLiteral: limit!) : .none)
             )
         )
-        guard let data = result.data else { throw SuiError.missingGraphQLData }
+        guard let data = result.data else { throw SuiError.customError(message: "Missing GraphQL data") }
         return PaginatedSuiMoveEvent(
             data: data.events.nodes.map { SuiEvent(graphql: $0) },
             pageInfo: PageInfo(graphql: data.events.pageInfo)

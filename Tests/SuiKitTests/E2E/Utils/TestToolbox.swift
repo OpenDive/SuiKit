@@ -117,45 +117,6 @@ internal class TestToolbox {
         return PublishedPackage(packageId: packageId, publishedTx: publishTxBlock)
     }
 
-    func upgradePackage(_ packageId: String, _ capId: String, _ name: String) async throws {
-        let fileData = try self.getModule(name)
-
-        var txBlock = try TransactionBlock()
-        let cap = try txBlock.object(value: .string(capId))
-        let ticket = try txBlock.moveCall(
-            target: "0x2::package::authorize_upgrade",
-            arguments: [cap.toTransactionArgument()]
-        )
-
-        let receipt = try txBlock.upgrade(
-            modules: fileData["modules"].arrayObject as! [Data],
-            dependencies: fileData["dependencies"].arrayObject as! [String],
-            packageId: packageId,
-            ticket: ticket[0]
-        )
-
-        let _ = try txBlock.moveCall(
-            target: "0x2::package::commit_upgrade",
-            arguments: [cap.toTransactionArgument(), receipt]
-        )
-
-        let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
-            transactionBlock: &txBlock,
-            signer: self.account,
-            options: SuiTransactionBlockResponseOptions(
-                showInput: false,
-                showEffects: true,
-                showEvents: false,
-                showObjectChanges: true,
-                showBalanceChanges: false
-            )
-        )
-
-        guard publishTxBlock.effects?.status.status == .success else {
-            throw SuiError.notImplemented
-        }
-    }
-
     func getRandomAddresses(_ n: Int) throws -> [String] {
         return try (0..<n).map { _ in try Account().publicKey.toSuiAddress() }
     }
@@ -243,7 +204,7 @@ internal class TestToolbox {
             else { return nil }
             return created
         })
-        if results.isEmpty { throw SuiError.emptyResponse }
+        if results.isEmpty { throw SuiError.customError(message: "Empty message") }
         return results[0].objectId
     }
 
@@ -261,9 +222,9 @@ internal class TestToolbox {
                 let _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
                 isInitializing = false
             } catch {
-                if let error = error as? SuiError, error == .faucetRateLimitError {
+                if error.localizedDescription.contains("limit") {
                     isInitializing = false
-                    throw SuiError.faucetRateLimitError
+                    throw SuiError.customError(message: "Faucet rate limit error. Please try again later.")
                 }
                 print("Retrying requesting from faucet...")
                 try await Task.sleep(nanoseconds: 60_000_000_000)

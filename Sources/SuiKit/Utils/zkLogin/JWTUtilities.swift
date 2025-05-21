@@ -24,6 +24,8 @@
 //
 
 import Foundation
+import JWTDecode
+import SwiftyJSON
 
 public struct JWTUtilities {
     public static func base64UrlCharTo6Bits(base64UrlChar: String) throws -> [Int] {
@@ -112,6 +114,30 @@ public struct JWTUtilities {
         return String(data: Data(bytes), encoding: .utf8) ?? ""
     }
 
+    public static func decodezkLoginInputs(fromJson data: String, andAddressSeed addressSeed: String) throws -> zkLoginSignatureInputs {
+        // Parse the JSON
+        let json = JSON(data)
+        
+        let proofPoints = json["proofPoints"]
+        let issBase64Details = json["issBase64Details"]
+        let headerBase64 = json["headerBase64"].stringValue
+
+        return zkLoginSignatureInputs(
+            proofPoints: zkLoginSignatureInputsProofPoints(
+                a: proofPoints["a"].arrayValue.map { $0.stringValue },
+                b: proofPoints["b"].arrayValue.map { $0.arrayValue.map { $0.stringValue } },
+                c: proofPoints["c"].arrayValue.map { $0.stringValue }
+            )
+            ,
+            issBase64Details: zkLoginSignatureInputsClaim(
+                value: issBase64Details["value"].stringValue,
+                indexMod4: issBase64Details["indexMod4"].uInt8Value
+            ),
+            headerBase64: headerBase64,
+            addressSeed: addressSeed
+        )
+    }
+
     public static func verifyExtendedClaim(claim: String) throws -> (String, Any) {
         // Check the last character of the claim
         guard let lastChar = claim.last, lastChar == "}" || lastChar == "," else {
@@ -119,7 +145,9 @@ public struct JWTUtilities {
         }
 
         // Prepare the string for JSON parsing
-        let jsonStr = "{" + String(claim.dropLast()) + "}"
+        let jsonStr = claim.first != "{" ?
+            "{" + String(claim.dropLast()) + "}" :
+            String(claim.dropLast()) + "}"
 
         // Parse the JSON
         guard let data = jsonStr.data(using: .utf8),
@@ -136,7 +164,7 @@ public struct JWTUtilities {
         return (key, jsonObject[key]!)
     }
 
-    public static func extractClaimValue<R>(claim: JWTClaim, claimName: String) throws -> R {
+    public static func extractClaimValue<R>(claim: zkLoginSignatureInputsClaim, claimName: String) throws -> R {
         let extendedClaim = try Self.decodeBase64URL(s: claim.value, i: Int(claim.indexMod4))
         let (name, value) = try Self.verifyExtendedClaim(claim: extendedClaim)
 
@@ -149,5 +177,35 @@ public struct JWTUtilities {
         }
 
         return returnValue
+    }
+    
+    /// Extracts claims from a JWT token
+    /// - Parameter jwt: The JWT token string
+    /// - Returns: A JWTClaims object containing the claims
+    public static func extractClaims(from jwt: String) throws -> JWTClaims {
+        let decoded = try JWTDecode.decode(jwt: jwt)
+        
+        let iss = decoded.claim(name: "iss").string
+        let sub = decoded.claim(name: "sub").string
+        let aud = decoded.claim(name: "aud").rawValue
+        let exp = decoded.claim(name: "exp").date?.timeIntervalSince1970
+        let iat = decoded.claim(name: "iat").date?.timeIntervalSince1970
+        let nonce = decoded.claim(name: "nonce").string
+        
+        return JWTClaims(
+            iss: iss,
+            sub: sub,
+            aud: aud,
+            exp: exp,
+            iat: iat,
+            nonce: nonce
+        )
+    }
+    
+    /// Extracts claims from a JWT with a specific structure used by zkLogin
+    /// - Parameter jwt: The JWT token string
+    /// - Returns: A JWTClaims object containing the claims
+    public static func extractClaimValue(from jwt: String) throws -> JWTClaims {
+        return try extractClaims(from: jwt)
     }
 }

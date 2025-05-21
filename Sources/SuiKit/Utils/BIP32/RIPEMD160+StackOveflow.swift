@@ -348,7 +348,7 @@ public struct RIPEMD160 {
                             let pointer = bodyAddress.assumingMemoryBound(to: Void.self)
                             _ = memcpy(&X, pointer, 64)
                         } else {
-                            throw SuiError.DataError
+                            throw SuiError.customError(message: "Data error")
                         }
                     }
                     compress(X)
@@ -365,7 +365,7 @@ public struct RIPEMD160 {
                 // Save remaining unprocessed bytes:
                 buffer = Data(bytes: ptr, count: length)
             } else {
-                throw SuiError.DataError
+                throw SuiError.customError(message: "Data error")
             }
         }
         count += Int64(data.count)
@@ -380,7 +380,7 @@ public struct RIPEMD160 {
                 let pointer = bodyAddress.assumingMemoryBound(to: Void.self)
                 _ = memcpy(&X, pointer, buffer.count)
             } else {
-                throw SuiError.DataError
+                throw SuiError.customError(message: "Data error")
             }
         }
 
@@ -407,7 +407,7 @@ public struct RIPEMD160 {
                 pointer[3] = MDbuf.3
                 pointer[4] = MDbuf.4
             } else {
-                throw SuiError.DataError
+                throw SuiError.customError(message: "Data error")
             }
         }
 

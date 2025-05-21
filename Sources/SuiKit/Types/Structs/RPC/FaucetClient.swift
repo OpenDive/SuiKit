@@ -59,13 +59,13 @@ public extension FaucetClient {
     ///     - `SuiError.invalidUrl` if the faucet URL is invalid.
     ///     - `SuiError.faucetRateLimitError` if the request is rate limited.
     ///     - `SuiError.invalidJsonData` if the received JSON data is invalid.
-    func funcAccount(_ address: String) async throws -> FaucetCoinInfo {
+    func funcAccount(_ address: String) async throws -> FaucetCoins {
         guard let baseUrl = connection.faucet else {
-            throw SuiError.faucetUrlRequired
+            throw SuiError.customError(message: "Faucet URL required")
         }
 
         guard let url = URL(string: baseUrl) else {
-            throw SuiError.invalidUrl(url: baseUrl)
+            throw SuiError.customError(message: "Invalid URL: \(baseUrl)")
         }
 
         let data: [String: Any] = [
@@ -83,19 +83,11 @@ public extension FaucetClient {
             request.httpMethod = "POST"
 
             let result = try await URLSession.shared.asyncData(with: request)
-            let json = try JSONDecoder().decode(JSON.self, from: result)["transferredGasObjects"][0]
+            let coins = try JSONDecoder().decode(FaucetCoins.self, from: result)
 
-            return FaucetCoinInfo(
-                amount: json["amount"].intValue,
-                id: json["id"].stringValue,
-                transferTxDigest: json["transferTxDigest"].stringValue
-            )
+            return coins
         } catch {
-            if let error = error as? SuiError, error == .faucetRateLimitError {
-                throw SuiError.faucetRateLimitError
-            }
-
-            throw SuiError.invalidJsonData
+            throw SuiError.customError(message: "\(error.localizedDescription)")
         }
     }
 }

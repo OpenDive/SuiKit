@@ -88,7 +88,7 @@ public struct JsonRpcClient {
             let (data, _) = try await URLSession.shared.data(for: requestUrl)
             return data
         } catch {
-            throw SuiError.encodingError
+            throw SuiError.customError(message: "Encoding error")
         }
     }
 

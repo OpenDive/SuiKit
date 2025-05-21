@@ -38,7 +38,7 @@ public struct AccountAddress: KeyProtocol, Equatable, CustomStringConvertible, H
         self.address = address
 
         if address.count != AccountAddress.length {
-            throw SuiError.invalidAddressLength
+            throw SuiError.customError(message: "Invalid address length \(address.count), expected \(AccountAddress.length)")
         }
     }
 

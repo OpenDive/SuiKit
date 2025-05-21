@@ -129,7 +129,7 @@ public struct TransactionBlockDataBuilder: KeyProtocol {
             let payment = gasConfig.payment,
             let price = gasConfig.price
         else {
-            throw SuiError.missingGasValues
+            throw SuiError.customError(message: "Missing gas value")
         }
 
         let transactionData = TransactionData.V1(TransactionDataV1(

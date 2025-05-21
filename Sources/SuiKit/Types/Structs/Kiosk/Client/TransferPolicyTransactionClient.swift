@@ -348,17 +348,17 @@ public class TransferPolicyTransactionClient {
     private func validateInputs() throws {
         let genericErrorMessage = "Please use 'setCap()' to setup the TransferPolicy."
         if self.policy == nil {
-            throw SuiError.invalidTransferPolicyInput(
+            throw SuiError.customError(
                 message: "\(genericErrorMessage) Missing: Transfer Policy Object."
             )
         }
         if self.policyCap == nil {
-            throw SuiError.invalidTransferPolicyInput(
+            throw SuiError.customError(
                 message: "\(genericErrorMessage) Missing: TransferPolicyCap Object ID"
             )
         }
         if self.type == nil { 
-            throw SuiError.invalidTransferPolicyInput(
+            throw SuiError.customError(
                 message: "\(genericErrorMessage) Missing: Transfer Policy object type (e.g. {packageId}::item::Item)"
             )
         }
@@ -370,7 +370,9 @@ public class TransferPolicyTransactionClient {
                 type: params.type
             )
             guard !(policies.isEmpty) else {
-                throw SuiError.invalidTransferPolicy
+                throw SuiError.customError(
+                    message: "Invalid transfer policy"
+                )
             }
         }
     }

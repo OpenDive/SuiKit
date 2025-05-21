@@ -146,7 +146,7 @@ public struct Inputs {
         if !forceAdd0x && address.hasPrefix("0x") {
             address = String(address.dropFirst(2))
         }
-        guard address.count <= (Self.suiAddressLength * 2) else { throw SuiError.addressTooLong(input: value) }
+        guard address.count <= (Self.suiAddressLength * 2) else { throw SuiError.customError(message: "Address too long (max \(Self.suiAddressLength * 2) characters)") }
         return "0x" + String().padding(toLength: ((Self.suiAddressLength * 2) - address.count), withPad: "0", startingAt: 0) + address
     }
 }

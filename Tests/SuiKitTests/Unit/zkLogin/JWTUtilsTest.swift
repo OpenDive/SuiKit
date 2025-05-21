@@ -30,7 +30,7 @@ import XCTest
 final class JWTUtilsTest: XCTestCase {
     func testThatClaimValuesAreExtractedAsIntended() throws {
         let extractedValue: String = try JWTUtilities.extractClaimValue(
-            claim: JWTClaim(
+            claim: zkLoginSignatureInputsClaim(
                 value: "yJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLC",
                 indexMod4: 1
             ),

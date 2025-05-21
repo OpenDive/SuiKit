@@ -25,7 +25,18 @@
 
 import Foundation
 
-public struct JWTClaim {
-    public var value: String
-    public var indexMod4: UInt8
+/// Extension to provide String padding capability
+extension String {
+    /// Left pad a string with a specified character to a specified length
+    /// - Parameters:
+    ///   - toLength: The desired final length
+    ///   - withPad: The character to use for padding
+    /// - Returns: A padded string
+    func leftPad(toLength: Int, withPad character: Character) -> String {
+        let newLength = self.count
+        if newLength < toLength {
+            return String(repeating: character, count: toLength - newLength) + self
+        }
+        return self
+    }
 }

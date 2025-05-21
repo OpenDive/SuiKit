@@ -9,7 +9,7 @@ import Foundation
 
 extension Double {
     public func percentageToBasisPoints() throws -> Int {
-        guard self >= 0 && self <= 100 else { throw SuiError.notImplemented }
+        guard self >= 0 && self <= 100 else { throw SuiError.customError(message: "Invalid percentage") }
         return Int(ceil(self * 100))
     }
 }

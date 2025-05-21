@@ -111,7 +111,7 @@ public class TransactionBlock {
     /// - Parameter payments: An array of `SuiObjectRef` representing the gas payments.
     public func setGasPayment(payments: [SuiObjectRef]) throws {
         guard payments.count < TransactionConstants.MAX_GAS_OBJECTS else {
-            throw SuiError.gasPaymentTooHigh
+            throw SuiError.customError(message: "Gas payment too high")
         }
         self.blockData.builder.gasConfig.payment = payments
     }
@@ -474,21 +474,21 @@ public class TransactionBlock {
     ) throws -> Int {
         // If limits contains the key, return its value.
         if let keyNumber = buildOptions.limits?[key.rawValue] {
-            guard let keyNumber else { throw SuiError.cannotFindKeyNumber }
+            guard let keyNumber else { throw SuiError.customError(message: "Cannot find key number") }
             return keyNumber
         }
 
         // Handle the case where protocolConfig is nil.
         if buildOptions.protocolConfig == nil {
             guard let defaultValue = Self.defaultOfflineLimits[key.rawValue] else {
-                throw SuiError.cannotFindProtocolConfig
+                throw SuiError.customError(message: "Cannot find protocol config")
             }
             return Int(defaultValue)
         }
 
         // Unwrap protocolConfig's attributes for the given key.
         guard let attribute = buildOptions.protocolConfig?.attributes[key.rawValue] else {
-            throw SuiError.cannotFindProtocolConfig
+            throw SuiError.customError(message: "Cannot find protocol config")
         }
 
         switch attribute {
@@ -496,7 +496,7 @@ public class TransactionBlock {
         case .u32(let u32): return Int(u32)!
         case .u64(let u64): return Int(u64)!
         default:
-            throw SuiError.cannotFindAttribute
+            throw SuiError.customError(message: "Cannot find attribute")
         }
     }
 
@@ -543,7 +543,7 @@ public class TransactionBlock {
         onlyTransactionKind: Bool? = nil
     ) async throws {
         if isMissingSender(onlyTransactionKind) {
-            throw SuiError.senderIsMissing
+            throw SuiError.customError(message: "Sender is missing")
         }
 
         if onlyTransactionKind == true || self.blockData.builder.gasConfig.payment != nil {
@@ -551,7 +551,7 @@ public class TransactionBlock {
         }
 
         guard let gasOwner = self.blockData.builder.gasConfig.owner?.hex() ?? self.blockData.builder.sender?.hex() else {
-            throw SuiError.gasOwnerCannotBeFound
+            throw SuiError.customError(message: "Gas owner cannot be found")
         }
 
         let coins = try await provider.getCoins(
@@ -580,7 +580,7 @@ public class TransactionBlock {
         }
 
         guard !paymentCoins.isEmpty else {
-            throw SuiError.ownerDoesNotHavePaymentCoins
+            throw SuiError.customError(message: "Owner does not have payment coins")
         }
 
         try self.setGasPayment(payments: paymentCoins)
@@ -597,7 +597,7 @@ public class TransactionBlock {
         onlyTransactionKind: Bool? = nil
     ) async throws {
         if self.isMissingSender(onlyTransactionKind) {
-            throw SuiError.senderIsMissing
+            throw SuiError.customError(message: "Sender is missing")
         }
         self.setGasPrice(
             price: BigInt(
@@ -677,7 +677,7 @@ public class TransactionBlock {
 
                 // Obtain parameters of the normalized function, dropping the last one if it has a transaction context
                 let params = hasTxContext ? normalized.parameters.dropLast() : normalized.parameters
-                guard params.count == moveCallTx.arguments.count else { throw SuiError.moveCallSizeDoesNotMatch }
+                guard params.count == moveCallTx.arguments.count else { throw SuiError.customError(message: "Move call size does not match parameter size: \(moveCallTx.arguments.count) != \(params.count)") }
 
                 // Validate and process the arguments of the moveCall transaction
                 try params.enumerated().forEach { (idx, param) in
@@ -697,7 +697,7 @@ public class TransactionBlock {
                             return
                         }
                         // Handle errors and edge cases related to input value and parameter types
-                        guard param.extractStructTag() != nil || param.kind == "TypeParameter" else { throw SuiError.unknownCallArgType }
+                        guard param.extractStructTag() != nil || param.kind == "TypeParameter" else { throw SuiError.customError(message: "Unknown call arg type \(String(describing: type(of: inputValue)))") }
 
                         // Append the object to resolve to the objectsToResolve array
                         if case .string(let string) = inputValue {
@@ -712,7 +712,7 @@ public class TransactionBlock {
                         }
 
                         // Otherwise, the value is not a valid Object ID
-                        throw SuiError.inputValueIsNotObjectId
+                        throw SuiError.customError(message: "Input value is not object ID: \(String(describing: type(of: inputValue))), \(String(describing: inputValue))")
                     }
                 }
             }
@@ -742,7 +742,7 @@ public class TransactionBlock {
 
             // Handle invalid objects and throw an error if any are found
             let invalidObjects = objectsById.filter { _, obj in obj.error != nil }.map { key, _ in key }
-            guard invalidObjects.isEmpty else { throw SuiError.objectIsInvalid }
+            guard invalidObjects.isEmpty else { throw SuiError.customError(message: "Object is invalid: \(invalidObjects)") }
 
             // Process each object to resolve and update the blockData and related structures accordingly
             for i in 0..<objectsToResolve.count {
@@ -829,7 +829,7 @@ public class TransactionBlock {
         var options: BuildOptions = optionsPassed
 
         guard let provider = options.provider else {
-            throw SuiError.providerNotFound
+            throw SuiError.customError(message: "Provider not found")
         }
 
         if options.protocolConfig == nil && options.limits == nil {
@@ -861,7 +861,7 @@ public class TransactionBlock {
                 )
 
                 guard dryRunResult.effects?.status.status != .failure else {
-                    throw SuiError.failedDryRun
+                    throw SuiError.customError(message: "Failed dry run transaction block with error: \(dryRunResult.effects?.status.error ?? "UNKNOWN_ERROR")")
                 }
 
                 let safeOverhead = Int(TransactionConstants.GAS_SAFE_OVERHEAD) * (

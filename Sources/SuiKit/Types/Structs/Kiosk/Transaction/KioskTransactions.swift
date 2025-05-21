@@ -38,7 +38,7 @@ public struct KioskTransactions {
         guard
             let kiosk = TransactionObjectArgument(from: result[0]),
             let kioskOwnerCap = TransactionObjectArgument(from: result[1])
-        else { throw SuiError.invalidObjectArgument }
+        else { throw SuiError.customError(message: "Invalid object argument") }
 
         return (kiosk, kioskOwnerCap)
     }
@@ -139,7 +139,7 @@ public struct KioskTransactions {
             typeArguments: [itemType]
         )
         guard let returnValue = TransactionObjectArgument(from: result[0]) else {
-            throw SuiError.invalidObjectArgument
+            throw SuiError.customError(message: "Invalid object argument")
         }
         return returnValue
     }
@@ -156,7 +156,9 @@ public struct KioskTransactions {
         itemId: String,
         price: String
     ) throws {
-        guard let priceU64 = UInt64(price) else { throw SuiError.invalidNumber }
+        guard let priceU64 = UInt64(price) else { throw SuiError.customError(
+            message: "Invalid number: \(price)"
+        ) }
 
         let _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::list",
@@ -204,7 +206,9 @@ public struct KioskTransactions {
         item: ObjectArgument,
         price: String
     ) throws {
-        guard let priceU64 = UInt64(price) else { throw SuiError.invalidNumber }
+        guard let priceU64 = UInt64(price) else { throw SuiError.customError(
+            message: "Invalid number: \(price)"
+        ) }
 
         let _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::place_and_list",
@@ -243,7 +247,7 @@ public struct KioskTransactions {
         guard
             let item = TransactionObjectArgument(from: result[0]),
             let transferRequest = TransactionObjectArgument(from: result[1])
-        else { throw SuiError.invalidObjectArgument }
+        else { throw SuiError.customError(message: "Invalid object argument") }
 
         return (item, transferRequest)
     }
@@ -282,7 +286,7 @@ public struct KioskTransactions {
         guard 
             let coinObj = result.first,
             let coin = TransactionObjectArgument(from: coinObj)
-        else { throw SuiError.invalidObjectArgument }
+        else { throw SuiError.customError(message: "Invalid object argument") }
 
         return coin
     }
@@ -314,7 +318,7 @@ public struct KioskTransactions {
         guard 
             let item = result.first,
             result.count == 2
-        else { throw SuiError.invalidObjectArgument }
+        else { throw SuiError.customError(message: "Invalid object argument") }
 
         return (item, result[1])
     }

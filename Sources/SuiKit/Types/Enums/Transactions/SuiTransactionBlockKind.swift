@@ -101,7 +101,7 @@ public enum SuiTransactionBlockKind: KeyProtocol {
         case 3:
             return .consensusCommitPrologue(try Deserializer._struct(deserializer))
         default:
-            throw SuiError.unableToDeserialize
+            throw SuiError.customError(message: "Unable to Deserialize")
         }
     }
 }

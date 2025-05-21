@@ -32,7 +32,7 @@ public struct SignatureSchemeFlags {
         "ED25519": 0x00,   // Represents the Ed25519 signature scheme.
         "SECP256K1": 0x01,  // Represents the SECP256K1 signature scheme.
         "SECP256R1": 0x02,  // Represents the SECP256R1 (P256) signature scheme.
-        "ZkLogin": 0x05  // Represents the zkLogin signature scheme.
+        "zkLogin": 0x05  // Represents the zkLogin signature scheme.
     ]
 
     /// A dictionary mapping the flags of signature schemes to their associated names.
@@ -40,6 +40,6 @@ public struct SignatureSchemeFlags {
         0x00: "ED25519",   // Represents the flag for the Ed25519 signature scheme.
         0x01: "SECP256K1",  // Represents the flag for the SECP256K1 signature scheme.
         0x02: "SECP256R1",  // Represents the flag for the SECP256R1 (P256) signature scheme.
-        0x05: "ZkLogin"  // Represents the flag for the zkLogin signature scheme.
+        0x05: "zkLogin"  // Represents the flag for the zkLogin signature scheme.
     ]
 }

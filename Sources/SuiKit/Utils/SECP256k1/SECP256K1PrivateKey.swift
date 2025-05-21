@@ -29,7 +29,7 @@ import CryptoSwift
 import BigInt
 import Blake2
 import CryptoKit
-import secp256k1
+import secp256k1sui
 
 /// `SECP256K1PrivateKey` is a struct representing a private key using the SECP256K1 elliptic curve cryptography.
 public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {

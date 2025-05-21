@@ -55,7 +55,7 @@ final class zkLoginSignatureTests: XCTestCase {
         ),
         issBase64Details: zkLoginSignatureInputsClaim(value: "yJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLC", indexMod4: 1),
         headerBase64: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5YWM2MDFkMTMxZmQ0ZmZkNTU2ZmYwMzJhYWIxODg4ODBjZGUzYjkiLCJ0eXAiOiJKV1QifQ",
-        userSignature: "13322897930163218532266430409510394316985274769125667290600321564259466511711"
+        addressSeed: "13322897930163218532266430409510394316985274769125667290600321564259466511711"
     )
     let anEphemeralSignature = "AEp+O5GEAF/5tKNDdWBObNf/1uIrbOJmE+xpnlBD2Vikqhbd0zLrQ2NJyquYXp4KrvWUOl7Hso+OK0eiV97ffwucM8VdtG2hjf/RUGNO5JNUH+D/gHtE9sHe6ZEnxwZL7g=="
 

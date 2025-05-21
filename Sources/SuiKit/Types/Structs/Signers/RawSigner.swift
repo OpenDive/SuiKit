@@ -67,9 +67,9 @@ public struct RawSigner: SignerWithProviderProtocol {
 
     /// Requests Sui from a faucet for the given address.
     /// - Parameter address: The blockchain address as a `String`.
-    /// - Returns: An instance of `FaucetCoinInfo` containing the details of the acquired coins.
+    /// - Returns: An instance of `FaucetCoins` containing the details of the acquired coins.
     /// - Throws: An error if the request fails.
-    public func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoinInfo {
+    public func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoins {
         try await self.faucetProvider.funcAccount(address)
     }
 
@@ -159,7 +159,7 @@ public struct RawSigner: SignerWithProviderProtocol {
     /// - Returns: A `SuiTransactionBlockResponse` instance representing the response of the dry-run.
     /// - Throws: An error if the dry-run process fails or if the input string is not valid base64.
     public func dryRunTransactionBlock(_ transactionBlock: String) async throws -> SuiTransactionBlockResponse {
-        guard let dryRunTxBytes = Data.fromBase64(transactionBlock) else { throw SuiError.failedData }
+        guard let dryRunTxBytes = Data.fromBase64(transactionBlock) else { throw SuiError.customError(message: "Failed data") }
         return try await self.provider.dryRunTransactionBlock(transactionBlock: [UInt8](dryRunTxBytes))
     }
 
@@ -217,9 +217,9 @@ public struct RawSigner: SignerWithProviderProtocol {
         _ signatureScheme: KeyType,
         _ pubKey: String
     ) throws -> String {
-        guard let pubKeyData = Data(base64Encoded: pubKey) else { throw SuiError.failedData }
+        guard let pubKeyData = Data(base64Encoded: pubKey) else { throw SuiError.customError(message: "Failed data") }
         guard let encryptionType = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG[signatureScheme.rawValue] else {
-            throw SuiError.cannotFindSignatureType
+            throw SuiError.customError(message: "Cannot find signature type for \(signatureScheme.rawValue)")
         }
         var serializedSignature = Data(count: signature.signature.count + pubKeyData.count)
         serializedSignature[0] = encryptionType

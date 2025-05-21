@@ -73,7 +73,7 @@ public indirect enum InputType: KeyProtocol {
     ///
     /// - Parameter deserializer: The `Deserializer` to use for the deserialization.
     /// - Returns: A deserialized `InputType` instance.
-    /// - Throws: Throws `SuiError.unableToDeserialize` if the deserialization fails.
+    /// - Throws: Throws `SuiError.customError(message: "Unable to Deserialize")` if the deserialization fails.
     public static func deserialize(from deserializer: Deserializer) throws -> InputType {
         let value = try Deserializer.u8(deserializer)
         switch value {
@@ -82,7 +82,7 @@ public indirect enum InputType: KeyProtocol {
         case 1:
             return .object(try Deserializer._struct(deserializer))
         default:
-            throw SuiError.unableToDeserialize
+            throw SuiError.customError(message: "Unable to Deserialize")
         }
     }
 }

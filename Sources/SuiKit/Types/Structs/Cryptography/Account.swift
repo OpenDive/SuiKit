@@ -166,11 +166,11 @@ public struct Account: Equatable, Hashable {
         guard let json = try JSONSerialization
             .jsonObject(with: data, options: []) as? [String: Any]
         else {
-            throw SuiError.invalidJsonData
+            throw SuiError.customError(message: "Invalid JSON data")
         }
 
         guard let privateKeyHex = json["private_key"] as? String else {
-            throw SuiError.missingPrivateKey
+            throw SuiError.customError(message: "Missing Private Key")
         }
 
         try self.init(

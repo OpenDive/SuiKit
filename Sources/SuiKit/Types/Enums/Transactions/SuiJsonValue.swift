@@ -180,6 +180,6 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
         if let input: TransactionObjectArgument = try? Deserializer._struct(deserializer) {
             return .input(input)
         }
-        throw SuiError.unableToDeserialize
+        throw SuiError.customError(message: "Unable to Deserialize")
     }
 }

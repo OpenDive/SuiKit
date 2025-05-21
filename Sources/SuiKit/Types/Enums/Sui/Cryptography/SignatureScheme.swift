@@ -39,4 +39,7 @@ public enum SignatureScheme: String {
 
     /// Represents the SECP256R1 cryptographic algorithm.
     case SECP256R1
+    
+    /// Represents the zkLogin zero knowledge proof algorithm
+    case zkLogin
 }

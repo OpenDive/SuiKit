@@ -69,7 +69,7 @@ public enum TransactionObjectArgument: KeyProtocol {
         case 3:
             return TransactionObjectArgument.nestedResult(try Deserializer._struct(deserializer))
         default:
-            throw SuiError.unableToDeserialize
+            throw SuiError.customError(message: "Unable to Deserialize")
         }
     }
 }

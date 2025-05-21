@@ -56,6 +56,8 @@ public struct Signature: Equatable, KeyProtocol {
             self.LENGTH = 64
         case .SECP256K1:
             self.LENGTH = 65
+        case .zkLogin:
+            self.LENGTH = 64  // Using standard length for zkLogin signatures
         }
     }
 

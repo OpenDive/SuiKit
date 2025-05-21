@@ -30,6 +30,6 @@ public protocol SignerWithProviderProtocol {
     var faucetProvider: FaucetClient { get set }
 
     func getAddress() throws -> String
-    func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoinInfo
+    func requestSuiFromFaucet(_ address: String) async throws -> FaucetCoins
     func signData(data: Data) throws -> String
 }

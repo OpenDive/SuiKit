@@ -54,7 +54,7 @@ public struct PoseidonUtilities {
                 let hash2 = try Self.poseidonHash(inputs: Array(inputs.suffix(from: 16)))
                 return try Self.poseidonHash(inputs: [hash1, hash2])
             }
-            throw SuiError.notImplemented
+            throw SuiError.customError(message: "Poseidon hash not implemented for this input size")
         }
         let hashFN = Self.poseidonNumToHashFN[inputs.count - 1]
         return try hashFN.poseidon(inputs: inputs)

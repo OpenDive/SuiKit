@@ -36,19 +36,11 @@ public struct zkLoginUtilities {
     public static let maxAudValueLength = 145
     public static let packWidth = 248
 
-    public static func computeZkLoginAddressFromSeed(addressSeed: BigInt, issInput: String) throws -> String {
-        let addressSeedBytesBigEndian = Self.toBigEndianBytes(num: addressSeed, width: 32)
-        let iss = issInput == "accounts.google.com" ? "https://accounts.google.com" : issInput
-        let addressParamBytes = Data(iss.utf8)
-        var tmp = Data(count: (addressSeedBytesBigEndian.count + addressParamBytes.count))
-
-        tmp[0] = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ZkLogin"]!
-        tmp[1] = UInt8(addressParamBytes.count)
-        tmp[2..<(2+addressParamBytes.count)] = addressParamBytes
-        tmp[(2+addressParamBytes.count)..<(addressParamBytes.count+addressSeedBytesBigEndian.count)] = Data(addressSeedBytesBigEndian)
-
-        let blake = (try Blake2b.hash(size: 32, data: tmp))
-        return try Inputs.normalizeSuiAddress(value: blake.hexEncodedString())
+    public static func computezkLoginAddressFromSeed(addressSeed: BigInt, issInput: String) throws -> String {
+        // This method is used by the SDK tests but not by zkLoginPublicIdentifier
+        // For compatibility, we'll create a zkLoginPublicIdentifier and use that to compute the address
+        let pubId = try zkLoginPublicIdentifier(addressSeed: addressSeed, iss: issInput)
+        return try pubId.toSuiAddress()
     }
 
     public static func toBigEndianBytes(num: BigInt, width: Int) -> [UInt8] {
@@ -145,17 +137,42 @@ public struct zkLoginUtilities {
             PoseidonUtilities.poseidonHash(inputs: [salt])
         ])
     }
+    
+    /// Generate an address seed for zkLogin authentication
+    /// - Parameters:
+    ///   - salt: User's salt value
+    ///   - keyClaimName: Name of the key claim (typically "sub")
+    ///   - keyClaimValue: Value of the key claim (typically the user ID)
+    ///   - audience: The audience value from the JWT
+    /// - Returns: A BigInt representing the address seed
+    public static func generateAddressSeed(
+        salt: String,
+        keyClaimName: String,
+        keyClaimValue: String,
+        audience: String
+    ) throws -> String {
+        // Generate the address seed
+        let addressSeed = try genAddressSeed(
+            _salt: salt,
+            name: keyClaimName,
+            value: keyClaimValue,
+            aud: audience
+        )
+        
+        // Return as string (BigInt description)
+        return addressSeed.description
+    }
 
     public static func lengthChecks(jwt: String) throws {
         let parts = jwt.split(separator: ".")
-        guard parts.count >= 2 else { throw SuiError.notImplemented }
+        guard parts.count >= 2 else { throw SuiError.customError(message: "Invalid JWT format") }
 
         let header = parts[0]
         let payload = parts[1]
 
         // Check if the header is small enough
         if header.count > Self.maxHeaderLengthBase64 {
-            throw SuiError.notImplemented
+            throw SuiError.customError(message: "Header too large")
         }
 
         // Check if the combined length of (header, payload, SHA2 padding) is small enough
@@ -164,7 +181,7 @@ public struct zkLoginUtilities {
         let paddedUnsignedJwtLen = (L + 1 + K + 64) / 8
 
         if paddedUnsignedJwtLen > Self.maxPaddedUnsignedJwtLength {
-            throw SuiError.notImplemented
+            throw SuiError.customError(message: "JWT too large")
         }
     }
 
@@ -176,9 +193,9 @@ public struct zkLoginUtilities {
             let sub = decodedJwt.body["sub"] as? String,
             let iss = decodedJwt.body["iss"] as? String,
             let aud = decodedJwt.body["aud"] as? String
-        else { throw SuiError.notImplemented }
+        else { throw SuiError.customError(message: "Invalid JWT format") }
 
-        return try Self.computeZkLoginAddress(
+        return try Self.computezkLoginAddress(
             claimName: "sub",
             claimValue: sub,
             userSalt: userSalt,
@@ -187,14 +204,14 @@ public struct zkLoginUtilities {
         )
     }
 
-    public static func computeZkLoginAddress(
+    public static func computezkLoginAddress(
         claimName: String,
         claimValue: String,
         userSalt: String,
         iss: String,
         aud: String
     ) throws -> String {
-        return try Self.computeZkLoginAddressFromSeed(
+        return try Self.computezkLoginAddressFromSeed(
             addressSeed: Self.genAddressSeed(
                 _salt: userSalt,
                 name: claimName,

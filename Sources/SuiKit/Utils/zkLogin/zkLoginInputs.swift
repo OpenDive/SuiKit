@@ -1,5 +1,5 @@
 //
-//  PartialzkLoginSignature.swift
+//  zkLoginSignatureInputs.swift
 //  SuiKit
 //
 //  Copyright (c) 2024-2025 OpenDive
@@ -25,56 +25,33 @@
 
 import Foundation
 
-public struct PartialzkLoginSignature: KeyProtocol, Equatable, Codable {
+/// Represents the inputs for a zkLogin signature
+public struct zkLoginInputs: KeyProtocol, Equatable, Codable {
     public var proofPoints: zkLoginSignatureInputsProofPoints
     public var issBase64Details: zkLoginSignatureInputsClaim
     public var headerBase64: String
     
-    public init(proofPoints: zkLoginSignatureInputsProofPoints, issBase64Details: zkLoginSignatureInputsClaim, headerBase64: String) {
+    public init(
+        proofPoints: zkLoginSignatureInputsProofPoints,
+        issBase64Details: zkLoginSignatureInputsClaim,
+        headerBase64: String
+    ) {
         self.proofPoints = proofPoints
         self.issBase64Details = issBase64Details
         self.headerBase64 = headerBase64
     }
-
+    
     public func serialize(_ serializer: Serializer) throws {
         try Serializer._struct(serializer, value: self.proofPoints)
         try Serializer._struct(serializer, value: self.issBase64Details)
         try Serializer.str(serializer, self.headerBase64)
     }
-
-    public static func deserialize(from deserializer: Deserializer) throws -> PartialzkLoginSignature {
-        return PartialzkLoginSignature(
+    
+    public static func deserialize(from deserializer: Deserializer) throws -> zkLoginInputs {
+        return zkLoginInputs(
             proofPoints: try zkLoginSignatureInputsProofPoints.deserialize(from: deserializer),
             issBase64Details: try zkLoginSignatureInputsClaim.deserialize(from: deserializer),
             headerBase64: try Deserializer.string(deserializer)
         )
     }
-    
-    // MARK: - Equatable
-    public static func == (lhs: PartialzkLoginSignature, rhs: PartialzkLoginSignature) -> Bool {
-        return lhs.proofPoints == rhs.proofPoints &&
-               lhs.issBase64Details == rhs.issBase64Details &&
-               lhs.headerBase64 == rhs.headerBase64
-    }
-    
-    // MARK: - Codable
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        self.proofPoints = try container.decode(zkLoginSignatureInputsProofPoints.self, forKey: .proofPoints)
-        self.issBase64Details = try container.decode(zkLoginSignatureInputsClaim.self, forKey: .issBase64Details)
-        self.headerBase64 = try container.decode(String.self, forKey: .headerBase64)
-    }
-    
-    public func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(proofPoints, forKey: .proofPoints)
-        try container.encode(issBase64Details, forKey: .issBase64Details)
-        try container.encode(headerBase64, forKey: .headerBase64)
-    }
-    
-    private enum CodingKeys: String, CodingKey {
-        case proofPoints
-        case issBase64Details
-        case headerBase64
-    }
-}
+} 

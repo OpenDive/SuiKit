@@ -25,37 +25,38 @@
 
 import Foundation
 
-public struct zkLoginSignatureInputs: KeyProtocol, Equatable {
+/// Represents the inputs for a zkLogin signature
+public struct zkLoginSignatureInputs: KeyProtocol, Equatable, Codable {
     public var proofPoints: zkLoginSignatureInputsProofPoints
     public var issBase64Details: zkLoginSignatureInputsClaim
     public var headerBase64: String
-    public var userSignature: String
-
+    public var addressSeed: String
+    
     public init(
         proofPoints: zkLoginSignatureInputsProofPoints,
         issBase64Details: zkLoginSignatureInputsClaim,
         headerBase64: String,
-        userSignature: String
+        addressSeed: String
     ) {
         self.proofPoints = proofPoints
         self.issBase64Details = issBase64Details
         self.headerBase64 = headerBase64
-        self.userSignature = userSignature
+        self.addressSeed = addressSeed
     }
-
+    
     public func serialize(_ serializer: Serializer) throws {
         try Serializer._struct(serializer, value: self.proofPoints)
         try Serializer._struct(serializer, value: self.issBase64Details)
         try Serializer.str(serializer, self.headerBase64)
-        try Serializer.str(serializer, self.userSignature)
+        try Serializer.str(serializer, self.addressSeed)
     }
-
+    
     public static func deserialize(from deserializer: Deserializer) throws -> zkLoginSignatureInputs {
         return zkLoginSignatureInputs(
-            proofPoints: try Deserializer._struct(deserializer),
-            issBase64Details: try Deserializer._struct(deserializer),
+            proofPoints: try zkLoginSignatureInputsProofPoints.deserialize(from: deserializer),
+            issBase64Details: try zkLoginSignatureInputsClaim.deserialize(from: deserializer),
             headerBase64: try Deserializer.string(deserializer),
-            userSignature: try Deserializer.string(deserializer)
+            addressSeed: try Deserializer.string(deserializer)
         )
     }
-}
+} 

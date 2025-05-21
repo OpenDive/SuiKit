@@ -101,7 +101,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
                 return "address"
             }
             if normalizedStruct.isSameStruct(ResolvedStdOption()) {
-                guard !(normalizedStruct.typeArguments.isEmpty) else { throw SuiError.typeArgumentIsEmpty }
+                guard !(normalizedStruct.typeArguments.isEmpty) else { throw SuiError.customError(message: "Type argument is empty") }
                 let optionToVec: SuiMoveNormalizedType = .vector(normalizedStruct.typeArguments[0])
                 
                 return try optionToVec.getPureSerializationType(argVal)
@@ -363,7 +363,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
         case 13:
             return .structure(try Deserializer._struct(deserializer))
         default:
-            throw SuiError.unableToDeserialize
+            throw SuiError.customError(message: "Unable to Deserialize")
         }
     }
 }

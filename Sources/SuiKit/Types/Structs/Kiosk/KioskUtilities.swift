@@ -46,7 +46,9 @@ public struct KioskUtilities {
             let bcs = data.bcs,
             case .moveObject(let serialziedKiosk) = bcs,
             let kioskData = Data(base64Encoded: serialziedKiosk.bcsBytes)
-        else { throw SuiError.invalidKioskData }
+        else { throw SuiError.customError(
+            message: "Invalid Kiosk Data"
+        ) }
 
         let der = Deserializer(data: kioskData)
 

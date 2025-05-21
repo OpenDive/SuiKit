@@ -47,7 +47,7 @@ public struct zkLoginNonce {
         let bigNum = try PoseidonUtilities.poseidonHash(inputs: [ephPublicKey0, ephPublicKey1, BigInt(maxEpoch), BigInt(randomness, radix: 10)!])
         let z = zkLoginUtilities.toBigEndianBytes(num: bigNum, width: 20)
         let nonce = Data(z).base64urlEncodedString()
-        guard nonce.count == Self.nonceLength else { throw SuiError.notImplemented }
+        guard nonce.count == Self.nonceLength else { throw SuiError.customError(message: "Invalid nonce length") }
         return nonce
     }
 

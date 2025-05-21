@@ -70,7 +70,7 @@ public enum ObjectArg: KeyProtocol {
     ///
     /// - Parameter deserializer: The `Deserializer` to use for deserialization.
     /// - Returns: A deserialized `ObjectArg` instance.
-    /// - Throws: Throws `SuiError.unableToDeserialize` if deserialization fails.
+    /// - Throws: Throws `SuiError.customError(message: "Unable to Deserialize")` if deserialization fails.
     public static func deserialize(from deserializer: Deserializer) throws -> ObjectArg {
         let type = try Deserializer.u8(deserializer)
         
@@ -84,7 +84,7 @@ public enum ObjectArg: KeyProtocol {
                 try Deserializer._struct(deserializer)
             )
         default:
-            throw SuiError.unableToDeserialize
+            throw SuiError.customError(message: "Unable to Deserialize")
         }
     }
 }

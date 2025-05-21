@@ -506,7 +506,7 @@ public class KioskTransactionClient {
         if self.personalCap == nil {
             // If we're pending transfer though, we inform user to call `shareAndTransferCap()`.
             if self.pendingTransfer != nil && self.pendingTransfer! {
-                throw SuiError.kioskOwnerCapNotTransferred(message: "You need to transfer the `kioskOwnerCap` by calling `shareAndTransferCap()` before wrap")
+                throw SuiError.customError(message: "You need to transfer the `kioskOwnerCap` by calling `shareAndTransferCap()` before wrap")
             }
             return
         }

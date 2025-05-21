@@ -71,7 +71,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return DevInspectResults(input: JSON(data)["result"])
     }
 
@@ -92,7 +92,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
@@ -154,7 +154,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
@@ -190,7 +190,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
@@ -206,7 +206,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return JSON(data)["result"].stringValue
     }
 
@@ -225,7 +225,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let value = JSON(data)["result"]
         return Checkpoint(input: value)
     }
@@ -254,7 +254,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var checkpointPages: [Checkpoint] = []
         let result = JSON(data)["result"]
         for checkpoint in result["data"].arrayValue {
@@ -284,7 +284,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var eventPages: [SuiEvent] = []
         let result = JSON(data)["result"]
         for event in result.arrayValue {
@@ -307,7 +307,7 @@ public struct SuiProvider {
             SuiRequest("sui_getLatestCheckpointSequenceNumber", [])
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return JSON(data)["result"].stringValue
     }
 
@@ -323,7 +323,7 @@ public struct SuiProvider {
             SuiRequest("sui_getLoadedChildObjects", [AnyCodable(digest)])
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return result.arrayValue.map { TransactionEffectsModifiedAtVersions(input: $0) }
     }
@@ -352,7 +352,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         var argTypes: [SuiMoveFunctionArgType] = []
         for arg in result.arrayValue {
@@ -391,7 +391,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return SuiMoveNormalizedFunction(input: result)
     }
@@ -417,7 +417,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return SuiMoveNormalizedModule(input: result)
     }
@@ -439,7 +439,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return try self.parseNormalizedModules(result: result)
     }
@@ -468,7 +468,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return SuiMoveNormalizedStruct(input: result)
     }
@@ -483,7 +483,7 @@ public struct SuiProvider {
         objectId: String,
         options: SuiObjectDataOptions? = nil
     ) async throws -> SuiObjectResponse? {
-        guard (try Inputs.normalizeSuiAddress(value: objectId)).isValidSuiAddress() else { throw SuiError.unableToValidateAddress }
+        guard (try Inputs.normalizeSuiAddress(value: objectId)).isValidSuiAddress() else { throw SuiError.customError(message: "Unable to validate address") }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -495,7 +495,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let value = JSON(data)["result"]
         return SuiObjectResponse(input: value)
     }
@@ -517,7 +517,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         var attributesDict: [String: ProtocolConfigValue?] = [:]
         let attributeTypeMap: [String: (String) -> ProtocolConfigValue] = [
@@ -563,7 +563,7 @@ public struct SuiProvider {
         digest: String,
         options: SuiTransactionBlockResponseOptions? = nil
     ) async throws -> SuiTransactionBlockResponse {
-        guard self.isValidTransactionDigest(digest) else { throw SuiError.invalidDigest }
+        guard self.isValidTransactionDigest(digest) else { throw SuiError.customError(message: "Invalid digest") }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -575,7 +575,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return SuiTransactionBlockResponse(input: JSON(data)["result"])
     }
 
@@ -591,7 +591,7 @@ public struct SuiProvider {
     ) async throws -> [SuiObjectResponse] {
         for object in ids {
             guard (try Inputs.normalizeSuiAddress(value: object)).isValidSuiAddress() else {
-                throw SuiError.unableToValidateAddress
+                throw SuiError.customError(message: "Unable to validate address")
             }
         }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
@@ -605,7 +605,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let jsonResponse = JSON(data)["result"]
         var objectResponses: [SuiObjectResponse] = []
         for jsonData in jsonResponse.arrayValue {
@@ -626,9 +626,9 @@ public struct SuiProvider {
         options: SuiTransactionBlockResponseOptions? = nil
     ) async throws -> [SuiTransactionBlockResponse] {
         for digest in digests {
-            guard self.isValidTransactionDigest(digest) else { throw SuiError.invalidDigest }
+            guard self.isValidTransactionDigest(digest) else { throw SuiError.customError(message: "Invalid digest") }
         }
-        guard digests.count == Set(digests).count else { throw SuiError.digestsDoNotMatch }
+        guard digests.count == Set(digests).count else { throw SuiError.customError(message: "Digest do not match: \(digests.count) != \(Set(digests).count)") }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -640,7 +640,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         return JSON(data)["result"].arrayValue.map { SuiTransactionBlockResponse(input: $0) }
     }
 
@@ -670,7 +670,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return ObjectRead.parseJSON(result)
     }
@@ -698,7 +698,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return result.arrayValue.compactMap { ObjectRead.parseJSON($0) }
     }
@@ -717,7 +717,7 @@ public struct SuiProvider {
             ])
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var balances: [CoinBalance] = []
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"] {
             let lockedBalance = value["lockedBalance"]
@@ -757,7 +757,7 @@ public struct SuiProvider {
             ])
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var coinPages: [CoinStruct] = []
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
@@ -797,7 +797,7 @@ public struct SuiProvider {
             ])
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
         let lockedBalance = value["lockedBalance"]
         return try CoinBalance(
@@ -828,9 +828,9 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let value = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        guard value.null == nil else { throw SuiError.invalidCoinType }
+        guard value.null == nil else { throw SuiError.customError(message: "Invalid coin type") }
         return SuiCoinMetadata(
             decimals: value["decimals"].uInt8Value,
             description: value["description"].stringValue,
@@ -868,7 +868,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var coinPages: [CoinStruct] = []
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
         for value in result["data"].arrayValue {
@@ -907,7 +907,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         var validators: [[String]] = [[]]
         for validator in result["validators"].arrayValue {
@@ -944,7 +944,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return SuiObjectResponse(input: result)
     }
@@ -970,7 +970,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         return SuiObjectResponse(input: result)
     }
@@ -992,7 +992,7 @@ public struct SuiProvider {
         limit: Int? = nil,
         cursor: String? = nil
     ) async throws -> DynamicFieldPage {
-        guard (try Inputs.normalizeSuiAddress(value: parentId)).isValidSuiAddress() else { throw SuiError.unableToValidateAddress }
+        guard (try Inputs.normalizeSuiAddress(value: parentId)).isValidSuiAddress() else { throw SuiError.customError(message: "Unable to validate address") }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -1007,7 +1007,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         var dynamicFields: [DynamicFieldInfo] = []
 
@@ -1044,6 +1044,17 @@ public struct SuiProvider {
         )
         return try JSONDecoder().decode(JSON.self, from: data)["result"]
     }
+    
+    /// Return the latest SUI system state object on-chain.
+    /// - Returns: A `JSON` object containing the information of the latest Sui system state.
+    /// - Throws: `SuiError.rpcError` if there are errors in the JSON RPC response.
+    public func getSuiSystemState() async throws -> JSON {
+        let data = try await JsonRpcClient.sendSuiJsonRpc(
+            try self.getServerUrl(),
+            SuiRequest("suix_getLatestSuiSystemState", [])
+        )
+        return try JSONDecoder().decode(JSON.self, from: data)["result"]
+    }
 
     /// Return the list of objects owned by an address.
     ///
@@ -1065,7 +1076,7 @@ public struct SuiProvider {
         cursor: String? = nil,
         limit: Int? = nil
     ) async throws -> PaginatedObjectsResponse {
-        guard owner.isValidSuiAddress() else { throw SuiError.unableToValidateAddress }
+        guard owner.isValidSuiAddress() else { throw SuiError.customError(message: "Unable to validate address") }
         let data = try await JsonRpcClient.sendSuiJsonRpc(
             try self.getServerUrl(),
             SuiRequest(
@@ -1084,7 +1095,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)
         let objects: [SuiObjectResponse] = result["result"]["data"].arrayValue.compactMap {
             SuiObjectResponse(input: $0)
@@ -1124,7 +1135,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         var stakes: [DelegatedStake] = []
         for value in result.arrayValue {
@@ -1145,7 +1156,7 @@ public struct SuiProvider {
                 case "Unstaked":
                     stakesInner.append(.unstaked(finalStake))
                 default:
-                    throw SuiError.unableToParseJson
+                    throw SuiError.customError(message: "Unable to parse JSON")
                 }
             }
             stakes.append(
@@ -1178,7 +1189,7 @@ public struct SuiProvider {
             )
         )
         let errorValue = self.hasErrors(JSON(data))
-        guard !(errorValue.hasError) else { throw SuiError.rpcError(error: errorValue) }
+        guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         let result = JSON(data)["result"]
         var stakes: [DelegatedStake] = []
         for value in result.arrayValue {
@@ -1199,7 +1210,7 @@ public struct SuiProvider {
                 case "Unstaked":
                     stakesInner.append(.unstaked(finalStake))
                 default:
-                    throw SuiError.unableToParseJson
+                    throw SuiError.customError(message: "Unable to parse JSON")
                 }
             }
             stakes.append(
@@ -1352,7 +1363,7 @@ public struct SuiProvider {
         var count = 0
         repeat {
             if count >= 60 {
-                throw SuiError.transactionTimedOut
+                throw SuiError.customError(message: "Transaction timed out after 60 seconds")
             }
             try await Task.sleep(nanoseconds: 1_000_000_000)
             count += 1
@@ -1412,8 +1423,20 @@ public struct SuiProvider {
 
     private func getServerUrl() throws -> URL {
         guard let url = URL(string: self.connection.fullNode) else {
-            throw SuiError.invalidUrl(url: self.connection.fullNode)
+            throw SuiError.customError(message: "Invalid URL: \(self.connection.fullNode)")
         }
         return url
+    }
+    
+    /// Get epoch information required for zkLogin
+    /// - Returns: Current epoch information from the network
+    public func getzkLoginEpochInfo() async throws -> EpochInfo {
+        let systemState = try await getSuiSystemState()
+        
+        return EpochInfo(
+            epoch: systemState["epoch"].uInt64Value,
+            epochStartTimestampMs: systemState["epochStartTimestampMs"].uInt64Value,
+            epochDurationMs: systemState["epochDurationMs"].uInt64Value
+        )
     }
 }

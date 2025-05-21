@@ -50,3 +50,16 @@ public struct FaucetCoinInfo: Codable {
     public let transferTxDigest: TransactionDigest
 }
 #endif
+
+public struct FaucetCoins: Codable {
+    /// Represents the coins (0x2::sui::SUI) that were fauceted to the account. Can be null if faucet failed
+    public let coinsSent: [FaucetCoinInfo]?
+    
+    /// Represents either "success" if the faucet succeeded, or a "Failure" object with `status` string containing a `JSON` object.
+    public let status: String
+    
+    enum CodingKeys: String, CodingKey {
+        case coinsSent = "coins_sent"
+        case status
+    }
+}

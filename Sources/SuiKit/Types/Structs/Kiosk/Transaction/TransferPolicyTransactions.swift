@@ -28,7 +28,7 @@ import Foundation
 public struct TransferPolicyTransactions {
     /**
      * Call the `transfer_policy::new` function to create a new transfer policy.
-     * Returns `transferPolicyCap`
+     * Returns `tra/Volumes/OpenDive/Github/SuiKit-Devel/SuiKit/Sources/SuiKitnsferPolicyCap`
      */
     public static func createTransferPolicy(
         tx: inout TransactionBlock,
@@ -43,7 +43,7 @@ public struct TransferPolicyTransactions {
 
         guard let txPolicyObj = TransactionObjectArgument(
             from: transferPolicy
-        ) else { throw SuiError.invalidObjectArgument }
+        ) else { throw SuiError.customError(message: "Invalid object argument") }
 
         try Self.shareTransferPolicy(tx: &tx, itemType: itemType, transferPolicy: txPolicyObj)
 
@@ -73,7 +73,7 @@ public struct TransferPolicyTransactions {
         guard
             let transferPolicy = result.first,
             result.count == 2
-        else { throw SuiError.invalidObjectArgument }
+        else { throw SuiError.customError(message: "Invalid object argument") }
 
         return (transferPolicy, result[1])
     }
@@ -129,7 +129,7 @@ public struct TransferPolicyTransactions {
         )
 
         guard let profits = result.first else {
-            throw SuiError.invalidObjectArgument
+            throw SuiError.customError(message: "Invalid object argument")
         }
 
         return profits

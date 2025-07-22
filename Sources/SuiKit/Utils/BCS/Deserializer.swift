@@ -24,7 +24,6 @@
 //
 
 import Foundation
-
 import UInt256
 
 /// The max UInt8 value
@@ -45,317 +44,376 @@ let MAX_U128 = UInt128.max
 /// The max UInt256 value
 let MAX_U256 = UInt256.max
 
-/// A BCS (Binary Canonical Serialization) Deserializer meant for Deserializing data
-public class Deserializer {
-    /// The input data itself
-    private var input: Data
+/// A highly optimized BCS (Binary Canonical Serialization) Deserializer
+/// Based on the reference Rust implementation with zero-copy optimizations
+public final class Deserializer {
 
-    /// Meant for determining how many bytes are left to deserialize
+    // MARK: - Constants
+    private static let MAX_SEQUENCE_LENGTH: UInt32 = (1 << 31) - 1
+    private static let MAX_CONTAINER_DEPTH = 500
+
+    // MARK: - Properties
+    private let buffer: UnsafeRawBufferPointer
     private var position: Int = 0
+    private var containerDepth: Int = 0
+    private let originalData: Data // Keep reference to prevent deallocation
+
+    // MARK: - Initialization
 
     public init(data: Data) {
-        self.input = data
+        self.originalData = data
+        self.buffer = data.withUnsafeBytes { bytes in
+            UnsafeRawBufferPointer(bytes)
+        }
     }
 
     public func output() -> Data {
-        return self.input
+        return originalData
+    }
+
+    /// Reset the deserializer position
+    public func reset() {
+        position = 0
+        containerDepth = 0
+    }
+
+    /// Check if all data has been consumed
+    public func isComplete() -> Bool {
+        return position >= buffer.count
     }
 
     /// Calculate the remaining number of bytes in the input data buffer.
-    ///
-    /// This function returns the number of bytes remaining in the Serializer's input data buffer
-    /// by subtracting the current position from the total count of bytes.
-    ///
-    /// - Returns: An Int representing the number of bytes remaining in the input data buffer.
     public func remaining() -> Int {
-        return input.count - position
+        return Swift.max(0, buffer.count - position)
     }
 
-    /// Deserialize a boolean value from the Serializer's input data buffer.
-    ///
-    /// This function reads an integer of length 1 byte from the input data buffer,
-    /// and returns a boolean value based on its content. A value of 0 represents false
-    /// and a value of 1 represents true. If the read value is not 0 or 1, it throws an error.
-    ///
-    /// - Returns: A Bool value deserialized from the input data buffer.
-    ///
-    /// - Throws: An SuiError.unexpectedValue error if the value read from the input data buffer is neither 0 nor 1.
-    public func bool() throws -> Bool {
-        let value = Int(try readInt(length: 1))
-        switch value {
+    // MARK: - Core Reading Functions
+
+    @inline(__always)
+    private func ensureRemaining(_ count: Int) throws {
+        guard position + count <= buffer.count else {
+            throw BCSError.unexpectedEndOfInput(
+                requested: "\(count)",
+                found: "\(remaining())"
+            )
+        }
+    }
+
+    @inline(__always)
+    private func readByte() throws -> UInt8 {
+        try ensureRemaining(1)
+        let byte = buffer.load(fromByteOffset: position, as: UInt8.self)
+        position += 1
+        return byte
+    }
+
+    @inline(__always)
+    private func readBytes(_ count: Int) throws -> UnsafeRawBufferPointer {
+        try ensureRemaining(count)
+        let slice = UnsafeRawBufferPointer(
+            start: buffer.baseAddress?.advanced(by: position),
+            count: count
+        )
+        position += count
+        return slice
+    }
+
+    // MARK: - Primitive Type Deserialization (Optimized)
+
+    private func deserializeBool() throws -> Bool {
+        let byte = try readByte()
+        switch byte {
         case 0:
             return false
         case 1:
             return true
         default:
-            throw BCSError.unexpectedValue(value: "\(value)")
+            throw BCSError.unexpectedValue(value: "\(byte)")
         }
+    }
+
+    private func deserializeU8() throws -> UInt8 {
+        return try readByte()
+    }
+
+    private func deserializeU16() throws -> UInt16 {
+        let bytes = try readBytes(2)
+        return bytes.load(as: UInt16.self).littleEndian
+    }
+
+    private func deserializeU32() throws -> UInt32 {
+        let bytes = try readBytes(4)
+        return bytes.load(as: UInt32.self).littleEndian
+    }
+
+    private func deserializeU64() throws -> UInt64 {
+        let bytes = try readBytes(8)
+        return bytes.load(as: UInt64.self).littleEndian
+    }
+
+    private func deserializeU128() throws -> UInt128 {
+        let bytes = try readBytes(16)
+        return bytes.load(as: UInt128.self).littleEndian
+    }
+
+    private func deserializeU256() throws -> UInt256 {
+        let bytes = try readBytes(32)
+        return bytes.load(as: UInt256.self).littleEndian
+    }
+
+    // MARK: - ULEB128 Decoding (Optimized)
+
+    private func deserializeULEB128() throws -> UInt32 {
+        var value: UInt64 = 0
+        var shift: Int = 0
+
+        while shift < 32 {
+            let byte = try readByte()
+            let digit = UInt64(byte & 0x7F)
+            value |= digit << shift
+
+            // If the highest bit is 0, we're done
+            if byte & 0x80 == 0 {
+                // Check for canonical encoding
+                if shift > 0 && digit == 0 {
+                    throw BCSError.nonCanonicalULEB128
+                }
+
+                // Check for overflow
+                guard value <= UInt64(UInt32.max) else {
+                    throw BCSError.uleb128Overflow
+                }
+
+                return UInt32(value)
+            }
+
+            shift += 7
+        }
+
+        throw BCSError.uleb128Overflow
+    }
+
+    // MARK: - String Deserialization (Zero-Copy Optimized)
+
+    private func deserializeString() throws -> String {
+        let length = try deserializeULEB128()
+        let bytes = try readBytes(Int(length))
+
+        let string = String(
+            decoding: UnsafeBufferPointer(
+                start: bytes.bindMemory(to: UInt8.self).baseAddress,
+                count: bytes.count
+            ),
+            as: UTF8.self
+        )
+
+        return string
+    }
+
+    // MARK: - Bytes Deserialization
+
+    private func deserializeData() throws -> Data {
+        let length = try deserializeULEB128()
+        let bytes = try readBytes(Int(length))
+        return Data(bytes)
+    }
+
+    private func deserializeFixedData(_ length: Int) throws -> Data {
+        let bytes = try readBytes(length)
+        return Data(bytes)
+    }
+
+    // MARK: - Legacy API Compatibility Layer
+
+    /// Deserialize a boolean value from the Serializer's input data buffer.
+    public func bool() throws -> Bool {
+        return try deserializeBool()
     }
 
     /// Deserialize a Data object from the Deserializer's input data buffer.
-    ///
-    /// This function reads the length of the data as a ULEB128-encoded integer, followed by
-    /// reading the data with the obtained length from the input data buffer.
-    ///
-    /// - Parameter deserializer: A Deserializer instance to deserialize the data from.
-    ///
-    /// - Returns: A Data object deserialized from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the ULEB128-encoded length or the data.
     public static func toBytes(_ deserializer: Deserializer) throws -> Data {
-        let length = try deserializer.uleb128()
-        return try deserializer.read(length: Int(length))
+        return try deserializer.deserializeData()
     }
 
     /// Deserialize a fixed-length Data object from the Deserializer's input data buffer.
-    ///
-    /// This function reads the specified number of bytes from the input data buffer
-    /// and returns the data as a Data object.
-    ///
-    /// - Parameter length: The number of bytes to read from the input data buffer.
-    ///
-    /// - Returns: A Data object of the specified length deserialized from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the data.
     public func fixedBytes(length: Int) throws -> Data {
-        return try read(length: length)
+        return try deserializeFixedData(length)
     }
 
     /// Deserialize a dictionary of key-value pairs from the Deserializer's input data buffer.
-    ///
-    /// This function first reads the length of the dictionary as a ULEB128-encoded integer.
-    /// Then, it iteratively decodes keys and values using the provided keyDecoder and valueDecoder closures
-    /// until the desired number of pairs is deserialized.
-    ///
-    /// - Parameters:
-    ///    - keyDecoder: A closure that takes a Deserializer instance and returns a decoded key of type K.
-    ///    - valueDecoder: A closure that takes a Deserializer instance and returns a decoded value of type V.
-    ///
-    /// - Returns: A dictionary of [K: V] deserialized from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the ULEB128-encoded length, keys, or values.
-    public func map<K, V>(keyDecoder: (Deserializer) throws -> K, valueDecoder: (Deserializer) throws -> V) throws -> [K: V] {
-        let length = try uleb128()
-        var values: [K: V] = [:]
-        while values.count < length {
+    public func map<K: Hashable, V>(
+        keyDecoder: (Deserializer) throws -> K,
+        valueDecoder: (Deserializer) throws -> V
+    ) throws -> [K: V] {
+        let length = try deserializeULEB128()
+
+        var result: [K: V] = [:]
+        result.reserveCapacity(Int(length))
+
+        var previousKeyBytes: Data?
+
+        for _ in 0..<length {
+            // Capture the position before deserializing the key
+            let keyStartPosition = position
             let key = try keyDecoder(self)
+            let keyEndPosition = position
+
+            // Extract the serialized key bytes for validation
+            let keyBytes = originalData.subdata(in: keyStartPosition..<keyEndPosition)
+
+            // Check canonical ordering
+            if let prevKey = previousKeyBytes {
+                if !prevKey.lexicographicallyPrecedes(keyBytes) {
+                    // prevKey is either equal to or greater than keyBytes
+                    throw BCSError.nonCanonicalMapOrder
+                }
+            }
+
             let value = try valueDecoder(self)
-            values[key] = value
-        }
-        return values
-    }
 
-    /// Deserialize a sequence of values from the Deserializer's input data buffer.
-    ///
-    /// This function first reads the length of the sequence as a ULEB128-encoded integer.
-    /// Then, it iteratively decodes values using the provided valueDecoder closure
-    /// until the desired number of elements is deserialized.
-    ///
-    /// - Parameter valueDecoder: A closure that takes a Deserializer instance and returns a decoded value of type T.
-    ///
-    /// - Returns: An array of [T] deserialized from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the ULEB128-encoded length or the values.
-    public func sequence<T>(valueDecoder: (Deserializer) throws -> T) throws -> [T] {
-        let length = try uleb128()
-        var values: [T] = []
-        while values.count < length {
-            values.append(try valueDecoder(self))
-        }
-        return values
-    }
+            // Check for duplicate keys
+            if result[key] != nil {
+                throw BCSError.duplicateMapKey
+            }
 
-    /// Deserialize a string from the Deserializer's input data buffer.
-    ///
-    /// This function first calls Deserializer.toBytes(_:) to read the raw bytes for the string.
-    /// Then, it attempts to convert the bytes into a String using the UTF-8 encoding.
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the string from.
-    ///
-    /// - Returns: A decoded String from the input data buffer.
-    ///
-    /// - Throws: SuiError.stringToDataFailure if the UTF-8 decoding fails.
-    public static func string(_ deserializer: Deserializer) throws -> String {
-        let data = try Deserializer.toBytes(deserializer)
-        guard let result = String(data: data, encoding: .utf8) else {
-            throw BCSError.stringToDataFailure(value: "\(data)")
+            result[key] = value
+            previousKeyBytes = keyBytes
         }
+
         return result
     }
 
+    /// Deserialize a sequence of values from the Deserializer's input data buffer.
+    public func sequence<T>(valueDecoder: (Deserializer) throws -> T) throws -> [T] {
+        let length = try deserializeULEB128()
+
+        guard length <= Self.MAX_SEQUENCE_LENGTH else {
+            throw BCSError.sequenceTooLong(Int(length))
+        }
+
+        var result: [T] = []
+        result.reserveCapacity(Int(length))
+
+        for _ in 0..<length {
+            result.append(try valueDecoder(self))
+        }
+
+        return result
+    }
+
+    /// Deserialize a string from the Deserializer's input data buffer.
+    public static func string(_ deserializer: Deserializer) throws -> String {
+        return try deserializer.deserializeString()
+    }
+
     /// Deserialize a structure that conforms to the KeyProtocol from the Deserializer's input data buffer.
-    ///
-    /// This function uses the type's deserialize(from:) method, passing the current Deserializer instance,
-    /// to deserialize the structure from the input data buffer.
-    ///
-    /// - Parameter type: The Deserializer instance to deserialize the struct from.
-    ///
-    /// - Returns: An instance of type T deserialized from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data or decoding the structure.
     public static func _struct<T: KeyProtocol>(_ deserializer: Deserializer) throws -> T {
         return try T.deserialize(from: deserializer)
     }
 
     /// Deserialize a UInt8 value from the Deserializer's input data buffer.
-    ///
-    /// This function reads an 8-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the UInt8 value from.
-    ///
-    /// - Returns: A deserialized UInt8 value from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data.
     public static func u8(_ deserializer: Deserializer) throws -> UInt8 {
-        return UInt8(try deserializer.readInt(length: 1))
+        return try deserializer.deserializeU8()
     }
 
     /// Deserialize a UInt16 value from the Deserializer's input data buffer.
-    ///
-    /// This function reads a 16-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the UInt16 value from.
-    ///
-    /// - Returns: A deserialized UInt16 value from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data.
     public static func u16(_ deserializer: Deserializer) throws -> UInt16 {
-        return UInt16(try deserializer.readInt(length: 2))
+        return try deserializer.deserializeU16()
     }
 
     /// Deserialize a UInt32 value from the Deserializer's input data buffer.
-    ///
-    /// This function reads a 32-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the UInt32 value from.
-    ///
-    /// - Returns: A deserialized UInt32 value from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data.
     public static func u32(_ deserializer: Deserializer) throws -> UInt32 {
-        return UInt32(try deserializer.readInt(length: 4))
+        return try deserializer.deserializeU32()
     }
 
     /// Deserialize a UInt64 value from the Deserializer's input data buffer.
-    ///
-    /// This function reads a 64-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the UInt64 value from.
-    ///
-    /// - Returns: A deserialized UInt64 value from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data.
     public static func u64(_ deserializer: Deserializer) throws -> UInt64 {
-        return UInt64(try deserializer.readInt(length: 8))
+        return try deserializer.deserializeU64()
     }
 
     /// Deserialize a UInt128 value from the Deserializer's input data buffer.
-    ///
-    /// This function reads a 128-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:).
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the UInt128 value from.
-    ///
-    /// - Returns: A deserialized UInt128 value from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data.
     public static func u128(_ deserializer: Deserializer) throws -> UInt128 {
-        return UInt128(try deserializer.readInt(length: 16))
+        return try deserializer.deserializeU128()
     }
 
     /// Deserialize a UInt256 value from the Deserializer's input data buffer.
-    ///
-    /// This function reads a 256-bit unsigned integer from the input data buffer by calling Deserializer.readInt(length:). It then attempts to convert the result into a UInt256 instance.
-    ///
-    /// - Parameter deserializer: The Deserializer instance to deserialize the UInt256 value from.
-    ///
-    /// - Returns: A deserialized UInt256 value from the input data buffer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data, or if the conversion from the deserialized value to a UInt256 instance fails.
     public static func u256(_ deserializer: Deserializer) throws -> UInt256 {
-        let value = try deserializer.readInt(length: 32)
-        guard let result = UInt256(String(value)) else {
-            throw BCSError.stringToUInt256Failure(value: String(value))
-        }
-        return result
+        return try deserializer.deserializeU256()
     }
 
     public func _optional<T>(valueDecoder: (Deserializer) throws -> T) throws -> T? {
-        let isNil = try self.readInt(length: 1)
-        if UInt8(isNil) != 0 {
+        let tag = try readByte()
+        switch tag {
+        case 0:
+            return nil
+        case 1:
             return try valueDecoder(self)
+        default:
+            throw BCSError.invalidOptionTag(tag)
         }
-        return nil
     }
 
     /// Deserialize an unsigned LEB128-encoded integer from the Deserializer's input data buffer.
-    ///
-    /// This function reads bytes from the input data buffer and reconstructs the original unsigned integer using LEB128 encoding. LEB128 is a compact representation for variable-length integers, particularly for small values.
-    ///
-    /// - Returns: A deserialized UInt value representing the original unsigned integer.
-    ///
-    /// - Throws: Any error that may occur during the deserialization process, such as reading the input data, or if the deserialized value is larger than the maximum supported value (UInt128).
     public func uleb128() throws -> UInt {
-        var value: UInt = 0
-        var shift: UInt = 0
-
-        while value <= UInt(MAX_U32) {
-            let byte = try readInt(length: 1)
-            value |= (UInt(byte) & 0x7F) << shift
-            if Int(byte) & 0x80 == 0 {
-                break
-            }
-            shift += 7
-        }
-
-        if value > UInt128(MAX_U128) {
-            throw BCSError.unexpectedLargeULEB128Value(value: "\(value)")
-        }
-
-        return value
+        return UInt(try deserializeULEB128())
     }
 
-    /// Reads a specified number of bytes from the input data and advances the current position by that amount.
-    ///
-    /// - Parameter length: The number of bytes to read from the input data.
-    ///
-    /// - Returns: A Data object containing the bytes that were read from the input data.
-    ///
-    /// - Throws: An SuiError object of type unexpectedEndOfInput if there are not enough bytes left in the input data
-    /// to satisfy the requested length. The error message will contain the requested length and the remaining bytes available to read.
+    /// Reads a specified number of bytes from the input data and advances the current position.
     private func read(length: Int) throws -> Data {
-        guard position + length <= input.count else {
-            throw BCSError.unexpectedEndOfInput(requested: "\(length)", found: "\(input.count - position)")
-        }
-        let range = position ..< position + length
-        let value = input.subdata(in: range)
-        position += length
-        return value
+        let bytes = try readBytes(length)
+        return Data(bytes)
     }
 
-    /// Reads a specified number of bytes from the input data and interprets the bytes as an unsigned integer of a specified bit width.
-    ///
-    /// - Parameter length: The number of bytes to read from the input data. This determines the bit width of the unsigned integer that will be returned.
-    ///
-    /// - Returns: An unsigned integer of the specified bit width, representing the bytes that were read from the input data.
-    ///
-    /// - Throws: An SuiError object of type invalidLength if the specified length is not valid, i.e. not one of the supported lengths: 1, 2, 4, 8, 16 or 32 bytes.
+    /// Reads a specified number of bytes from the input data and interprets the bytes as an unsigned integer.
     private func readInt(length: Int) throws -> any UnsignedInteger {
-        let data = try read(length: length)
+        let bytes = try readBytes(length)
 
-        if length == 1 {
-            return data.withUnsafeBytes { $0.load(as: UInt8.self) }
-        } else if length == 2 {
-            return data.withUnsafeBytes { $0.load(as: UInt16.self) }
-        } else if length == 4 {
-            return data.withUnsafeBytes { $0.load(as: UInt32.self) }
-        } else if length == 8 {
-            return data.withUnsafeBytes { $0.load(as: UInt64.self) }
-        } else if length == 16 {
-            return data.withUnsafeBytes { $0.load(as: UInt128.self) }
-        } else if length == 32 {
-            return data.withUnsafeBytes { $0.load(as: UInt256.self) }
-        } else {
+        switch length {
+        case 1:
+            return bytes.load(as: UInt8.self)
+        case 2:
+            return bytes.load(as: UInt16.self)
+        case 4:
+            return bytes.load(as: UInt32.self)
+        case 8:
+            return bytes.load(as: UInt64.self)
+        case 16:
+            return bytes.load(as: UInt128.self)
+        case 32:
+            return bytes.load(as: UInt256.self)
+        default:
             throw BCSError.invalidLength
         }
     }
+
+    // MARK: - Container Depth Management
+
+    private func enterContainer() throws {
+        guard containerDepth < Self.MAX_CONTAINER_DEPTH else {
+            throw BCSError.exceedsMaxContainerDepth
+        }
+        containerDepth += 1
+    }
+
+    private func exitContainer() {
+        containerDepth -= 1
+    }
+}
+
+// MARK: - Additional Error Types
+
+extension BCSError {
+    static let nonCanonicalULEB128 = BCSError.customError("Non-canonical ULEB128 encoding")
+    static let uleb128Overflow = BCSError.customError("ULEB128 integer overflow")
+
+    static func invalidOptionTag(_ tag: UInt8) -> BCSError {
+        return .customError("Invalid option tag: \(tag), expected 0 or 1")
+    }
+
+    static func sequenceTooLong(_ length: Int) -> BCSError {
+        return .customError("Sequence too long: \(length)")
+    }
+
+    static let nonCanonicalMapOrder = BCSError.customError("Map keys not in canonical order")
+    static let duplicateMapKey = BCSError.customError("Duplicate key found in map")
 }

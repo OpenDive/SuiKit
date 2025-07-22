@@ -37,11 +37,6 @@ public class TransactionResult: Sequence, IteratorProtocol {
 
     /// An array holding the nested results, each represented by a `TransactionArgument`.
     var nestedResults: [TransactionArgument]
-    
-    /// Returns true if there are no more results to iterate over.
-    public var isEmpty: Bool {
-        return count == 0
-    }
 
     /// Initializes a new instance of `TransactionResult` with the specified index.
     ///
@@ -86,7 +81,7 @@ public class TransactionResult: Sequence, IteratorProtocol {
     }
 
     public func next() -> TransactionArgument? {
-        guard !self.isEmpty else { return nil }
+        guard !(self.count == 0) else { return nil }
         defer { self.count -= 1 }
         return self.nestedResultFor(UInt16(self.count - 1))
     }

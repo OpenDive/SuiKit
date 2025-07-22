@@ -33,7 +33,7 @@ public struct JsonRpcClient {
 
     /// Represents the targeted RPC version.
     public static let TARGETED_RPC_VERSION = "1.1.0"
-    
+
     /// Shared URLSession with optimized configuration
     private static let sharedSession: URLSession = {
         let config = URLSessionConfiguration.default

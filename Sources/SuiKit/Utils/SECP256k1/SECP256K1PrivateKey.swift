@@ -225,14 +225,14 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
 
     public func sign(data: Data) throws -> Signature {
         let hash = data.sha256
-        
+
         // Use shared context for better performance
-        guard let ctx = sharedSecp256k1Context else { 
-            throw AccountError.invalidContext 
+        guard let ctx = sharedSecp256k1Context else {
+            throw AccountError.invalidContext
         }
-        
+
         var signatureReturned: secp256k1_ecdsa_signature = secp256k1_ecdsa_signature()
-        
+
         let result = contextQueue.sync {
             hash.withUnsafeBytes { hashRBPointer -> Int32? in
                 if let hashRPointer = hashRBPointer.baseAddress, !hashRBPointer.isEmpty {
@@ -255,7 +255,7 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
                 }
             }
         }
-        
+
         guard result != nil, result != 0 else { throw AccountError.invalidSignature }
         var serializedSignature = Data(repeating: 0x00, count: 64)
         let compactResult = serializedSignature.withUnsafeMutableBytes { (signatureRBPtr: UnsafeMutableRawBufferPointer) -> Int32? in

@@ -265,4 +265,3 @@ extension zkLoginSigner {
         return (publicKey: publicKey, signature: signature)
     }
 }
-

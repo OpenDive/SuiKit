@@ -50,4 +50,6 @@ public enum BCSError: Error, Equatable {
 
     /// Indicates that the length of the provided data is invalid.
     case invalidLength
+
+    case customError(String)
 }

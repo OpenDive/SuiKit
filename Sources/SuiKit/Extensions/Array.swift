@@ -41,19 +41,19 @@ extension Array {
     func chunked(into size: Int) -> [[Element]] {
         guard size > 0 else { return [] }
         guard !isEmpty else { return [] }
-        
+
         let chunkCount = (count + size - 1) / size  // Ceiling division
         var result: [[Element]] = []
         result.reserveCapacity(chunkCount)
-        
+
         for i in stride(from: 0, to: count, by: size) {
             let endIndex = Swift.min(i + size, count)
             result.append(Array(self[i..<endIndex]))
         }
-        
+
         return result
     }
-    
+
     /// More memory-efficient chunking using lazy evaluation
     func chunkedLazy(into size: Int) -> LazyMapSequence<StrideTo<Int>, ArraySlice<Element>> {
         return stride(from: 0, to: count, by: size).lazy.map { start in
@@ -71,16 +71,16 @@ public extension Array where Element == UInt8 {
     init(hex: String) {
         let cleanHex = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
         let hexLength = cleanHex.count
-        
+
         // Pre-allocate capacity
         self.init()
         self.reserveCapacity((hexLength + 1) / 2)
-        
+
         var buffer: UInt8?
-        
+
         for char in cleanHex.utf8 {
             let value: UInt8?
-            
+
             switch char {
             case 48...57:  // '0'...'9'
                 value = char - 48
@@ -92,12 +92,12 @@ public extension Array where Element == UInt8 {
                 removeAll()
                 return
             }
-            
+
             guard let v = value else {
                 removeAll()
                 return
             }
-            
+
             if let b = buffer {
                 append(b << 4 | v)
                 buffer = nil
@@ -105,7 +105,7 @@ public extension Array where Element == UInt8 {
                 buffer = v
             }
         }
-        
+
         // Handle odd-length hex strings
         if let b = buffer {
             append(b)
@@ -142,20 +142,20 @@ public extension Array where Element == UInt8 {
         // Pre-allocate string capacity for better performance
         var result = String()
         result.reserveCapacity(count * 2)
-        
+
         for byte in self {
             result += String(format: "%02x", byte)
         }
         return result
     }
-    
+
     /// High-performance hex string conversion using unsafe buffer operations
     func toHexStringFast() -> String {
         let hexChars: [UInt8] = [
             48, 49, 50, 51, 52, 53, 54, 55, 56, 57,  // 0-9
             97, 98, 99, 100, 101, 102                // a-f
         ]
-        
+
         return String(unsafeUninitializedCapacity: count * 2) { buffer in
             var index = 0
             for byte in self {

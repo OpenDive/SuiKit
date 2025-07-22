@@ -1376,10 +1376,10 @@ public struct SuiProvider {
                 try await Task.sleep(nanoseconds: delay + jitter)
                 delay = min(delay * 2, maxDelay)  // Exponential backoff, capped at maxDelay
             }
-            
+
             retryCount += 1
         } while await !(self.isValidTransactionBlock(tx: tx, options: options))
-        
+
         return try await self.getTransactionBlock(digest: tx, options: options)
     }
 

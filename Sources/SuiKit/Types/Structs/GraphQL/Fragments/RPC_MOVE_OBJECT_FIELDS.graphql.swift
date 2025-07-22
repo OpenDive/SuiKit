@@ -23,7 +23,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
     .include(if: "showOwner", .field("owner", Owner?.self)),
     .include(if: "showPreviousTransaction", .field("previousTransactionBlock", PreviousTransactionBlock?.self)),
     .include(if: "showStorageRebate", .field("storageRebate", SuiKit.BigIntApollo?.self)),
-    .include(if: "showDisplay", .field("display", [Display]?.self)),
+    .include(if: "showDisplay", .field("display", [Display]?.self))
   ] }
 
   public var objectId: SuiKit.SuiAddressApollo { __data["objectId"] }
@@ -64,7 +64,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       .field("__typename", String.self),
       .include(if: "showType", .inlineFragment(IfShowType.self)),
       .include(if: "showContent", .inlineFragment(IfShowContent.self)),
-      .include(if: "showBcs", .inlineFragment(IfShowBcs.self)),
+      .include(if: "showBcs", .inlineFragment(IfShowBcs.self))
     ] }
 
     public var ifShowType: IfShowType? { _asInlineFragment() }
@@ -81,7 +81,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public typealias RootEntityType = RPC_MOVE_OBJECT_FIELDS.Contents
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
       public static var __selections: [ApolloAPI.Selection] { [
-        .field("type", Type_SelectionSet.self),
+        .field("type", Type_SelectionSet.self)
       ] }
 
       /// The value's Move type.
@@ -97,7 +97,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("repr", String.self),
+          .field("repr", String.self)
         ] }
 
         /// Flat representation of the type signature, as a displayable string.
@@ -121,7 +121,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("data", AnyHashable.self),
-        .field("type", Type_SelectionSet.self),
+        .field("type", Type_SelectionSet.self)
       ] }
 
       /// Structured contents of a Move value.
@@ -141,7 +141,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("__typename", String.self),
           .field("repr", String.self),
           .field("layout", AnyHashable?.self),
-          .field("signature", AnyHashable.self),
+          .field("signature", AnyHashable.self)
         ] }
 
         /// Flat representation of the type signature, as a displayable string.
@@ -165,11 +165,11 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("bcs", AnyHashable.self),
-        .field("type", Type_SelectionSet.self),
+        .field("type", Type_SelectionSet.self)
       ] }
 
       /// The BCS representation of this value, Base64 encoded.
-      public var bcs: AnyHashable{ __data["bcs"] }
+      public var bcs: AnyHashable { __data["bcs"] }
       /// The value's Move type.
       public var type: Type_SelectionSet { __data["type"] }
 
@@ -183,7 +183,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("repr", String.self),
+          .field("repr", String.self)
         ] }
 
         /// Flat representation of the type signature, as a displayable string.
@@ -207,7 +207,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Unions.ObjectOwner }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .fragment(RPC_OBJECT_OWNER_FIELDS.self),
+      .fragment(RPC_OBJECT_OWNER_FIELDS.self)
     ] }
 
     public var asAddressOwner: AsAddressOwner? { _asInlineFragment() }
@@ -308,7 +308,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("digest", String?.self),
+      .field("digest", String?.self)
     ] }
 
     /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
@@ -328,7 +328,7 @@ public struct RPC_MOVE_OBJECT_FIELDS: SuiKit.SelectionSet, Fragment {
       .field("__typename", String.self),
       .field("key", String.self),
       .field("value", String?.self),
-      .field("error", String?.self),
+      .field("error", String?.self)
     ] }
 
     /// The identifier for a particular template string of the Display object.

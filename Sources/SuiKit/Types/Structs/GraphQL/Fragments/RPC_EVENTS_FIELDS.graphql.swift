@@ -17,7 +17,7 @@ public struct RPC_EVENTS_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("sendingModule", SendingModule?.self),
     .field("sender", Sender?.self),
     .field("contents", Contents.self),
-    .field("timestamp", SuiKit.DateTimeApollo?.self),
+    .field("timestamp", SuiKit.DateTimeApollo?.self)
   ] }
 
   /// The Move module containing some function that when called by
@@ -44,7 +44,7 @@ public struct RPC_EVENTS_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("package", Package.self),
-      .field("name", String.self),
+      .field("name", String.self)
     ] }
 
     /// The package that this Move module was defined in
@@ -62,7 +62,7 @@ public struct RPC_EVENTS_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("address", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self)
       ] }
 
       public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -79,7 +79,7 @@ public struct RPC_EVENTS_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("address", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self)
     ] }
 
     public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -97,7 +97,7 @@ public struct RPC_EVENTS_FIELDS: SuiKit.SelectionSet, Fragment {
       .field("__typename", String.self),
       .field("type", Type_SelectionSet.self),
       .field("json", SuiKit.JSONApollo.self),
-      .field("bcs", SuiKit.Base64Apollo.self),
+      .field("bcs", SuiKit.Base64Apollo.self)
     ] }
 
     /// The value's Move type.
@@ -128,7 +128,7 @@ public struct RPC_EVENTS_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("repr", String.self),
+        .field("repr", String.self)
       ] }
 
       /// Flat representation of the type signature, as a displayable string.

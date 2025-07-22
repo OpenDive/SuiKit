@@ -36,7 +36,7 @@ public enum SuiMoveVisibility: String, Equatable {
 
     /// Represents a friend visibility level, accessible only by designated friend modules.
     case Friend
-    
+
     public static func parseGraphQL(_ data: GraphQLEnum<MoveVisibility>?) -> SuiMoveVisibility? {
         guard data != nil else { return nil }
         switch data! {
@@ -59,4 +59,3 @@ public enum SuiMoveVisibility: String, Equatable {
         }
     }
 }
-

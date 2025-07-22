@@ -38,6 +38,6 @@ public enum ProtocolConfigValue: Equatable {
     /// Represents a 64-bit floating-point value in the configuration.
     /// The associated `String` holds the actual value in string format.
     case f64(String)
-    
+
     case u16(String)
 }

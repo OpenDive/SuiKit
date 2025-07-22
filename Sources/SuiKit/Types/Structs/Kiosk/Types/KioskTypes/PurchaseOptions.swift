@@ -29,7 +29,7 @@ import Foundation
 public struct PurchaseOptions {
     public let extraArgs: [String: AnyCodable]?
 
-    public init(extraArgs: [String : AnyCodable]? = nil) {
+    public init(extraArgs: [String: AnyCodable]? = nil) {
         self.extraArgs = extraArgs
     }
 }

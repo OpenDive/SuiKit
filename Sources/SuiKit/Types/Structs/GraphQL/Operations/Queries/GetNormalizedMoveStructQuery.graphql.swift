@@ -37,7 +37,7 @@ public class GetNormalizedMoveStructQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("packageId")]),
+      .field("object", Object?.self, arguments: ["address": .variable("packageId")])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -54,7 +54,7 @@ public class GetNormalizedMoveStructQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("asMovePackage", AsMovePackage?.self),
+        .field("asMovePackage", AsMovePackage?.self)
       ] }
 
       /// Attempts to convert the object into a MovePackage
@@ -71,7 +71,7 @@ public class GetNormalizedMoveStructQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("address", SuiKit.SuiAddressApollo.self),
-          .field("module", Module?.self, arguments: ["name": .variable("module")]),
+          .field("module", Module?.self, arguments: ["name": .variable("module")])
         ] }
 
         public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -90,7 +90,7 @@ public class GetNormalizedMoveStructQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("fileFormatVersion", Int.self),
-            .field("struct", Struct?.self, arguments: ["name": .variable("struct")]),
+            .field("struct", Struct?.self, arguments: ["name": .variable("struct")])
           ] }
 
           /// Format version of this module's bytecode.
@@ -108,7 +108,7 @@ public class GetNormalizedMoveStructQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveStruct }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_MOVE_STRUCT_FIELDS.self),
+              .fragment(RPC_MOVE_STRUCT_FIELDS.self)
             ] }
 
             /// The struct's (unqualified) type name.

@@ -31,7 +31,7 @@ public struct SuiObjectChangePublished {
     public let type: String = "published"
 
     /// An `objectId` representing the ID of the package.
-    public let packageId: objectId
+    public let packageId: ObjectId
 
     /// A `SequenceNumber` representing the version number of the published object.
     public let version: SequenceNumber

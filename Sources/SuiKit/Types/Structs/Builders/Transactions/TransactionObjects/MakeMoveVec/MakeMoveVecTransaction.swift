@@ -74,7 +74,7 @@ public struct MakeMoveVecTransaction: KeyProtocol, TransactionProtocol {
     public static func deserialize(
         from deserializer: Deserializer
     ) throws -> MakeMoveVecTransaction {
-        let _ = Deserializer.uleb128(deserializer)
+        _ = Deserializer.uleb128(deserializer)
         return MakeMoveVecTransaction(
             objects: try deserializer.sequence(valueDecoder: Deserializer._struct),
             type: try? Deserializer._struct(deserializer)

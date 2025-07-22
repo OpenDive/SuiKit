@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// A structure representing SuiObjectData, containing various information about an object.
-public struct SuiObjectData: Equatable  {
+public struct SuiObjectData: Equatable {
     /// An optional `RawData` representing the Binary Canonical Serialization (BCS) of the object.
     public let bcs: RawData?
 

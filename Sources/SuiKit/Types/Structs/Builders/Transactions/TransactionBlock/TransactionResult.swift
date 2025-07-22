@@ -29,14 +29,19 @@ import Foundation
 /// It holds a main `transactionArgument` and a collection of `nestedResults`
 /// representing the sub-results associated with the main transaction argument.
 public class TransactionResult: Sequence, IteratorProtocol {
-//public class TransactionResult {
+// public class TransactionResult {
     /// Represents the main transaction argument which holds a result.
     let transactionArgument: TransactionArgument
-    
+
     var count: UInt16
 
     /// An array holding the nested results, each represented by a `TransactionArgument`.
     var nestedResults: [TransactionArgument]
+    
+    /// Returns true if there are no more results to iterate over.
+    public var isEmpty: Bool {
+        return count == 0
+    }
 
     /// Initializes a new instance of `TransactionResult` with the specified index.
     ///
@@ -79,9 +84,9 @@ public class TransactionResult: Sequence, IteratorProtocol {
     public func makeIterator() -> TransactionResult {
         return self
     }
-    
+
     public func next() -> TransactionArgument? {
-        guard self.count > 0 else { return nil }
+        guard !self.isEmpty else { return nil }
         defer { self.count -= 1 }
         return self.nestedResultFor(UInt16(self.count - 1))
     }

@@ -29,7 +29,7 @@ import CryptoKit
 public protocol GenericPasswordConvertible: CustomStringConvertible {
     /// Creates a key from a raw representation.
     init(rawRepresentation data: Data) throws
-    
+
     /// A raw representation of the key.
     var rawRepresentation: Data { get }
 }

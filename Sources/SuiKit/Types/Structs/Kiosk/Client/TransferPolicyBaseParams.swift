@@ -33,7 +33,7 @@ public struct TransferPolicyBaseParams {
     public var publisher: ObjectArgument
 
     /// Skip checking if a transfer policy already exists
-    public var skipCheck: Bool? = nil
+    public var skipCheck: Bool?
 
     public init(type: String, publisher: ObjectArgument, skipCheck: Bool? = nil) {
         self.type = type

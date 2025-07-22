@@ -39,7 +39,7 @@ public struct TransferPolicy: KeyProtocol {
         try Serializer.u64(serializer, self.balance)
         try serializer.sequence(self.rules, Serializer.str)
         if let owner = self.owner { try Serializer._struct(serializer, value: owner) }
-        
+
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> TransferPolicy {

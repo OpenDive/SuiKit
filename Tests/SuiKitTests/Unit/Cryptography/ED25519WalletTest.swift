@@ -35,17 +35,17 @@ final class ED25519WalletTest: XCTestCase {
         [
             "film crazy soon outside stand loop subway crumble thrive popular green nuclear struggle pistol arm wife phrase warfare march wheat nephew ask sunny firm",
             "AN0JMHpDum3BhrVwnkylH0/HGRHBQ/fO/8+MYOawO8j6",
-            "0xa2d14fad60c56049ecf75246a481934691214ce413e6a8ae2fe6834c173a6133",
+            "0xa2d14fad60c56049ecf75246a481934691214ce413e6a8ae2fe6834c173a6133"
         ],
         [
             "require decline left thought grid priority false tiny gasp angle royal system attack beef setup reward aunt skill wasp tray vital bounce inflict level",
             "AJrA997C1eVz6wYIp7bO8dpITSRBXpvg1m70/P3gusu2",
-            "0x1ada6e6f3f3e4055096f606c746690f1108fcc2ca479055cc434a3e1d3f758aa",
+            "0x1ada6e6f3f3e4055096f606c746690f1108fcc2ca479055cc434a3e1d3f758aa"
         ],
         [
             "organ crash swim stick traffic remember army arctic mesh slice swear summer police vast chaos cradle squirrel hood useless evidence pet hub soap lake",
             "AAEMSIQeqyz09StSwuOW4MElQcZ+4jHW4/QcWlJEf5Yk",
-            "0xe69e896ca10f5a77732769803cc2b5707f0ab9d4407afb5e4b4464b89769af14",
+            "0xe69e896ca10f5a77732769803cc2b5707f0ab9d4407afb5e4b4464b89769af14"
         ]
     ]
 
@@ -71,7 +71,7 @@ final class ED25519WalletTest: XCTestCase {
             // Keypair derived from mnemonic
             let wallet = try Wallet(mnemonicString: testCase[0])
             XCTAssertEqual(try wallet.accounts[0].publicKey.toSuiAddress(), testCase[2])
-            
+
             // Keypair derived from 32-byte secret key
             guard let raw = Data.fromBase64(testCase[1]) else {
                 XCTFail("Failed to convert \(testCase[1]) from Base 64 to Data")
@@ -84,7 +84,7 @@ final class ED25519WalletTest: XCTestCase {
             let secretKey = try ED25519PrivateKey(key: raw.dropFirst())
             let imported = try Account(privateKey: secretKey)
             XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
-            
+
             // Exported secret key matches the 32-byte secret key.
             let exported = try imported.export()
             XCTAssertEqual(exported.privateKey, raw.dropFirst().base64EncodedString())
@@ -113,7 +113,7 @@ final class ED25519WalletTest: XCTestCase {
 
     func testThatIncoorectCoinTypeWillThrowForWallet() throws {
         func incorrectCoin() throws {
-            let _ = try ED25519PrivateKey(testMnemonic, "m/44'/0'/0'/0'/0'")
+            _ = try ED25519PrivateKey(testMnemonic, "m/44'/0'/0'/0'/0'")
         }
 
         XCTAssertThrowsError(
@@ -123,7 +123,7 @@ final class ED25519WalletTest: XCTestCase {
 
     func testThatIncoorectPurposeNodeWillThrowForWallet() throws {
         func incorrectPurposeNode() throws {
-            let _ = try ED25519PrivateKey(testMnemonic, "m/54'/784'/0'/0'/0'")
+            _ = try ED25519PrivateKey(testMnemonic, "m/54'/784'/0'/0'/0'")
         }
 
         XCTAssertThrowsError(

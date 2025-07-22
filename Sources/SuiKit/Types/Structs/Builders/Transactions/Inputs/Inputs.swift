@@ -88,7 +88,7 @@ public struct Inputs {
     /// - Parameter arg: The `objectId` to be normalized.
     /// - Throws: If unable to normalize the provided `objectId`.
     /// - Returns: A normalized SUI address as a string.
-    public static func getIdFromCallArg(arg: objectId) throws -> String {
+    public static func getIdFromCallArg(arg: ObjectId) throws -> String {
         return try normalizeSuiAddress(value: arg)
     }
 
@@ -117,7 +117,7 @@ public struct Inputs {
             return try normalizeSuiAddress(value: shared.objectId)
         }
     }
-    
+
     public static func getIdFromCallArg(value: TransactionObjectInput) throws -> String {
         if case .objectCallArg(let objCallArg) = value {
             return try Self.getIdFromCallArg(arg: objCallArg)

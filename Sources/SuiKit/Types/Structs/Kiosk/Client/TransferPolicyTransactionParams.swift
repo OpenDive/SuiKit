@@ -28,7 +28,7 @@ import Foundation
 @available(iOS 16.0, *)
 public struct TransferPolicyTransactionParams {
     public var kioskClient: KioskClient
-    public var cap: TransferPolicyCap? = nil
+    public var cap: TransferPolicyCap?
 
     public init(kioskClient: KioskClient, cap: TransferPolicyCap? = nil) {
         self.kioskClient = kioskClient

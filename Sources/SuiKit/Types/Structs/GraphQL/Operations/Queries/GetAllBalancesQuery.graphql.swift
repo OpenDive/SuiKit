@@ -36,7 +36,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("address", Address?.self, arguments: ["address": .variable("owner")]),
+      .field("address", Address?.self, arguments: ["address": .variable("owner")])
     ] }
 
     /// Look-up an Account by its SuiAddressApollo.
@@ -55,7 +55,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
         .field("balances", Balances.self, arguments: [
           "first": .variable("limit"),
           "after": .variable("cursor")
-        ]),
+        ])
       ] }
 
       /// The balances of all coin types owned by this address.
@@ -72,7 +72,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("pageInfo", PageInfo.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// Information to aid in pagination.
@@ -91,7 +91,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("hasNextPage", Bool.self),
-            .field("endCursor", String?.self),
+            .field("endCursor", String?.self)
           ] }
 
           /// When paginating forwards, are there more items?
@@ -112,7 +112,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
             .field("__typename", String.self),
             .field("coinType", CoinType.self),
             .field("coinObjectCount", SuiKit.UInt53Apollo?.self),
-            .field("totalBalance", SuiKit.BigIntApollo?.self),
+            .field("totalBalance", SuiKit.BigIntApollo?.self)
           ] }
 
           /// Coin type for the balance, such as 0x2::sui::SUI
@@ -132,7 +132,7 @@ public class GetAllBalancesQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("repr", String.self),
+              .field("repr", String.self)
             ] }
 
             /// Flat representation of the type signature, as a displayable string.

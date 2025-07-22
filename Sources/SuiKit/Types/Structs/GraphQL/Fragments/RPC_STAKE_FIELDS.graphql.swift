@@ -20,7 +20,7 @@ public struct RPC_STAKE_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("requestedEpoch", RequestedEpoch?.self),
     .field("contents", Contents?.self),
     .field("address", SuiKit.SuiAddressApollo.self),
-    .field("estimatedReward", SuiKit.BigIntApollo?.self),
+    .field("estimatedReward", SuiKit.BigIntApollo?.self)
   ] }
 
   /// The SUI that was initially staked.
@@ -59,7 +59,7 @@ public struct RPC_STAKE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("epochId", SuiKit.UInt53Apollo.self),
-      .field("referenceGasPrice", SuiKit.BigIntApollo?.self),
+      .field("referenceGasPrice", SuiKit.BigIntApollo?.self)
     ] }
 
     /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change.
@@ -78,7 +78,7 @@ public struct RPC_STAKE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Epoch }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("epochId", SuiKit.UInt53Apollo.self),
+      .field("epochId", SuiKit.UInt53Apollo.self)
     ] }
 
     /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change.
@@ -95,7 +95,7 @@ public struct RPC_STAKE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("json", SuiKit.JSONApollo.self),
+      .field("json", SuiKit.JSONApollo.self)
     ] }
 
     /// Representation of a Move value in JSON, where:

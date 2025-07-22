@@ -46,7 +46,7 @@ public struct SuiMoveNormalizedModule: Equatable {
 
     /// A dictionary containing the exposed functions of the module, where the key is the name of the function and the value is an instance of `SuiMoveNormalizedFunction`.
     public let exposedFunctions: [String: SuiMoveNormalizedFunction]
-    
+
     public init(graphql: GetNormalizedMoveModuleQuery.Data.Object.AsMovePackage.Module, package: String) {
         let module = graphql
         var structs: [String: SuiMoveNormalizedStruct] = [:]

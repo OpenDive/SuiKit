@@ -32,7 +32,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("owner", Owner?.self, arguments: ["address": .variable("parentId")]),
+      .field("owner", Owner?.self, arguments: ["address": .variable("parentId")])
     ] }
 
     /// Look up an Owner by its SuiAddressApollo.
@@ -62,7 +62,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Owner }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("dynamicObjectField", DynamicObjectField?.self, arguments: ["name": .variable("name")]),
+        .field("dynamicObjectField", DynamicObjectField?.self, arguments: ["name": .variable("name")])
       ] }
 
       /// Access a dynamic object field on an object using its name. Names are arbitrary Move values
@@ -83,7 +83,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.DynamicField }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("value", Value?.self),
+          .field("value", Value?.self)
         ] }
 
         /// The returned dynamic field is an object if its return type is `MoveObject`,
@@ -102,7 +102,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Unions.DynamicFieldValue }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .inlineFragment(AsMoveObject.self),
+            .inlineFragment(AsMoveObject.self)
           ] }
 
           public var asMoveObject: AsMoveObject? { _asInlineFragment() }
@@ -117,7 +117,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
             public typealias RootEntityType = GetDynamicFieldObjectQuery.Data.Owner.DynamicObjectField.Value
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
             public static var __selections: [ApolloAPI.Selection] { [
-              .field("owner", Owner?.self),
+              .field("owner", Owner?.self)
             ] }
 
             /// The owner type of this object: Immutable, Shared, Parent, Address
@@ -133,7 +133,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Unions.ObjectOwner }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .inlineFragment(AsParent.self),
+                .inlineFragment(AsParent.self)
               ] }
 
               public var asParent: AsParent? { _asInlineFragment() }
@@ -148,7 +148,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                 public typealias RootEntityType = GetDynamicFieldObjectQuery.Data.Owner.DynamicObjectField.Value.AsMoveObject.Owner
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Parent }
                 public static var __selections: [ApolloAPI.Selection] { [
-                  .field("parent", Parent?.self),
+                  .field("parent", Parent?.self)
                 ] }
 
                 public var parent: Parent? { __data["parent"] }
@@ -163,7 +163,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                   public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Owner }
                   public static var __selections: [ApolloAPI.Selection] { [
                     .field("__typename", String.self),
-                    .field("asObject", AsObject?.self),
+                    .field("asObject", AsObject?.self)
                   ] }
 
                   public var asObject: AsObject? { __data["asObject"] }
@@ -184,7 +184,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                       .field("storageRebate", SuiKit.BigIntApollo?.self),
                       .field("owner", Owner?.self),
                       .field("previousTransactionBlock", PreviousTransactionBlock?.self),
-                      .field("asMoveObject", AsMoveObject?.self),
+                      .field("asMoveObject", AsMoveObject?.self)
                     ] }
 
                     public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -212,7 +212,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Unions.ObjectOwner }
                       public static var __selections: [ApolloAPI.Selection] { [
                         .field("__typename", String.self),
-                        .inlineFragment(AsParent.self),
+                        .inlineFragment(AsParent.self)
                       ] }
 
                       public var asParent: AsParent? { _asInlineFragment() }
@@ -227,7 +227,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                         public typealias RootEntityType = GetDynamicFieldObjectQuery.Data.Owner.DynamicObjectField.Value.AsMoveObject.Owner.AsParent.Parent.AsObject.Owner
                         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Parent }
                         public static var __selections: [ApolloAPI.Selection] { [
-                          .field("parent", Parent?.self),
+                          .field("parent", Parent?.self)
                         ] }
 
                         public var parent: Parent? { __data["parent"] }
@@ -242,7 +242,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Owner }
                           public static var __selections: [ApolloAPI.Selection] { [
                             .field("__typename", String.self),
-                            .field("address", SuiKit.SuiAddressApollo.self),
+                            .field("address", SuiKit.SuiAddressApollo.self)
                           ] }
 
                           public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -260,7 +260,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
                       public static var __selections: [ApolloAPI.Selection] { [
                         .field("__typename", String.self),
-                        .field("digest", String?.self),
+                        .field("digest", String?.self)
                       ] }
 
                       /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
@@ -279,7 +279,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                       public static var __selections: [ApolloAPI.Selection] { [
                         .field("__typename", String.self),
                         .field("contents", Contents?.self),
-                        .field("hasPublicTransfer", Bool.self),
+                        .field("hasPublicTransfer", Bool.self)
                       ] }
 
                       /// Displays the contents of the Move object in a JSON string and through GraphQL types. Also
@@ -302,7 +302,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                         public static var __selections: [ApolloAPI.Selection] { [
                           .field("__typename", String.self),
                           .field("data", SuiKit.MoveDataApollo.self),
-                          .field("type", Type_SelectionSet.self),
+                          .field("type", Type_SelectionSet.self)
                         ] }
 
                         /// Structured contents of a Move value.
@@ -321,7 +321,7 @@ public class GetDynamicFieldObjectQuery: GraphQLQuery {
                           public static var __selections: [ApolloAPI.Selection] { [
                             .field("__typename", String.self),
                             .field("repr", String.self),
-                            .field("layout", SuiKit.MoveTypeLayoutApollo?.self),
+                            .field("layout", SuiKit.MoveTypeLayoutApollo?.self)
                           ] }
 
                           /// Flat representation of the type signature, as a displayable string.

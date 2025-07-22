@@ -51,11 +51,10 @@ public struct TransferPolicyQuery {
             )
         )
         return try policies.compactMap { $0.data }.compactMap { response in
-            if 
+            if
                 let bcsBytes = response.bcs,
                 case .moveObject(let rawObj) = bcsBytes,
-                let bytes = Data(base64Encoded: rawObj.bcsBytes)
-            {
+                let bytes = Data(base64Encoded: rawObj.bcsBytes) {
                 let der = Deserializer(data: bytes)
                 if let parsed: TransferPolicy = try? Deserializer._struct(der) {
                     return TransferPolicy(

@@ -32,7 +32,7 @@ import Bip39
 public class Wallet: Hashable {
     /// The mnemonic associated with the wallet, represented by a `Mnemonic` instance.
     public var mnemonic: Mnemonic
-    
+
     /// An array of `Account` instances representing the accounts in the wallet.
     public var accounts: [Account]
 

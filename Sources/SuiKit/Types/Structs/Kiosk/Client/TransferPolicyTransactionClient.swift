@@ -43,7 +43,7 @@ public class TransferPolicyTransactionClient {
         self.policyCap = nil
         self.type = nil
         if let policyCap = params.cap {
-            let _ = self.setCap(cap: policyCap)
+            _ = self.setCap(cap: policyCap)
         }
     }
 
@@ -56,7 +56,7 @@ public class TransferPolicyTransactionClient {
     ///   - params: The parameters used for the transfer policy.
     ///   - address: Address to save the `TransferPolicyCap` object to.
     public func createAndShare(
-        params: TransferPolicyBaseParams, 
+        params: TransferPolicyBaseParams,
         address: String
     ) async throws {
         try await self.checkPolicies(params: params)
@@ -66,7 +66,7 @@ public class TransferPolicyTransactionClient {
             itemType: params.type,
             publisher: params.publisher
         )
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [cap],
             address: address
         )
@@ -97,7 +97,7 @@ public class TransferPolicyTransactionClient {
     /// and transfer the `TransferPolicyCap` to the specified address
     /// - Parameter address: The address to transfer the `TransferPolicyCap`
     public func shareAndTransferCap(address: String) async throws {
-        guard 
+        guard
             let type = self.type,
             let policyCapObj = self.policyCap,
             let policyObj = self.policy,
@@ -113,7 +113,7 @@ public class TransferPolicyTransactionClient {
             transferPolicy: policy
         )
 
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [policyCap.toTransactionArgument()],
             address: address
         )
@@ -129,7 +129,7 @@ public class TransferPolicyTransactionClient {
             type: cap.type
         )
     }
-    
+
     /// Withdraw from the transfer policy's profits.
     /// - Parameters:
     ///   - address: Address to transfer the profits to.
@@ -145,14 +145,14 @@ public class TransferPolicyTransactionClient {
             policyCap: self.policyCap!,
             amount: amount
         )
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [coin],
             address: address
         )
 
         return self
     }
-    
+
     /// Adds the Kiosk Royalty rule to the Transfer Policy.
     /// You can pass the percentage, as well as a minimum amount.
     /// The royalty that will be paid is the MAX(percentage, minAmount).
@@ -170,7 +170,7 @@ public class TransferPolicyTransactionClient {
         // Hard-coding package Ids as these don't change.
         // Also, it's hard to keep versioning as with network wipes, mainnet
         // and testnet will conflict.
-        let _ = try AttachRules.attachRoyaltyRuleTx(
+        _ = try AttachRules.attachRoyaltyRuleTx(
             tx: &self.transactionBlock,
             type: self.type!,
             policy: self.policy!,
@@ -184,13 +184,13 @@ public class TransferPolicyTransactionClient {
 
         return self
     }
-    
+
     /// Adds the Kiosk Lock Rule to the Transfer Policy.
     /// This Rule forces buyer to lock the item in the kiosk, preserving strong royalties.
     public func addLockRule() throws -> TransferPolicyTransactionClient {
         try self.validateInputs()
 
-        let _ = try AttachRules.attachKioskLockRuleTx(
+        _ = try AttachRules.attachKioskLockRuleTx(
             tx: &self.transactionBlock,
             type: self.type!,
             policy: self.policy!,
@@ -207,7 +207,7 @@ public class TransferPolicyTransactionClient {
     public func addPersonalKioskRule() throws -> TransferPolicyTransactionClient {
         try self.validateInputs()
 
-        let _ = try AttachRules.attachPersonalKioskRuleTx(
+        _ = try AttachRules.attachPersonalKioskRuleTx(
             tx: &self.transactionBlock,
             type: self.type!,
             policy: self.policy!,
@@ -225,7 +225,7 @@ public class TransferPolicyTransactionClient {
     public func addFloorPriceRule(minPrice: String) throws -> TransferPolicyTransactionClient {
         try self.validateInputs()
 
-        let _ = try AttachRules.attachFloorPriceRuleTx(
+        _ = try AttachRules.attachFloorPriceRuleTx(
             tx: &self.transactionBlock,
             type: self.type!,
             policy: self.policy!,
@@ -246,7 +246,7 @@ public class TransferPolicyTransactionClient {
     public func removeRule(ruleType: String, configType: String) throws -> TransferPolicyTransactionClient {
         try self.validateInputs()
 
-        let _ = try TransferPolicyTransactions.removeTransferPolicyRule(
+        _ = try TransferPolicyTransactions.removeTransferPolicyRule(
             tx: &self.transactionBlock,
             itemType: self.type!,
             ruleType: ruleType,
@@ -265,7 +265,7 @@ public class TransferPolicyTransactionClient {
         let packageId = try self.kioskClient.getRulePackageId(
             rule: .kioskLockRulePackageId
         )
-        let _ = try TransferPolicyTransactions.removeTransferPolicyRule(
+        _ = try TransferPolicyTransactions.removeTransferPolicyRule(
             tx: &self.transactionBlock,
             itemType: self.type!,
             ruleType: "\(packageId)::kiosk_lock_rule::Rule",
@@ -284,7 +284,7 @@ public class TransferPolicyTransactionClient {
         let packageId = try self.kioskClient.getRulePackageId(
             rule: .royaltyRulePackageId
         )
-        let _ = try TransferPolicyTransactions.removeTransferPolicyRule(
+        _ = try TransferPolicyTransactions.removeTransferPolicyRule(
             tx: &self.transactionBlock,
             itemType: self.type!,
             ruleType: "\(packageId)::royalty_rule::Rule",
@@ -300,7 +300,7 @@ public class TransferPolicyTransactionClient {
         try self.validateInputs()
 
         let packageId = try self.kioskClient.getRulePackageId(rule: .personalKioskRulePackageId)
-        let _ = try TransferPolicyTransactions.removeTransferPolicyRule(
+        _ = try TransferPolicyTransactions.removeTransferPolicyRule(
             tx: &self.transactionBlock,
             itemType: self.type!,
             ruleType: "\(packageId)::personal_kiosk_rule::Rule",
@@ -318,7 +318,7 @@ public class TransferPolicyTransactionClient {
         let packageId = try self.kioskClient.getRulePackageId(
             rule: .floorPriceRulePackageId
         )
-        let _ = try TransferPolicyTransactions.removeTransferPolicyRule(
+        _ = try TransferPolicyTransactions.removeTransferPolicyRule(
             tx: &self.transactionBlock,
             itemType: self.type!,
             ruleType: "\(packageId)::floor_price_rule::Rule",
@@ -357,7 +357,7 @@ public class TransferPolicyTransactionClient {
                 message: "\(genericErrorMessage) Missing: TransferPolicyCap Object ID"
             )
         }
-        if self.type == nil { 
+        if self.type == nil {
             throw SuiError.customError(
                 message: "\(genericErrorMessage) Missing: Transfer Policy object type (e.g. {packageId}::item::Item)"
             )

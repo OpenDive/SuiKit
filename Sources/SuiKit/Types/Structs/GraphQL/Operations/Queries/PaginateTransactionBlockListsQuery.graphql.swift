@@ -53,7 +53,7 @@ public class PaginateTransactionBlockListsQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("transactionBlock", TransactionBlock?.self, arguments: ["digest": .variable("digest")]),
+      .field("transactionBlock", TransactionBlock?.self, arguments: ["digest": .variable("digest")])
     ] }
 
     /// Fetch a transaction block by its transaction digest.
@@ -69,7 +69,7 @@ public class PaginateTransactionBlockListsQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(PAGINATE_TRANSACTION_LISTS.self),
+        .fragment(PAGINATE_TRANSACTION_LISTS.self)
       ] }
 
       /// The effects field captures the results to the chain of executing this transaction.

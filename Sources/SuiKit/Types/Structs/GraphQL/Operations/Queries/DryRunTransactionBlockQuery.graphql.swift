@@ -57,7 +57,7 @@ public class DryRunTransactionBlockQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("dryRunTransactionBlock", DryRunTransactionBlock.self, arguments: ["txBytes": .variable("txBytes")]),
+      .field("dryRunTransactionBlock", DryRunTransactionBlock.self, arguments: ["txBytes": .variable("txBytes")])
     ] }
 
     /// Simulate running a transaction to inspect its effects without
@@ -90,7 +90,7 @@ public class DryRunTransactionBlockQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("error", String?.self),
-        .field("transaction", Transaction?.self),
+        .field("transaction", Transaction?.self)
       ] }
 
       /// The error that occurred during dry run execution, if any.
@@ -108,7 +108,7 @@ public class DryRunTransactionBlockQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_TRANSACTION_FIELDS.self),
+          .fragment(RPC_TRANSACTION_FIELDS.self)
         ] }
 
         /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

@@ -49,7 +49,7 @@ public struct ZkProof {
     public let proofPoints: zkLoginSignatureInputsProofPoints
     public let headerBase64: String
     public let issBase64Details: zkLoginSignatureInputsClaim
-    
+
     public init(
         proofPoints: zkLoginSignatureInputsProofPoints,
         headerBase64: String,
@@ -65,12 +65,12 @@ public struct ZkProof {
 public class RemoteZkProofService: ZkProofService {
     private let url: URL
     private let session: URLSession
-    
+
     public init(url: URL, session: URLSession = .shared) {
         self.url = url
         self.session = session
     }
-    
+
     public func generateProof(
         jwt: String,
         userSalt: String,
@@ -87,40 +87,40 @@ public class RemoteZkProofService: ZkProofService {
             "salt": userSalt,
             "keyClaimName": "sub"
         ]
-        
+
         // Create the request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
-        
+
         // Serialize the request body to JSON
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody, options: [])
-        
+
         // Send the request
         let (data, response) = try await session.data(for: request)
-        
+
         // Check for successful response
-        guard let httpResponse = response as? HTTPURLResponse, 
+        guard let httpResponse = response as? HTTPURLResponse,
               httpResponse.statusCode == 200 else {
             throw SuiError.customError(message: "Proof service error")
         }
-        
+
         // Parse the response
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw SuiError.customError(message: "Invalid proof service response format")
         }
-        
+
         // Extract proof points
         guard let proofPointsJson = json["proofPoints"] as? [String: Any] else {
             throw SuiError.customError(message: "Missing proof points in response")
         }
-        
+
         // Extract the three arrays of points
         guard let aPoints = proofPointsJson["a"] as? [String],
               aPoints.count == 3 else {
             throw SuiError.customError(message: "Invalid 'a' points in proof")
         }
-        
+
         // Extract b-points (array of arrays)
         guard let bPointsArray = proofPointsJson["b"] as? [[String]],
               bPointsArray.count == 3,
@@ -129,37 +129,37 @@ public class RemoteZkProofService: ZkProofService {
               bPointsArray[2].count == 2 else {
             throw SuiError.customError(message: "Invalid 'b' points in proof")
         }
-        
+
         // Extract c-points
         guard let cPoints = proofPointsJson["c"] as? [String],
               cPoints.count == 3 else {
             throw SuiError.customError(message: "Invalid 'c' points in proof")
         }
-        
+
         let proofPoints = zkLoginSignatureInputsProofPoints(
             a: aPoints,
             b: bPointsArray,
             c: cPoints
         )
-        
+
         // Extract header Base64
         guard let headerBase64 = json["headerBase64"] as? String else {
             throw SuiError.customError(message: "Missing headerBase64 in proof response")
         }
-        
+
         // Extract issuerPoints
         guard let issBase64DetailsJson = json["issBase64Details"] as? [String: Any],
               let value = issBase64DetailsJson["value"] as? String,
               let indexMod4 = issBase64DetailsJson["indexMod4"] as? Int else {
             throw SuiError.customError(message: "Invalid issBase64Details in proof response")
         }
-        
+
         let issBase64Details = zkLoginSignatureInputsClaim(value: value, indexMod4: UInt8(indexMod4))
-        
+
         return ZkProof(
             proofPoints: proofPoints,
             headerBase64: headerBase64,
             issBase64Details: issBase64Details
         )
     }
-} 
+}

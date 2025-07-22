@@ -42,7 +42,7 @@ public struct KioskUtilities {
 
         guard let data = queryRes?.data else { throw SuiError.notImplemented }
 
-        guard 
+        guard
             let bcs = data.bcs,
             case .moveObject(let serialziedKiosk) = bcs,
             let kioskData = Data(base64Encoded: serialziedKiosk.bcsBytes)
@@ -124,13 +124,12 @@ public struct KioskUtilities {
             itemListings[listing.objectId] = listing
             // return in case we don't have any listing objects.
             // that's the case when we don't have the `listingPrices` included.
-            if listingObjects.count != 0 {
+            if !listingObjects.isEmpty {
                 let content = listingObjects[idx].data?.content
-                if 
+                if
                     let content,
                     case .moveObject(let moveObject) = content,
-                    let fields = moveObject.fields
-                {
+                    let fields = moveObject.fields {
                     itemListings[listing.objectId]?.price = fields["value"].stringValue
                 }
             }
@@ -180,7 +179,7 @@ public struct KioskUtilities {
      */
     public static func getAllDynamicFields(
         client: SuiProvider,
-        parentId: String, 
+        parentId: String,
         cursorParam: String? = nil,
         limitParam: Int? = nil
     ) async throws -> [DynamicFieldInfo] {
@@ -238,7 +237,7 @@ public struct KioskUtilities {
         limit: Int = Self.defaultQueryLimit
     ) async throws -> [SuiObjectResponse] {
         var hasNextPage = true
-        var cursor: String? = nil
+        var cursor: String?
         var data: [SuiObjectResponse] = []
 
         while hasNextPage {

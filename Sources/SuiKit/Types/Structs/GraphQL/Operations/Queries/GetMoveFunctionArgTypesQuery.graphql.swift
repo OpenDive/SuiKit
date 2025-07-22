@@ -36,7 +36,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("packageId")]),
+      .field("object", Object?.self, arguments: ["address": .variable("packageId")])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -53,7 +53,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("asMovePackage", AsMovePackage?.self),
+        .field("asMovePackage", AsMovePackage?.self)
       ] }
 
       /// Attempts to convert the object into a MovePackage
@@ -69,7 +69,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("module", Module?.self, arguments: ["name": .variable("module")]),
+          .field("module", Module?.self, arguments: ["name": .variable("module")])
         ] }
 
         /// A representation of the module called `name` in this package, including the
@@ -87,7 +87,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("fileFormatVersion", Int.self),
-            .field("function", Function?.self, arguments: ["name": .variable("function")]),
+            .field("function", Function?.self, arguments: ["name": .variable("function")])
           ] }
 
           /// Format version of this module's bytecode.
@@ -105,7 +105,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveFunction }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("parameters", [Parameter]?.self),
+              .field("parameters", [Parameter]?.self)
             ] }
 
             /// The function's parameter types.  These types can reference type parameters introduce by this
@@ -122,7 +122,7 @@ public class GetMoveFunctionArgTypesQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("signature", AnyHashable.self),
+                .field("signature", AnyHashable.self)
               ] }
 
               /// Structured representation of the type signature.

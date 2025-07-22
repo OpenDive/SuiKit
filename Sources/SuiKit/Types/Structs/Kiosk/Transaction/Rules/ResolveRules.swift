@@ -61,7 +61,7 @@ public struct ResolveRules {
             tx: &tx,
             itemType: param.itemType,
             kiosk: param.kiosk,
-            kioskCap: param.kioskCap, 
+            kioskCap: param.kioskCap,
             policy: param.policyId,
             item: .objectArgument(param.purchasedItem)
         )

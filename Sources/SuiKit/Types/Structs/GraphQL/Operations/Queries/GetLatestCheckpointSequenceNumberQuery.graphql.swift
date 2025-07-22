@@ -18,7 +18,7 @@ public class GetLatestCheckpointSequenceNumberQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("checkpoint", Checkpoint?.self),
+      .field("checkpoint", Checkpoint?.self)
     ] }
 
     /// Fetch checkpoint information by sequence number or digest (defaults to the latest available
@@ -35,7 +35,7 @@ public class GetLatestCheckpointSequenceNumberQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("sequenceNumber", SuiKit.UInt53Apollo.self),
+        .field("sequenceNumber", SuiKit.UInt53Apollo.self)
       ] }
 
       /// This checkpoint's position in the total order of finalized checkpoints, agreed upon by

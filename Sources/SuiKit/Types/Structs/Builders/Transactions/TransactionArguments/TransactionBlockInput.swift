@@ -63,4 +63,3 @@ public struct TransactionBlockInput: KeyProtocol {
         )
     }
 }
-

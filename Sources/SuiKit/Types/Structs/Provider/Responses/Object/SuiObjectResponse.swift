@@ -67,7 +67,7 @@ public struct SuiObjectResponse: Equatable {
     }
 
     public init?(input: JSON) {
-        var error: ObjectResponseError? = nil
+        var error: ObjectResponseError?
         if input["error"].exists() {
             error = ObjectResponseError.parseJSON(input["error"])
         }

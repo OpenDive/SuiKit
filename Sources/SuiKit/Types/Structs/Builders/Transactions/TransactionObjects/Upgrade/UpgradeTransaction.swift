@@ -31,10 +31,10 @@ public struct UpgradeTransaction: KeyProtocol, TransactionProtocol {
     public let modules: [[UInt8]]
 
     /// An array of object IDs representing dependencies.
-    public let dependencies: [objectId]
+    public let dependencies: [ObjectId]
 
     /// The ID of the package.
-    public let packageId: objectId
+    public let packageId: ObjectId
 
     /// Represents a ticket which is an instance of `TransactionArgument`.
     public let ticket: TransactionArgument
@@ -47,8 +47,8 @@ public struct UpgradeTransaction: KeyProtocol, TransactionProtocol {
     ///   - ticket: Represents a ticket which is an instance of `TransactionArgument`.
     public init(
         modules: [[UInt8]],
-        dependencies: [objectId],
-        packageId: objectId,
+        dependencies: [ObjectId],
+        packageId: ObjectId,
         ticket: TransactionArgument
     ) {
         self.modules = modules

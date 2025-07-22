@@ -54,7 +54,7 @@ final class EntryPointStringTest: XCTestCase {
 
     private func callWithString(str: String, len: Int, funcName: String) async throws {
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(self.fetchPackageId())::entry_point_types::\(funcName)",
             arguments: [
                 .input(tx.pure(value: .string(str))),
@@ -76,7 +76,7 @@ final class EntryPointStringTest: XCTestCase {
 
     private func callWithString(str: [String], len: Int, funcName: String) async throws {
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(self.fetchPackageId())::entry_point_types::\(funcName)",
             arguments: [
                 .input(tx.pure(value: .array(str.map { .string($0) }))),

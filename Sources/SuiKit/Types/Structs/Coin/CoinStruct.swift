@@ -13,7 +13,7 @@ public struct CoinStruct: Equatable {
     public let coinType: StructTag
 
     /// An `objectId` representing the unique identifier of the coin object.
-    public let coinObjectId: objectId
+    public let coinObjectId: ObjectId
 
     /// A string representing the version of the coin object.
     /// This can be used to track the changes or updates made to the coin object.
@@ -68,7 +68,7 @@ public struct CoinStruct: Equatable {
 
     public init(
         coinType: String,
-        coinObjectId: objectId,
+        coinObjectId: ObjectId,
         version: String,
         digest: TransactionDigest,
         balance: String,
@@ -83,4 +83,4 @@ public struct CoinStruct: Equatable {
     }
 }
 
-public typealias objectId = String
+public typealias ObjectId = String

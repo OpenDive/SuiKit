@@ -37,7 +37,7 @@ public class GetNormalizedMoveFunctionQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("packageId")]),
+      .field("object", Object?.self, arguments: ["address": .variable("packageId")])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -55,7 +55,7 @@ public class GetNormalizedMoveFunctionQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("address", SuiKit.SuiAddressApollo.self),
-        .field("asMovePackage", AsMovePackage?.self),
+        .field("asMovePackage", AsMovePackage?.self)
       ] }
 
       public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -72,7 +72,7 @@ public class GetNormalizedMoveFunctionQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("module", Module?.self, arguments: ["name": .variable("module")]),
+          .field("module", Module?.self, arguments: ["name": .variable("module")])
         ] }
 
         /// A representation of the module called `name` in this package, including the
@@ -90,7 +90,7 @@ public class GetNormalizedMoveFunctionQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("fileFormatVersion", Int.self),
-            .field("function", Function?.self, arguments: ["name": .variable("function")]),
+            .field("function", Function?.self, arguments: ["name": .variable("function")])
           ] }
 
           /// Format version of this module's bytecode.
@@ -108,7 +108,7 @@ public class GetNormalizedMoveFunctionQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveFunction }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_MOVE_FUNCTION_FIELDS.self),
+              .fragment(RPC_MOVE_FUNCTION_FIELDS.self)
             ] }
 
             /// The function's (unqualified) name.

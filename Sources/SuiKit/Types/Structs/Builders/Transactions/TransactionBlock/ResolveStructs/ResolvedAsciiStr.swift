@@ -54,4 +54,3 @@ public struct ResolvedAsciiStr: ResolvedProtocol {
         self.name = name
     }
 }
-

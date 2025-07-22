@@ -100,4 +100,3 @@ public struct ProtocolConfig: Equatable {
         self.protocolVersion = protocolVersion
     }
 }
-

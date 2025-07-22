@@ -52,7 +52,7 @@ public struct PersonalKioskTransactions {
         packageId: String
     ) throws {
         let personalKioskCapArgument = personalKioskCap.toTransactionArgument()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(packageId)::personal_kiosk::transfer_to_sender",
             arguments: [personalKioskCapArgument]
         )

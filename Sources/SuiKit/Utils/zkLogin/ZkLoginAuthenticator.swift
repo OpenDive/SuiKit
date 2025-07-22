@@ -29,11 +29,11 @@ import BigInt
 /// Manages the zkLogin authentication flow
 public class zkLoginAuthenticator {
     private let provider: SuiProvider
-    
+
     public init(provider: SuiProvider) {
         self.provider = provider
     }
-    
+
     /// Generate an ephemeral keypair for zkLogin
     /// - Parameter scheme: The cryptographic scheme to use (supports Ed25519, Secp256k1, Secp256r1)
     /// - Returns: A new keypair
@@ -49,7 +49,7 @@ public class zkLoginAuthenticator {
             throw SuiError.error(code: .unsupportedSignatureScheme)
         }
     }
-    
+
     /// Generate a nonce for the OAuth flow based on the ephemeral public key
     /// - Parameters:
     ///   - publicKey: The ephemeral public key
@@ -58,32 +58,32 @@ public class zkLoginAuthenticator {
     /// - Returns: A base64 encoded nonce string for use in OAuth
     public func generateNonce(publicKey: any PublicKeyProtocol, maxEpoch: UInt64, randomness: [UInt8]? = nil) throws -> String {
         let jwtRandomness = try randomness ?? generateRandomness()
-        
+
         // Convert randomness bytes to a BigInt string
         let randomnessData = Data(jwtRandomness)
         let randomnessString = zkLoginNonce.toBigIntBE(bytes: randomnessData).description
-        
+
         return try zkLoginNonce.generateNonce(
             publicKey: publicKey,
             maxEpoch: Int(maxEpoch),
             randomness: randomnessString
         )
     }
-    
+
     /// Generate random bytes for use in nonce creation
     /// - Returns: Random bytes
     public func generateRandomness() throws -> [UInt8] {
         // Generate 16 bytes of secure random data
         var randomBytes = [UInt8](repeating: 0, count: 16)
         let status = SecRandomCopyBytes(kSecRandomDefault, randomBytes.count, &randomBytes)
-        
+
         guard status == errSecSuccess else {
             throw SuiError.error(code: .failedToGenerateRandomData)
         }
-        
+
         return randomBytes
     }
-    
+
     /// Get the current epoch from the network
     /// - Returns: The current epoch and related information
     public func getCurrentEpoch() async throws -> EpochInfo {
@@ -94,7 +94,7 @@ public class zkLoginAuthenticator {
             epochDurationMs: systemState["epochDurationMs"].uInt64Value
         )
     }
-    
+
     /// Process JWT and salt to derive a zkLogin signature
     /// - Parameters:
     ///   - jwt: The JWT token from OAuth provider
@@ -114,7 +114,7 @@ public class zkLoginAuthenticator {
     ) async throws -> zkLoginSignature {
         // Parse JWT to extract claims
         let jwtClaims = try JWTUtilities.extractClaims(from: jwt)
-        
+
         // Calculate address seed
         _ = try zkLoginUtilities.generateAddressSeed(
             salt: userSalt,
@@ -122,12 +122,12 @@ public class zkLoginAuthenticator {
             keyClaimValue: jwtClaims.sub ?? "",
             audience: jwtClaims.audienceString() ?? ""
         )
-        
+
         // Get ZK proof (either from service or directly)
         let proofPoints: zkLoginSignatureInputsProofPoints
         let headerBase64: String
         let issBase64Details: zkLoginSignatureInputsClaim
-        
+
         if let service = proofService {
             // Get proof from external service
             let proof = try await service.generateProof(
@@ -137,14 +137,14 @@ public class zkLoginAuthenticator {
                 maxEpoch: maxEpoch,
                 jwtRandomness: randomness
             )
-            
+
             proofPoints = proof.proofPoints
             headerBase64 = proof.headerBase64
             issBase64Details = proof.issBase64Details
         } else {
             throw SuiError.error(code: .missingProofService)
         }
-        
+
         // Create signature inputs
         let inputs = zkLoginSignatureInputs(
             proofPoints: proofPoints,
@@ -152,7 +152,7 @@ public class zkLoginAuthenticator {
             headerBase64: headerBase64,
             addressSeed: "" // Will be populated from the proofPoints
         )
-        
+
         // Create the zkLoginSignature (without user signature, that will be added at transaction time)
         return zkLoginSignature(
             inputs: inputs,
@@ -160,7 +160,7 @@ public class zkLoginAuthenticator {
             userSignature: [UInt8]() // Empty signature, will be filled at transaction time
         )
     }
-    
+
     /// Get the zkLogin address for a user
     /// - Parameters:
     ///   - jwt: The JWT token
@@ -168,7 +168,7 @@ public class zkLoginAuthenticator {
     /// - Returns: The zkLogin Sui address
     public func derivezkLoginAddress(jwt: String, userSalt: String) throws -> String {
         let jwtClaims = try JWTUtilities.extractClaims(from: jwt)
-        
+
         return try zkLoginPublicKey.deriveAddress(
             keyClaimName: "sub",
             keyClaimValue: jwtClaims.sub ?? "",
@@ -177,7 +177,7 @@ public class zkLoginAuthenticator {
             userSalt: userSalt
         )
     }
-    
+
     /// Create a signer that can sign transactions with zkLogin (legacy version)
     /// - Parameters:
     ///   - ephemeralKeyPair: The ephemeral keypair used for signing
@@ -196,7 +196,7 @@ public class zkLoginAuthenticator {
             userAddress: userAddress
         )
     }
-    
+
     /// Create a comprehensive zkLogin signer with verification capabilities
     /// - Parameters:
     ///   - ephemeralKeyPair: The ephemeral keypair used for signing
@@ -225,4 +225,4 @@ public struct EpochInfo {
     public let epoch: UInt64
     public let epochStartTimestampMs: UInt64
     public let epochDurationMs: UInt64
-} 
+}

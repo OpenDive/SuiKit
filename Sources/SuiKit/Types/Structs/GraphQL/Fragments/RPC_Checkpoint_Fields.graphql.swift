@@ -26,7 +26,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
     .field("transactionBlocks", alias: "endOfEpoch", EndOfEpoch.self, arguments: [
       "last": 1,
       "filter": ["kind": "SYSTEM_TX"]
-    ]),
+    ])
   ] }
 
   /// A 32-byte hash that uniquely identifies the checkpoint contents, encoded in Base58. This
@@ -101,7 +101,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Epoch }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("epochId", SuiKit.UInt53Apollo.self),
+      .field("epochId", SuiKit.UInt53Apollo.self)
     ] }
 
     /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change.
@@ -121,7 +121,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
       .field("computationCost", SuiKit.BigIntApollo?.self),
       .field("storageCost", SuiKit.BigIntApollo?.self),
       .field("storageRebate", SuiKit.BigIntApollo?.self),
-      .field("nonRefundableStorageFee", SuiKit.BigIntApollo?.self),
+      .field("nonRefundableStorageFee", SuiKit.BigIntApollo?.self)
     ] }
 
     /// Gas paid for executing this transaction (in MIST).
@@ -148,7 +148,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("pageInfo", PageInfo.self),
-      .field("nodes", [Node].self),
+      .field("nodes", [Node].self)
     ] }
 
     /// Information to aid in pagination.
@@ -167,7 +167,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("hasNextPage", Bool.self),
-        .field("endCursor", String?.self),
+        .field("endCursor", String?.self)
       ] }
 
       /// When paginating forwards, are there more items?
@@ -186,7 +186,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("digest", String?.self),
+        .field("digest", String?.self)
       ] }
 
       /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
@@ -205,7 +205,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlockConnection }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("nodes", [Node].self),
+      .field("nodes", [Node].self)
     ] }
 
     /// A list of nodes.
@@ -221,7 +221,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("kind", Kind?.self),
+        .field("kind", Kind?.self)
       ] }
 
       /// The type of this transaction as well as the commands and/or parameters comprising the
@@ -238,7 +238,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Unions.TransactionBlockKind }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .inlineFragment(AsEndOfEpochTransaction.self),
+          .inlineFragment(AsEndOfEpochTransaction.self)
         ] }
 
         public var asEndOfEpochTransaction: AsEndOfEpochTransaction? { _asInlineFragment() }
@@ -253,7 +253,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
           public typealias RootEntityType = RPC_Checkpoint_Fields.EndOfEpoch.Node.Kind
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.EndOfEpochTransaction }
           public static var __selections: [ApolloAPI.Selection] { [
-            .field("transactions", Transactions.self, arguments: ["last": 1]),
+            .field("transactions", Transactions.self, arguments: ["last": 1])
           ] }
 
           /// The list of system transactions that are allowed to run at the end of the epoch.
@@ -269,7 +269,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.EndOfEpochTransactionKindConnection }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("nodes", [Node].self),
+              .field("nodes", [Node].self)
             ] }
 
             /// A list of nodes.
@@ -285,7 +285,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Unions.EndOfEpochTransactionKind }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .inlineFragment(AsChangeEpochTransaction.self),
+                .inlineFragment(AsChangeEpochTransaction.self)
               ] }
 
               public var asChangeEpochTransaction: AsChangeEpochTransaction? { _asInlineFragment() }
@@ -300,7 +300,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                 public typealias RootEntityType = RPC_Checkpoint_Fields.EndOfEpoch.Node.Kind.AsEndOfEpochTransaction.Transactions.Node
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ChangeEpochTransaction }
                 public static var __selections: [ApolloAPI.Selection] { [
-                  .field("epoch", Epoch?.self),
+                  .field("epoch", Epoch?.self)
                 ] }
 
                 /// The next (to become) epoch.
@@ -318,7 +318,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                     .field("__typename", String.self),
                     .field("validatorSet", ValidatorSet?.self),
                     .field("protocolConfigs", ProtocolConfigs.self),
-                    .field("epochId", SuiKit.UInt53Apollo.self),
+                    .field("epochId", SuiKit.UInt53Apollo.self)
                   ] }
 
                   /// Validator related properties, including the active validators.
@@ -339,7 +339,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorSet }
                     public static var __selections: [ApolloAPI.Selection] { [
                       .field("__typename", String.self),
-                      .field("activeValidators", ActiveValidators.self),
+                      .field("activeValidators", ActiveValidators.self)
                     ] }
 
                     /// The current set of active validators.
@@ -356,7 +356,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                       public static var __selections: [ApolloAPI.Selection] { [
                         .field("__typename", String.self),
                         .field("pageInfo", PageInfo.self),
-                        .field("nodes", [Node].self),
+                        .field("nodes", [Node].self)
                       ] }
 
                       /// Information to aid in pagination.
@@ -375,7 +375,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                         public static var __selections: [ApolloAPI.Selection] { [
                           .field("__typename", String.self),
                           .field("hasNextPage", Bool.self),
-                          .field("endCursor", String?.self),
+                          .field("endCursor", String?.self)
                         ] }
 
                         /// When paginating forwards, are there more items?
@@ -395,7 +395,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                         public static var __selections: [ApolloAPI.Selection] { [
                           .field("__typename", String.self),
                           .field("credentials", Credentials?.self),
-                          .field("votingPower", Int?.self),
+                          .field("votingPower", Int?.self)
                         ] }
 
                         /// Validator's set of credentials such as public keys, network addresses and others.
@@ -413,7 +413,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorCredentials }
                           public static var __selections: [ApolloAPI.Selection] { [
                             .field("__typename", String.self),
-                            .field("protocolPubKey", SuiKit.Base64Apollo?.self),
+                            .field("protocolPubKey", SuiKit.Base64Apollo?.self)
                           ] }
 
                           public var protocolPubKey: SuiKit.Base64Apollo? { __data["protocolPubKey"] }
@@ -432,7 +432,7 @@ public struct RPC_Checkpoint_Fields: SuiKit.SelectionSet, Fragment {
                     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ProtocolConfigs }
                     public static var __selections: [ApolloAPI.Selection] { [
                       .field("__typename", String.self),
-                      .field("protocolVersion", SuiKit.UInt53Apollo.self),
+                      .field("protocolVersion", SuiKit.UInt53Apollo.self)
                     ] }
 
                     /// The protocol is not required to change on every epoch boundary, so the protocol version

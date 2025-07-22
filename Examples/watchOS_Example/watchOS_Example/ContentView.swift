@@ -107,7 +107,7 @@ struct ContentView: View {
                 .pickerStyle(.menu)
                 .padding(.top, 40)
                 .padding(.horizontal)
-                
+
                 Text("Current Wallet Balance: \(self.currentWalletBalance) SUI")
                     .padding(.top)
             } else {
@@ -141,7 +141,7 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: self.viewModel.currentWallet) { _, newValue in
+        .onChange(of: self.viewModel.currentWallet) { _, _ in
             Task {
                 do {
                     self.isGettingBalance = true
@@ -178,7 +178,7 @@ class WCSessionDelegateHandler: NSObject, WCSessionDelegate {
         WCSession.default.activate()
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
+    func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
         if let receivedMessage = message["addresses"] as? [String] {
             DispatchQueue.main.async {
                 // Handle received message here (e.g., update the UI)
@@ -222,7 +222,7 @@ public class HomeViewModel: ObservableObject {
     public init(_ mnemos: [[String]]? = nil) throws {
         if let mnemos {
             var tmpWallets: [Wallet] = []
-            var lastWallet: Wallet? = nil
+            var lastWallet: Wallet?
             for mnemo in mnemos {
                 let newWallet = try Wallet(mnemonic: Mnemonic(mnemonic: mnemo))
                 tmpWallets.append(newWallet)
@@ -266,7 +266,7 @@ public class HomeViewModel: ObservableObject {
     }
 
     public func airdropToCurrentWallet() async throws {
-        let _ = try await self.faucetClient.funcAccount(try self.currentWallet.accounts[0].address())
+        _ = try await self.faucetClient.funcAccount(try self.currentWallet.accounts[0].address())
     }
 
     private func initializeWallet(_ mnemo: Mnemonic) throws {

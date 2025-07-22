@@ -52,7 +52,7 @@ final class GovernanceTest: XCTestCase {
         let activeValidator = system["activeValidators"].arrayValue[0]["suiAddress"].stringValue
         var tx = try TransactionBlock()
         let coinsTx = try tx.splitCoin(coin: tx.gas, amounts: [tx.pure(value: .number(UInt64(defaultStakeAmount)))])
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "0x3::sui_system::request_add_stake",
             arguments: [
                 tx.object(id: stateObjectId).toTransactionArgument(),
@@ -85,7 +85,7 @@ final class GovernanceTest: XCTestCase {
     func testThatGettingDelegatedStakesWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         try await toolBox.setup()
-        let _ = try await self.addStake(toolBox.client, toolBox.account)
+        _ = try await self.addStake(toolBox.client, toolBox.account)
         let stakes = try await toolBox.client.getStakes(owner: try toolBox.address())
         let stakesById = try await toolBox.client.getStakesByIds(
             stakes: [stakes[0].stakes[0].getStakeObject().stakeSuiId]
@@ -102,6 +102,6 @@ final class GovernanceTest: XCTestCase {
 
     func testThatGettingLatestSuiSystemStateWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
-        let _ = try await toolBox.client.info()
+        _ = try await toolBox.client.info()
     }
 }

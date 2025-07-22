@@ -30,19 +30,19 @@ import BigInt
 public class zkLoginSigner {
     /// The Sui provider for network operations
     private let provider: SuiProvider
-    
+
     /// The ephemeral keypair used for signing
     private let ephemeralKeyPair: Account
-    
+
     /// The zkLogin signature structure (contains proof, metadata, but not user signature until signing)
     private var zkLoginSignatureTemplate: zkLoginSignature
-    
+
     /// The user's zkLogin address
     private let userAddress: String
-    
+
     /// Optional GraphQL client for signature verification
     private let graphQLClient: GraphQLClientProtocol?
-    
+
     /// Initialize a new zkLoginSigner
     /// - Parameters:
     ///   - provider: The Sui provider for network operations
@@ -63,13 +63,13 @@ public class zkLoginSigner {
         self.userAddress = userAddress
         self.graphQLClient = graphQLClient
     }
-    
+
     /// Get the zkLogin address for this signer
     /// - Returns: The Sui address string
     public func getAddress() -> String {
         return userAddress
     }
-    
+
     /// Create a zkLogin public identifier for verification purposes
     /// - Returns: A zkLoginPublicIdentifier for signature verification
     public func getPublicKey() throws -> zkLoginPublicIdentifier {
@@ -79,28 +79,28 @@ public class zkLoginSigner {
             indexMod4: zkLoginSignatureTemplate.inputs.issBase64Details.indexMod4
         )
         let iss = try JWTUtilities.extractClaimValue(claim: issClaimJWT, claimName: "iss") as String
-        
+
         return try zkLoginPublicIdentifier(
             addressSeed: BigInt(zkLoginSignatureTemplate.inputs.addressSeed)!,
             iss: iss,
             client: graphQLClient
         )
     }
-    
+
     /// Sign raw bytes with the ephemeral keypair and create a complete zkLogin signature
     /// - Parameter bytes: The bytes to sign
     /// - Returns: A complete zkLogin signature
     private func signBytes(_ bytes: [UInt8]) throws -> zkLoginSignature {
         // Sign with the ephemeral keypair
         let ephemeralSignature = try ephemeralKeyPair.sign(Data(bytes))
-        
+
         // Create a complete zkLogin signature with the user signature
         var completeSignature = zkLoginSignatureTemplate
         completeSignature.userSignature = ephemeralSignature.signature.bytes
-        
+
         return completeSignature
     }
-    
+
     /// Sign a transaction block and return the serialized signature
     /// - Parameter transactionData: The transaction data bytes to sign
     /// - Returns: A serialized zkLogin signature string
@@ -108,7 +108,7 @@ public class zkLoginSigner {
         let signature = try signBytes(transactionData)
         return try signature.getSignature()
     }
-    
+
     /// Sign a personal message and return the serialized signature
     /// - Parameter message: The message bytes to sign
     /// - Returns: A serialized zkLogin signature string
@@ -118,32 +118,32 @@ public class zkLoginSigner {
         let signature = try signBytes([UInt8](messageWithPrefix))
         return try signature.getSignature()
     }
-    
+
     /// Sign and execute a transaction using zkLogin authentication
     /// - Parameters:
     ///   - transactionBlock: The transaction to execute
     ///   - options: Optional execution parameters
     /// - Returns: The transaction execution response
     public func signAndExecuteTransaction(
-        transactionBlock: inout TransactionBlock, 
+        transactionBlock: inout TransactionBlock,
         options: SuiTransactionBlockResponseOptions = .init()
     ) async throws -> SuiTransactionBlockResponse {
         // Ensure the transaction has the zkLogin user address as sender
         try transactionBlock.setSender(sender: userAddress)
-        
+
         // Build the transaction
         let bytes = try await transactionBlock.build(self.provider)
-        
+
         // Sign the transaction data with our zkLogin signer
         let serializedSignature = try signTransaction(bytes.bytes)
-        
+
         // Execute the transaction with the zkLogin signature
         var resp = try await provider.executeTransactionBlock(
             transactionBlock: bytes.bytes,
             signature: serializedSignature,
             options: options
         )
-        
+
         // Wait for confirmation
         resp = try await provider.waitForTransaction(tx: resp.digest)
         return resp
@@ -174,49 +174,49 @@ public class zkLoginSigner {
     ///   - options: Optional execution parameters
     /// - Returns: The transaction execution response
     public func signAndExecuteTransactionBlock(
-        transactionBlock: inout TransactionBlock, 
+        transactionBlock: inout TransactionBlock,
         options: SuiTransactionBlockResponseOptions = .init()
     ) async throws -> SuiTransactionBlockResponse {
         var txBlock = transactionBlock
         return try await signAndExecuteTransaction(transactionBlock: &txBlock, options: options)
     }
-    
+
     /// Verify a zkLogin signature against transaction data
     /// - Parameters:
     ///   - transactionData: The transaction data bytes
     ///   - signature: The zkLogin signature to verify
     /// - Returns: True if signature is valid, false otherwise
     public func verifyTransaction(
-        transactionData: [UInt8], 
+        transactionData: [UInt8],
         signature: zkLoginSignature
     ) async throws -> Bool {
         guard self.graphQLClient != nil else {
             throw SuiError.customError(message: "GraphQL client required for verification")
         }
-        
+
         let publicKey = try getPublicKey()
         return try await publicKey.verifyTransaction(
-            transactionData: transactionData, 
+            transactionData: transactionData,
             signature: signature
         )
     }
-    
+
     /// Verify a zkLogin signature against a personal message
     /// - Parameters:
     ///   - message: The message bytes
     ///   - signature: The zkLogin signature to verify
     /// - Returns: True if signature is valid, false otherwise
     public func verifyPersonalMessage(
-        message: [UInt8], 
+        message: [UInt8],
         signature: zkLoginSignature
     ) async throws -> Bool {
         guard self.graphQLClient != nil else {
             throw SuiError.customError(message: "GraphQL client required for verification")
         }
-        
+
         let publicKey = try getPublicKey()
         return try await publicKey.verifyPersonalMessage(
-            message: message, 
+            message: message,
             signature: signature
         )
     }
@@ -230,14 +230,14 @@ extension zkLoginSigner {
     public static func parseSignature(_ serialized: String) throws -> zkLoginSignature {
         return try zkLoginSignature.parse(serialized: serialized)
     }
-    
+
     /// Serialize a zkLogin signature to a string
     /// - Parameter signature: The zkLogin signature
     /// - Returns: A base64 encoded signature string
     public static func serializeSignature(_ signature: zkLoginSignature) throws -> String {
         return try signature.getSignature()
     }
-    
+
     /// Parse a serialized zkLogin signature and extract the public key
     /// - Parameters:
     ///   - serializedSignature: The serialized signature string
@@ -248,22 +248,21 @@ extension zkLoginSigner {
         graphQLClient: GraphQLClientProtocol? = nil
     ) throws -> (publicKey: zkLoginPublicIdentifier, signature: zkLoginSignature) {
         let signature = try parseSignature(serializedSignature)
-        
+
         // Extract issuer from signature
         let issClaimJWT = zkLoginSignatureInputsClaim(
             value: signature.inputs.issBase64Details.value,
             indexMod4: signature.inputs.issBase64Details.indexMod4
         )
         let iss = try JWTUtilities.extractClaimValue(claim: issClaimJWT, claimName: "iss") as String
-        
+
         let publicKey = try zkLoginPublicIdentifier(
             addressSeed: BigInt(signature.inputs.addressSeed)!,
             iss: iss,
             client: graphQLClient
         )
-        
+
         return (publicKey: publicKey, signature: signature)
     }
 }
 
- 

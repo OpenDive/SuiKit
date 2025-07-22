@@ -32,7 +32,7 @@ public struct PaginatedSuiMoveEvent {
 
     /// An `EventId` object representing the cursor to the next page of events.
     public let nextCursor: EventId?
-    
+
     public let pageInfo: PageInfo?
 
     /// A Boolean value indicating whether there is a next page of events available.

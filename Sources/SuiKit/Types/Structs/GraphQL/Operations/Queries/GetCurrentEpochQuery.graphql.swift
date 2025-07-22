@@ -19,7 +19,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("epoch", Epoch?.self),
+      .field("epoch", Epoch?.self)
     ] }
 
     /// Fetch epoch information by ID (defaults to the latest epoch).
@@ -41,7 +41,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
         .field("checkpoints", alias: "firstCheckpoint", FirstCheckpoint.self, arguments: ["first": 1]),
         .field("startTimestamp", SuiKit.DateTimeApollo.self),
         .field("endTimestamp", SuiKit.DateTimeApollo?.self),
-        .field("referenceGasPrice", SuiKit.BigIntApollo?.self),
+        .field("referenceGasPrice", SuiKit.BigIntApollo?.self)
       ] }
 
       /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change.
@@ -69,7 +69,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorSet }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("activeValidators", ActiveValidators.self),
+          .field("activeValidators", ActiveValidators.self)
         ] }
 
         /// The current set of active validators.
@@ -86,7 +86,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("pageInfo", PageInfo.self),
-            .field("nodes", [Node].self),
+            .field("nodes", [Node].self)
           ] }
 
           /// Information to aid in pagination.
@@ -105,7 +105,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("hasNextPage", Bool.self),
-              .field("endCursor", String?.self),
+              .field("endCursor", String?.self)
             ] }
 
             /// When paginating forwards, are there more items?
@@ -124,7 +124,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Validator }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_VALIDATOR_FIELDS.self),
+              .fragment(RPC_VALIDATOR_FIELDS.self)
             ] }
 
             /// The number of epochs for which this validator has been below the
@@ -218,7 +218,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.CheckpointConnection }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// A list of nodes.
@@ -234,7 +234,7 @@ public class GetCurrentEpochQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("sequenceNumber", SuiKit.UInt53Apollo.self),
+            .field("sequenceNumber", SuiKit.UInt53Apollo.self)
           ] }
 
           /// This checkpoint's position in the total order of finalized checkpoints, agreed upon by

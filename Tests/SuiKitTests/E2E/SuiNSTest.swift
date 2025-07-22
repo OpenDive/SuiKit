@@ -31,9 +31,9 @@ final class SuiNSTest: XCTestCase {
     let domainName = "test.sui"
     let walletAddress = "0xfce343a643991c592c4f1a9ee415a7889293f694ab8828f78e3c81d11c9530c6"
 
-    var nonExistingDomain: String? = nil
-    var nonExistingWalletAddress: String? = nil
-    var client: SuiNSClient? = nil
+    var nonExistingDomain: String?
+    var nonExistingWalletAddress: String?
+    var client: SuiNSClient?
 
     override func setUp() async throws {
         self.client = SuiNSClient(

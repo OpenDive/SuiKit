@@ -30,7 +30,7 @@ public struct zkLoginInputs: KeyProtocol, Equatable, Codable {
     public var proofPoints: zkLoginSignatureInputsProofPoints
     public var issBase64Details: zkLoginSignatureInputsClaim
     public var headerBase64: String
-    
+
     public init(
         proofPoints: zkLoginSignatureInputsProofPoints,
         issBase64Details: zkLoginSignatureInputsClaim,
@@ -40,13 +40,13 @@ public struct zkLoginInputs: KeyProtocol, Equatable, Codable {
         self.issBase64Details = issBase64Details
         self.headerBase64 = headerBase64
     }
-    
+
     public func serialize(_ serializer: Serializer) throws {
         try Serializer._struct(serializer, value: self.proofPoints)
         try Serializer._struct(serializer, value: self.issBase64Details)
         try Serializer.str(serializer, self.headerBase64)
     }
-    
+
     public static func deserialize(from deserializer: Deserializer) throws -> zkLoginInputs {
         return zkLoginInputs(
             proofPoints: try zkLoginSignatureInputsProofPoints.deserialize(from: deserializer),
@@ -54,4 +54,4 @@ public struct zkLoginInputs: KeyProtocol, Equatable, Codable {
             headerBase64: try Deserializer.string(deserializer)
         )
     }
-} 
+}

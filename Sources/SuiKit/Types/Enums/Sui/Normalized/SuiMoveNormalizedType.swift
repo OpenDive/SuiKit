@@ -103,7 +103,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
             if normalizedStruct.isSameStruct(ResolvedStdOption()) {
                 guard !(normalizedStruct.typeArguments.isEmpty) else { throw SuiError.customError(message: "Type argument is empty") }
                 let optionToVec: SuiMoveNormalizedType = .vector(normalizedStruct.typeArguments[0])
-                
+
                 return try optionToVec.getPureSerializationType(argVal)
             }
         default:
@@ -193,7 +193,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
         }
         return parseGraphQLInner(data)
     }
-    
+
     internal static func parseGraphQLInner(_ data: AnyHashable? = nil, _ override: JSON? = nil) -> SuiMoveNormalizedType? {
         let json = data != nil ? JSON(data!) : JSON()
         var body = json["body"]
@@ -332,7 +332,7 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
 
     public static func deserialize(from deserializer: Deserializer) throws -> SuiMoveNormalizedType {
         let value = try Deserializer.u8(deserializer)
-        
+
         switch value {
         case 0:
             return .bool

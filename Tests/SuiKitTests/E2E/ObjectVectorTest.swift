@@ -54,7 +54,7 @@ final class ObjectVectorTest: XCTestCase {
 
     private func mintObject(val: Int, toolBox: TestToolbox) async throws -> String {
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::entry_point_vector::mint",
             arguments: [.input(tx.pure(value: .number(UInt64(val))))]
         )
@@ -79,7 +79,7 @@ final class ObjectVectorTest: XCTestCase {
             type: withType ? "\(try self.fetchPackageId())::entry_point_vector::Obj" : nil,
             objects: objects.map { try tx.object(id: $0).toTransactionArgument() }
         )
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::entry_point_vector::two_obj_vec_destroy",
             arguments: [vec]
         )
@@ -115,7 +115,7 @@ final class ObjectVectorTest: XCTestCase {
                 (try await self.mintObject(val: 7, toolBox: toolBox)),
                 (try await self.mintObject(val: 42, toolBox: toolBox))
             ],
-            withType: true, 
+            withType: true,
             toolBox: toolBox
         )
     }
@@ -133,7 +133,7 @@ final class ObjectVectorTest: XCTestCase {
                 tx.object(id: coinIds[2]).toTransactionArgument()
             ]
         )
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "0x2::pay::join_vec",
             arguments: [
                 tx.object(id: coinIds[0]).toTransactionArgument(),

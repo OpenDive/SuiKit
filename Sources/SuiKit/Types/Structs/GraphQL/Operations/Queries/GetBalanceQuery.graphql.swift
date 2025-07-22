@@ -32,7 +32,7 @@ public class GetBalanceQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("address", Address?.self, arguments: ["address": .variable("owner")]),
+      .field("address", Address?.self, arguments: ["address": .variable("owner")])
     ] }
 
     /// Look-up an Account by its SuiAddressApollo.
@@ -48,7 +48,7 @@ public class GetBalanceQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("balance", Balance?.self, arguments: ["type": .variable("type")]),
+        .field("balance", Balance?.self, arguments: ["type": .variable("type")])
       ] }
 
       /// Total balance of all coins with marker type owned by this address. If type is not supplied,
@@ -67,7 +67,7 @@ public class GetBalanceQuery: GraphQLQuery {
           .field("__typename", String.self),
           .field("coinType", CoinType.self),
           .field("coinObjectCount", SuiKit.UInt53Apollo?.self),
-          .field("totalBalance", SuiKit.BigIntApollo?.self),
+          .field("totalBalance", SuiKit.BigIntApollo?.self)
         ] }
 
         /// Coin type for the balance, such as 0x2::sui::SUI
@@ -87,7 +87,7 @@ public class GetBalanceQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("repr", String.self),
+            .field("repr", String.self)
           ] }
 
           /// Flat representation of the type signature, as a displayable string.

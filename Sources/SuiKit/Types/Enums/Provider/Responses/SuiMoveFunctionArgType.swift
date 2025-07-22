@@ -36,7 +36,7 @@ public enum SuiMoveFunctionArgType: Equatable {
 
     /// The argument is an object. The kind of the object (immutable/mutable reference or by value) is specified.
     case object(ObjectValueKind)
-    
+
     public init(graphql: GetMoveFunctionArgTypesQuery.Data.Object.AsMovePackage.Module.Function.Parameter) {
         self = Self.fromHashable(hash: graphql.signature)
     }
@@ -63,4 +63,3 @@ public enum SuiMoveFunctionArgType: Equatable {
         return .object(.byValue)
     }
 }
-

@@ -38,7 +38,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("stakingPoolActivationEpoch", SuiKit.UInt53Apollo?.self),
     .field("stakingPoolSuiBalance", SuiKit.BigIntApollo?.self),
     .field("address", Address.self),
-    .field("votingPower", Int?.self),
+    .field("votingPower", Int?.self)
   ] }
 
   /// The number of epochs for which this validator has been below the
@@ -111,7 +111,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("contents", Contents?.self),
-      .field("address", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self)
     ] }
 
     /// Displays the contents of the Move object in a JSON string and through GraphQL types. Also
@@ -130,7 +130,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("json", SuiKit.JSONApollo.self),
+        .field("json", SuiKit.JSONApollo.self)
       ] }
 
       /// Representation of a Move value in JSON, where:
@@ -159,7 +159,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorCredentials }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .fragment(RPC_CREDENTIAL_FIELDS.self),
+      .fragment(RPC_CREDENTIAL_FIELDS.self)
     ] }
 
     public var netAddress: String? { __data["netAddress"] }
@@ -189,7 +189,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorCredentials }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .fragment(RPC_CREDENTIAL_FIELDS.self),
+      .fragment(RPC_CREDENTIAL_FIELDS.self)
     ] }
 
     public var netAddress: String? { __data["netAddress"] }
@@ -219,7 +219,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("address", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self)
     ] }
 
     public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -235,7 +235,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("address", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self)
     ] }
 
     public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -251,7 +251,7 @@ public struct RPC_VALIDATOR_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("address", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self)
     ] }
 
     public var address: SuiKit.SuiAddressApollo { __data["address"] }

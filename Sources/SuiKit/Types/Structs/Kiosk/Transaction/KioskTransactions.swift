@@ -51,7 +51,7 @@ public struct KioskTransactions {
         let (kioskObj, kioskOwnerCap) = try Self.createKiosk(
             tx: &tx
         )
-        let _ = try Self.shareKiosk(
+        _ = try Self.shareKiosk(
             tx: &tx,
             kiosk: kioskObj.toTransactionArgument()
         )
@@ -63,7 +63,7 @@ public struct KioskTransactions {
         tx: inout TransactionBlock,
         kiosk: TransactionArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "0x2::transfer::public_share_object",
             arguments: [kiosk],
             typeArguments: [KioskConstants.kioskType]
@@ -79,7 +79,7 @@ public struct KioskTransactions {
         kioskCap: ObjectArgument,
         item: ObjectArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::place",
             arguments: [
                 tx.object(objectArgument: kiosk).toTransactionArgument(),
@@ -106,7 +106,7 @@ public struct KioskTransactions {
         policy: ObjectArgument,
         item: ObjectArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::lock",
             arguments: [
                 tx.object(objectArgument: kiosk).toTransactionArgument(),
@@ -160,7 +160,7 @@ public struct KioskTransactions {
             message: "Invalid number: \(price)"
         ) }
 
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::list",
             arguments: [
                 tx.object(objectArgument: kiosk).toTransactionArgument(),
@@ -183,7 +183,7 @@ public struct KioskTransactions {
         kioskCap: ObjectArgument,
         itemId: String
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::delist",
             arguments: [
                 tx.object(objectArgument: kiosk).toTransactionArgument(),
@@ -210,7 +210,7 @@ public struct KioskTransactions {
             message: "Invalid number: \(price)"
         ) }
 
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::place_and_list",
             arguments: [
                 tx.object(objectArgument: kiosk).toTransactionArgument(),
@@ -262,12 +262,11 @@ public struct KioskTransactions {
         kioskCap: ObjectArgument,
         amount: String?
     ) throws -> TransactionObjectArgument {
-        var amountArg: UInt64? = nil
+        var amountArg: UInt64?
 
         if
             let amount,
-            let outputU64 = UInt64(amount)
-        {
+            let outputU64 = UInt64(amount) {
             amountArg = outputU64
         }
 
@@ -283,7 +282,7 @@ public struct KioskTransactions {
             ]
         )
 
-        guard 
+        guard
             let coinObj = result.first,
             let coin = TransactionObjectArgument(from: coinObj)
         else { throw SuiError.customError(message: "Invalid object argument") }
@@ -315,7 +314,7 @@ public struct KioskTransactions {
             returnValueCount: 2
         )
 
-        guard 
+        guard
             let item = result.first,
             result.count == 2
         else { throw SuiError.customError(message: "Invalid object argument") }
@@ -334,7 +333,7 @@ public struct KioskTransactions {
         item: TransactionArgument,
         promise: TransactionArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(KioskConstants.kioskModule)::return_val",
             arguments: [
                 tx.object(objectArgument: kiosk).toTransactionArgument(),

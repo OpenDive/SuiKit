@@ -33,11 +33,11 @@ extension AnyHashable: @retroactive ScalarType, @retroactive OutputTypeConvertib
     public init(_jsonValue value: JSONValue) throws {
         self = value
     }
-    
+
     public static var _asOutputType: ApolloAPI.Selection.Field.OutputType {
         .scalar(AnyHashable.self)
     }
-    
+
     public var _jsonValue: ApolloAPI.JSONValue {
         self
     }
@@ -50,11 +50,11 @@ extension AnyHashable: ScalarType, OutputTypeConvertible, AnyScalarType {
     public init(_jsonValue value: JSONValue) throws {
         self = value
     }
-    
+
     public static var _asOutputType: ApolloAPI.Selection.Field.OutputType {
         .scalar(AnyHashable.self)
     }
-    
+
     public var _jsonValue: ApolloAPI.JSONValue {
         self
     }

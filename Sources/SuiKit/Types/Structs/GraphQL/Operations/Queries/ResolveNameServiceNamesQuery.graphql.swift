@@ -36,7 +36,7 @@ public class ResolveNameServiceNamesQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("address", Address?.self, arguments: ["address": .variable("address")]),
+      .field("address", Address?.self, arguments: ["address": .variable("address")])
     ] }
 
     /// Look-up an Account by its SuiAddressApollo.
@@ -55,7 +55,7 @@ public class ResolveNameServiceNamesQuery: GraphQLQuery {
         .field("suinsRegistrations", SuinsRegistrations.self, arguments: [
           "first": .variable("limit"),
           "after": .variable("cursor")
-        ]),
+        ])
       ] }
 
       /// The SuinsRegistration NFTs owned by this address. These grant the owner the capability to
@@ -73,7 +73,7 @@ public class ResolveNameServiceNamesQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("pageInfo", PageInfo.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// Information to aid in pagination.
@@ -92,7 +92,7 @@ public class ResolveNameServiceNamesQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("hasNextPage", Bool.self),
-            .field("endCursor", String?.self),
+            .field("endCursor", String?.self)
           ] }
 
           /// When paginating forwards, are there more items?
@@ -111,7 +111,7 @@ public class ResolveNameServiceNamesQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.SuinsRegistration }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("domain", String.self),
+            .field("domain", String.self)
           ] }
 
           /// Domain name of the SuinsRegistration object

@@ -19,7 +19,7 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("isEntry", Bool?.self),
     .field("parameters", [Parameter]?.self),
     .field("typeParameters", [TypeParameter]?.self),
-    .field("return", [Return]?.self),
+    .field("return", [Return]?.self)
   ] }
 
   /// The function's (unqualified) name.
@@ -50,7 +50,7 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("signature", AnyHashable.self),
+      .field("signature", AnyHashable.self)
     ] }
 
     /// Structured representation of the type signature.
@@ -67,7 +67,7 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveFunctionTypeParameter }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self),
+      .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self)
     ] }
 
     public var constraints: [GraphQLEnum<SuiKit.MoveAbility>] { __data["constraints"] }
@@ -84,7 +84,7 @@ public struct RPC_MOVE_FUNCTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("repr", String.self),
-      .field("signature", AnyHashable.self),
+      .field("signature", AnyHashable.self)
     ] }
 
     /// Flat representation of the type signature, as a displayable string.

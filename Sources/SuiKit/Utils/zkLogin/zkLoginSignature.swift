@@ -44,7 +44,7 @@ public struct zkLoginSignature: KeyProtocol, Equatable {
 
     public func getSignatureBytes(signature: String? = nil) throws -> Data {
         let ser = Serializer()
-        
+
         // Serialize the entire zkLoginSignature struct
         try self.serialize(ser)
         return ser.output()
@@ -71,7 +71,7 @@ public struct zkLoginSignature: KeyProtocol, Equatable {
             userSignature: [UInt8](try Deserializer.toBytes(deserializer))
         )
     }
-    
+
     /// Serialize the zkLogin signature for transaction submission
     /// - Returns: Base64 encoded serialized signature
     public func serialize() -> String {
@@ -80,21 +80,21 @@ public struct zkLoginSignature: KeyProtocol, Equatable {
             // First serialize the zkLoginSignature struct
             try self.serialize(serializer)
             let bytes = serializer.output()
-            
+
             // Create result with signature scheme flag (0x05) as first byte
             var signatureBytes = Data(count: bytes.count + 1)
             signatureBytes[0] = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["zkLogin"]!
             signatureBytes[1..<(bytes.count + 1)] = bytes
-            
+
             // Convert to base64
             let base64Signature = signatureBytes.base64EncodedString()
-            
+
             return base64Signature
         } catch {
             return Data().base64EncodedString() // Return empty signature in case of error
         }
     }
-    
+
     /// Parse a serialized zkLogin signature string
     /// - Parameter serialized: Base64 encoded signature string
     /// - Returns: A zkLoginSignature instance
@@ -102,29 +102,29 @@ public struct zkLoginSignature: KeyProtocol, Equatable {
         guard let data = Data(base64Encoded: serialized) else {
             throw SuiError.customError(message: "Failed to decode base64 signature")
         }
-        
+
         // Verify signature prefix byte is correct (0x05 for zkLogin)
         guard data[0] == SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["zkLogin"] else {
             throw SuiError.customError(message: "Invalid signature scheme flag")
         }
-        
+
         // Skip the flag byte
         let signatureBytes = data.subdata(in: 1..<data.count)
-        
+
         let deserializer = Deserializer(data: signatureBytes)
-        
+
         // Deserialize the proof points structure
         let proofPoints = try zkLoginSignatureInputsProofPoints.deserialize(from: deserializer)
-        
+
         // Deserialize issBase64Details
         let issBase64Details = try zkLoginSignatureInputsClaim.deserialize(from: deserializer)
-        
+
         // Read headerBase64
         let headerBase64 = try Deserializer.string(deserializer)
-        
+
         // Read addressSeed
         let addressSeed = try Deserializer.string(deserializer)
-        
+
         // Create inputs struct
         let inputs = zkLoginSignatureInputs(
             proofPoints: proofPoints,
@@ -145,7 +145,7 @@ public struct zkLoginSignature: KeyProtocol, Equatable {
             userSignature: [UInt8](userSignature)
         )
     }
-    
+
     /// Verify this zkLogin signature against transaction data
     /// The verification must be performed externally as it requires GraphQL access
     /// - Parameters:
@@ -169,18 +169,18 @@ public struct zkLoginSignature: KeyProtocol, Equatable {
 public class SuiGraphQLClient: GraphQLClientProtocol {
     private let url: URL
     private let session: URLSession
-    
+
     public init(url: URL, session: URLSession = .shared) {
         self.url = url
         self.session = session
     }
-    
+
     public func verifyZkLoginSignature(
         bytes: String,
         signature: String,
         intentScope: ZkLoginIntentScope,
         author: String
-    ) async throws -> zkLoginVerifyResult {
+    ) async throws -> ZkLoginVerifyResult {
         // Construct GraphQL query matching the schema
         let query = """
         query verifyZkLoginSignature($bytes: Base64!, $signature: Base64!, $intentScope: ZkLoginIntentScope!, $author: SuiAddress!) {
@@ -195,7 +195,7 @@ public class SuiGraphQLClient: GraphQLClientProtocol {
           }
         }
         """
-        
+
         // Create variables for the query
         let variables: [String: Any] = [
             "bytes": bytes,
@@ -203,47 +203,47 @@ public class SuiGraphQLClient: GraphQLClientProtocol {
             "intentScope": intentScope.rawValue,
             "author": author
         ]
-        
+
         // Create request body
         let requestBody: [String: Any] = [
             "query": query,
             "variables": variables
         ]
-        
+
         // Create request
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-        
+
         // Send request
         let (data, response) = try await session.data(for: request)
-        
+
         // Check response
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw SuiError.customError(message: "GraphQL request failed")
         }
-        
+
         // Parse response
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw SuiError.customError(message: "Invalid JSON response")
         }
-        
+
         // Check for GraphQL errors first
         if let errors = json["errors"] as? [[String: Any]], !errors.isEmpty {
             let errorMessages = errors.compactMap { $0["message"] as? String }
             throw SuiError.customError(message: "GraphQL errors: \(errorMessages.joined(separator: ", "))")
         }
-        
+
         // Extract verification result
         guard let dataJson = json["data"] as? [String: Any],
               let verifyResult = dataJson["verifyZkloginSignature"] as? [String: Any],
               let success = verifyResult["success"] as? Bool else {
             throw SuiError.customError(message: "Invalid GraphQL response format")
         }
-        
+
         let errors = (verifyResult["errors"] as? [String]) ?? []
-        
-        return zkLoginVerifyResult(success: success, errors: errors)
+
+        return ZkLoginVerifyResult(success: success, errors: errors)
     }
 }

@@ -69,7 +69,7 @@ public struct SuiChangeEpoch: Codable, KeyProtocol {
         try Serializer.str(serializer, storageCharge)
         try Serializer.str(serializer, computationCharge)
         try Serializer.str(serializer, storageRebate)
-        
+
         if let epochStartTimestampMs {
             try Serializer.str(serializer, epochStartTimestampMs)
         }

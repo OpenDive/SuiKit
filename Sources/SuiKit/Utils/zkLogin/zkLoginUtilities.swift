@@ -137,7 +137,7 @@ public struct zkLoginUtilities {
             PoseidonUtilities.poseidonHash(inputs: [salt])
         ])
     }
-    
+
     /// Generate an address seed for zkLogin authentication
     /// - Parameters:
     ///   - salt: User's salt value
@@ -158,7 +158,7 @@ public struct zkLoginUtilities {
             value: keyClaimValue,
             aud: audience
         )
-        
+
         // Return as string (BigInt description)
         return addressSeed.description
     }

@@ -39,7 +39,7 @@ public enum TransactionObjectArgument: KeyProtocol {
             return .input(input)
         }
     }
-    
+
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .gasCoin:

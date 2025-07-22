@@ -44,7 +44,7 @@ public struct GasCostSummary: Equatable {
     /// A string representing any non-refundable storage fee in the transaction or operation.
     /// This refers to the portion of the storage cost that cannot be recovered or refunded.
     public let nonRefundableStorageFee: String
-    
+
     /// Initialize a new instance of `GasCostSummary` from a GraphQL object.
     /// - Parameter graphql: A GraphQL object containing values for initalizing a new Checkpoint.
     public init(graphql: RPC_Checkpoint_Fields.RollingGasSummary) {

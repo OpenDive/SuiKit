@@ -21,7 +21,7 @@ public struct RPC_CREDENTIAL_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("workerPubKey", SuiKit.Base64Apollo?.self),
     .field("workerAddress", String?.self),
     .field("proofOfPossession", SuiKit.Base64Apollo?.self),
-    .field("protocolPubKey", SuiKit.Base64Apollo?.self),
+    .field("protocolPubKey", SuiKit.Base64Apollo?.self)
   ] }
 
   public var netAddress: String? { __data["netAddress"] }

@@ -84,7 +84,7 @@ internal class TestToolbox {
             dependencies: fileData["dependencies"].arrayObject as! [String]
         )
 
-        let _ = try txBlock.transferObject(objects: [cap], address: try self.address())
+        _ = try txBlock.transferObject(objects: [cap], address: try self.address())
         let options = SuiTransactionBlockResponseOptions(
             showEffects: true,
             showObjectChanges: true
@@ -96,7 +96,7 @@ internal class TestToolbox {
         )
         publishTxBlock = try await self.client.waitForTransaction(tx: publishTxBlock.digest, options: options)
 
-        guard 
+        guard
             publishTxBlock.effects?.status.status == .success,
             let objectChanges = publishTxBlock.objectChanges
         else {
@@ -154,7 +154,7 @@ internal class TestToolbox {
                     )
                 ]
             )
-            let _ = try txBlock.transferObject(objects: [coin], address: recipient)
+            _ = try txBlock.transferObject(objects: [coin], address: recipient)
         }
 
         let publishTxBlock = try await self.client.signAndExecuteTransactionBlock(
@@ -219,7 +219,7 @@ internal class TestToolbox {
         while isInitializing {
             do {
                 let faucet = FaucetClient(connection: self.client.connection)
-                let _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
+                _ = try await faucet.funcAccount(try self.account.publicKey.toSuiAddress())
                 isInitializing = false
             } catch {
                 if error.localizedDescription.contains("limit") {
@@ -239,7 +239,7 @@ internal class TestToolbox {
             guard let coinsSent = txFaucet.coinsSent, !coinsSent.isEmpty else {
                 throw SuiError.customError(message: "No coins were sent")
             }
-            let _ = try await self.client.waitForTransaction(tx: coinsSent[0].transferTxDigest)
+            _ = try await self.client.waitForTransaction(tx: coinsSent[0].transferTxDigest)
         }
     }
 

@@ -33,7 +33,7 @@ public struct BaseRulePackageIds {
     public let kioskLockRulePackageId: String?
     public let personalKioskRulePackageId: String?
     public let floorPriceRulePackageId: String?
-    
+
     public func getRule(rule: RulePackage, network: KioskNetwork) -> String {
         switch rule {
         case .kioskLockRulePackageId:

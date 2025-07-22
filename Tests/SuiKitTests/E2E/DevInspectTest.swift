@@ -72,7 +72,7 @@ final class DevInspectTest: XCTestCase {
         let toolBox = try self.fetchToolBox()
         var txBlock = try TransactionBlock()
         let coin = try txBlock.splitCoin(coin: txBlock.gas, amounts: [txBlock.pure(value: .number(10))])
-        let _ = try txBlock.transferObject(
+        _ = try txBlock.transferObject(
             objects: [coin],
             address: try toolBox.account.publicKey.toSuiAddress()
         )
@@ -96,7 +96,7 @@ final class DevInspectTest: XCTestCase {
             typeArguments: ["0x2::coin::Coin<0x2::sui::SUI>"]
         )
 
-        let _ = try tx.transferObject(
+        _ = try tx.transferObject(
             objects: [obj[0]],
             address: try toolBox.account.publicKey.toSuiAddress()
         )
@@ -112,7 +112,7 @@ final class DevInspectTest: XCTestCase {
     func testThatVerifiesIncorrectMoveCallsWillFail() async throws {
         let toolBox = try self.fetchToolBox()
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::test_abort",
             arguments: [],
             typeArguments: []

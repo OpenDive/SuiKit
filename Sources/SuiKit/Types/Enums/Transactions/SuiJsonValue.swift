@@ -51,7 +51,7 @@ public indirect enum SuiJsonValue: KeyProtocol, Equatable {
     case address(AccountAddress)
 
     case input(TransactionObjectArgument)
-    
+
     public var isObject: Bool {
         switch self {
         case .callArg, .address, .input:

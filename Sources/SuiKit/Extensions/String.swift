@@ -147,7 +147,7 @@ extension String {
     }
 }
 
-fileprivate func convertHex(_ s: String.UnicodeScalarView, i: String.UnicodeScalarIndex, appendTo d: [UInt8]) -> [UInt8] {
+private func convertHex(_ s: String.UnicodeScalarView, i: String.UnicodeScalarIndex, appendTo d: [UInt8]) -> [UInt8] {
     let skipChars = CharacterSet.whitespacesAndNewlines
     guard i != s.endIndex else { return d }
     let next1 = s.index(after: i)

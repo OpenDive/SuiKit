@@ -33,11 +33,10 @@ import Foundation
 public enum ObjectValueKind: String, Equatable {
     /// The object value is accessed by an immutable reference.
     case byImmutableReference = "ByImmutableReference"
-    
+
     /// The object value is accessed by a mutable reference.
     case byMutableReference = "ByMutableReference"
-    
+
     /// The object value is accessed by value.
     case byValue = "ByValue"
 }
-

@@ -18,7 +18,7 @@ public class GetChainIdentifierQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("chainIdentifier", String.self),
+      .field("chainIdentifier", String.self)
     ] }
 
     /// First four bytes of the network's genesis checkpoint digest (uniquely identifies the

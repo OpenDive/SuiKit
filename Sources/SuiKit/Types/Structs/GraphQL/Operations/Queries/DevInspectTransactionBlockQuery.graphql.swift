@@ -64,7 +64,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
       .field("dryRunTransactionBlock", DryRunTransactionBlock.self, arguments: [
         "txBytes": .variable("txBytes"),
         "txMeta": .variable("txMeta")
-      ]),
+      ])
     ] }
 
     /// Simulate running a transaction to inspect its effects without
@@ -98,7 +98,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
         .field("__typename", String.self),
         .field("error", String?.self),
         .field("results", [Result]?.self),
-        .field("transaction", Transaction?.self),
+        .field("transaction", Transaction?.self)
       ] }
 
       /// The error that occurred during dry run execution, if any.
@@ -120,7 +120,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("mutatedReferences", [MutatedReference]?.self),
-          .field("returnValues", [ReturnValue]?.self),
+          .field("returnValues", [ReturnValue]?.self)
         ] }
 
         /// Changes made to arguments that were mutably borrowed by each command in this transaction.
@@ -140,7 +140,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
             .field("__typename", String.self),
             .field("input", Input.self),
             .field("type", Type_SelectionSet.self),
-            .field("bcs", SuiKit.Base64Apollo.self),
+            .field("bcs", SuiKit.Base64Apollo.self)
           ] }
 
           public var input: Input { __data["input"] }
@@ -158,7 +158,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .inlineFragment(AsInput.self),
-              .inlineFragment(AsResult.self),
+              .inlineFragment(AsResult.self)
             ] }
 
             public var asInput: AsInput? { _asInlineFragment() }
@@ -174,7 +174,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
               public typealias RootEntityType = DevInspectTransactionBlockQuery.Data.DryRunTransactionBlock.Result.MutatedReference.Input
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Input }
               public static var __selections: [ApolloAPI.Selection] { [
-                .field("ix", alias: "inputIndex", Int.self),
+                .field("ix", alias: "inputIndex", Int.self)
               ] }
 
               /// Index of the programmable transaction block input (0-indexed).
@@ -192,7 +192,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Result }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("cmd", Int.self),
-                .field("ix", alias: "resultIndex", Int?.self),
+                .field("ix", alias: "resultIndex", Int?.self)
               ] }
 
               /// The index of the previous command (0-indexed) that returned this result.
@@ -213,7 +213,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("repr", String.self),
+              .field("repr", String.self)
             ] }
 
             /// Flat representation of the type signature, as a displayable string.
@@ -232,7 +232,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("type", Type_SelectionSet.self),
-            .field("bcs", SuiKit.Base64Apollo.self),
+            .field("bcs", SuiKit.Base64Apollo.self)
           ] }
 
           public var type: Type_SelectionSet { __data["type"] }
@@ -248,7 +248,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("repr", String.self),
+              .field("repr", String.self)
             ] }
 
             /// Flat representation of the type signature, as a displayable string.
@@ -267,7 +267,7 @@ public class DevInspectTransactionBlockQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_TRANSACTION_FIELDS.self),
+          .fragment(RPC_TRANSACTION_FIELDS.self)
         ] }
 
         /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

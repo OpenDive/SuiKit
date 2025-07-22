@@ -32,7 +32,7 @@ public struct FaucetCoinInfo: Codable, Sendable {
     public let amount: Int
 
     /// The identifier of the object.
-    public let id: objectId
+    public let id: ObjectId
 
     /// A `TransactionDigest` representing the transaction digest of the transfer.
     public let transferTxDigest: TransactionDigest
@@ -44,7 +44,7 @@ public struct FaucetCoinInfo: Codable {
     public let amount: Int
 
     /// The identifier of the object.
-    public let id: objectId
+    public let id: ObjectId
 
     /// A `TransactionDigest` representing the transaction digest of the transfer.
     public let transferTxDigest: TransactionDigest
@@ -54,10 +54,10 @@ public struct FaucetCoinInfo: Codable {
 public struct FaucetCoins: Codable {
     /// Represents the coins (0x2::sui::SUI) that were fauceted to the account. Can be null if faucet failed
     public let coinsSent: [FaucetCoinInfo]?
-    
+
     /// Represents either "success" if the faucet succeeded, or a "Failure" object with `status` string containing a `JSON` object.
     public let status: String
-    
+
     enum CodingKeys: String, CodingKey {
         case coinsSent = "coins_sent"
         case status

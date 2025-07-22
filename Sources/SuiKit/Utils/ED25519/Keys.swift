@@ -32,9 +32,4 @@ internal struct Keys {
 
     /// The chain code associated with the cryptographic key.
     internal let chainCode: Data
-
-    internal init(key: Data, chainCode: Data) {
-        self.key = key
-        self.chainCode = chainCode
-    }
 }

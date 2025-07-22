@@ -23,7 +23,7 @@ enum DataFetchPhase<T> {
     case empty
     case success(T)
     case failure(Error)
-    
+
     var value: T? {
         if case .success(let value) = self {
             return value
@@ -39,48 +39,47 @@ struct NFTCollection {
 
 struct NFTApi {
     static let shared = NFTApi()
-    
+
     // TODO: Replace with way of getting input wallet through zkLogin
     let walletAddress = "0x11e1167ee826093a81b40da90cc12cd12f47e16939454e245865cd5822d1a0c3"
-    
+
     private init() { }
 
     func fetchCollections() async throws -> [NFTCollection] {
         try await withThrowingTaskGroup(of: Swift.Result<NFT, Error>.self) { group in
             let provider = SuiProvider(connection: MainnetConnection())
             let kiosk = KioskClient(client: provider, network: .mainnet)
-            
+
             let kioskCollections = try await kiosk.getOwnedKiosks(address: walletAddress)
-            
+
             for object in kioskCollections.kioskOwnerCaps.map(\.objectId) {
                 group.addTask {
                     await self.fetchNFT(objectId: object, provider: provider)
                 }
             }
-            
+
             var results = [Swift.Result<NFT, Error>]()
-            
+
             for try await result in group {
                 results.append(result)
             }
-            
+
             if
                 let first = results.first,
-                case .failure(let failure) = first
-            {
+                case .failure(let failure) = first {
                 throw failure
             }
-            
+
             var nfts = [NFT]()
-            
+
             for result in results {
                 if case .success(let nft) = result {
                     nfts.append(nft)
                 }
             }
-            
+
             var sortedNFTs: [String: [NFT]] = [:]
-            
+
             for nft in nfts {
                 if sortedNFTs[nft.collectionName] == nil {
                     sortedNFTs[nft.collectionName] = [nft]
@@ -90,7 +89,7 @@ struct NFTApi {
             }
 
             var collections: [NFTCollection] = []
-            
+
             for category in sortedNFTs.keys.sorted() {
                 collections.append(NFTCollection(collectionName: category, nfts: sortedNFTs[category]!))
             }
@@ -114,12 +113,12 @@ struct NFTApi {
     func fetchNFT(objectId: String, provider: SuiProvider) async -> Swift.Result<NFT, Error> {
         do {
             guard let nft = try await provider.getObject(
-                objectId: objectId,
+                objectId: ObjectId,
                 options: SuiObjectDataOptions(showDisplay: true)
             ) else {
                 throw NSError(domain: "Unable to fetch NFT", code: 2)
             }
-            
+
             guard let displayData = nft.data?.display?.data else {
                 throw NSError(domain: "Unable to parse display data", code: 1)
             }
@@ -143,7 +142,7 @@ struct NFTApi {
     }
 }
 
-//{
+// {
 //  "collectionType": "0xcc2650b0d0b949e9cf4da71c22377fcbb78d71ce9cf0fed3e724ed3e2dc57813::boredapesuiclub_collection::BoredApeSuiClub",
 //  "collectionName": "Bored Ape Sui Club",
 //  "collectionImg": "https://ipfs.io/ipfs/bafybeicnuu37rwdmxcn3oobmbvgtji6kn52xtrkysgjn4nrxcnhchfsu4q/assets/235.png",
@@ -171,7 +170,7 @@ struct NFTApi {
 //    "BlueMove"
 //  ],
 //  "createTimestamp": 1683560584345
-//}
+// }
 struct CollectionDecoder: Codable {
     let collectionName: String
 }

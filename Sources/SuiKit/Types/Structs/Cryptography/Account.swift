@@ -238,12 +238,11 @@ public struct Account: Equatable, Hashable {
     }
 
     public static func == (lhs: Account, rhs: Account) -> Bool {
-        if 
+        if
             lhs.privateKey.key.getType() == rhs.privateKey.key.getType() &&
-            lhs.publicKey.key.getType() == rhs.publicKey.key.getType()
-        {
+            lhs.publicKey.key.getType() == rhs.publicKey.key.getType() {
             if lhs.privateKey.key.getType() == .data {
-                return 
+                return
                     (lhs.privateKey.key as! Data) == (rhs.privateKey.key as! Data) &&
                     (lhs.publicKey.key as! Data) == (rhs.publicKey.key as! Data)
             }
@@ -396,7 +395,7 @@ public struct Account: Equatable, Hashable {
     /// - Returns: A boolean value indicating whether the signature is valid.
     /// - Throws: An error if the verification process fails.
     public func verifyPersonalMessage(
-        _ message: [UInt8], 
+        _ message: [UInt8],
         _ signature: Signature
     ) throws -> Bool {
         return try self.publicKey.verifyPersonalMessage(

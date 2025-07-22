@@ -57,7 +57,7 @@ final class IdEntryArgsTest: XCTestCase {
     func testThatIdAsArgsToEntryFunctionWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::test::test_id",
             arguments: [
                 .input(
@@ -79,7 +79,7 @@ final class IdEntryArgsTest: XCTestCase {
     func testThatNonMutableIdAsArgsToEntryFunctionWorksAsIntended() async throws {
         let toolBox = try self.fetchToolBox()
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::test::test_id_non_mut",
             arguments: [
                 .input(

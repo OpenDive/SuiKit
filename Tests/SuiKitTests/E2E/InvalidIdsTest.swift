@@ -45,7 +45,7 @@ final class InvalidIdsTest: XCTestCase {
     func testThatVerifiesGetOwnedObjectsThrowsWithAnInvalidSuiAddress() async throws {
         do {
             let toolBox = try self.fetchToolBox()
-            let _ = try await toolBox.client.getOwnedObjects(owner: "")
+            _ = try await toolBox.client.getOwnedObjects(owner: "")
             XCTFail("Function did not throw")
         } catch {
             XCTAssertEqual(0, 0)
@@ -56,7 +56,7 @@ final class InvalidIdsTest: XCTestCase {
         // Empty ID
         do {
             let toolBox = try self.fetchToolBox()
-            let _ = try await toolBox.client.getObject(objectId: "")
+            _ = try await toolBox.client.getObject(objectId: "")
             XCTFail("Function did not throw")
         } catch {
             XCTAssertEqual(0, 0)
@@ -65,7 +65,7 @@ final class InvalidIdsTest: XCTestCase {
         // More than 20 Bytes
         do {
             let toolBox = try self.fetchToolBox()
-            let _ = try await toolBox.client.getDynamicFields(parentId: "0x0000000000000000000000004ce52ee7b659b610d59a1ced129291b3d0d4216322")
+            _ = try await toolBox.client.getDynamicFields(parentId: "0x0000000000000000000000004ce52ee7b659b610d59a1ced129291b3d0d4216322")
             XCTFail("Function did not throw")
         } catch {
             XCTAssertEqual(0, 0)
@@ -75,7 +75,7 @@ final class InvalidIdsTest: XCTestCase {
         do {
             let toolBox = try self.fetchToolBox()
             let objectIds = ["0xBABE", "0xCAFE", "0xWRONG", "0xFACE"]
-            let _ = try await toolBox.client.getMultiObjects(ids: objectIds)
+            _ = try await toolBox.client.getMultiObjects(ids: objectIds)
             XCTFail("Function did not throw")
         } catch {
             XCTAssertEqual(0, 0)
@@ -86,7 +86,7 @@ final class InvalidIdsTest: XCTestCase {
         // Empty Digest
         do {
             let toolBox = try self.fetchToolBox()
-            let _ = try await toolBox.client.getTransactionBlock(digest: "")
+            _ = try await toolBox.client.getTransactionBlock(digest: "")
             XCTFail("Function did not throw")
         } catch {
             XCTAssertEqual(0, 0)
@@ -96,7 +96,7 @@ final class InvalidIdsTest: XCTestCase {
         do {
             let toolBox = try self.fetchToolBox()
             let digests = ["AQ7FA8JTGs368CvMkXj2iFz2WUWwzP6AAWgsLpPLxUmr", "wrong"]
-            let _ = try await toolBox.client.multiGetTransactionBlocks(digests: digests)
+            _ = try await toolBox.client.multiGetTransactionBlocks(digests: digests)
             XCTFail("Function did not throw")
         } catch {
             XCTAssertEqual(0, 0)

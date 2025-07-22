@@ -19,7 +19,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("epoch", Epoch?.self),
+      .field("epoch", Epoch?.self)
     ] }
 
     /// Fetch epoch information by ID (defaults to the latest epoch).
@@ -45,7 +45,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
         .field("systemStateVersion", SuiKit.UInt53Apollo?.self),
         .field("systemParameters", SystemParameters?.self),
         .field("protocolConfigs", ProtocolConfigs.self),
-        .field("validatorSet", ValidatorSet?.self),
+        .field("validatorSet", ValidatorSet?.self)
       ] }
 
       /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change.
@@ -87,7 +87,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("enabled", Bool?.self),
-          .field("gasSummary", GasSummary?.self),
+          .field("gasSummary", GasSummary?.self)
         ] }
 
         /// Whether safe mode was used for the last epoch change.  The system will retry a full epoch
@@ -110,7 +110,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
             .field("computationCost", SuiKit.BigIntApollo?.self),
             .field("nonRefundableStorageFee", SuiKit.BigIntApollo?.self),
             .field("storageCost", SuiKit.BigIntApollo?.self),
-            .field("storageRebate", SuiKit.BigIntApollo?.self),
+            .field("storageRebate", SuiKit.BigIntApollo?.self)
           ] }
 
           /// Gas paid for executing this transaction (in MIST).
@@ -141,7 +141,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
           .field("currentDistributionAmount", SuiKit.BigIntApollo?.self),
           .field("decreaseRate", Int?.self),
           .field("distributionCounter", Int?.self),
-          .field("periodLength", Int?.self),
+          .field("periodLength", Int?.self)
         ] }
 
         /// SUI set aside for stake subsidies -- reduces over time as stake subsidies are paid out over
@@ -171,7 +171,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("nonRefundableBalance", SuiKit.BigIntApollo?.self),
-          .field("totalObjectStorageRebates", SuiKit.BigIntApollo?.self),
+          .field("totalObjectStorageRebates", SuiKit.BigIntApollo?.self)
         ] }
 
         /// The portion of the storage fund that will never be refunded through storage rebates.
@@ -201,7 +201,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
           .field("validatorLowStakeThreshold", SuiKit.BigIntApollo?.self),
           .field("validatorLowStakeGracePeriod", SuiKit.BigIntApollo?.self),
           .field("validatorVeryLowStakeThreshold", SuiKit.BigIntApollo?.self),
-          .field("stakeSubsidyStartEpoch", SuiKit.UInt53Apollo?.self),
+          .field("stakeSubsidyStartEpoch", SuiKit.UInt53Apollo?.self)
         ] }
 
         /// The minimum number of active validators that the system supports.
@@ -235,7 +235,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ProtocolConfigs }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("protocolVersion", SuiKit.UInt53Apollo.self),
+          .field("protocolVersion", SuiKit.UInt53Apollo.self)
         ] }
 
         /// The protocol is not required to change on every epoch boundary, so the protocol version
@@ -263,7 +263,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
           .field("stakingPoolMappingsId", SuiKit.SuiAddressApollo?.self),
           .field("pendingActiveValidatorsId", SuiKit.SuiAddressApollo?.self),
           .field("validatorCandidatesId", SuiKit.SuiAddressApollo?.self),
-          .field("inactivePoolsId", SuiKit.SuiAddressApollo?.self),
+          .field("inactivePoolsId", SuiKit.SuiAddressApollo?.self)
         ] }
 
         /// The current set of active validators.
@@ -303,7 +303,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("pageInfo", PageInfo.self),
-            .field("nodes", [Node].self),
+            .field("nodes", [Node].self)
           ] }
 
           /// Information to aid in pagination.
@@ -322,7 +322,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("hasNextPage", Bool.self),
-              .field("endCursor", String?.self),
+              .field("endCursor", String?.self)
             ] }
 
             /// When paginating forwards, are there more items?
@@ -341,7 +341,7 @@ public class GetLatestSuiSystemStateQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Validator }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_VALIDATOR_FIELDS.self),
+              .fragment(RPC_VALIDATOR_FIELDS.self)
             ] }
 
             /// The number of epochs for which this validator has been below the

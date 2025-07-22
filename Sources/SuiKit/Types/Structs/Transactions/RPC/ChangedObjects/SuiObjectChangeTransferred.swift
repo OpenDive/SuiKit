@@ -40,7 +40,7 @@ public struct SuiObjectChangeTransferred {
     public let objectType: String
 
     /// An `ObjectId` type representing the ID of the object transferred.
-    public let objectId: objectId
+    public let objectId: ObjectId
 
     /// A `SequenceNumber` representing the version number of the object transferred.
     public let version: SequenceNumber

@@ -73,7 +73,7 @@ public enum ObjectArg: KeyProtocol {
     /// - Throws: Throws `SuiError.customError(message: "Unable to Deserialize")` if deserialization fails.
     public static func deserialize(from deserializer: Deserializer) throws -> ObjectArg {
         let type = try Deserializer.u8(deserializer)
-        
+
         switch type {
         case 0:
             return ObjectArg.immOrOwned(

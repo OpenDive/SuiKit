@@ -29,22 +29,22 @@ import Foundation
 public struct JWTClaims {
     /// The issuer of the JWT
     public let iss: String?
-    
+
     /// The subject of the JWT, typically a user ID
     public let sub: String?
-    
+
     /// The audience for the JWT
     public let aud: Any?
-    
+
     /// The expiration time of the JWT as a timestamp
     public let exp: TimeInterval?
-    
+
     /// The time the JWT was issued as a timestamp
     public let iat: TimeInterval?
-    
+
     /// Optional nonce, used in zkLogin
     public let nonce: String?
-    
+
     /// Initialize with individual claim values
     public init(
         iss: String?,
@@ -61,7 +61,7 @@ public struct JWTClaims {
         self.iat = iat
         self.nonce = nonce
     }
-    
+
     /// Helper method to convert audience to string
     public func audienceString() -> String? {
         if let audString = aud as? String {
@@ -71,9 +71,9 @@ public struct JWTClaims {
         }
         return nil
     }
-    
+
     /// Convert audience to string safely
     public func toString() -> String? {
         return audienceString()
     }
-} 
+}

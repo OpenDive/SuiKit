@@ -117,7 +117,7 @@ public struct JWTUtilities {
     public static func decodezkLoginInputs(fromJson data: String, andAddressSeed addressSeed: String) throws -> zkLoginSignatureInputs {
         // Parse the JSON
         let json = JSON(data)
-        
+
         let proofPoints = json["proofPoints"]
         let issBase64Details = json["issBase64Details"]
         let headerBase64 = json["headerBase64"].stringValue
@@ -178,20 +178,20 @@ public struct JWTUtilities {
 
         return returnValue
     }
-    
+
     /// Extracts claims from a JWT token
     /// - Parameter jwt: The JWT token string
     /// - Returns: A JWTClaims object containing the claims
     public static func extractClaims(from jwt: String) throws -> JWTClaims {
         let decoded = try JWTDecode.decode(jwt: jwt)
-        
+
         let iss = decoded.claim(name: "iss").string
         let sub = decoded.claim(name: "sub").string
         let aud = decoded.claim(name: "aud").rawValue
         let exp = decoded.claim(name: "exp").date?.timeIntervalSince1970
         let iat = decoded.claim(name: "iat").date?.timeIntervalSince1970
         let nonce = decoded.claim(name: "nonce").string
-        
+
         return JWTClaims(
             iss: iss,
             sub: sub,
@@ -201,7 +201,7 @@ public struct JWTUtilities {
             nonce: nonce
         )
     }
-    
+
     /// Extracts claims from a JWT with a specific structure used by zkLogin
     /// - Parameter jwt: The JWT token string
     /// - Returns: A JWTClaims object containing the claims

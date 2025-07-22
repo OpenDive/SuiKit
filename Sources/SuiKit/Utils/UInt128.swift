@@ -26,7 +26,7 @@
 /// An `ErrorType` for `UInt128` data types. It includes cases
 /// for errors that can occur during string
 /// conversion.
-public enum UInt128Errors : Error {
+public enum UInt128Errors: Error {
     /// Input cannot be converted to a UInt128 value.
     case invalidString
 }
@@ -128,7 +128,7 @@ public struct UInt128: Sendable {
 #endif
 
 // MARK: - FixedWidthInteger Conformance
-extension UInt128 : FixedWidthInteger {
+extension UInt128: FixedWidthInteger {
     // MARK: Instance Properties
     public var nonzeroBitCount: Int {
         return value.lowerBits.nonzeroBitCount + value.upperBits.nonzeroBitCount
@@ -426,10 +426,10 @@ extension UInt128 : FixedWidthInteger {
 // MARK: - BinaryInteger Conformance
 extension UInt128 {
     // MARK: Instance Properties
-    public static var bitWidth : Int { return 128 }
+    public static var bitWidth: Int { return 128 }
 }
 
-extension UInt128 : BinaryInteger {
+extension UInt128: BinaryInteger {
     // MARK: Instance Methods
     public var words: [UInt] {
         return Array(value.lowerBits.words) + Array(value.upperBits.words)
@@ -443,19 +443,17 @@ extension UInt128 : BinaryInteger {
     }
 
     // MARK: Initializers
-    public init?<T : BinaryFloatingPoint>(exactly source: T) {
+    public init?<T: BinaryFloatingPoint>(exactly source: T) {
         if source.isZero {
             self = UInt128()
-        }
-        else if source.exponent < 0 || source.rounded() != source {
+        } else if source.exponent < 0 || source.rounded() != source {
             return nil
-        }
-        else {
+        } else {
             self = UInt128(UInt64(source))
         }
     }
 
-    public init<T : BinaryFloatingPoint>(_ source: T) {
+    public init<T: BinaryFloatingPoint>(_ source: T) {
         self.init(UInt64(source))
     }
 
@@ -554,10 +552,10 @@ extension UInt128 : BinaryInteger {
 }
 
 // MARK: - UnsignedInteger Conformance
-extension UInt128 : UnsignedInteger {}
+extension UInt128: UnsignedInteger {}
 
 // MARK: - Hashable Conformance
-extension UInt128 : Hashable {
+extension UInt128: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(value.lowerBits)
         hasher.combine(value.upperBits)
@@ -565,7 +563,7 @@ extension UInt128 : Hashable {
 }
 
 // MARK: - Numeric Conformance
-extension UInt128 : Numeric {
+extension UInt128: Numeric {
     public static func +(lhs: UInt128, rhs: UInt128) -> UInt128 {
         precondition(~lhs >= rhs, "Addition overflow!")
         let result = lhs.addingReportingOverflow(rhs)
@@ -593,7 +591,7 @@ extension UInt128 : Numeric {
 }
 
 // MARK: - Equatable Conformance
-extension UInt128 : Equatable {
+extension UInt128: Equatable {
     /// Checks if the `lhs` is equal to the `rhs`.
     public static func ==(lhs: UInt128, rhs: UInt128) -> Bool {
         if lhs.value.lowerBits == rhs.value.lowerBits && lhs.value.upperBits == rhs.value.upperBits {
@@ -604,14 +602,14 @@ extension UInt128 : Equatable {
 }
 
 // MARK: - ExpressibleByIntegerLiteral Conformance
-extension UInt128 : ExpressibleByIntegerLiteral {
+extension UInt128: ExpressibleByIntegerLiteral {
     public init(integerLiteral value: IntegerLiteralType) {
         self.init(upperBits: 0, lowerBits: UInt64(value))
     }
 }
 
 // MARK: - CustomStringConvertible Conformance
-extension UInt128 : CustomStringConvertible {
+extension UInt128: CustomStringConvertible {
     // MARK: Instance Properties
     public var description: String {
         return self._valueToString()
@@ -652,14 +650,14 @@ extension UInt128 : CustomStringConvertible {
 }
 
 // MARK: - CustomDebugStringConvertible Conformance
-extension UInt128 : CustomDebugStringConvertible {
+extension UInt128: CustomDebugStringConvertible {
     public var debugDescription: String {
         return self.description
     }
 }
 
 // MARK: - Comparable Conformance
-extension UInt128 : Comparable {
+extension UInt128: Comparable {
     public static func <(lhs: UInt128, rhs: UInt128) -> Bool {
         if lhs.value.upperBits < rhs.value.upperBits {
             return true
@@ -671,8 +669,8 @@ extension UInt128 : Comparable {
 }
 
 // MARK: - Codable Conformance
-extension UInt128 : Codable {
-    private enum CodingKeys : String, CodingKey {
+extension UInt128: Codable {
+    private enum CodingKeys: String, CodingKey {
         case upperBits = "upperBits", lowerBits = "lowerBits"
     }
 
@@ -705,7 +703,7 @@ extension UInt128 {
         }
         return result
     }
-    
+
     /// The required initializer of `ExpressibleByStringLiteral`.
     ///
     /// Note that the `ExpressibleByStringLiteral` conformance has been removed because it

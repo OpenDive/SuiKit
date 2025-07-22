@@ -37,7 +37,7 @@ public struct SuiMoveNormalizedStruct: Equatable {
 
     /// An array of `SuiMoveNormalizedField` representing the fields within the struct.
     public let fields: [SuiMoveNormalizedField]
-    
+
     public init(structure: GetNormalizedMoveStructQuery.Data.Object.AsMovePackage.Module.Struct) {
         self.abilities = structure.abilities != nil ?
             SuiMoveAbilitySet(abilities: structure.abilities!.compactMap { $0.value?.rawValue }) :

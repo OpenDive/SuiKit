@@ -16,7 +16,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("__typename", String.self),
     .inlineFragment(AsAddressOwner.self),
     .inlineFragment(AsParent.self),
-    .inlineFragment(AsShared.self),
+    .inlineFragment(AsShared.self)
   ] }
 
   public var asAddressOwner: AsAddressOwner? { _asInlineFragment() }
@@ -33,7 +33,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
     public typealias RootEntityType = RPC_OBJECT_OWNER_FIELDS
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.AddressOwner }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("owner", Owner?.self),
+      .field("owner", Owner?.self)
     ] }
 
     public var owner: Owner? { __data["owner"] }
@@ -49,7 +49,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("asObject", AsObject?.self),
-        .field("asAddress", AsAddress?.self),
+        .field("asAddress", AsAddress?.self)
       ] }
 
       public var asObject: AsObject? { __data["asObject"] }
@@ -65,7 +65,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("address", SuiKit.SuiAddressApollo.self),
+          .field("address", SuiKit.SuiAddressApollo.self)
         ] }
 
         public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -81,7 +81,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("address", SuiKit.SuiAddressApollo.self),
+          .field("address", SuiKit.SuiAddressApollo.self)
         ] }
 
         public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -99,7 +99,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
     public typealias RootEntityType = RPC_OBJECT_OWNER_FIELDS
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Parent }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("parent", Parent?.self),
+      .field("parent", Parent?.self)
     ] }
 
     public var parent: Parent? { __data["parent"] }
@@ -114,7 +114,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Owner }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("address", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self)
       ] }
 
       public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -131,7 +131,7 @@ public struct RPC_OBJECT_OWNER_FIELDS: SuiKit.SelectionSet, Fragment {
     public typealias RootEntityType = RPC_OBJECT_OWNER_FIELDS
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Shared }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("initialSharedVersion", SuiKit.UInt53Apollo.self),
+      .field("initialSharedVersion", SuiKit.UInt53Apollo.self)
     ] }
 
     public var initialSharedVersion: SuiKit.UInt53Apollo { __data["initialSharedVersion"] }

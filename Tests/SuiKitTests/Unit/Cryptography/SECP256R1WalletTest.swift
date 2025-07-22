@@ -45,19 +45,19 @@ final class SECP256R1WalletTest: XCTestCase {
             "act wing dilemma glory episode region allow mad tourist humble muffin oblige",
              "AiWmZXUcFpUF75H082F2RVJAABS5kcrvb8o09IPH9yUw",
              "0x4a822457f1970468d38dae8e63fb60eefdaa497d74d781f581ea2d137ec36f3a",
-             "AgLL1StURWGAemn/8rFn3FsRDVfO/Ssf+bbFaugGBtd70w==",
+             "AgLL1StURWGAemn/8rFn3FsRDVfO/Ssf+bbFaugGBtd70w=="
         ],
         [
             "flag rebel cabbage captain minimum purpose long already valley horn enrich salt",
              "AjaB6aLp4fQabx4NglfGz2Bf01TGKArV80NEOnqDwqNN",
              "0xcd43ecb9dd32249ff5748f5e4d51855b01c9b1b8bbe7f8638bb8ab4cb463b920",
-             "AgM2aZKpmTrKs8HuyvOZQ2TCQ0s7ql5Agf4giTcu6FtPHA==",
+             "AgM2aZKpmTrKs8HuyvOZQ2TCQ0s7ql5Agf4giTcu6FtPHA=="
         ],
         [
             "area renew bar language pudding trial small host remind supreme cabbage era",
              "AtSIEzVpJv+bJH3XptEq63vsuK+te1KRSY7JsiuJfcdK",
              "0x0d9047b7e7b698cc09c955ea97b0c68c2be7fb3aebeb59edcc84b1fb87e0f28e",
-             "AgJ0BrsxGK2gI3pl7m6L67IXusKo99w4tMDDZCwXhnUm/Q==",
+             "AgJ0BrsxGK2gI3pl7m6L67IXusKo99w4tMDDZCwXhnUm/Q=="
         ]
     ]
     let testMnemonic = "open genre century trouble allow pioneer love task chat salt drive income"
@@ -70,7 +70,7 @@ final class SECP256R1WalletTest: XCTestCase {
     func testThatSecp256r1PrivateKeyCanBeInitializedFromBytes() throws {
         let secretKey = try SECP256R1PrivateKey(key: Data(self.validSecp256r1SecretKey))
         let publicKey = try SECP256R1PublicKey(data: Data(self.validSecp256r1PublicKey))
-        
+
         let pubKeyBase64 = publicKey.base64()
         let account = Account(
             publicKey: publicKey,
@@ -87,7 +87,7 @@ final class SECP256R1WalletTest: XCTestCase {
             let secretKey = try SECP256R1PrivateKey(key: Data(self.invalidSecp256r1SecretKey))
             let secretKeyBase64 = secretKey.base64()
             guard let secretKeyBase64Output = Data.fromBase64(secretKeyBase64) else { XCTFail("Data is unable to be unencoded"); return; }
-            let _ = try SECP256R1PrivateKey(key: secretKeyBase64Output)
+            _ = try SECP256R1PrivateKey(key: secretKeyBase64Output)
         }
 
         XCTAssertThrowsError(
@@ -111,7 +111,7 @@ final class SECP256R1WalletTest: XCTestCase {
 
     func testThatSecp256r1WillThrowWithInvalidMnemonics() throws {
         func invalidKeyThrow() throws {
-            let _ = try SECP256R1PrivateKey("aaa")
+            _ = try SECP256R1PrivateKey("aaa")
         }
 
         XCTAssertThrowsError(
@@ -131,7 +131,7 @@ final class SECP256R1WalletTest: XCTestCase {
             XCTAssertEqual(try account.export().privateKey, raw.dropFirst().base64EncodedString())
 
             // The secp256r1 flag is 0x02. See more at [enum SignatureScheme].
-            guard (raw[0] == 2 && raw.count == (self.privateKeySize + 1)) else { XCTFail("Raw data not decoded correctly"); return; }
+            guard raw[0] == 2 && raw.count == (self.privateKeySize + 1) else { XCTFail("Raw data not decoded correctly"); return; }
 
             let imported = try Account(privateKey: raw.dropFirst(), accountType: .secp256r1)
             XCTAssertEqual(try imported.publicKey.toSuiAddress(), testCase[2])
@@ -144,7 +144,7 @@ final class SECP256R1WalletTest: XCTestCase {
 
     func testThatIncorrectPurposeNodeForSecp256r1PrivateKeyWillThrow() throws {
         func invalidKeyThrow() throws {
-            let _ = try SECP256R1PrivateKey(self.testMnemonic, "m/54'/784'/0'/0'/0'")
+            _ = try SECP256R1PrivateKey(self.testMnemonic, "m/54'/784'/0'/0'/0'")
         }
 
         XCTAssertThrowsError(
@@ -154,7 +154,7 @@ final class SECP256R1WalletTest: XCTestCase {
 
     func testThatIncorrectHardendedNodeForSecp256r1PrivateKeyWillThrow() throws {
         func invalidKeyThrow() throws {
-            let _ = try SECP256R1PrivateKey(self.testMnemonic, "m/44'/784'/0'/0'/0'")
+            _ = try SECP256R1PrivateKey(self.testMnemonic, "m/44'/784'/0'/0'/0'")
         }
 
         XCTAssertThrowsError(

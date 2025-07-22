@@ -104,7 +104,7 @@ struct HomeView: View {
                 .pickerStyle(.menu)
                 .padding(.top, 40)
                 .padding(.horizontal)
-                
+
                 Text("Current Wallet Balance: \(self.currentWalletBalance) SUI")
                     .padding(.top)
             } else {
@@ -131,7 +131,7 @@ struct HomeView: View {
                 }
             }
         }
-        .onChange(of: self.viewModel.currentWallet) { newValue in
+        .onChange(of: self.viewModel.currentWallet) { _ in
             Task {
                 do {
                     self.isGettingBalance = true
@@ -172,4 +172,3 @@ struct HomeView_Previews: PreviewProvider {
         WrapperView()
     }
 }
-

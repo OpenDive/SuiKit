@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// Represents the origin of a type in terms of module, package, and struct names.
-public struct TypeOrigin: Equatable  {
+public struct TypeOrigin: Equatable {
     /// A `String` representing the name of the module where the type is defined.
     public var moduleName: String
 

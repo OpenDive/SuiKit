@@ -23,7 +23,7 @@ public struct EventFilter: InputObject {
       "eventType": eventType
     ])
   }
-    
+
     public init(
         suiEventFilter: SuiEventFilter
     ) throws {

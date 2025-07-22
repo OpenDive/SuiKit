@@ -431,7 +431,7 @@ public struct GraphQLSuiProvider {
     /// - Throws: A `SuiError` if any address is invalid or if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: An array of `SuiObjectResponse` representing the retrieved Sui objects.
     public func getMultiObjects(
-        ids: [objectId],
+        ids: [ObjectId],
         options: SuiObjectDataOptions? = nil
     ) async throws -> [SuiObjectResponse] {
         let result = try await GraphQLClient.fetchQuery(

@@ -29,16 +29,16 @@ import Foundation
 public class ZkLoginSigner {
     /// The Sui provider for network operations
     private let provider: SuiProvider
-    
+
     /// The ephemeral keypair used for signing
     private let ephemeralKeyPair: Account
-    
+
     /// The zkLogin signature structure
     private var zkLoginSignature: zkLoginSignature
-    
+
     /// The user's zkLogin address
     private let userAddress: String
-    
+
     /// Initialize a new ZkLoginSigner
     /// - Parameters:
     ///   - provider: The Sui provider for network operations
@@ -56,7 +56,7 @@ public class ZkLoginSigner {
         self.zkLoginSignature = zkLoginSignature
         self.userAddress = userAddress
     }
-    
+
     /// Signs and executes a transaction using zkLogin authentication
     /// - Parameters:
     ///   - transactionBlock: The transaction to execute
@@ -65,20 +65,20 @@ public class ZkLoginSigner {
     public func signAndExecuteTransaction(transactionBlock: inout TransactionBlock, options: SuiTransactionBlockResponseOptions = .init()) async throws -> SuiTransactionBlockResponse {
         // Ensure the transaction has the zkLogin user address as sender
         try transactionBlock.setSender(sender: userAddress)
-        
+
         // Build the transaction
         let bytes = try await transactionBlock.build(self.provider)
-        
+
         // Sign the transaction with the ephemeral keypair
         let userSignature = try ephemeralKeyPair.sign(bytes)
-        
+
         // Update the zkLoginSignature with the user signature
         self.zkLoginSignature.userSignature = userSignature.signature.bytes
-        
+
         // Get serialized signature
         let serializedSignature = try self.zkLoginSignature.getSignature()
         print("Sending zkLogin transaction with signature: \(serializedSignature)")
-        
+
         // Execute the transaction with the zkLogin signature
         var resp = try await provider.executeTransactionBlock(
             transactionBlock: bytes.bytes,
@@ -88,7 +88,7 @@ public class ZkLoginSigner {
         resp = try await provider.waitForTransaction(tx: resp.digest)
         return resp
     }
-    
+
     /// Signs and executes a transaction block using zkLogin authentication
     /// - Parameters:
     ///   - transactionBlock: The transaction block to execute
@@ -98,4 +98,4 @@ public class ZkLoginSigner {
         var txBlock = transactionBlock
         return try await signAndExecuteTransaction(transactionBlock: &txBlock, options: options)
     }
-} 
+}

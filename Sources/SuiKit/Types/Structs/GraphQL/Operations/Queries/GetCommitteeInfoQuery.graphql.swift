@@ -32,7 +32,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("epoch", Epoch?.self, arguments: ["id": .variable("epochId")]),
+      .field("epoch", Epoch?.self, arguments: ["id": .variable("epochId")])
     ] }
 
     /// Fetch epoch information by ID (defaults to the latest epoch).
@@ -49,7 +49,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("epochId", SuiKit.UInt53Apollo.self),
-        .field("validatorSet", ValidatorSet?.self),
+        .field("validatorSet", ValidatorSet?.self)
       ] }
 
       /// The epoch's id as a sequence number that starts at 0 and is incremented by one at every epoch change.
@@ -67,7 +67,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorSet }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("activeValidators", ActiveValidators.self, arguments: ["after": .variable("after")]),
+          .field("activeValidators", ActiveValidators.self, arguments: ["after": .variable("after")])
         ] }
 
         /// The current set of active validators.
@@ -84,7 +84,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("pageInfo", PageInfo.self),
-            .field("nodes", [Node].self),
+            .field("nodes", [Node].self)
           ] }
 
           /// Information to aid in pagination.
@@ -103,7 +103,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("hasNextPage", Bool.self),
-              .field("endCursor", String?.self),
+              .field("endCursor", String?.self)
             ] }
 
             /// When paginating forwards, are there more items?
@@ -123,7 +123,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("credentials", Credentials?.self),
-              .field("votingPower", Int?.self),
+              .field("votingPower", Int?.self)
             ] }
 
             /// Validator's set of credentials such as public keys, network addresses and others.
@@ -141,7 +141,7 @@ public class GetCommitteeInfoQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorCredentials }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("protocolPubKey", SuiKit.Base64Apollo?.self),
+                .field("protocolPubKey", SuiKit.Base64Apollo?.self)
               ] }
 
               public var protocolPubKey: SuiKit.Base64Apollo? { __data["protocolPubKey"] }

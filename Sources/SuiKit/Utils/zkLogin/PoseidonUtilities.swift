@@ -48,7 +48,7 @@ public struct PoseidonUtilities {
 
     public static func poseidonHash(inputs: [BigInt]) throws -> BigInt {
         let idx = inputs.count - 1
-        guard (idx >= 0 && idx < (poseidonNumToHashFN.count - 1)) else {
+        guard idx >= 0 && idx < (poseidonNumToHashFN.count - 1) else {
             if inputs.count <= 32 {
                 let hash1 = try Self.poseidonHash(inputs: Array(inputs.prefix(upTo: 16)))
                 let hash2 = try Self.poseidonHash(inputs: Array(inputs.suffix(from: 16)))

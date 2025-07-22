@@ -37,7 +37,7 @@ public class GetStakesQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("address", Address?.self, arguments: ["address": .variable("owner")]),
+      .field("address", Address?.self, arguments: ["address": .variable("owner")])
     ] }
 
     /// Look-up an Account by its SuiAddressApollo.
@@ -56,7 +56,7 @@ public class GetStakesQuery: GraphQLQuery {
         .field("stakedSuis", StakedSuis.self, arguments: [
           "first": .variable("limit"),
           "after": .variable("cursor")
-        ]),
+        ])
       ] }
 
       /// The `0x3::staking_pool::StakedSui` objects owned by this address.
@@ -73,7 +73,7 @@ public class GetStakesQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("pageInfo", PageInfo.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// Information to aid in pagination.
@@ -92,7 +92,7 @@ public class GetStakesQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("hasNextPage", Bool.self),
-            .field("endCursor", String?.self),
+            .field("endCursor", String?.self)
           ] }
 
           /// When paginating forwards, are there more items?
@@ -111,7 +111,7 @@ public class GetStakesQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.StakedSui }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .fragment(RPC_STAKE_FIELDS.self),
+            .fragment(RPC_STAKE_FIELDS.self)
           ] }
 
           /// The SUI that was initially staked.

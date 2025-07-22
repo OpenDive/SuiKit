@@ -24,7 +24,7 @@ public class GetProtocolConfigQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("protocolConfig", ProtocolConfig.self, arguments: ["protocolVersion": .variable("protocolVersion")]),
+      .field("protocolConfig", ProtocolConfig.self, arguments: ["protocolVersion": .variable("protocolVersion")])
     ] }
 
     /// Fetch the protocol config by protocol version (defaults to the latest protocol
@@ -43,7 +43,7 @@ public class GetProtocolConfigQuery: GraphQLQuery {
         .field("__typename", String.self),
         .field("protocolVersion", SuiKit.UInt53Apollo.self),
         .field("configs", [Config].self),
-        .field("featureFlags", [FeatureFlag].self),
+        .field("featureFlags", [FeatureFlag].self)
       ] }
 
       /// The protocol is not required to change on every epoch boundary, so the protocol version
@@ -68,7 +68,7 @@ public class GetProtocolConfigQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("key", String.self),
-          .field("value", String?.self),
+          .field("value", String?.self)
         ] }
 
         public var key: String { __data["key"] }
@@ -86,7 +86,7 @@ public class GetProtocolConfigQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("key", String.self),
-          .field("value", Bool.self),
+          .field("value", Bool.self)
         ] }
 
         public var key: String { __data["key"] }

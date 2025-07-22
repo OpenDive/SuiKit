@@ -30,7 +30,7 @@ import BigInt
 
 // Note: Any tests that require the use of the GraphQL server must be started on call with the beginning of each test function.
 // This is due to the signatures below only being valid for an epoch of 3 or less (e.g., genesis to second block).
-final class zkLoginSignerTests: XCTestCase {
+final class ZkLoginSignerTests: XCTestCase {
     // Premade signatures for test
     let anEphemeralSignature = "AEp+O5GEAF/5tKNDdWBObNf/1uIrbOJmE+xpnlBD2Vikqhbd0zLrQ2NJyquYXp4KrvWUOl7Hso+OK0eiV97ffwucM8VdtG2hjf/RUGNO5JNUH+D/gHtE9sHe6ZEnxwZL7g=="
     let aSignature = "BQNNMTE3MDE4NjY4MTI3MDQ1MTcyMTM5MTQ2MTI3OTg2NzQ3NDg2NTc3NTU1NjY1ODY1OTc0MzQ4MTA5NDEyNDA0ODMzNDY3NjkzNjkyNjdNMTQxMjA0Mzg5OTgwNjM2OTIyOTczODYyNDk3NTQyMzA5NzI3MTUxNTM4NzY1Mzc1MzAxNjg4ODM5ODE1MTM1ODQ1ODYxNzIxOTU4NDEBMQMCTDE4Njc0NTQ1MDE2MDI1ODM4NDg4NTI3ODc3ODI3NjE5OTY1NjAxNzAxMTgyNDkyOTk1MDcwMTQ5OTkyMzA4ODY4NTI1NTY5OTgyNzNNMTQ0NjY0MTk2OTg2NzkxMTYzMTM0NzUyMTA2NTQ1NjI5NDkxMjgzNDk1OTcxMDE3NjkyNTY5NTkwMTAwMDMxODg4ODYwOTEwODAzMTACTTExMDcyOTU0NTYyOTI0NTg4NDk2MTQ4NjMyNDc0MDc4NDMyNDA2NjMzMjg4OTQ4MjU2NzE4ODA5NzE0ODYxOTg2MTE5MzAzNTI5NzYwTTE5NzkwNTE2MDEwNzg0OTM1MTAwMTUwNjE0OTg5MDk3OTA4MjMzODk5NzE4NjQ1NTM2MTMwNzI3NzczNzEzNDA3NjExMTYxMzY4MDQ2AgExATADTTEwNDIzMjg5MDUxODUzMDMzOTE1MzgwODEwNTE2MTMwMjA1NzQ3MTgyODY3NTk2NDU3MTM5OTk5MTc2NzE0NDc2NDE1MTQ4Mzc2MzUwTTIxNzg1NzE5Njk1ODQ4MDEzOTA4MDYxNDkyOTg5NzY1Nzc3Nzg4MTQyMjU1ODk3OTg2MzAwMjQxNTYxMjgwMTk2NzQ1MTc0OTM0NDU3ATExeUpwYzNNaU9pSm9kSFJ3Y3pvdkwyRmpZMjkxYm5SekxtZHZiMmRzWlM1amIyMGlMQwFmZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltSTVZV00yTURGa01UTXhabVEwWm1aa05UVTJabVl3TXpKaFlXSXhPRGc0T0RCalpHVXpZamtpTENKMGVYQWlPaUpLVjFRaWZRTTEzMzIyODk3OTMwMTYzMjE4NTMyMjY2NDMwNDA5NTEwMzk0MzE2OTg1Mjc0NzY5MTI1NjY3MjkwNjAwMzIxNTY0MjU5NDY2NTExNzExrgAAAAAAAABhAEp+O5GEAF/5tKNDdWBObNf/1uIrbOJmE+xpnlBD2Vikqhbd0zLrQ2NJyquYXp4KrvWUOl7Hso+OK0eiV97ffwucM8VdtG2hjf/RUGNO5JNUH+D/gHtE9sHe6ZEnxwZL7g=="
@@ -93,50 +93,50 @@ final class zkLoginSignerTests: XCTestCase {
     func testSignatureParsedSuccessfully() throws {
         // Parse the signature (matching TypeScript test logic)
         let parsedSignature = try zkLoginSigner.parseSignature(aSignature)
-        
+
         // Verify the signature components match expected values
         XCTAssertEqual(parsedSignature.maxEpoch, 174)
         XCTAssertEqual(parsedSignature.inputs.addressSeed, "13322897930163218532266430409510394316985274769125667290600321564259466511711")
         XCTAssertEqual(parsedSignature.inputs.headerBase64, "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5YWM2MDFkMTMxZmQ0ZmZkNTU2ZmYwMzJhYWIxODg4ODBjZGUzYjkiLCJ0eXAiOiJKV1QifQ")
-        
+
         // Verify user signature matches
         XCTAssertEqual(Data(parsedSignature.userSignature).base64EncodedString(), anEphemeralSignature)
-        
+
         // Verify proof points
         XCTAssertEqual(parsedSignature.inputs.proofPoints.a[0], "11701866812704517213914612798674748657755566586597434810941240483346769369267")
         XCTAssertEqual(parsedSignature.inputs.proofPoints.a[1], "14120438998063692297386249754230972715153876537530168883981513584586172195841")
         XCTAssertEqual(parsedSignature.inputs.proofPoints.a[2], "1")
     }
-    
+
     // MARK: - Signature Serialization Tests (matching TypeScript "is serialized successfully")
-    
+
     func testSignatureSerializedSuccessfully() throws {
         // Create signature from components
         guard let userSignature = Data(base64Encoded: anEphemeralSignature) else {
             XCTFail("Failed to decode ephemeral signature")
             return
         }
-        
+
         let signature = zkLoginSignature(
             inputs: aSignatureInputs,
             maxEpoch: 174,
             userSignature: [UInt8](userSignature)
         )
-        
+
         // Serialize and verify it matches expected result
         let serialized = try zkLoginSigner.serializeSignature(signature)
         XCTAssertEqual(serialized, aSignature)
     }
-    
+
     // MARK: - Personal Message Verification Tests (matching TypeScript personal message test)
-    
+
     func testVerifyPersonalMessageWithzkLogin() async throws {
         // Test data: base64 encoding of "hello"
         let messageBytes = "hello".data(using: .utf8)!.bytes
-        
+
         // Parse the personal message signature
         let parsedSignature = try zkLoginSigner.parseSignature(personalMessageSignature)
-        
+
         // Create a zkLogin signer with the mock client
         let toolbox = try fetchToolBox()
         let signer = SuiKit.zkLoginSigner(
@@ -146,26 +146,26 @@ final class zkLoginSignerTests: XCTestCase {
             userAddress: "0x1234567890abcdef1234567890abcdef12345678",
             graphQLClient: graphQLClient
         )
-        
+
         // Verify the message - should succeed
         let result = try await signer.verifyPersonalMessage(
             message: messageBytes,
             signature: parsedSignature
         )
         XCTAssertTrue(result)
-        
+
         // Test data: base64 encoding of "hello"
         let invalidMessageBytes = "hello1".data(using: .utf8)!.bytes
-        
+
         let failResult = try await signer.verifyPersonalMessage(
             message: invalidMessageBytes,
             signature: parsedSignature
         )
         XCTAssertFalse(failResult)
     }
-    
+
     // MARK: - Transaction Verification Tests (matching TypeScript transaction verification test)
-    
+
     func testVerifyTransactionDataWithzkLogin() async throws {
         // Parse transaction bytes
         guard let txBytes = Data(base64Encoded: transactionBytes) else {
@@ -192,33 +192,33 @@ final class zkLoginSignerTests: XCTestCase {
             signature: parsedSignature
         )
         XCTAssertTrue(result)
-        
+
         // Test with modified transaction data (should fail)
         var modifiedTxBytes = txBytes.bytes
         if !modifiedTxBytes.isEmpty {
             modifiedTxBytes[0] = modifiedTxBytes[0] ^ 0xFF // Flip bits
         }
-        
+
         let failResult = try await signer.verifyTransaction(
             transactionData: modifiedTxBytes,
             signature: parsedSignature
         )
         XCTAssertFalse(failResult)
     }
-    
+
     // MARK: - zkLoginSigner Creation and Basic Operations Tests
-    
+
     func testzkLoginSignerCreation() throws {
         let toolbox = try fetchToolBox()
-        
+
         let zkSignature = zkLoginSignature(
             inputs: aSignatureInputs,
             maxEpoch: 174,
             userSignature: [UInt8](repeating: 0, count: 64)
         )
-        
+
         let userAddress = "0x1234567890abcdef1234567890abcdef12345678"
-        
+
         // Create signer
         let signer = SuiKit.zkLoginSigner(
             provider: toolbox.client,
@@ -227,20 +227,20 @@ final class zkLoginSignerTests: XCTestCase {
             userAddress: userAddress,
             graphQLClient: graphQLClient
         )
-        
+
         // Test basic operations
         XCTAssertEqual(signer.getAddress(), userAddress)
-        
+
         // Test public key creation
         let publicKey = try signer.getPublicKey()
         XCTAssertNotNil(publicKey)
     }
-    
+
     // MARK: - Signature Creation Tests
-    
+
     func testzkLoginSignatureCreation() throws {
         let toolbox = try fetchToolBox()
-        
+
         let signer = SuiKit.zkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
@@ -251,43 +251,43 @@ final class zkLoginSignerTests: XCTestCase {
             ),
             userAddress: "0x1234567890abcdef1234567890abcdef12345678"
         )
-        
+
         // Test transaction signing
         let txData = "hello world".data(using: .utf8)!.bytes
         let txSignature = try signer.signTransaction(txData)
         XCTAssertFalse(txSignature.isEmpty)
         XCTAssertTrue(txSignature.starts(with: "BQ")) // Should start with zkLogin flag in base64
-        
+
         // Test personal message signing
         let messageData = "hello world".data(using: .utf8)!.bytes
         let messageSignature = try signer.signPersonalMessage(messageData)
         XCTAssertFalse(messageSignature.isEmpty)
         XCTAssertTrue(messageSignature.starts(with: "BQ")) // Should start with zkLogin flag in base64
     }
-    
+
     // MARK: - Serialization Utilities Tests
-    
+
     func testParseSerializedzkLoginSignature() throws {
         // Test the utility function that extracts both public key and signature
         let result = try SuiKit.zkLoginSigner.parseSerializedZkLoginSignature(
             aSignature,
             graphQLClient: graphQLClient
         )
-        
+
         // Verify we got both components
         XCTAssertNotNil(result.publicKey)
         XCTAssertNotNil(result.signature)
-        
+
         // Verify signature components
         XCTAssertEqual(result.signature.maxEpoch, 174)
         XCTAssertEqual(result.signature.inputs.addressSeed, "13322897930163218532266430409510394316985274769125667290600321564259466511711")
     }
-    
+
     // MARK: - Error Handling Tests
-    
+
     func testSignerWithoutGraphQLClientThrowsError() async throws {
         let toolbox = try fetchToolBox()
-        
+
         // Create signer without GraphQL client
         let signer = SuiKit.zkLoginSigner(
             provider: toolbox.client,
@@ -300,13 +300,13 @@ final class zkLoginSignerTests: XCTestCase {
             userAddress: "0x1234567890abcdef1234567890abcdef12345678"
             // No graphQLClient parameter
         )
-        
+
         let signature = zkLoginSignature(
             inputs: aSignatureInputs,
             maxEpoch: 174,
             userSignature: []
         )
-        
+
         // Should throw error when trying to verify without GraphQL client
         do {
             _ = try await signer.verifyTransaction(
@@ -317,7 +317,7 @@ final class zkLoginSignerTests: XCTestCase {
         } catch {
             XCTAssertTrue(error is SuiError)
         }
-        
+
         do {
             _ = try await signer.verifyPersonalMessage(
                 message: [1, 2, 3],

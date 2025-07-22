@@ -44,7 +44,7 @@ extension Data: KeyValueProtocol {
 #if swift(>=5.9)
 /// Represents a `P256`public key.
 extension P256.Signing.PublicKey: @retroactive Equatable {}
-extension P256.Signing.PublicKey: KeyValueProtocol, @retroactive Hashable  {
+extension P256.Signing.PublicKey: KeyValueProtocol, @retroactive Hashable {
     public static func == (lhs: P256.Signing.PublicKey, rhs: P256.Signing.PublicKey) -> Bool {
         return lhs.rawRepresentation == rhs.rawRepresentation
     }
@@ -52,7 +52,7 @@ extension P256.Signing.PublicKey: KeyValueProtocol, @retroactive Hashable  {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.rawRepresentation)
     }
-    
+
     public func getType() -> DataType { return .p256 }
 }
 
@@ -72,7 +72,7 @@ extension SecureEnclave.P256.Signing.PrivateKey: KeyValueProtocol, @retroactive 
 #else
 /// Represents a `P256`public key.
 extension P256.Signing.PublicKey: Equatable {}
-extension P256.Signing.PublicKey: KeyValueProtocol, Hashable  {
+extension P256.Signing.PublicKey: KeyValueProtocol, Hashable {
     public static func == (lhs: P256.Signing.PublicKey, rhs: P256.Signing.PublicKey) -> Bool {
         return lhs.rawRepresentation == rhs.rawRepresentation
     }
@@ -80,7 +80,7 @@ extension P256.Signing.PublicKey: KeyValueProtocol, Hashable  {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(self.rawRepresentation)
     }
-    
+
     public func getType() -> DataType { return .p256 }
 }
 

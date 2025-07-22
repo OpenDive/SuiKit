@@ -123,11 +123,11 @@ final class ObjectsTest: XCTestCase {
         let data = (try await toolBox.client.getCoins(account: try toolBox.address(), coinType: "0x2::sui::SUI")).data
         var tx = try TransactionBlock()
         // Transfer the entire gas object:
-        let _ = try tx.transferObject(
+        _ = try tx.transferObject(
             objects: [tx.gas],
             address: Inputs.normalizeSuiAddress(value: "0x2")
         )
-        let _ = try await toolBox.client.signAndExecuteTransactionBlock(transactionBlock: &tx, signer: toolBox.account)
+        _ = try await toolBox.client.signAndExecuteTransactionBlock(transactionBlock: &tx, signer: toolBox.account)
         let result = try await toolBox.client.tryGetPastObject(
             id: data[0].coinObjectId,
             // NOTE: This works because we know that this is a fresh coin that hasn't been modified:

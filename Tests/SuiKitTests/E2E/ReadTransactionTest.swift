@@ -52,7 +52,7 @@ final class ReadTransactionTest: XCTestCase {
     private func setupTransaction(_ toolBox: TestToolbox) async throws -> SuiTransactionBlockResponse {
         var tx = try TransactionBlock()
         let coin = try tx.splitCoin(coin: tx.gas, amounts: [tx.pure(value: .number(1))])
-        let _ = try tx.transferObject(objects: [coin], address: try toolBox.address())
+        _ = try tx.transferObject(objects: [coin], address: try toolBox.address())
         return try await toolBox.client.signAndExecuteTransactionBlock(
             transactionBlock: &tx,
             signer: toolBox.account,

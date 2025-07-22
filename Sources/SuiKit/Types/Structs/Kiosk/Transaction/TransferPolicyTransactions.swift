@@ -86,7 +86,7 @@ public struct TransferPolicyTransactions {
         itemType: String,
         transferPolicy: TransactionObjectArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "0x2::transfer::public_share_object",
             arguments: [transferPolicy.toTransactionArgument()],
             typeArguments: [
@@ -105,12 +105,11 @@ public struct TransferPolicyTransactions {
         policyCap: ObjectArgument,
         amount: String? = nil
     ) throws -> TransactionArgument {
-        var amountArg: UInt64? = nil
+        var amountArg: UInt64?
 
-        if 
+        if
             let amount,
-            let outputU64 = UInt64(amount)
-        {
+            let outputU64 = UInt64(amount) {
             amountArg = outputU64
         }
 
@@ -145,7 +144,7 @@ public struct TransferPolicyTransactions {
         policy: ObjectArgument,
         request: TransactionArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(TransferPolicyConstants.transferPolicyModule)::confirm_request",
             arguments: [
                 tx.object(objectArgument: policy).toTransactionArgument(),
@@ -166,7 +165,7 @@ public struct TransferPolicyTransactions {
         policy: ObjectArgument,
         policyCap: ObjectArgument
     ) throws {
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(TransferPolicyConstants.transferPolicyModule)::remove_rule",
             arguments: [
                 tx.object(objectArgument: policy).toTransactionArgument(),

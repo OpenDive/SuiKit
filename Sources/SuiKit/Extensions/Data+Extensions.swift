@@ -9,12 +9,12 @@ extension Data {
         let format = uppercase ? "%02X" : "%02x"
         return self.map { String(format: format, $0) }.joined()
     }
-    
+
     /// Alias for backward compatibility
     public func hexEncodedString(uppercase: Bool = false) -> String {
         return hexString(uppercase: uppercase)
     }
-    
+
     /// Computes the SHA-256 hash of the data
     /// - Returns: The SHA-256 hash as Data
     public func sha256() -> Data {
@@ -24,7 +24,7 @@ extension Data {
         }
         return Data(hash)
     }
-    
+
     /// Sets bytes at the specified offset
     /// - Parameters:
     ///   - bytes: The bytes to set
@@ -34,7 +34,7 @@ extension Data {
         guard offset >= 0 && offset + bytes.count <= self.count else {
             throw SuiError.customError(message: "Offset out of bounds")
         }
-        
+
         self.withUnsafeMutableBytes { ptr in
             guard let baseAddress = ptr.baseAddress else { return }
             let offsetPtr = baseAddress.advanced(by: offset).assumingMemoryBound(to: UInt8.self)
@@ -44,7 +44,7 @@ extension Data {
             }
         }
     }
-    
+
     /// Convenience initializer with hexadecimal string
     /// - Parameter hexString: The hexadecimal string (with or without 0x prefix)
     public init?(hexString: String) {
@@ -52,14 +52,14 @@ extension Data {
         if hex.hasPrefix("0x") {
             hex = String(hex.dropFirst(2))
         }
-        
+
         // Check for valid hex string (even length, valid characters)
         if hex.count % 2 != 0 || hex.contains(where: { !$0.isHexDigit }) {
             return nil
         }
-        
+
         self.init(capacity: hex.count / 2)
-        
+
         var index = hex.startIndex
         while index < hex.endIndex {
             let nextIndex = hex.index(index, offsetBy: 2)
@@ -71,7 +71,7 @@ extension Data {
             index = nextIndex
         }
     }
-    
+
     /// Converts hexadecimal string representation of some bytes into actual bytes.
     /// - Parameter hex: bytes represented as string.
     /// - Returns: optional raw bytes.
@@ -79,17 +79,17 @@ extension Data {
         let hex = hex.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         guard !hex.isEmpty else { return nil }
         guard hex != "0x" else { return Data() }
-        
+
         var hexString = hex
         if hex.hasPrefix("0x") {
             hexString = String(hex.dropFirst(2))
         }
-        
+
         // Check for valid hex string
         guard hexString.count % 2 == 0 && hexString.allSatisfy({ $0.isHexDigit }) else {
             return nil
         }
-        
+
         var data = Data(capacity: hexString.count / 2)
         var index = hexString.startIndex
         while index < hexString.endIndex {
@@ -100,10 +100,10 @@ extension Data {
             data.append(byte)
             index = nextIndex
         }
-        
+
         return data
     }
-    
+
     /// Sets the length of the data to the given length, padding with zeros on the left
     func setLengthLeft(_ toBytes: UInt64, isNegative: Bool = false) -> Data? {
         let existingLength = UInt64(self.count)
@@ -139,7 +139,7 @@ extension Data {
         }
         return data
     }
-    
+
     /// Two octet checksum as defined in RFC-4880. Sum of all octets, mod 65536
     public func checksum() -> UInt16 {
         let s = withUnsafeBytes { buf in
@@ -147,7 +147,7 @@ extension Data {
         }
         return UInt16(s % 65535)
     }
-    
+
     /// Base64 URL safe encoding
     public func base64urlEncodedString() -> String {
         var result = self.base64EncodedString()
@@ -156,7 +156,7 @@ extension Data {
         result = result.replacingOccurrences(of: "=", with: "")
         return result
     }
-    
+
     /// Create from base64 string
     public static func fromBase64(_ encoded: String) -> Data? {
         return Data(base64Encoded: encoded)
@@ -167,9 +167,9 @@ extension Data {
 // CommonCrypto is already imported above
 #else
 // Placeholder for platforms where CommonCrypto is not available
-public func CC_SHA256(_ data: UnsafeRawPointer?, _ len: CC_LONG, _ md: UnsafeMutablePointer<UInt8>?) -> UnsafeMutablePointer<UInt8>? {
+public func CC_SHA256(_ data: UnsafeRawPointer?, _ len: CCLong, _ md: UnsafeMutablePointer<UInt8>?) -> UnsafeMutablePointer<UInt8>? {
     fatalError("CommonCrypto not available")
 }
 public let CC_SHA256_DIGEST_LENGTH: Int = 32
-public typealias CC_LONG = UInt32
-#endif 
+public typealias CCLong = UInt32
+#endif

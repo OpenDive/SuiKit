@@ -27,7 +27,7 @@ import Foundation
 import SwiftyJSON
 
 /// A structure representing the response containing display fields.
-public struct DisplayFieldsResponse: Equatable  {
+public struct DisplayFieldsResponse: Equatable {
     /// An optional dictionary containing the display data.
     /// The keys are `String` representing the field names and the values are `String` representing the field values.
     /// This will be `nil` if there is no display data to represent.
@@ -39,7 +39,7 @@ public struct DisplayFieldsResponse: Equatable  {
 
     public init(graphql: [RPC_OBJECT_FIELDS.Display]) {
         var data: [String: String] = [:]
-        var error: ObjectResponseError? = nil
+        var error: ObjectResponseError?
         for displayItem in graphql {
             if displayItem.error != nil {
                 error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
@@ -53,7 +53,7 @@ public struct DisplayFieldsResponse: Equatable  {
 
     public init(graphql: [RPC_MOVE_OBJECT_FIELDS.Display]) {
         var data: [String: String] = [:]
-        var error: ObjectResponseError? = nil
+        var error: ObjectResponseError?
         for displayItem in graphql {
             if displayItem.error != nil {
                 error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
@@ -65,13 +65,13 @@ public struct DisplayFieldsResponse: Equatable  {
         self.error = error
     }
 
-    public init(data: [String : String]? = nil, error: ObjectResponseError? = nil) {
+    public init(data: [String: String]? = nil, error: ObjectResponseError? = nil) {
         self.data = data
         self.error = error
     }
 
     public static func parseJSON(_ input: JSON) -> DisplayFieldsResponse? {
-        var error: ObjectResponseError? = nil
+        var error: ObjectResponseError?
         if input["error"].exists() {
             error = ObjectResponseError.parseJSON(input["error"])
         }

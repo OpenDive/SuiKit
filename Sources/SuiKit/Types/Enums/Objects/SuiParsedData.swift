@@ -30,13 +30,13 @@ import SwiftyJSON
 ///
 /// The enum handles two main types of parsed data: `MoveObject` and `MovePackage`, which represent
 /// different kinds of data structures commonly used in Sui-related operations.
-public enum SuiParsedData: Equatable  {
+public enum SuiParsedData: Equatable {
     /// Represents a parsed Move object. The associated value is a `MoveObject` that holds the parsed fields and other relevant data for a Move object.
     case moveObject(MoveObject)
 
     /// Represents a parsed Move package. The associated value is a `MovePackage` containing the disassembled or decomposed package information.
     case movePackage(MovePackage)
-    
+
     public init(graphql: TryGetPastObjectQuery.Data.Object.AsMoveObject) {
         let fields: [String: AnyHashable] = [
             "data": graphql.ifShowContent!.contents!.data,
@@ -50,7 +50,7 @@ public enum SuiParsedData: Equatable  {
             )
         )
     }
-    
+
     public init(graphql: GetOwnedObjectsQuery.Data.Address.Objects.Node) {
         let fields: [String: AnyHashable] = [
             "data": graphql.contents!.ifShowContent!.data,
@@ -64,7 +64,7 @@ public enum SuiParsedData: Equatable  {
             )
         )
     }
-    
+
     public init(graphql: MultiGetObjectsQuery.Data.Objects.Node) {
         let fields: [String: AnyHashable] = [
             "data": graphql.asMoveObject!.ifShowContent!.contents!.data,

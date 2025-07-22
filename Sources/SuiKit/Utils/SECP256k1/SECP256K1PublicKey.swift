@@ -73,7 +73,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         var signatureEcdsa: secp256k1_ecdsa_signature = secp256k1_ecdsa_signature()
         let serializedSignature = Data(signature.signature[0..<64])
         let resultSignature = serializedSignature.withUnsafeBytes { (rawSignaturePtr: UnsafeRawBufferPointer) -> Int32? in
-            if let rawPtr = rawSignaturePtr.baseAddress, rawSignaturePtr.count > 0 {
+            if let rawPtr = rawSignaturePtr.baseAddress, !rawSignaturePtr.isEmpty {
                 let ptr = rawPtr.assumingMemoryBound(to: UInt8.self)
                 return withUnsafeMutablePointer(to: &signatureEcdsa) { (mutablePtrEcdsa: UnsafeMutablePointer<secp256k1_ecdsa_signature>) -> Int32? in
                     let res = secp256k1_ecdsa_signature_parse_compact(ctx, mutablePtrEcdsa, ptr)
@@ -86,7 +86,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         guard let _ = resultSignature, resultSignature != 0 else { throw AccountError.invalidParsedSignature }
         var pubKeyObject: secp256k1_pubkey = secp256k1_pubkey()
         let pubKeyResult = self.key.withUnsafeBytes { (rawUnsafePubkeyPtr: UnsafeRawBufferPointer) -> Int32? in
-            if let rawPubKey = rawUnsafePubkeyPtr.baseAddress, rawUnsafePubkeyPtr.count > 0 {
+            if let rawPubKey = rawUnsafePubkeyPtr.baseAddress, !rawUnsafePubkeyPtr.isEmpty {
                 let pubKeyPtr = rawPubKey.assumingMemoryBound(to: UInt8.self)
                 let res = secp256k1_ec_pubkey_parse(ctx, &pubKeyObject, pubKeyPtr, self.key.count)
                 return res
@@ -97,7 +97,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         guard let _ = pubKeyResult, pubKeyResult != 0 else { throw AccountError.invalidParsedPublicKey }
         return withUnsafePointer(to: signatureEcdsa) { (signaturePtr: UnsafePointer<secp256k1_ecdsa_signature>) -> Bool in
             return hashedData.withUnsafeBytes { (rawUnsafeDataPtr: UnsafeRawBufferPointer) -> Bool in
-                if let dataRawPtr = rawUnsafeDataPtr.baseAddress, rawUnsafeDataPtr.count > 0 {
+                if let dataRawPtr = rawUnsafeDataPtr.baseAddress, !rawUnsafeDataPtr.isEmpty {
                     let dataPtr = dataRawPtr.assumingMemoryBound(to: UInt8.self)
                     return withUnsafePointer(to: pubKeyObject) { (pubKeyPtr: UnsafePointer<secp256k1_pubkey>) -> Bool in
                         return secp256k1sui.secp256k1_ecdsa_verify(ctx, signaturePtr, dataPtr, pubKeyPtr) != 0
@@ -136,7 +136,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         var suiBytes = Data(count: rawBytes.count + 1)
         try suiBytes.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["SECP256K1"]!])
         try suiBytes.set([UInt8](rawBytes), offset: 1)
-        
+
         return [UInt8](suiBytes)
     }
 
@@ -145,7 +145,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
         serializedSignature[0] = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["SECP256K1"]!
         serializedSignature[1..<signature.signature.count] = signature.signature
         serializedSignature[1+signature.signature.count..<1+signature.signature.count+self.key.count] = self.key
-        
+
         return serializedSignature.base64EncodedString()
     }
 
@@ -156,7 +156,7 @@ public struct SECP256K1PublicKey: Equatable, PublicKeyProtocol {
     public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
         let digest = try Blake2b.hash(size: 32, data: intentMessage)
-        
+
         return try self.verify(data: digest, signature: signature)
     }
 

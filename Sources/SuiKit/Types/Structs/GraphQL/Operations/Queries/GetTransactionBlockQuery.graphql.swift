@@ -57,7 +57,7 @@ public class GetTransactionBlockQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("transactionBlock", TransactionBlock?.self, arguments: ["digest": .variable("digest")]),
+      .field("transactionBlock", TransactionBlock?.self, arguments: ["digest": .variable("digest")])
     ] }
 
     /// Fetch a transaction block by its transaction digest.
@@ -73,7 +73,7 @@ public class GetTransactionBlockQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_TRANSACTION_FIELDS.self),
+        .fragment(RPC_TRANSACTION_FIELDS.self)
       ] }
 
       /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

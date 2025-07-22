@@ -17,7 +17,7 @@ public struct RPC_MOVE_STRUCT_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("name", String.self),
     .field("abilities", [GraphQLEnum<SuiKit.MoveAbility>]?.self),
     .field("fields", [Field]?.self),
-    .field("typeParameters", [TypeParameter]?.self),
+    .field("typeParameters", [TypeParameter]?.self)
   ] }
 
   /// The struct's (unqualified) type name.
@@ -43,7 +43,7 @@ public struct RPC_MOVE_STRUCT_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("name", String.self),
-      .field("type", Type_SelectionSet?.self),
+      .field("type", Type_SelectionSet?.self)
     ] }
 
     public var name: String { __data["name"] }
@@ -59,7 +59,7 @@ public struct RPC_MOVE_STRUCT_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("signature", AnyHashable.self),
+        .field("signature", AnyHashable.self)
       ] }
 
       /// Structured representation of the type signature.
@@ -78,7 +78,7 @@ public struct RPC_MOVE_STRUCT_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("isPhantom", Bool.self),
-      .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self),
+      .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self)
     ] }
 
     public var isPhantom: Bool { __data["isPhantom"] }

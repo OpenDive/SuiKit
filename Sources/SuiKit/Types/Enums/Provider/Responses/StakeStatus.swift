@@ -33,13 +33,13 @@ import Foundation
 public enum StakeStatus: Equatable {
     /// The stake is in a pending state and is not yet active.
     case pending(StakeObject)
-    
+
     /// The stake is active and participating.
     case active(StakeObject)
-    
+
     /// The stake has been unstaked and is no longer participating.
     case unstaked(StakeObject)
-    
+
     /// Retrieve the `StakeObject` associated with the current status.
     ///
     /// - Returns: The associated `StakeObject`.
@@ -54,4 +54,3 @@ public enum StakeStatus: Equatable {
         }
     }
 }
-

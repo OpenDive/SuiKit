@@ -24,7 +24,7 @@ public class GetTypeLayoutQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("type", Type_SelectionSet.self, arguments: ["type": .variable("type")]),
+      .field("type", Type_SelectionSet.self, arguments: ["type": .variable("type")])
     ] }
 
     /// Fetch a structured representation of a concrete type, including its layout information.
@@ -41,7 +41,7 @@ public class GetTypeLayoutQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("layout", SuiKit.MoveTypeLayoutApollo?.self),
+        .field("layout", SuiKit.MoveTypeLayoutApollo?.self)
       ] }
 
       /// Structured representation of the "shape" of values that match this type. May return no

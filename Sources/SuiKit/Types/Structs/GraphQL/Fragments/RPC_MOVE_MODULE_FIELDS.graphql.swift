@@ -19,7 +19,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("structs", Structs?.self),
     .field("enums", Enums?.self),
     .field("fileFormatVersion", Int.self),
-    .field("functions", Functions?.self),
+    .field("functions", Functions?.self)
   ] }
 
   /// The module's (unqualified) name.
@@ -47,7 +47,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("pageInfo", PageInfo.self),
-      .field("nodes", [Node].self),
+      .field("nodes", [Node].self)
     ] }
 
     /// Information to aid in pagination.
@@ -66,7 +66,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("hasNextPage", Bool.self),
-        .field("endCursor", String?.self),
+        .field("endCursor", String?.self)
       ] }
 
       /// When paginating forwards, are there more items?
@@ -86,7 +86,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("name", String.self),
-        .field("package", Package.self),
+        .field("package", Package.self)
       ] }
 
       /// The module's (unqualified) name.
@@ -104,7 +104,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("address", SuiKit.SuiAddressApollo.self),
+          .field("address", SuiKit.SuiAddressApollo.self)
         ] }
 
         public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -123,7 +123,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("pageInfo", PageInfo.self),
-      .field("nodes", [Node].self),
+      .field("nodes", [Node].self)
     ] }
 
     /// Information to aid in pagination.
@@ -142,7 +142,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("hasNextPage", Bool.self),
-        .field("endCursor", String?.self),
+        .field("endCursor", String?.self)
       ] }
 
       /// When paginating forwards, are there more items?
@@ -161,7 +161,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveStruct }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_MOVE_STRUCT_FIELDS.self),
+        .fragment(RPC_MOVE_STRUCT_FIELDS.self)
       ] }
 
       /// The struct's (unqualified) type name.
@@ -200,7 +200,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("pageInfo", PageInfo.self),
-      .field("nodes", [Node].self),
+      .field("nodes", [Node].self)
     ] }
 
     /// Information to aid in pagination.
@@ -219,7 +219,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("hasNextPage", Bool.self),
-        .field("endCursor", String?.self),
+        .field("endCursor", String?.self)
       ] }
 
       /// When paginating forwards, are there more items?
@@ -238,7 +238,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveEnum }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_MOVE_ENUM_FIELDS.self),
+        .fragment(RPC_MOVE_ENUM_FIELDS.self)
       ] }
 
       /// The enum's (unqualified) type name.
@@ -277,14 +277,14 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("pageInfo", PageInfo.self),
-      .field("nodes", [Node].self),
+      .field("nodes", [Node].self)
     ] }
 
     /// Information to aid in pagination.
     public var pageInfo: PageInfo { __data["pageInfo"] }
     /// A list of nodes.
     public var nodes: [Node] { __data["nodes"] }
-      
+
       public func filterUsable() -> [Node] {
           return self.nodes.filter {
               ($0.visibility != nil && ($0.visibility! == .public || $0.visibility! == .friend)) ||
@@ -303,7 +303,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("hasNextPage", Bool.self),
-        .field("endCursor", String?.self),
+        .field("endCursor", String?.self)
       ] }
 
       /// When paginating forwards, are there more items?
@@ -322,7 +322,7 @@ public struct RPC_MOVE_MODULE_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveFunction }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_MOVE_FUNCTION_FIELDS.self),
+        .fragment(RPC_MOVE_FUNCTION_FIELDS.self)
       ] }
 
       /// The function's (unqualified) name.

@@ -114,7 +114,7 @@ final class TxSerializerTest: XCTestCase {
 
     func testThatMoveSharedObjectCallWithImmutableReferenceWorksAsIntended() async throws {
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::value",
             arguments: [
                 tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()
@@ -127,11 +127,11 @@ final class TxSerializerTest: XCTestCase {
         let toolBox = try self.fetchToolBox()
         try await toolBox.setup()
         var tx = try TransactionBlock()
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::value",
             arguments: [tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()]
         )
-        let _ = try tx.moveCall(
+        _ = try tx.moveCall(
             target: "\(try self.fetchPackageId())::serializer_tests::set_value",
             arguments: [tx.object(id: try self.fetchSharedObjectId()).toTransactionArgument()]
         )

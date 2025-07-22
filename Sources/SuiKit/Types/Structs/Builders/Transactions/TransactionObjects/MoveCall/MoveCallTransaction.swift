@@ -120,11 +120,10 @@ public struct MoveCallTransaction: KeyProtocol, TransactionProtocol {
                 for (idxOuter, argumentOuter) in self.arguments.enumerated() {
                     if case .input(let outerInput) = argumentOuter {
                         for (idxInner, argumentInner) in moveCall.arguments.enumerated() {
-                            if 
+                            if
                                 case .input(let innerInput) = argumentInner,
                                 outerInput.value == innerInput.value,
-                                outerInput.index != innerInput.index 
-                            {
+                                outerInput.index != innerInput.index {
                                 self.arguments[idxOuter] = moveCall.arguments[idxInner]
                             }
                         }

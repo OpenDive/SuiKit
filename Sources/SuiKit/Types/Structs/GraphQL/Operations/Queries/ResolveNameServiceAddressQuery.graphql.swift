@@ -24,7 +24,7 @@ public class ResolveNameServiceAddressQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("resolveSuinsAddress", ResolveSuinsAddress?.self, arguments: ["domain": .variable("domain")]),
+      .field("resolveSuinsAddress", ResolveSuinsAddress?.self, arguments: ["domain": .variable("domain")])
     ] }
 
     /// Resolves a SuiNS `domain` name to an address, if it has been bound.
@@ -40,7 +40,7 @@ public class ResolveNameServiceAddressQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("address", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self)
       ] }
 
       public var address: SuiKit.SuiAddressApollo { __data["address"] }

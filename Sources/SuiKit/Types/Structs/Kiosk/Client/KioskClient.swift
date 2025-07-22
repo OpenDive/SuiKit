@@ -69,13 +69,13 @@ public class KioskClient {
     /// - Parameter address: The address for which we want to retrieve the kiosks.
     /// - Returns: An Object containing all the `kioskOwnerCap` objects as well as the kioskIds.
     public func getOwnedKiosks(address: String) async throws -> OwnedKiosks {
-        let personalPackageId = 
+        let personalPackageId =
             self.packageIds?.personalKioskRulePackageId ??
             RuleAddresses.personalKioskRuleAddress[self.network]
         return try await KioskQuery.getOwnedKiosks(
             client: self.client,
             address: address,
-            personalKioskType: personalPackageId != nil ? 
+            personalKioskType: personalPackageId != nil ?
                 "\(personalPackageId!)::personal_kiosk::PersonalKioskCap" :
                 ""
         )

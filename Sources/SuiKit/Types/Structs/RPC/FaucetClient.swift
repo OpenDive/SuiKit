@@ -30,7 +30,7 @@ import SwiftyJSON
 public struct FaucetClient: Sendable {
     /// A connection conforming to `ConnectionProtocol` to interact with.
     public let connection: any ConnectionProtocol
-    
+
     /// Initializes a new `FaucetClient` with the given connection.
     /// - Parameter connection: A connection conforming to `ConnectionProtocol`.
     public init(connection: any ConnectionProtocol) {
@@ -41,7 +41,7 @@ public struct FaucetClient: Sendable {
 public struct FaucetClient {
     /// A connection conforming to `ConnectionProtocol` to interact with.
     public let connection: any ConnectionProtocol
-    
+
     /// Initializes a new `FaucetClient` with the given connection.
     /// - Parameter connection: A connection conforming to `ConnectionProtocol`.
     public init(connection: any ConnectionProtocol) {

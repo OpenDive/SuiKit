@@ -112,11 +112,10 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
         var suiBytes = Data(count: rawBytes.count + 1)
         try suiBytes.set([SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!])
         try suiBytes.set([UInt8](rawBytes), offset: 1)
-        
+
         return [UInt8](suiBytes)
     }
 
-    
     public func toSerializedSignature(signature: Signature) throws -> String {
         var serializedSignature = Data(count: signature.signature.count + self.key.count)
         serializedSignature[0] = SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["ED25519"]!
@@ -133,7 +132,7 @@ public struct ED25519PublicKey: Equatable, PublicKeyProtocol {
     public func verifyWithIntent(_ bytes: [UInt8], _ signature: Signature, _ intent: IntentScope) throws -> Bool {
         let intentMessage = RawSigner.messageWithIntent(intent, Data(bytes))
         let digest = try Blake2b.hash(size: 32, data: intentMessage)
-        
+
         return try self.verify(data: digest, signature: signature)
     }
 

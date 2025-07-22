@@ -39,7 +39,7 @@ final class GraphQLProviderTest: XCTestCase {
 
     private func setUpWithPackage() async throws {
         self.packageId = try await self.fetchToolBox().publishPackage("dynamic-fields").packageId
-        
+
         let ownedObjects = try await self.fetchToolBox()
             .client.getOwnedObjects(
                 owner: try self.fetchToolBox().account.publicKey.toSuiAddress(),
@@ -59,14 +59,14 @@ final class GraphQLProviderTest: XCTestCase {
             coin: tx.gas,
             amounts: [tx.pure(value: .number(1))]
         )
-        let _ = try tx.transferObject(objects: [coin], address: toolBox.defaultRecipient)
+        _ = try tx.transferObject(objects: [coin], address: toolBox.defaultRecipient)
         try tx.setSenderIfNotSet(sender: try toolBox.account.publicKey.toSuiAddress())
-        
+
         let result = try await toolBox.client.signAndExecuteTransactionBlock(
             transactionBlock: &tx,
             signer: toolBox.account
         )
-        let _ = try await self.fetchToolBox().client.waitForTransaction(tx: result.digest)
+        _ = try await self.fetchToolBox().client.waitForTransaction(tx: result.digest)
         // TODO: Remove once the GraphQL endpoint becomes default with the example validator.
         try await Task.sleep(nanoseconds: 10_000_000_000)  // Buffer for waiting on the Sui Indexer to catch up with the RPC Node
     }

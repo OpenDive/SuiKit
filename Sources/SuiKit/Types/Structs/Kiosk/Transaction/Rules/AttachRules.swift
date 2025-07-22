@@ -35,7 +35,7 @@ public struct AttachRules {
         packageId: String
     ) throws -> [TransactionArgument] {
         guard let percent = UInt16(percentageBps), let min = UInt64(minAmount) else { throw SuiError.notImplemented }
-        guard (percent >= 0 && percent <= 10_000) else { throw SuiError.notImplemented }
+        guard percent >= 0 && percent <= 10_000 else { throw SuiError.notImplemented }
 
         return try tx.moveCall(
             target: "\(packageId)::royalty_rule::add",

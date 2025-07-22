@@ -180,7 +180,7 @@ public struct KioskQuery {
         let returnedExtension = try await client.getDynamicFieldObject(
             parentId: kioskId,
             name: DynamicFieldName(
-                type: "0x2::kiosk_extension::ExtensionKey<\(extensionType)>", 
+                type: "0x2::kiosk_extension::ExtensionKey<\(extensionType)>",
                 value: JSON(["dummy_field": false])
             )
         )

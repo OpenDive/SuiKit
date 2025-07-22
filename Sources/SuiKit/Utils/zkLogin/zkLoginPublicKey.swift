@@ -51,7 +51,7 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
             indexMod4: data.inputs.issBase64Details.indexMod4
         )
         let iss = try JWTUtilities.extractClaimValue(claim: issClaimJWT, claimName: "iss") as String
-        
+
         // Initialize with address seed and issuer
         try self.init(addressSeed: BigInt(data.inputs.addressSeed)!, iss: iss, client: nil)
     }
@@ -59,23 +59,23 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
     public init(addressSeed: BigInt, iss: String, client: GraphQLClientProtocol? = nil) throws {
         // In Rust, the ZkLoginPublicIdentifier is:
         // iss_bytes_len || iss_bytes || padded_32_byte_address_seed
-        
+
         // Normalize the issuer string (ensure it has the https:// prefix for consistency)
         let normalizedIss = iss.hasPrefix("https://") ? iss : "https://\(iss)"
-        
+
         let addressSeedBytes = zkLoginUtilities.toPaddedBigEndianBytes(num: addressSeed, width: Self.LENGTH)
         let issBytes = Data(normalizedIss.utf8)
-        
+
         // Create data with format: iss_bytes_len || iss_bytes || padded_32_byte_address_seed
         var tmp = Data()
         tmp.append(UInt8(issBytes.count)) // First byte is issuer bytes length
         tmp.append(issBytes)              // Then the issuer bytes
         tmp.append(Data(addressSeedBytes)) // Then the padded 32-byte address seed
-        
+
         self.key = tmp
         self.client = client
     }
-    
+
     // Added overload for string addressSeed
     public init(addressSeed: String, iss: String, client: GraphQLClientProtocol? = nil) throws {
         // Try to convert the string addressSeed to BigInt
@@ -89,7 +89,7 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
     public static func == (lhs: zkLoginPublicIdentifier, rhs: zkLoginPublicIdentifier) -> Bool {
         return lhs.key == rhs.key
     }
-    
+
     // Manual Hashable conformance - only hash the key data, not the client
     public func hash(into hasher: inout Hasher) {
         hasher.combine(key)
@@ -102,11 +102,11 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
     public func hex() -> String {
         return "0x\(self.key.hexEncodedString())"
     }
-    
+
     public func toBase58() throws -> String {
         return try toSuiBytes().toBase58String()
     }
-    
+
     public static func fromBase58(_ base58: String) throws -> zkLoginPublicIdentifier {
         guard let data = [UInt8](base58: base58) else {
             throw AccountError.invalidData
@@ -143,27 +143,27 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
         var result = [UInt8]()
         result.append(SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["zkLogin"]!)
         result.append(contentsOf: [UInt8](self.key))
-        
+
         return result
     }
 
     // Methods for zkLogin signature verification
-    
+
     /// Verifies that the signature is valid for the provided transaction data
     public func verifyTransaction(transactionData: [UInt8], signature: zkLoginSignature) async throws -> Bool {
         guard let client = self.client else {
             throw SuiError.customError(message: "GraphQL client not provided for verification")
         }
-        
+
         // Get the address from the signature components
         let address = try extractAddressFromSignature(signature: signature)
-        
+
         // Convert transaction data to base64
         let transactionDataBase64 = Data(transactionData).base64EncodedString()
-        
+
         // Serialize signature
         let serializedSignature = signature.serialize()
-        
+
         // Call GraphQL verification
         guard let result = try? await client.verifyZkLoginSignature(
             bytes: transactionDataBase64,
@@ -173,25 +173,25 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
         ) else {
             return false
         }
-        
+
         return result.success && result.errors.isEmpty
     }
-    
+
     /// Verifies that the signature is valid for the provided personal message
     public func verifyPersonalMessage(message: [UInt8], signature: zkLoginSignature) async throws -> Bool {
         guard let client = self.client else {
             throw SuiError.customError(message: "GraphQL client not provided for verification")
         }
-        
+
         // Get the address from the signature components  
         let address = try extractAddressFromSignature(signature: signature)
-        
+
         // Convert message to base64
         let messageBase64 = Data(message).base64EncodedString()
-        
+
         // Serialize signature
         let serializedSignature = signature.serialize()
-        
+
         // Call GraphQL verification
         let result = try await client.verifyZkLoginSignature(
             bytes: messageBase64,
@@ -199,10 +199,10 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
             intentScope: .personalMessage,
             author: address
         )
-        
+
         return result.success && result.errors.isEmpty
     }
-    
+
     /// Extract the zkLogin address from a signature
     private func extractAddressFromSignature(signature: zkLoginSignature) throws -> String {
         // Extract issuer from the signature inputs
@@ -211,14 +211,14 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
             indexMod4: signature.inputs.issBase64Details.indexMod4
         )
         let iss = try JWTUtilities.extractClaimValue(claim: issClaimJWT, claimName: "iss") as String
-        
+
         // Create a new public identifier from the signature data
         let publicKey = try zkLoginPublicIdentifier(
             addressSeed: BigInt(signature.inputs.addressSeed)!,
             iss: iss,
             client: self.client
         )
-        
+
         return try publicKey.toSuiAddress()
     }
 
@@ -285,7 +285,7 @@ public struct zkLoginPublicKey {
             aud: audience
         )
     }
-    
+
     /// Creates a zkLoginPublicIdentifier from an address seed and issuer
     /// - Parameters:
     ///   - addressSeed: The address seed as a BigInt

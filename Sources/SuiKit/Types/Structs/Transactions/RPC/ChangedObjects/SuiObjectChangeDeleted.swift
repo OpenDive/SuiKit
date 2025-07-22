@@ -37,7 +37,7 @@ public struct SuiObjectChangeDeleted {
     public let objectType: String
 
     /// An `objectId` representing the unique identifier of the deleted object.
-    public let objectId: objectId
+    public let objectId: ObjectId
 
     /// A `SequenceNumber` representing the version of the deleted object.
     public let version: SequenceNumber

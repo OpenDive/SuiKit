@@ -116,7 +116,7 @@ public class HDNode {
             guard
                 let privateKey = privateKey,
                 let pubKey = Utilities.privateToPublic(privateKey, compressed: true),
-                (pubKey[0] == 0x02 || pubKey[0] == 0x03)
+                pubKey[0] == 0x02 || pubKey[0] == 0x03
             else { return nil }
             publicKey = pubKey
         } else {
@@ -220,7 +220,7 @@ extension HDNode {
             let newPrivateKey = newPK.serialize().setLengthLeft(32),
             SECP256K1PrivateKey.verifyPrivateKey(privateKey: newPrivateKey),
             let newPublicKey = SECP256K1PrivateKey.privateToPublic(privateKey: newPrivateKey, compressed: true),
-            (newPublicKey.bytes[0] == 0x02 || newPublicKey.bytes[0] == 0x03),
+            newPublicKey.bytes[0] == 0x02 || newPublicKey.bytes[0] == 0x03,
             self.depth < UInt8.max
         else { return nil }
         return createNode(chainCode: chainCode, depth: depth + 1, publicKey: newPublicKey, privateKey: newPrivateKey, childNumber: trueIndex)
@@ -251,9 +251,9 @@ extension HDNode {
             let tempKey = bn.serialize().setLengthLeft(32),
             SECP256K1PrivateKey.verifyPrivateKey(privateKey: tempKey),
             let pubKeyCandidate = SECP256K1PrivateKey.privateToPublic(privateKey: tempKey, compressed: true),
-            (pubKeyCandidate.bytes[0] == 0x02 || pubKeyCandidate.bytes[0] == 0x03),
+            pubKeyCandidate.bytes[0] == 0x02 || pubKeyCandidate.bytes[0] == 0x03,
             let newPublicKey = SECP256K1PrivateKey.combineSerializedPublicKeys(keys: [self.publicKey, pubKeyCandidate], outputCompressed: true),
-            (newPublicKey.bytes[0] == 0x02 || newPublicKey.bytes[0] == 0x03),
+            newPublicKey.bytes[0] == 0x02 || newPublicKey.bytes[0] == 0x03,
             self.depth < UInt8.max
         else { return nil }
 
@@ -286,7 +286,7 @@ extension HDNode {
     private func calculateHMACInput(_ index: UInt32, privateKey: Data? = nil, hardened: Bool) -> Data {
         var inputForHMAC = Data()
 
-        if let privateKey = privateKey, (index >= (UInt32(1) << 31) || hardened) {
+        if let privateKey = privateKey, index >= (UInt32(1) << 31) || hardened {
             inputForHMAC.append(Data([UInt8(0x00)]))
             inputForHMAC.append(privateKey)
         } else {

@@ -36,16 +36,16 @@ import SwiftyJSON
 public enum ObjectResponseError: Error, Equatable {
     /// Indicates that an object with the given ID does not exist.
     case notExist(objectId: String)
-    
+
     /// Indicates that a dynamic field is not found within the parent object.
     case dynamicFieldNotFound(parentObjectId: String)
-    
+
     /// Indicates that the object has been deleted. The digest, object ID, and version are provided for context.
     case deleted(digest: String, objectId: String, version: String)
-    
+
     /// Represents an unknown error.
     case unknown
-    
+
     /// Indicates that there's a display error. The details are provided as a string.
     case displayError(error: String)
 
@@ -74,4 +74,3 @@ public enum ObjectResponseError: Error, Equatable {
         }
     }
 }
-

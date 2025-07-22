@@ -15,8 +15,8 @@ public protocol GraphQLClientProtocol {
     /// - Returns: The verification result
     func verifyZkLoginSignature(
         bytes: String,
-        signature: String, 
+        signature: String,
         intentScope: ZkLoginIntentScope,
         author: String
-    ) async throws -> zkLoginVerifyResult
+    ) async throws -> ZkLoginVerifyResult
 }

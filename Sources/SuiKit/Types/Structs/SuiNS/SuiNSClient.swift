@@ -51,7 +51,7 @@ public class SuiNSClient {
         var requestUrl = URLRequest(url: url)
         requestUrl.httpMethod = "GET"
 
-        guard let result = try await withCheckedThrowingContinuation ({ (con: CheckedContinuation<Data?, Error>) in
+        guard let result = try await withCheckedThrowingContinuation({ (con: CheckedContinuation<Data?, Error>) in
             let task = URLSession.shared.dataTask(with: requestUrl) { data, _, error in
                 if let error = error {
                     con.resume(throwing: error)
@@ -117,7 +117,7 @@ public class SuiNSClient {
 //        }
 //        return nil
 //    }
-    
+
     /// Returns the name object data.
     ///
     /// If the input domain has not been registered, it will return an empty object.
@@ -156,7 +156,7 @@ public class SuiNSClient {
                     client: self.suiClient,
                     nftId: nftId
                 )
-                var avatar: SuiObjectResponse? = nil
+                var avatar: SuiObjectResponse?
                 if includeAvatar, let avatarName = namedObject.avatar {
                     avatar = try await SuiNSQueries.getAvatar(
                         client: self.suiClient,
@@ -172,8 +172,7 @@ public class SuiNSClient {
                             case .addressOwner(let addressOwner) = avatar.data?.owner,
                             addressOwner == namedObject.owner,
                             let display = avatar.data?.display,
-                            let displayData = display.data
-                        {
+                            let displayData = display.data {
                             namedObject.avatar = displayData["image_url"]
                         } else {
                             namedObject.avatar = avatarNotOwned
@@ -208,7 +207,7 @@ public class SuiNSClient {
             type: "address"
         ) else { return nil }
 
-        guard 
+        guard
             let data = SuiNSParser.parseObjectDataResponse(response: res),
             let value = data["value"]
         else { return nil }

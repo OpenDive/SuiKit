@@ -37,16 +37,16 @@ public class KioskTransactionClient {
     public var kioskCap: TransactionObjectArgument?
 
     /// If we're pending `share` of a new kiosk, `finalize()` will share it.
-    private var pendingShare: Bool? = nil
+    private var pendingShare: Bool?
 
     /// If we're pending transferring of the cap, `finalize()` will either error or transfer the cap if it's a new personal.
-    private var pendingTransfer: Bool? = nil
+    private var pendingTransfer: Bool?
 
     /// The promise that the personalCap will be returned on `finalize()`.
-    private var promise: TransactionArgument? = nil
+    private var promise: TransactionArgument?
 
     /// The personal kiosk argument.
-    private var personalCap: TransactionObjectArgument? = nil
+    private var personalCap: TransactionObjectArgument?
 
     /// A flag that checks whether kiosk TX is finalized.
     private var finalized: Bool = false
@@ -60,7 +60,7 @@ public class KioskTransactionClient {
         self.kioskClient = kioskClient
         self.kiosk = nil
         self.kioskCap = nil
-        if let kioskCap { let _ = try self.setCap(cap: kioskCap) }
+        if let kioskCap { _ = try self.setCap(cap: kioskCap) }
     }
 
     /// Creates a kiosk and saves `kiosk` and `kioskOwnerCap` in state.
@@ -97,13 +97,12 @@ public class KioskTransactionClient {
 
         // if we enable `borrow`, we borrow the kioskCap from the cap.
         if borrow != nil, borrow! {
-            let _ = try self.borrowFromPersonalCap(
+            _ = try self.borrowFromPersonalCap(
                 personalCap: .objectArgument(
                     TransactionObjectArgument(from: cap)!
                 )
             )
-        }
-        else { self.personalCap = TransactionObjectArgument(from: cap)! }
+        } else { self.personalCap = TransactionObjectArgument(from: cap)! }
 
         self.setPendingStatuses(transfer: true)
         return self
@@ -113,7 +112,7 @@ public class KioskTransactionClient {
     public func createAndShare(address: String) throws {
         try self.validateFinalizedStatus()
         let cap = try KioskTransactions.createKioskAndShare(tx: &self.transactionBlock)
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [cap.toTransactionArgument()],
             address: address
         )
@@ -123,7 +122,7 @@ public class KioskTransactionClient {
     public func share() throws {
         try self.validateKioskIsSet()
         self.setPendingStatuses(share: false)
-        let _ = try KioskTransactions.shareKiosk(
+        _ = try KioskTransactions.shareKiosk(
             tx: &self.transactionBlock,
             kiosk: self.kiosk!.toTransactionArgument()
         )
@@ -137,7 +136,7 @@ public class KioskTransactionClient {
         guard self.personalCap == nil else { throw SuiError.notImplemented }
         self.setPendingStatuses(transfer: false)
         try self.share()
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [self.kioskCap!.toTransactionArgument()],
             address: address
         )
@@ -150,7 +149,7 @@ public class KioskTransactionClient {
     public func borrowTx(
         itemType: String,
         itemId: String,
-        closure: @escaping (TransactionArgument) throws -> ()
+        closure: @escaping (TransactionArgument) throws -> Void
     ) throws {
         try self.validateKioskIsSet()
         let result = try KioskTransactions.borrowValue(
@@ -222,7 +221,7 @@ public class KioskTransactionClient {
             amount: amount
         )
 
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [coin.toTransactionArgument()],
             address: address
         )
@@ -296,7 +295,7 @@ public class KioskTransactionClient {
 
         try KioskTransactions.delist(
             tx: &self.transactionBlock,
-            itemType: itemType, 
+            itemType: itemType,
             kiosk: .objectArgument(self.kiosk!),
             kioskCap: .objectArgument(self.kioskCap!),
             itemId: itemId
@@ -330,7 +329,7 @@ public class KioskTransactionClient {
         try self.validateKioskIsSet()
 
         let item = try self.take(itemType: itemType, itemId: itemId)
-        let _ = try self.transactionBlock.transferObject(
+        _ = try self.transactionBlock.transferObject(
             objects: [item.toTransactionArgument()],
             address: address
         )
@@ -393,7 +392,7 @@ public class KioskTransactionClient {
             )
         )
     }
-    
+
     /// A function to purchase and resolve a transfer policy.
     /// If the transfer policy has the `lock` rule, the item is locked in the kiosk.
     /// Otherwise, the item is placed in the kiosk.
@@ -441,9 +440,9 @@ public class KioskTransactionClient {
                 canTransferOutsideKiosk = false
             }
 
-            let _ = try ruleDefinition.resolveRuleFunction!(
+            _ = try ruleDefinition.resolveRuleFunction!(
                 RuleResolvingParams(
-                    itemType: itemType, 
+                    itemType: itemType,
                     itemId: itemId,
                     price: "\(price)",
                     policyId: .string(policy.id.hex()),
@@ -515,7 +514,7 @@ public class KioskTransactionClient {
 
         // if we have a promise, return the `ownerCap` back to the personal cap.
         if let promise = self.promise {
-            let _ = try self.transactionBlock.moveCall(
+            _ = try self.transactionBlock.moveCall(
                 target: "\(packageId)::personal_kiosk::return_val",
                 arguments: [
                     self.personalCap!.toTransactionArgument(),

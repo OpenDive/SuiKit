@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-//struct NFTView: View {
+// struct NFTView: View {
 //    @StateObject private var articleCategoriesVM = ArticleCategoriesViewModel()
 //    
 //    var body: some View {
@@ -43,4 +43,4 @@ import SwiftUI
 //            await self.articleCategoriesVM.loadCategoryArticles(withPreview: true)
 //        }
 //    }
-//}
+// }

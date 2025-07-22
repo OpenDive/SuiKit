@@ -57,7 +57,7 @@ public class GetObjectQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("id")]),
+      .field("object", Object?.self, arguments: ["address": .variable("id")])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -74,7 +74,7 @@ public class GetObjectQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_OBJECT_FIELDS.self),
+        .fragment(RPC_OBJECT_FIELDS.self)
       ] }
 
       public var objectId: SuiKit.SuiAddressApollo { __data["objectId"] }

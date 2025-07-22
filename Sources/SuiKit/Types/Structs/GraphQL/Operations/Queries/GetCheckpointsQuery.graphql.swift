@@ -46,7 +46,7 @@ public class GetCheckpointsQuery: GraphQLQuery {
         "after": .variable("after"),
         "last": .variable("last"),
         "before": .variable("before")
-      ]),
+      ])
     ] }
 
     /// The checkpoints that exist in the network.
@@ -63,7 +63,7 @@ public class GetCheckpointsQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -84,7 +84,7 @@ public class GetCheckpointsQuery: GraphQLQuery {
           .field("startCursor", String?.self),
           .field("endCursor", String?.self),
           .field("hasNextPage", Bool.self),
-          .field("hasPreviousPage", Bool.self),
+          .field("hasPreviousPage", Bool.self)
         ] }
 
         /// When paginating backwards, the cursor to continue.
@@ -107,7 +107,7 @@ public class GetCheckpointsQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_Checkpoint_Fields.self),
+          .fragment(RPC_Checkpoint_Fields.self)
         ] }
 
         /// A 32-byte hash that uniquely identifies the checkpoint contents, encoded in Base58. This

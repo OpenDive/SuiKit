@@ -30,7 +30,7 @@ import SwiftyJSON
 public enum TransactionData: KeyProtocol {
     /// Version 1 of transaction data.
     case V1(TransactionDataV1)
-    
+
     public func serialize(_ serializer: Serializer) throws {
         switch self {
         case .V1(let transactionDataV1):

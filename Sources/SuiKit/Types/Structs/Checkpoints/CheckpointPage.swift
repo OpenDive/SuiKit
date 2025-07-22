@@ -41,7 +41,7 @@ public struct CheckpointPage {
 
     public init(
         data: [Checkpoint],
-        nextCursor: String? = nil, 
+        nextCursor: String? = nil,
         pageInfo: PageInfo? = nil,
         hasNextPage: Bool? = nil
     ) {

@@ -38,7 +38,7 @@ public struct PublishTransaction: KeyProtocol, TransactionProtocol {
     ///   - modules: An array of modules where each module is represented as an array of `UInt8`.
     ///   - dependencies: An array of dependencies represented by `objectId`.
     /// - Throws: If conversion of objectId to AccountAddress fails.
-    public init(modules: [[UInt8]], dependencies: [objectId]) throws {
+    public init(modules: [[UInt8]], dependencies: [ObjectId]) throws {
         self.modules = modules
         self.dependencies = try dependencies.map { try AccountAddress.fromHex($0) }
     }

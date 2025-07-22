@@ -18,7 +18,7 @@ public class GetTotalTransactionBlocksQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("checkpoint", Checkpoint?.self),
+      .field("checkpoint", Checkpoint?.self)
     ] }
 
     /// Fetch checkpoint information by sequence number or digest (defaults to the latest available
@@ -35,7 +35,7 @@ public class GetTotalTransactionBlocksQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("networkTotalTransactions", SuiKit.UInt53Apollo?.self),
+        .field("networkTotalTransactions", SuiKit.UInt53Apollo?.self)
       ] }
 
       /// The total number of transaction blocks in the network by the end of this checkpoint.

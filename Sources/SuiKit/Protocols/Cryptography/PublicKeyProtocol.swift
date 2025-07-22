@@ -88,6 +88,6 @@ public protocol PublicKeyProtocol: KeyProtocol, CustomStringConvertible, Hashabl
     /// - Throws: If any error occurs during verification.
     /// - Returns: `true` if the verification is successful, otherwise `false`.
     func verifyPersonalMessage(_ message: [UInt8], _ signature: Signature) throws -> Bool
-    
+
     func toSuiBytes() throws -> [UInt8]
 }

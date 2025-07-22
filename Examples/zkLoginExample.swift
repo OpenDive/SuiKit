@@ -28,17 +28,17 @@ import SuiKit
 
 /// A comprehensive example of using the zkLogin flow in SuiKit
 /// This example demonstrates the complete zkLogin authentication and transaction flow
-class zkLoginExample {
+class ZkLoginExample {
     // Configuration
     private let proofServiceUrl: URL
     private let saltServiceUrl: URL
     private let networkUrl: URL
-    
+
     // Services
     private let provider: SuiProvider
     private let zkLoginAuthenticator: zkLoginAuthenticator
     private let proofService: RemoteZkProofService
-    
+
     /// Initialize the zkLogin example
     /// - Parameters:
     ///   - network: The network to connect to (defaults to devnet)
@@ -64,13 +64,13 @@ class zkLoginExample {
             self.proofServiceUrl = proofServiceUrl ?? URL(string: "https://prover.mainnet.sui.io/v1")!
             self.saltServiceUrl = saltServiceUrl ?? URL(string: "https://salt.api.mystenlabs.com/get_salt")!
         }
-        
+
         // Initialize services
         self.provider = SuiProvider(url: networkUrl)
         self.zkLoginAuthenticator = zkLoginAuthenticator(provider: provider)
         self.proofService = RemoteZkProofService(url: proofServiceUrl!)
     }
-    
+
     /// Step 1: Generate the OAuth URL with nonce
     /// - Parameters:
     ///   - clientId: OAuth client ID
@@ -84,21 +84,21 @@ class zkLoginExample {
     ) async throws -> (url: URL, ephemeralKeypair: KeyPair, randomness: [UInt8], maxEpoch: UInt64) {
         // Generate ephemeral keypair - using Secure Enclave compatible key when possible
         let ephemeralKeypair = try zkLoginAuthenticator.generateEphemeralKeypair(scheme: .secp256r1)
-        
+
         // Get current epoch and calculate max epoch (current + 2)
         let epochInfo = try await provider.getzkLoginEpochInfo()
         let maxEpoch = epochInfo.epoch + 2
-        
+
         // Generate randomness for nonce
         let randomness = try zkLoginAuthenticator.generateRandomness()
-        
+
         // Generate nonce using ephemeral public key
         let nonce = try zkLoginAuthenticator.generateNonce(
             publicKey: ephemeralKeypair.publicKey,
             maxEpoch: maxEpoch,
             randomness: randomness
         )
-        
+
         // Construct OAuth URL based on provider
         let urlString: String
         switch provider {
@@ -111,59 +111,59 @@ class zkLoginExample {
         case .apple:
             urlString = "https://appleid.apple.com/auth/authorize?client_id=\(clientId)&redirect_uri=\(redirectUrl)&scope=email&response_mode=form_post&response_type=code%20id_token&nonce=\(nonce)"
         }
-        
+
         guard let url = URL(string: urlString) else {
             throw SuiError.error(code: .invalidURL)
         }
-        
+
         return (url, ephemeralKeypair, randomness, maxEpoch)
     }
-    
+
     /// Step 2: Process the JWT from OAuth and get the user's salt
     /// - Parameter jwt: The JWT token from the OAuth redirect
     /// - Returns: The user salt for zkLogin
     public func getUserSalt(jwt: String) async throws -> String {
         // Parse JWT to extract claims
         let jwtClaims = try JWTUtilities.extractClaims(from: jwt)
-        
+
         // Create a unique user identifier for storing the salt
         guard let sub = jwtClaims.sub, let iss = jwtClaims.iss else {
             throw SuiError.error(code: .missingJWTClaim)
         }
-        
+
         // Check if we already have a stored salt for this user
         let userIdentifier = SecurezkLoginStorage.generateUserIdentifier(sub: sub, iss: iss)
         if let storedSalt = try SecurezkLoginStorage.retrieveUserSalt(userIdentifier: userIdentifier) {
             return storedSalt
         }
-        
+
         // Request salt from salt service
         let requestBody: [String: Any] = [
             "token": jwt
         ]
-        
+
         var request = URLRequest(url: saltServiceUrl)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try JSONSerialization.data(withJSONObject: requestBody)
-        
+
         // Send request and parse response
         let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
             throw SuiError.error(code: .saltServiceError)
         }
-        
+
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
               let salt = json["salt"] as? String else {
             throw SuiError.error(code: .invalidSaltServiceResponse)
         }
-        
+
         // Store the salt for future use
         try SecurezkLoginStorage.storeUserSalt(salt, userIdentifier: userIdentifier)
-        
+
         return salt
     }
-    
+
     /// Step 3: Process the JWT and salt to create a zkLogin signature and address
     /// - Parameters:
     ///   - jwt: The JWT token from OAuth
@@ -181,7 +181,7 @@ class zkLoginExample {
     ) async throws -> (address: String, signature: zkLoginSignature) {
         // Get zkLogin address
         let address = try zkLoginAuthenticator.derivezkLoginAddress(jwt: jwt, userSalt: salt)
-        
+
         // Generate ZK proof and get zkLogin signature
         let signature = try await zkLoginAuthenticator.processJWT(
             jwt: jwt,
@@ -191,10 +191,10 @@ class zkLoginExample {
             randomness: randomness,
             proofService: proofService
         )
-        
+
         return (address, signature)
     }
-    
+
     /// Step 4: Create and submit a transaction with zkLogin
     /// - Parameters:
     ///   - userAddress: The user's zkLogin address
@@ -216,22 +216,22 @@ class zkLoginExample {
             zkLoginSignature: zkLoginSignature,
             userAddress: userAddress
         )
-        
+
         // Create transaction
         var transaction = try TransactionBlock()
-        
+
         // Add transaction operations - send coins to recipient
         let coin = try transaction.splitCoins(transaction.gas, [transaction.pure(value: .number(amount))])
         try transaction.transferObjects([coin], transaction.pure(value: .address(recipientAddress)))
-        
+
         // Sign and execute the transaction
         let response = try await zkLoginSigner.signAndExecuteTransaction(
             transactionBlock: &transaction
         )
-        
+
         return response.digest
     }
-    
+
     /// Full example of zkLogin flow (for demonstration purposes)
     /// Note: This method is for illustrating the full flow and would typically
     /// be split across multiple user interactions in a real application
@@ -243,19 +243,19 @@ class zkLoginExample {
             redirectUrl: "YOUR_REDIRECT_URL",
             provider: .google
         )
-        
+
         print("Step 1: Generated OAuth URL - \(url)")
         print("Open this URL in a browser and complete the OAuth flow")
-        
+
         // Step 2: After the OAuth flow, the application would extract the JWT from the redirect URL
         // For this example, we're assuming the JWT is provided
         let jwtToken = "SAMPLE_JWT_TOKEN" // In a real app, this would come from the OAuth redirect
-        
+
         // Step 3: Get user salt
         let salt = try await getUserSalt(jwt: jwtToken)
-        
+
         print("Step 2: Retrieved user salt - \(salt)")
-        
+
         // Step 4: Process authentication to get zkLogin address and signature
         let (userAddress, zkLoginSignature) = try await processAuthentication(
             jwt: jwtToken,
@@ -264,10 +264,10 @@ class zkLoginExample {
             maxEpoch: maxEpoch,
             randomness: randomness
         )
-        
+
         print("Step 3: Processed authentication")
         print("User zkLogin address: \(userAddress)")
-        
+
         // Step 5: Send a transaction
         let recipientAddress = "0xSOME_RECIPIENT_ADDRESS"
         let transactionDigest = try await sendTransaction(
@@ -277,11 +277,11 @@ class zkLoginExample {
             recipientAddress: recipientAddress,
             amount: 100_000_000 // 0.1 SUI
         )
-        
+
         print("Step 4: Sent transaction")
         print("Transaction digest: \(transactionDigest)")
     }
-    
+
     /// OAuth provider types
     public enum OAuthProvider {
         case google
@@ -289,11 +289,11 @@ class zkLoginExample {
         case twitch
         case apple
     }
-    
+
     /// Network types
     public enum Network {
         case devnet
         case testnet
         case mainnet
     }
-} 
+}

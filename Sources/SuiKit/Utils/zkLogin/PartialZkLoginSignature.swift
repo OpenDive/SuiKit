@@ -29,7 +29,7 @@ public struct PartialzkLoginSignature: KeyProtocol, Equatable, Codable {
     public var proofPoints: zkLoginSignatureInputsProofPoints
     public var issBase64Details: zkLoginSignatureInputsClaim
     public var headerBase64: String
-    
+
     public init(proofPoints: zkLoginSignatureInputsProofPoints, issBase64Details: zkLoginSignatureInputsClaim, headerBase64: String) {
         self.proofPoints = proofPoints
         self.issBase64Details = issBase64Details
@@ -49,14 +49,14 @@ public struct PartialzkLoginSignature: KeyProtocol, Equatable, Codable {
             headerBase64: try Deserializer.string(deserializer)
         )
     }
-    
+
     // MARK: - Equatable
     public static func == (lhs: PartialzkLoginSignature, rhs: PartialzkLoginSignature) -> Bool {
         return lhs.proofPoints == rhs.proofPoints &&
                lhs.issBase64Details == rhs.issBase64Details &&
                lhs.headerBase64 == rhs.headerBase64
     }
-    
+
     // MARK: - Codable
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -64,14 +64,14 @@ public struct PartialzkLoginSignature: KeyProtocol, Equatable, Codable {
         self.issBase64Details = try container.decode(zkLoginSignatureInputsClaim.self, forKey: .issBase64Details)
         self.headerBase64 = try container.decode(String.self, forKey: .headerBase64)
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(proofPoints, forKey: .proofPoints)
         try container.encode(issBase64Details, forKey: .issBase64Details)
         try container.encode(headerBase64, forKey: .headerBase64)
     }
-    
+
     private enum CodingKeys: String, CodingKey {
         case proofPoints
         case issBase64Details

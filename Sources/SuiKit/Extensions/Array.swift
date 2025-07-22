@@ -145,22 +145,22 @@ public extension Array where Element == UInt8 {
     func toBase58String() -> String {
         // Base58 alphabet
         let alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        
+
         let bytes = self
         var zerosCount = 0
-        
+
         // Count leading zeros
         for b in bytes {
             if b != 0 { break }
             zerosCount += 1
         }
-        
+
         // Convert to BigInt
         var num = BigInt(0)
         for byte in bytes {
             num = num * 256 + BigInt(byte)
         }
-        
+
         // Convert to base58
         var result = ""
         while num > 0 {
@@ -168,26 +168,26 @@ public extension Array where Element == UInt8 {
             result = String(alphabet[alphabet.index(alphabet.startIndex, offsetBy: Int(remainder))]) + result
             num = quotient
         }
-        
+
         // Add leading zeros
         for _ in 0..<zerosCount {
             result = "1" + result
         }
-        
+
         return result
     }
-    
+
     /// Initialize an array of UInt8 from a base58 string
     init?(base58: String) {
         let alphabet = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
-        
+
         // Count leading 1s (zeros in base58)
         var zerosCount = 0
         for c in base58 {
             if c != "1" { break }
             zerosCount += 1
         }
-        
+
         // Convert from base58
         var num = BigInt(0)
         for c in base58 {
@@ -196,7 +196,7 @@ public extension Array where Element == UInt8 {
             }
             num = num * 58 + BigInt(alphabet.distance(from: alphabet.startIndex, to: idx))
         }
-        
+
         // Convert to bytes
         var bytes = [UInt8]()
         while num > 0 {
@@ -204,12 +204,12 @@ public extension Array where Element == UInt8 {
             bytes.insert(UInt8(remainder), at: 0)
             num = quotient
         }
-        
+
         // Add leading zeros
         for _ in 0..<zerosCount {
             bytes.insert(0, at: 0)
         }
-        
+
         self = bytes
     }
 }

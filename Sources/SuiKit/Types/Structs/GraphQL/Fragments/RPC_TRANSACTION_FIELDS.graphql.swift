@@ -18,7 +18,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("sender", Sender?.self),
     .field("signatures", [SuiKit.Base64Apollo]?.self),
     .field("effects", Effects?.self),
-    .include(if: "showInput" || "showRawInput", .field("bcs", alias: "rawTransaction", SuiKit.Base64Apollo?.self)),
+    .include(if: "showInput" || "showRawInput", .field("bcs", alias: "rawTransaction", SuiKit.Base64Apollo?.self))
   ] }
 
   /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.
@@ -45,7 +45,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
-      .field("address", SuiKit.SuiAddressApollo.self),
+      .field("address", SuiKit.SuiAddressApollo.self)
     ] }
 
     public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -66,7 +66,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       .include(if: "showEffects" || "showObjectChanges" || "showRawEffects", .field("bcs", SuiKit.Base64Apollo.self)),
       .include(if: "showEvents", .field("events", Events.self)),
       .include(if: "showBalanceChanges", .field("balanceChanges", BalanceChanges.self)),
-      .include(if: "showObjectChanges", .field("objectChanges", ObjectChanges.self)),
+      .include(if: "showObjectChanges", .field("objectChanges", ObjectChanges.self))
     ] }
 
     /// Base64 encoded bcs serialization of the on-chain transaction effects.
@@ -94,7 +94,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -113,7 +113,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("hasNextPage", Bool.self),
-          .field("endCursor", String?.self),
+          .field("endCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -132,7 +132,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Event }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_EVENTS_FIELDS.self),
+          .fragment(RPC_EVENTS_FIELDS.self)
         ] }
 
         /// The Move module containing some function that when called by
@@ -173,7 +173,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("sequenceNumber", SuiKit.UInt53Apollo.self),
+        .field("sequenceNumber", SuiKit.UInt53Apollo.self)
       ] }
 
       /// This checkpoint's position in the total order of finalized checkpoints, agreed upon by
@@ -192,7 +192,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -211,7 +211,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("hasNextPage", Bool.self),
-          .field("endCursor", String?.self),
+          .field("endCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -232,7 +232,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("__typename", String.self),
           .field("coinType", CoinType?.self),
           .field("owner", Owner?.self),
-          .field("amount", SuiKit.BigIntApollo?.self),
+          .field("amount", SuiKit.BigIntApollo?.self)
         ] }
 
         /// The inner type of the coin whose balance has changed (e.g. `0x2::sui::SUI`).
@@ -252,7 +252,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("repr", String.self),
+            .field("repr", String.self)
           ] }
 
           /// Flat representation of the type signature, as a displayable string.
@@ -270,7 +270,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("asObject", AsObject?.self),
-            .field("asAddress", AsAddress?.self),
+            .field("asAddress", AsAddress?.self)
           ] }
 
           public var asObject: AsObject? { __data["asObject"] }
@@ -286,7 +286,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("address", SuiKit.SuiAddressApollo.self),
+              .field("address", SuiKit.SuiAddressApollo.self)
             ] }
 
             public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -302,7 +302,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Address }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("address", SuiKit.SuiAddressApollo.self),
+              .field("address", SuiKit.SuiAddressApollo.self)
             ] }
 
             public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -322,7 +322,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -341,7 +341,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("hasNextPage", Bool.self),
-          .field("endCursor", String?.self),
+          .field("endCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -362,7 +362,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           .field("__typename", String.self),
           .field("address", SuiKit.SuiAddressApollo.self),
           .field("inputState", InputState?.self),
-          .field("outputState", OutputState?.self),
+          .field("outputState", OutputState?.self)
         ] }
 
         /// The address of the object that has changed.
@@ -383,7 +383,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("version", SuiKit.UInt53Apollo.self),
-            .field("asMoveObject", AsMoveObject?.self),
+            .field("asMoveObject", AsMoveObject?.self)
           ] }
 
           public var version: SuiKit.UInt53Apollo { __data["version"] }
@@ -400,7 +400,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("contents", Contents?.self),
+              .field("contents", Contents?.self)
             ] }
 
             /// Displays the contents of the Move object in a JSON string and through GraphQL types. Also
@@ -418,7 +418,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("type", Type_SelectionSet.self),
+                .field("type", Type_SelectionSet.self)
               ] }
 
               /// The value's Move type.
@@ -434,7 +434,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
-                  .field("repr", String.self),
+                  .field("repr", String.self)
                 ] }
 
                 /// Flat representation of the type signature, as a displayable string.
@@ -455,7 +455,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("asMoveObject", AsMoveObject?.self),
-            .field("asMovePackage", AsMovePackage?.self),
+            .field("asMovePackage", AsMovePackage?.self)
           ] }
 
           /// Attempts to convert the object into a MoveObject
@@ -473,7 +473,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("contents", Contents?.self),
+              .field("contents", Contents?.self)
             ] }
 
             /// Displays the contents of the Move object in a JSON string and through GraphQL types. Also
@@ -491,7 +491,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("type", Type_SelectionSet.self),
+                .field("type", Type_SelectionSet.self)
               ] }
 
               /// The value's Move type.
@@ -507,7 +507,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
-                  .field("repr", String.self),
+                  .field("repr", String.self)
                 ] }
 
                 /// Flat representation of the type signature, as a displayable string.
@@ -526,7 +526,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("modules", Modules?.self, arguments: ["first": 10]),
+              .field("modules", Modules?.self, arguments: ["first": 10])
             ] }
 
             /// Paginate through the MoveModules defined in this package.
@@ -542,7 +542,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveModuleConnection }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("nodes", [Node].self),
+                .field("nodes", [Node].self)
               ] }
 
               /// A list of nodes.
@@ -558,7 +558,7 @@ public struct RPC_TRANSACTION_FIELDS: SuiKit.SelectionSet, Fragment {
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveModule }
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
-                  .field("name", String.self),
+                  .field("name", String.self)
                 ] }
 
                 /// The module's (unqualified) name.

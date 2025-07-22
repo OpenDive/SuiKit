@@ -51,21 +51,21 @@ final class SECP256R1PublicKeyTest: XCTestCase {
 
     func testThatInvalidSecp256r1PublicKeysWillThrow() throws {
         func invalidKeyThrow() throws {
-            let _ = try SECP256R1PublicKey(data: Data(self.invalidSecp256r1PublicKey))
+            _ = try SECP256R1PublicKey(data: Data(self.invalidSecp256r1PublicKey))
         }
 
         func invalidBuffer() throws {
             let invalidPubKeyBase64 = Data(self.invalidSecp256r1PublicKey).base64EncodedString()
-            let _ = try SECP256R1PublicKey(value: invalidPubKeyBase64)
+            _ = try SECP256R1PublicKey(value: invalidPubKeyBase64)
         }
 
         func invalidEncoding() throws {
             let wrongEncode = Data(self.validSecp256r1PublicKey).hexEncodedString()
-            let _ = try SECP256R1PublicKey(value: wrongEncode)
+            _ = try SECP256R1PublicKey(value: wrongEncode)
         }
 
         func invalidKeyValue() throws {
-            let _ = try SECP256R1PublicKey(value: "12345")
+            _ = try SECP256R1PublicKey(value: "12345")
         }
 
         XCTAssertThrowsError(

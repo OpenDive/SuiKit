@@ -126,8 +126,8 @@ public class Serializer {
     /// - Throws: This function may throw an error from the keyEncoder or valueEncoder closures when encoding a key or value fails.
     func map<T, U>(
         _ values: [T: U],
-        keyEncoder: (Serializer, T) throws -> (),
-        valueEncoder: (Serializer, U) throws -> ()
+        keyEncoder: (Serializer, T) throws -> Void,
+        valueEncoder: (Serializer, U) throws -> Void
     ) throws {
         var encodedValues: [(Data, Data)] = []
         for (key, value) in values {
@@ -160,7 +160,7 @@ public class Serializer {
     /// - Returns: A closure that accepts a Serializer instance and an array of values of type T, and throws an error
     /// if the sequence cannot be serialized using the provided value encoder.
     static func sequenceSerializer<T>(
-        _ valueEncoder: @escaping (Serializer, T) throws -> ()
+        _ valueEncoder: @escaping (Serializer, T) throws -> Void
     ) -> (Serializer, [T]) throws -> Void {
         return { (self, values) in try self.sequence(values, valueEncoder) }
     }
@@ -178,7 +178,7 @@ public class Serializer {
     /// - Throws: This function may throw an error from the valueEncoder closure when encoding a value fails.
     public func sequence<T>(
         _ values: [T],
-        _ valueEncoder: (Serializer, T) throws -> ()
+        _ valueEncoder: (Serializer, T) throws -> Void
     ) throws {
         try self.uleb128(UInt(values.count))
         for value in values {
@@ -193,7 +193,7 @@ public class Serializer {
 
     public func optionalSequence<T: EncodingProtocol>(
         _ values: [T?],
-        _ valueEncoder: (Serializer, T) throws -> ()
+        _ valueEncoder: (Serializer, T) throws -> Void
     ) throws {
         try self.uleb128(UInt(values.count))
         for value in values {
@@ -359,7 +359,7 @@ public class Serializer {
 
     public func _optional<T: EncodingContainer>(
         _ value: T?,
-        _ valueEncoder: (Serializer, T) throws -> ()
+        _ valueEncoder: (Serializer, T) throws -> Void
     ) throws {
         if let value {
             let bytes = try encoder(value, valueEncoder)
@@ -425,7 +425,7 @@ public class Serializer {
 /// - Throws: Any error that may occur during the encoding process with the given encoding function.
 func encoder<T>(
     _ value: T,
-    _ encoder: (Serializer, T) throws -> ()
+    _ encoder: (Serializer, T) throws -> Void
 ) throws -> Data {
     let ser = Serializer()
     try encoder(ser, value)

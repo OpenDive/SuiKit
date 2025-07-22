@@ -59,23 +59,23 @@ final class ED25519PublicKeyTest: XCTestCase {
             let invalidBytes: [UInt8] = [
                 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
             ]
-            let _ = try ED25519PublicKey(data: Data(invalidBytes))
+            _ = try ED25519PublicKey(data: Data(invalidBytes))
         }
 
         func invalidLengthPublicKeyB64StringLong() throws {
-            let _ = try ED25519PublicKey(value: "0x300000000000000000000000000000000000000000000000000000000000000000000")
+            _ = try ED25519PublicKey(value: "0x300000000000000000000000000000000000000000000000000000000000000000000")
         }
 
         func invalidLengthPublicKeyB64StringShort() throws {
-            let _ = try ED25519PublicKey(value: "0x300000000000000000000000000000000000000000000000000000000000000")
+            _ = try ED25519PublicKey(value: "0x300000000000000000000000000000000000000000000000000000000000000")
         }
 
         func invalidLengthPublicKeyB64StringIntLong() throws {
-            let _ = try ED25519PublicKey(value: "135693854574979916511997248057056142015550763280047535983739356259273198796800000")
+            _ = try ED25519PublicKey(value: "135693854574979916511997248057056142015550763280047535983739356259273198796800000")
         }
 
         func invalidLengthPublicKeyB64StringIntShort() throws {
-            let _ = try ED25519PublicKey(value: "12345")
+            _ = try ED25519PublicKey(value: "12345")
         }
 
         XCTAssertThrowsError(try invalidLengthPublicKeyBytes())

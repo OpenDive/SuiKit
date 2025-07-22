@@ -36,7 +36,7 @@ struct ContentView: View {
 
             for element in userDefaults.dictionaryRepresentation() {
                 let mnemo = userDefaults.object(forKey: element.key) as? [String]
-                
+
                 if let mnemo, mnemo.count == 12 {
                     defaultWalletSeeds.append(mnemo)
                 }

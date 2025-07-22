@@ -29,7 +29,7 @@ import Foundation
 public struct SuiMoveStructTypeParameter: Equatable {
     /// A `SuiMoveAbilitySet` representing the constraints on the type parameter in the SuiMove structure.
     public let constraints: SuiMoveAbilitySet
-    
+
     /// A `Bool` indicating whether the type parameter is a phantom type parameter in the SuiMove structure.
     public let isPhantom: Bool
 }

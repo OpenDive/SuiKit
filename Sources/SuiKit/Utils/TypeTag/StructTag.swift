@@ -50,7 +50,7 @@ public struct StructTag: TypeProtocol, Equatable {
     public static func fromStr(_ typeTag: String) throws -> StructTag {
         var name = ""
         var index = 0
-        var nestedValue: TypeTag? = nil
+        var nestedValue: TypeTag?
 
         while index < typeTag.count {
             let letter = typeTag[typeTag.index(typeTag.startIndex, offsetBy: index)]
@@ -78,14 +78,14 @@ public struct StructTag: TypeProtocol, Equatable {
     public func toString() throws -> String {
         let value = self.value
         let formattedTypeParams =
-        value.typeArgs.count > 0 ?
+        !value.typeArgs.isEmpty ?
         "<\(try value.typeArgs.map({ try $0.toString() }).joined(separator: ","))>" :
         ""
         return "\(value.address)::\(value.module)::\(value.name)\(formattedTypeParams)"
     }
 
     public static func deserialize(from deserializer: Deserializer) throws -> StructTag {
-        let _ = try Deserializer.u8(deserializer)
+        _ = try Deserializer.u8(deserializer)
         let address: AccountAddress = try Deserializer._struct(deserializer)
         let module = try Deserializer.string(deserializer)
         let name = try Deserializer.string(deserializer)

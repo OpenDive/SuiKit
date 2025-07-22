@@ -65,7 +65,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("packageId")]),
+      .field("object", Object?.self, arguments: ["address": .variable("packageId")])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -82,7 +82,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("asMovePackage", AsMovePackage?.self),
+        .field("asMovePackage", AsMovePackage?.self)
       ] }
 
       /// Attempts to convert the object into a MovePackage
@@ -98,7 +98,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("module", Module?.self, arguments: ["name": .variable("module")]),
+          .field("module", Module?.self, arguments: ["name": .variable("module")])
         ] }
 
         /// A representation of the module called `name` in this package, including the
@@ -118,7 +118,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
             .include(if: "hasMoreFriends", .field("friends", Friends.self, arguments: ["after": .variable("afterFriends")])),
             .include(if: "hasMoreStructs", .field("structs", Structs?.self, arguments: ["after": .variable("afterStructs")])),
             .include(if: "hasMoreEnums", .field("enums", Enums?.self, arguments: ["after": .variable("afterEnums")])),
-            .include(if: "hasMoreFunctions", .field("functions", Functions?.self, arguments: ["after": .variable("afterFunctions")])),
+            .include(if: "hasMoreFunctions", .field("functions", Functions?.self, arguments: ["after": .variable("afterFunctions")]))
           ] }
 
           /// Modules that this module considers friends (these modules can access `public(friend)`
@@ -142,7 +142,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("pageInfo", PageInfo.self),
-              .field("nodes", [Node].self),
+              .field("nodes", [Node].self)
             ] }
 
             /// Information to aid in pagination.
@@ -161,7 +161,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
                 .field("hasNextPage", Bool.self),
-                .field("endCursor", String?.self),
+                .field("endCursor", String?.self)
               ] }
 
               /// When paginating forwards, are there more items?
@@ -181,7 +181,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
                 .field("name", String.self),
-                .field("package", Package.self),
+                .field("package", Package.self)
               ] }
 
               /// The module's (unqualified) name.
@@ -199,7 +199,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MovePackage }
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
-                  .field("address", SuiKit.SuiAddressApollo.self),
+                  .field("address", SuiKit.SuiAddressApollo.self)
                 ] }
 
                 public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -218,7 +218,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("pageInfo", PageInfo.self),
-              .field("nodes", [Node].self),
+              .field("nodes", [Node].self)
             ] }
 
             /// Information to aid in pagination.
@@ -237,7 +237,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
                 .field("hasNextPage", Bool.self),
-                .field("endCursor", String?.self),
+                .field("endCursor", String?.self)
               ] }
 
               /// When paginating forwards, are there more items?
@@ -256,7 +256,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveStruct }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .fragment(RPC_MOVE_STRUCT_FIELDS.self),
+                .fragment(RPC_MOVE_STRUCT_FIELDS.self)
               ] }
 
               /// The struct's (unqualified) type name.
@@ -295,7 +295,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("pageInfo", PageInfo.self),
-              .field("nodes", [Node].self),
+              .field("nodes", [Node].self)
             ] }
 
             /// Information to aid in pagination.
@@ -314,7 +314,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
                 .field("hasNextPage", Bool.self),
-                .field("endCursor", String?.self),
+                .field("endCursor", String?.self)
               ] }
 
               /// When paginating forwards, are there more items?
@@ -333,7 +333,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveEnum }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .fragment(RPC_MOVE_ENUM_FIELDS.self),
+                .fragment(RPC_MOVE_ENUM_FIELDS.self)
               ] }
 
               /// The enum's (unqualified) type name.
@@ -372,7 +372,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("pageInfo", PageInfo.self),
-              .field("nodes", [Node].self),
+              .field("nodes", [Node].self)
             ] }
 
             /// Information to aid in pagination.
@@ -391,7 +391,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
                 .field("hasNextPage", Bool.self),
-                .field("endCursor", String?.self),
+                .field("endCursor", String?.self)
               ] }
 
               /// When paginating forwards, are there more items?
@@ -410,7 +410,7 @@ public class PaginateMoveModuleListsQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveFunction }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .fragment(RPC_MOVE_FUNCTION_FIELDS.self),
+                .fragment(RPC_MOVE_FUNCTION_FIELDS.self)
               ] }
 
               /// The function's (unqualified) name.

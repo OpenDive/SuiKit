@@ -33,7 +33,7 @@ public class PaginateEpochValidatorsQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("epoch", Epoch?.self, arguments: ["id": .variable("id")]),
+      .field("epoch", Epoch?.self, arguments: ["id": .variable("id")])
     ] }
 
     /// Fetch epoch information by ID (defaults to the latest epoch).
@@ -49,7 +49,7 @@ public class PaginateEpochValidatorsQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Epoch }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("validatorSet", ValidatorSet?.self),
+        .field("validatorSet", ValidatorSet?.self)
       ] }
 
       /// Validator related properties, including the active validators.
@@ -65,7 +65,7 @@ public class PaginateEpochValidatorsQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.ValidatorSet }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("activeValidators", ActiveValidators.self, arguments: ["after": .variable("after")]),
+          .field("activeValidators", ActiveValidators.self, arguments: ["after": .variable("after")])
         ] }
 
         /// The current set of active validators.
@@ -82,7 +82,7 @@ public class PaginateEpochValidatorsQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("pageInfo", PageInfo.self),
-            .field("nodes", [Node].self),
+            .field("nodes", [Node].self)
           ] }
 
           /// Information to aid in pagination.
@@ -101,7 +101,7 @@ public class PaginateEpochValidatorsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("hasNextPage", Bool.self),
-              .field("endCursor", String?.self),
+              .field("endCursor", String?.self)
             ] }
 
             /// When paginating forwards, are there more items?
@@ -120,7 +120,7 @@ public class PaginateEpochValidatorsQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Validator }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_VALIDATOR_FIELDS.self),
+              .fragment(RPC_VALIDATOR_FIELDS.self)
             ] }
 
             /// The number of epochs for which this validator has been below the

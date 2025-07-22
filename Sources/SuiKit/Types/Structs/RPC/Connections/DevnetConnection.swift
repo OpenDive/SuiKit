@@ -28,7 +28,7 @@ import Foundation
 public struct DevnetConnection: ConnectionProtocol {
     public var fullNode: String = "https://fullnode.devnet.sui.io:443/"
     public var faucet: String? = "https://faucet.devnet.sui.io/gas"
-    public var graphql: String? = nil
+    public var graphql: String?
 
     public init() { }
 }

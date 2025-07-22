@@ -30,16 +30,16 @@ import Security
 public protocol ZkLoginSecureStorage {
     /// Store an ephemeral private key securely
     func storeEphemeralKey(_ key: Data, forUser userId: String) throws
-    
+
     /// Retrieve an ephemeral private key
     func retrieveEphemeralKey(forUser userId: String) throws -> Data
-    
+
     /// Store a salt value securely
     func storeSalt(_ salt: String, forUser userId: String) throws
-    
+
     /// Retrieve a salt value
     func retrieveSalt(forUser userId: String) throws -> String
-    
+
     /// Delete all stored data for a user
     func clearUserData(forUser userId: String) throws
 }
@@ -47,13 +47,13 @@ public protocol ZkLoginSecureStorage {
 /// Default implementation of ZkLoginSecureStorage using Apple's Keychain
 public class SecureZkLoginStorage: ZkLoginSecureStorage {
     private let keychainService: String
-    
+
     /// Initialize with a keychain service identifier
     /// - Parameter service: The service identifier for keychain items
     public init(service: String = "com.opendive.suikit.zklogin") {
         self.keychainService = service
     }
-    
+
     /// Store an ephemeral private key in the keychain
     /// - Parameters:
     ///   - key: The private key data
@@ -66,9 +66,9 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
             kSecValueData as String: key,
             kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
         ]
-        
+
         let status = SecItemAdd(query as CFDictionary, nil)
-        
+
         if status == errSecDuplicateItem {
             // Update existing item
             let updateQuery: [String: Any] = [
@@ -76,13 +76,13 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
                 kSecAttrService as String: keychainService,
                 kSecAttrAccount as String: "\(userId).ephemeral_key"
             ]
-            
+
             let updateAttributes: [String: Any] = [
                 kSecValueData as String: key
             ]
-            
+
             let updateStatus = SecItemUpdate(updateQuery as CFDictionary, updateAttributes as CFDictionary)
-            
+
             guard updateStatus == errSecSuccess else {
                 throw SuiError.error(code: .keyChainError)
             }
@@ -90,7 +90,7 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
             throw SuiError.error(code: .keyChainError)
         }
     }
-    
+
     /// Retrieve an ephemeral private key from the keychain
     /// - Parameter userId: The user identifier
     /// - Returns: The private key data
@@ -101,21 +101,21 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
             kSecAttrAccount as String: "\(userId).ephemeral_key",
             kSecReturnData as String: true
         ]
-        
+
         var keyData: AnyObject?
         let status = SecItemCopyMatching(query as CFDictionary, &keyData)
-        
+
         guard status == errSecSuccess else {
             throw SuiError.error(code: .keyChainError)
         }
-        
+
         guard let keyData = keyData as? Data else {
             throw SuiError.error(code: .missingKeyItem)
         }
-        
+
         return keyData
     }
-    
+
     /// Store a salt value in the keychain
     /// - Parameters:
     ///   - salt: The salt string
@@ -127,18 +127,18 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
             kSecAttrAccount as String: "\(userId).salt",
             kSecValueData as String: Data(salt.utf8)
         ]
-        
+
         // First delete any existing salt
         SecItemDelete(query as CFDictionary)
-        
+
         // Add the new salt
         let status = SecItemAdd(query as CFDictionary, nil)
-        
+
         guard status == errSecSuccess else {
             throw SuiError.error(code: .keyChainError)
         }
     }
-    
+
     /// Retrieve a salt value from the keychain
     /// - Parameter userId: The user identifier
     /// - Returns: The salt string
@@ -150,21 +150,21 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
             kSecReturnData as String: true,
             kSecMatchLimit as String: kSecMatchLimitOne
         ]
-        
+
         var item: CFTypeRef?
         let status = SecItemCopyMatching(query as CFDictionary, &item)
-        
+
         guard status == errSecSuccess, let saltData = item as? Data else {
             throw SuiError.error(code: .keyChainError)
         }
-        
+
         guard let saltString = String(data: saltData, encoding: .utf8) else {
             throw SuiError.error(code: .dataEncodingFailed)
         }
-        
+
         return saltString
     }
-    
+
     /// Delete all stored data for a user
     /// - Parameter userId: The user identifier
     public func clearUserData(forUser userId: String) throws {
@@ -174,25 +174,25 @@ public class SecureZkLoginStorage: ZkLoginSecureStorage {
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: "\(userId).ephemeral_key"
         ]
-        
+
         SecItemDelete(keyQuery as CFDictionary)
-        
+
         // Delete salt
         let saltQuery: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: keychainService,
             kSecAttrAccount as String: "\(userId).salt"
         ]
-        
+
         SecItemDelete(saltQuery as CFDictionary)
     }
-    
+
     // MARK: - Private helper functions
-    
+
     /// Generate a unique tag for the key based on the service name and user ID
     /// - Parameter userId: The user identifier
     /// - Returns: A Data object containing the tag
     private func keyTag(forUser userId: String) -> Data {
         return "\(keychainService).\(userId)".data(using: .utf8)!
     }
-} 
+}

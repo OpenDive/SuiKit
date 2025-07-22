@@ -36,7 +36,7 @@ public struct SuiMoveAbilitySet: Equatable {
     public init(abilities: [String]) {
         self.abilities = abilities.map { $0.capitalized }
     }
-    
+
     public init(graphql: RPC_MOVE_FUNCTION_FIELDS.TypeParameter) {
         self.abilities = graphql.constraints.map { $0.value!.rawValue.capitalized }
     }

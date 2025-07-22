@@ -10,13 +10,13 @@ import SwiftUI
 struct NFTCarouselView: View {
     let collectionName: String
     let nfts: [NFT]
-    
+
     var body: some View {
         Text(self.collectionName)
             .font(.headline)
             .foregroundStyle(.primary)
             .padding(.horizontal, 64)
-        
+
         ScrollView(.horizontal) {
             LazyHStack(spacing: 32) {
                 ForEach(self.nfts) { nft in

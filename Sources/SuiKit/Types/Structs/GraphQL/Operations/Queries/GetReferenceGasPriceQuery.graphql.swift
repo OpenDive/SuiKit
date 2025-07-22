@@ -18,7 +18,7 @@ public class GetReferenceGasPriceQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("epoch", Epoch?.self),
+      .field("epoch", Epoch?.self)
     ] }
 
     /// Fetch epoch information by ID (defaults to the latest epoch).
@@ -34,7 +34,7 @@ public class GetReferenceGasPriceQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Epoch }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("referenceGasPrice", SuiKit.BigIntApollo?.self),
+        .field("referenceGasPrice", SuiKit.BigIntApollo?.self)
       ] }
 
       /// The minimum gas price that a quorum of validators are guaranteed to sign a transaction for.

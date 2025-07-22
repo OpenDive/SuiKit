@@ -188,7 +188,7 @@ public struct SECP256R1PrivateKey: PrivateKeyProtocol {
         let pattern = "^m\\/(54|74)'\\/784'\\/[0-9]+'\\/[0-9]+\\/[0-9]+$"
         let regex = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
         let matches = regex?.matches(in: path, options: [], range: NSRange(location: 0, length: path.utf16.count))
-        
+
         return matches?.first != nil
     }
 

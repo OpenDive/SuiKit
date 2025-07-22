@@ -36,7 +36,7 @@ public struct MultiSignature: EncodingProtocol, Equatable {
     init(publicKey: MultiPublicKey, signatureMap: [(ED25519PublicKey, Signature)]) {
         self.signatures = []
         var bitmap: UInt32 = 0
-        
+
         for entry in signatureMap {
             self.signatures.append(entry.1)
             if let index = publicKey.keys.firstIndex(of: entry.0) {

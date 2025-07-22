@@ -31,7 +31,7 @@ public struct SuiEvent {
     public let id: EventId?
 
     /// The identifier of the package associated with the event.
-    public let packageId: objectId
+    public let packageId: ObjectId
 
     /// A string representing the module associated with the transaction.
     public let transactionModule: String

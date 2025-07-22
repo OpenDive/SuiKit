@@ -43,9 +43,9 @@ public struct ExecutionResultType {
         self.returnValues = []
         self.mutableReferenceOutputs = []
 
-        var argument: SuiMoveNormalizedStructType? = nil
-        var valueArray: [UInt8]? = nil
-        var name: String? = nil
+        var argument: SuiMoveNormalizedStructType?
+        var valueArray: [UInt8]?
+        var name: String?
         let mutable = input["mutableReferenceOutputs"].arrayValue
         for mutableValue in mutable {
             mutableValue.arrayValue.forEach { value in
@@ -70,8 +70,8 @@ public struct ExecutionResultType {
         }
         let returnValues = input["returnValues"].arrayValue
         for returnIteration in returnValues {
-            var returnUInt8Array: [UInt8]? = nil
-            var returnName: SuiMoveNormalizedStructType? = nil
+            var returnUInt8Array: [UInt8]?
+            var returnName: SuiMoveNormalizedStructType?
             returnIteration.arrayValue.forEach { returnValue in
                 if let uInt8ArrayValue = returnValue.array {
                     returnUInt8Array = uInt8ArrayValue.map { $0.uInt8Value }

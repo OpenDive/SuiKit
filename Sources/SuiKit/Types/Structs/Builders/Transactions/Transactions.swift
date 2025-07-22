@@ -103,12 +103,9 @@ public struct Transactions {
     /// - Returns: An instance of `PublishTransaction`.
     public static func publish(
         modules: [[UInt8]],
-        dependencies: [objectId]
+        dependencies: [ObjectId]
     ) throws -> PublishTransaction {
-        return try PublishTransaction(
-            modules: modules,
-            dependencies: dependencies
-        )
+        return try PublishTransaction(modules: modules, dependencies: dependencies)
     }
 
     /// Creates a `PublishTransaction` instance with given modules (as base64 encoded strings) and dependencies.
@@ -120,7 +117,7 @@ public struct Transactions {
     /// - Returns: An instance of `PublishTransaction`.
     public static func publish(
         modules: [String],
-        dependencies: [objectId]
+        dependencies: [ObjectId]
     ) throws -> PublishTransaction {
         return try PublishTransaction(
             modules: modules.compactMap { module in
@@ -141,8 +138,8 @@ public struct Transactions {
     /// - Returns: An instance of `UpgradeTransaction`.
     public static func upgrade(
         modules: [[UInt8]],
-        dependencies: [objectId],
-        packageId: objectId,
+        dependencies: [ObjectId],
+        packageId: ObjectId,
         ticket: TransactionArgument
     ) -> UpgradeTransaction {
         return UpgradeTransaction(
@@ -163,8 +160,8 @@ public struct Transactions {
     /// - Returns: An instance of `UpgradeTransaction`.
     public static func upgrade(
         modules: [String],
-        dependencies: [objectId],
-        packageId: objectId,
+        dependencies: [ObjectId],
+        packageId: ObjectId,
         ticket: TransactionArgument
     ) -> UpgradeTransaction {
         return UpgradeTransaction(

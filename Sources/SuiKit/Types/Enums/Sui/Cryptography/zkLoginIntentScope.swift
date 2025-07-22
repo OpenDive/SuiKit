@@ -29,21 +29,21 @@ import Foundation
 public enum ZkLoginIntentScope: String, CaseIterable {
     /// Indicates that the bytes are to be parsed as transaction data bytes
     case transactionData = "TRANSACTION_DATA"
-    
+
     /// Indicates that the bytes are to be parsed as a personal message
     case personalMessage = "PERSONAL_MESSAGE"
 }
 
 /// Result of zkLogin signature verification from GraphQL
-public struct zkLoginVerifyResult {
+public struct ZkLoginVerifyResult {
     /// The boolean result of the verification. If true, errors should be empty.
     public let success: Bool
-    
+
     /// The errors field captures any verification error
     public let errors: [String]
-    
+
     public init(success: Bool, errors: [String]) {
         self.success = success
         self.errors = errors
     }
-} 
+}

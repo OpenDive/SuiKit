@@ -36,7 +36,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("owner", Owner?.self, arguments: ["address": .variable("parentId")]),
+      .field("owner", Owner?.self, arguments: ["address": .variable("parentId")])
     ] }
 
     /// Look up an Owner by its SuiAddressApollo.
@@ -69,7 +69,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
         .field("dynamicFields", DynamicFields.self, arguments: [
           "first": .variable("first"),
           "after": .variable("cursor")
-        ]),
+        ])
       ] }
 
       /// The dynamic fields and dynamic object fields on an object.
@@ -88,7 +88,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("pageInfo", PageInfo.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// Information to aid in pagination.
@@ -107,7 +107,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("hasNextPage", Bool.self),
-            .field("endCursor", String?.self),
+            .field("endCursor", String?.self)
           ] }
 
           /// When paginating forwards, are there more items?
@@ -127,7 +127,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("name", Name?.self),
-            .field("value", Value?.self),
+            .field("value", Value?.self)
           ] }
 
           /// The string type, data, and serialized value of the DynamicField's 'name' field.
@@ -151,7 +151,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
               .field("__typename", String.self),
               .field("bcs", SuiKit.Base64Apollo.self),
               .field("json", SuiKit.JSONApollo.self),
-              .field("type", Type_SelectionSet.self),
+              .field("type", Type_SelectionSet.self)
             ] }
 
             /// The BCS representation of this value, Base64 encoded.
@@ -183,7 +183,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
                 .field("layout", SuiKit.MoveTypeLayoutApollo?.self),
-                .field("repr", String.self),
+                .field("repr", String.self)
               ] }
 
               /// Structured representation of the "shape" of values that match this type. May return no
@@ -205,7 +205,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .inlineFragment(AsMoveValue.self),
-              .inlineFragment(AsMoveObject.self),
+              .inlineFragment(AsMoveObject.self)
             ] }
 
             public var asMoveValue: AsMoveValue? { _asInlineFragment() }
@@ -222,7 +222,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("json", SuiKit.JSONApollo.self),
-                .field("type", Type_SelectionSet.self),
+                .field("type", Type_SelectionSet.self)
               ] }
 
               /// Representation of a Move value in JSON, where:
@@ -251,7 +251,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
-                  .field("repr", String.self),
+                  .field("repr", String.self)
                 ] }
 
                 /// Flat representation of the type signature, as a displayable string.
@@ -272,7 +272,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 .field("contents", Contents?.self),
                 .field("address", SuiKit.SuiAddressApollo.self),
                 .field("digest", String?.self),
-                .field("version", SuiKit.UInt53Apollo.self),
+                .field("version", SuiKit.UInt53Apollo.self)
               ] }
 
               /// Displays the contents of the Move object in a JSON string and through GraphQL types. Also
@@ -295,7 +295,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                 public static var __selections: [ApolloAPI.Selection] { [
                   .field("__typename", String.self),
                   .field("type", Type_SelectionSet.self),
-                  .field("json", SuiKit.JSONApollo.self),
+                  .field("json", SuiKit.JSONApollo.self)
                 ] }
 
                 /// The value's Move type.
@@ -324,7 +324,7 @@ public class GetDynamicFieldsQuery: GraphQLQuery {
                   public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
                   public static var __selections: [ApolloAPI.Selection] { [
                     .field("__typename", String.self),
-                    .field("repr", String.self),
+                    .field("repr", String.self)
                   ] }
 
                   /// Flat representation of the type signature, as a displayable string.

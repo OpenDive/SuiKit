@@ -54,7 +54,7 @@ public struct Checkpoint: Equatable {
 
     /// Represents the array of transaction digests included in this checkpoint.
     public let transactions: [TransactionDigest]
-    
+
     /// Initialize a new instance of `Checkpoint` from a GraphQL object.
     /// - Parameter graphql: A GraphQL object containing values for initalizing a new Checkpoint.
     public init(graphql: GetCheckpointQuery.Data) {
@@ -72,7 +72,7 @@ public struct Checkpoint: Equatable {
         self.validatorSignature = graphql.checkpoint!.validatorSignatures
         self.transactions = graphql.checkpoint!.transactionBlocks.nodes.compactMap { $0.digest }
     }
-    
+
     /// Initialize a new instance of `Checkpoint` from a GraphQL object.
     /// - Parameter graphql: A GraphQL object containing values for initalizing a new Checkpoint.
     public init(graphql: GetCheckpointsQuery.Data.Checkpoints.Node) {

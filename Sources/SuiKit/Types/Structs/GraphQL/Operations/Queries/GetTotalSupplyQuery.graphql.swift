@@ -24,7 +24,7 @@ public class GetTotalSupplyQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("coinMetadata", CoinMetadata?.self, arguments: ["coinType": .variable("coinType")]),
+      .field("coinMetadata", CoinMetadata?.self, arguments: ["coinType": .variable("coinType")])
     ] }
 
     /// The coin metadata associated with the given coin type. Note that if the latest version of
@@ -42,7 +42,7 @@ public class GetTotalSupplyQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("supply", SuiKit.BigIntApollo?.self),
-        .field("decimals", Int?.self),
+        .field("decimals", Int?.self)
       ] }
 
       /// The overall quantity of tokens that will be issued.

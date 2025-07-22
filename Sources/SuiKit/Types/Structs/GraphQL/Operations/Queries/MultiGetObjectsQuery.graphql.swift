@@ -69,7 +69,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
         "first": .variable("limit"),
         "after": .variable("cursor"),
         "filter": ["objectIds": .variable("ids")]
-      ]),
+      ])
     ] }
 
     /// The objects that exist in the network.
@@ -86,7 +86,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -105,7 +105,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("hasNextPage", Bool.self),
-          .field("endCursor", String?.self),
+          .field("endCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -124,7 +124,7 @@ public class MultiGetObjectsQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_OBJECT_FIELDS.self),
+          .fragment(RPC_OBJECT_FIELDS.self)
         ] }
 
         public var objectId: SuiKit.SuiAddressApollo { __data["objectId"] }

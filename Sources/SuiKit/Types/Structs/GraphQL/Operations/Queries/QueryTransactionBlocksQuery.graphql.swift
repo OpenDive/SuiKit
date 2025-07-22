@@ -79,7 +79,7 @@ public class QueryTransactionBlocksQuery: GraphQLQuery {
         "last": .variable("last"),
         "before": .variable("before"),
         "filter": .variable("filter")
-      ]),
+      ])
     ] }
 
     /// The transaction blocks that exist in the network.
@@ -115,7 +115,7 @@ public class QueryTransactionBlocksQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -136,7 +136,7 @@ public class QueryTransactionBlocksQuery: GraphQLQuery {
           .field("hasNextPage", Bool.self),
           .field("hasPreviousPage", Bool.self),
           .field("startCursor", String?.self),
-          .field("endCursor", String?.self),
+          .field("endCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -159,7 +159,7 @@ public class QueryTransactionBlocksQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_TRANSACTION_FIELDS.self),
+          .fragment(RPC_TRANSACTION_FIELDS.self)
         ] }
 
         /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

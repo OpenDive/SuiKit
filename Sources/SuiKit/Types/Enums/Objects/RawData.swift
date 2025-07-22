@@ -30,13 +30,13 @@ import SwiftyJSON
 ///
 /// This enum allows for either a `MoveObjectRaw` or `PackageRaw` data type, capturing
 /// the raw information for either a Move object or a package object.
-public enum RawData: Equatable  {
+public enum RawData: Equatable {
     /// Represents raw data for a Move object. The associated value is a `MoveObjectRaw` containing the Move object's raw data.
     case moveObject(MoveObjectRaw)
 
     /// Represents raw data for a package object. The associated value is a `PackageRaw` containing the package object's raw data.
     case packageObject(PackageRaw)
-    
+
     public init(graphql: TryGetPastObjectQuery.Data.Object.AsMoveObject, version: String) {
         self = .moveObject(
             MoveObjectRaw(

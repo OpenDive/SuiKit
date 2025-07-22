@@ -64,7 +64,7 @@ public class ExecuteTransactionBlockMutation: GraphQLMutation {
       .field("executeTransactionBlock", ExecuteTransactionBlock.self, arguments: [
         "txBytes": .variable("txBytes"),
         "signatures": .variable("signatures")
-      ]),
+      ])
     ] }
 
     /// Execute a transaction, committing its effects on chain.
@@ -94,7 +94,7 @@ public class ExecuteTransactionBlockMutation: GraphQLMutation {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("errors", [String]?.self),
-        .field("effects", Effects.self),
+        .field("effects", Effects.self)
       ] }
 
       /// The errors field captures any errors that occurred during execution
@@ -114,7 +114,7 @@ public class ExecuteTransactionBlockMutation: GraphQLMutation {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlockEffects }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("transactionBlock", TransactionBlock?.self),
+          .field("transactionBlock", TransactionBlock?.self)
         ] }
 
         /// The transaction that ran to produce these effects.
@@ -130,7 +130,7 @@ public class ExecuteTransactionBlockMutation: GraphQLMutation {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .fragment(RPC_TRANSACTION_FIELDS.self),
+            .fragment(RPC_TRANSACTION_FIELDS.self)
           ] }
 
           /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

@@ -586,7 +586,7 @@ public struct SuiProvider {
     /// - Throws: A `SuiError` if any address is invalid or if an error occurs during the JSON RPC call or if there are errors in the response data.
     /// - Returns: An array of `SuiObjectResponse` representing the retrieved Sui objects.
     public func getMultiObjects(
-        ids: [objectId],
+        ids: [ObjectId],
         options: SuiObjectDataOptions? = nil
     ) async throws -> [SuiObjectResponse] {
         for object in ids {
@@ -719,7 +719,7 @@ public struct SuiProvider {
         let errorValue = self.hasErrors(JSON(data))
         guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var balances: [CoinBalance] = []
-        for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"] {
+        for (_, value): (String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"] {
             let lockedBalance = value["lockedBalance"]
             balances.append(
                 try CoinBalance(
@@ -760,7 +760,7 @@ public struct SuiProvider {
         guard !(errorValue.hasError) else { throw SuiError.customError(message: "RPC Error: \(errorValue.localizedDescription)") }
         var coinPages: [CoinStruct] = []
         let result = try JSONDecoder().decode(JSON.self, from: data)["result"]
-        for (_, value):(String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
+        for (_, value): (String, JSON) in try JSONDecoder().decode(JSON.self, from: data)["result"]["data"] {
             coinPages.append(
                 try CoinStruct(
                     coinType: value["coinType"].stringValue,
@@ -939,7 +939,7 @@ public struct SuiProvider {
                 "suix_getDynamicFieldObject",
                 [
                     AnyCodable(parentId),
-                    AnyCodable(name),
+                    AnyCodable(name)
                 ]
             )
         )
@@ -965,7 +965,7 @@ public struct SuiProvider {
                 "suix_getDynamicFieldObject",
                 [
                     AnyCodable(parentId),
-                    AnyCodable(name),
+                    AnyCodable(name)
                 ]
             )
         )
@@ -1044,7 +1044,7 @@ public struct SuiProvider {
         )
         return try JSONDecoder().decode(JSON.self, from: data)["result"]
     }
-    
+
     /// Return the latest SUI system state object on-chain.
     /// - Returns: A `JSON` object containing the information of the latest Sui system state.
     /// - Throws: `SuiError.rpcError` if there are errors in the JSON RPC response.
@@ -1331,7 +1331,7 @@ public struct SuiProvider {
         }
         return PaginatedTransactionResponse(
             data: responsePage,
-            hasNextPage: result["hasNextPage"].boolValue, 
+            hasNextPage: result["hasNextPage"].boolValue,
             nextCursor: result["nextCursor"].stringValue
         )
     }
@@ -1427,12 +1427,12 @@ public struct SuiProvider {
         }
         return url
     }
-    
+
     /// Get epoch information required for zkLogin
     /// - Returns: Current epoch information from the network
     public func getzkLoginEpochInfo() async throws -> EpochInfo {
         let systemState = try await getSuiSystemState()
-        
+
         return EpochInfo(
             epoch: systemState["epoch"].uInt64Value,
             epochStartTimestampMs: systemState["epochStartTimestampMs"].uInt64Value,

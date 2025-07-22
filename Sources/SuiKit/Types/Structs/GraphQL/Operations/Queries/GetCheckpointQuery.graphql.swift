@@ -25,7 +25,7 @@ public class GetCheckpointQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("checkpoint", Checkpoint?.self, arguments: ["id": .variable("id")]),
+      .field("checkpoint", Checkpoint?.self, arguments: ["id": .variable("id")])
     ] }
 
     /// Fetch checkpoint information by sequence number or digest (defaults to the latest available
@@ -42,7 +42,7 @@ public class GetCheckpointQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_Checkpoint_Fields.self),
+        .fragment(RPC_Checkpoint_Fields.self)
       ] }
 
       /// A 32-byte hash that uniquely identifies the checkpoint contents, encoded in Base58. This

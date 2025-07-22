@@ -40,7 +40,7 @@ public struct SuiObjectChangeCreated {
     public let objectType: String
 
     /// An `objectId` representing the unique identifier of the created object.
-    public let objectId: objectId
+    public let objectId: ObjectId
 
     /// A `SequenceNumber` representing the version of the created object.
     public let version: SequenceNumber

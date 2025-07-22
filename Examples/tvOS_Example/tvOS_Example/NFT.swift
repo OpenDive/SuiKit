@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct NFT: Identifiable {
+struct NFTItem: Identifiable {
     let id = UUID()
 
     let name: String

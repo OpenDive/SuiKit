@@ -40,7 +40,7 @@ public class HomeViewModel: ObservableObject {
     public init(_ mnemos: [[String]]? = nil) throws {
         if let mnemos {
             var tmpWallets: [Wallet] = []
-            var lastWallet: Wallet? = nil
+            var lastWallet: Wallet?
             for mnemo in mnemos {
                 let newWallet = try Wallet(mnemonic: Mnemonic(mnemonic: mnemo))
                 tmpWallets.append(newWallet)
@@ -84,7 +84,7 @@ public class HomeViewModel: ObservableObject {
     }
 
     public func airdropToCurrentWallet() async throws {
-        let _ = try await self.faucetClient.funcAccount(try self.currentWallet.accounts[0].address())
+        _ = try await self.faucetClient.funcAccount(try self.currentWallet.accounts[0].address())
     }
 
     public func createNft(
@@ -101,7 +101,7 @@ public class HomeViewModel: ObservableObject {
                 description,
                 url
             ]
-            let _ = try tx.moveCall(
+            _ = try tx.moveCall(
                 target: "\(objectId)::devnet_nft::mint",
                 arguments: txArguments.map { .input(try tx.pure(value: .string($0))) }
             )
@@ -136,7 +136,7 @@ public class HomeViewModel: ObservableObject {
                 modules: fileData["modules"].arrayObject as! [String],
                 dependencies: fileData["dependencies"].arrayObject as! [String]
             )
-            let _ = try tx.transferObject(objects: [publish], address: try self.currentWallet.accounts[0].address())
+            _ = try tx.transferObject(objects: [publish], address: try self.currentWallet.accounts[0].address())
             let options = SuiTransactionBlockResponseOptions(showEffects: true, showObjectChanges: true)
             var result = try await self.restClient.signAndExecuteTransactionBlock(
                 transactionBlock: &tx,
@@ -171,7 +171,7 @@ public class HomeViewModel: ObservableObject {
                     )
                 ]
             )
-            let _ = try txBlock.transferObject(objects: [coin], address: receiverAddress.hex())
+            _ = try txBlock.transferObject(objects: [coin], address: receiverAddress.hex())
             let options = SuiTransactionBlockResponseOptions(showEffects: true)
             var result = try await self.restClient.signAndExecuteTransactionBlock(
                 transactionBlock: &txBlock,

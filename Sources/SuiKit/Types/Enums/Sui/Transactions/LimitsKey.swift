@@ -39,4 +39,3 @@ public enum LimitsKey: String {
     /// Represents the maximum size of a pure function's argument.
     case maxPureArgumentSize = "max_pure_argument_size"
 }
-

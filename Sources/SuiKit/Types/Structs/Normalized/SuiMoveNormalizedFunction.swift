@@ -42,7 +42,7 @@ public struct SuiMoveNormalizedFunction: Equatable {
 
     /// Represents the types of the values that the function can return.
     public let returnValues: [SuiMoveNormalizedType]
-    
+
     public init?(graphql: GetNormalizedMoveFunctionQuery.Data) {
         let function = graphql.object!.asMovePackage!.module!.function!
         guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }

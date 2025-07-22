@@ -37,7 +37,7 @@ public struct SuiObjectChangeWrapped {
     public let objectType: String
 
     /// The `ObjectId` type representing the ID of the object wrapped.
-    public let objectId: objectId
+    public let objectId: ObjectId
 
     /// The `SequenceNumber` type representing the version of the wrapped object.
     public let version: SequenceNumber

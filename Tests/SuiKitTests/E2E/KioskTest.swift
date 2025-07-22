@@ -87,19 +87,19 @@ final class KioskTest: XCTestCase {
         var txb = try TransactionBlock()
         let kioskTx = try KioskTransactionClient(transactionBlock: &txb, kioskClient: self.kioskClient!, kioskCap: kioskOwnerCaps[0])
 
-        let _ = try kioskTx.place(itemType: self.heroType!, item: .string(heroId))
+        _ = try kioskTx.place(itemType: self.heroType!, item: .string(heroId))
         let (item, promise) = try kioskTx.borrow(itemType: self.heroType!, itemId: heroId)
 
-        let _ = try txb.moveCall(target: "\(self.heroPackageId!)::hero::level_up", arguments: [item])
+        _ = try txb.moveCall(target: "\(self.heroPackageId!)::hero::level_up", arguments: [item])
         try kioskTx.returnValue(itemType: self.heroType!, item: item, promise: promise)
 
         // Let's try to increase health again by using callback style borrow
         try kioskTx.borrowTx(itemType: self.heroType!, itemId: heroId) { argument in
-            let _ = try txb.moveCall(target: "\(self.heroPackageId!)::hero::level_up", arguments: [argument])
+            _ = try txb.moveCall(target: "\(self.heroPackageId!)::hero::level_up", arguments: [argument])
         }
 
         try kioskTx.finalize()
-        let _ = try await self.toolBox!.executeTransactionBlock(txb: &txb)
+        _ = try await self.toolBox!.executeTransactionBlock(txb: &txb)
     }
 
     func testThatPurchasingAndResolvingItemsUnderAllRuleSetsWorksAsIntended() async throws {
@@ -139,7 +139,7 @@ final class KioskTest: XCTestCase {
         var txb = try TransactionBlock()
         let tpTx = TransferPolicyTransactionClient(params: TransferPolicyTransactionParams(kioskClient: self.kioskClient!, cap: villainPolicyCaps[0]), transactionBlock: &txb)
 
-        let _ = try tpTx
+        _ = try tpTx
             .addFloorPriceRule(minPrice: "10")
             .addLockRule()
             .addRoyaltyRule(percentageBps: "\(try (10.0).percentageToBasisPoints())", minAmount: "0")
@@ -150,7 +150,7 @@ final class KioskTest: XCTestCase {
             .removePersonalKioskRule()
             .withdraw(address: try self.toolBox!.address())
 
-        let _ = try await self.toolBox!.executeTransactionBlock(txb: &txb)
+        _ = try await self.toolBox!.executeTransactionBlock(txb: &txb)
     }
 
     func testThatFetchingKiosksByIdWorksAsIntended() async throws {
@@ -165,11 +165,11 @@ final class KioskTest: XCTestCase {
         func throwingFinalize() throws {
             var txb = try TransactionBlock()
             let kioskTx = try KioskTransactionClient(transactionBlock: &txb, kioskClient: self.kioskClient!)
-            let _ = try kioskTx
+            _ = try kioskTx
                 .createPersonal()
                 .finalize()
 
-            let _ = try kioskTx.withdraw(address: try self.toolBox!.address())  // Should throw an error
+            _ = try kioskTx.withdraw(address: try self.toolBox!.address())  // Should throw an error
         }
 
         XCTAssertThrowsError(try throwingFinalize())

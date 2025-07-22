@@ -17,7 +17,7 @@ public struct RPC_MOVE_ENUM_FIELDS: SuiKit.SelectionSet, Fragment {
     .field("name", String.self),
     .field("abilities", [GraphQLEnum<SuiKit.MoveAbility>]?.self),
     .field("typeParameters", [TypeParameter]?.self),
-    .field("variants", [Variant]?.self),
+    .field("variants", [Variant]?.self)
   ] }
 
   /// The enum's (unqualified) type name.
@@ -43,7 +43,7 @@ public struct RPC_MOVE_ENUM_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("isPhantom", Bool.self),
-      .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self),
+      .field("constraints", [GraphQLEnum<SuiKit.MoveAbility>].self)
     ] }
 
     public var isPhantom: Bool { __data["isPhantom"] }
@@ -61,7 +61,7 @@ public struct RPC_MOVE_ENUM_FIELDS: SuiKit.SelectionSet, Fragment {
     public static var __selections: [ApolloAPI.Selection] { [
       .field("__typename", String.self),
       .field("name", String.self),
-      .field("fields", [Field]?.self),
+      .field("fields", [Field]?.self)
     ] }
 
     /// The name of the variant
@@ -81,7 +81,7 @@ public struct RPC_MOVE_ENUM_FIELDS: SuiKit.SelectionSet, Fragment {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("name", String.self),
-        .field("type", Type_SelectionSet?.self),
+        .field("type", Type_SelectionSet?.self)
       ] }
 
       public var name: String { __data["name"] }
@@ -97,7 +97,7 @@ public struct RPC_MOVE_ENUM_FIELDS: SuiKit.SelectionSet, Fragment {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.OpenMoveType }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("signature", SuiKit.OpenMoveTypeSignatureApollo.self),
+          .field("signature", SuiKit.OpenMoveTypeSignatureApollo.self)
         ] }
 
         /// Structured representation of the type signature.

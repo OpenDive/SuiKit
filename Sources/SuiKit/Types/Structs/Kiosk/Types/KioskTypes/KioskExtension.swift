@@ -26,8 +26,8 @@
 import Foundation
 
 public struct KioskExtension {
-    public var objectId: String? = nil
-    public var type: String? = nil
+    public var objectId: String?
+    public var type: String?
 
     // These fields are only there if we have `withExtensions` flag
     public let isEnabled: Bool

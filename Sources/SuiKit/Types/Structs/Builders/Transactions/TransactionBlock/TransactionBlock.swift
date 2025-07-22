@@ -61,7 +61,7 @@ public class TransactionBlock {
     /// Sets the sender of the transaction if it is not set.
     /// - Parameter sender: A string representing the sender.
     public func setSenderIfNotSet(sender: String) throws {
-        if ((self.blockData.builder.sender) == nil) {
+        if (self.blockData.builder.sender) == nil {
             self.blockData.builder.sender = try AccountAddress.fromHex(sender)
         }
     }
@@ -162,11 +162,11 @@ public class TransactionBlock {
             }
         }
     }
-    
+
     public func object(id: String) throws -> TransactionObjectArgument {
         return try self.object(value: .string(id))
     }
-    
+
     public func object(objectArgument: ObjectArgument) throws -> TransactionObjectArgument {
         switch objectArgument {
         case .string(let string):
@@ -317,7 +317,7 @@ public class TransactionBlock {
     /// - Returns: A `TransactionArgument` representing the result of the publish operation.
     public func publish(
         modules: [Data],
-        dependencies: [objectId]
+        dependencies: [ObjectId]
     ) throws -> TransactionArgument {
         try self.add(
             transaction: .publish(
@@ -338,7 +338,7 @@ public class TransactionBlock {
     /// - Returns: A `TransactionArgument` representing the result of the publish operation.
     public func publish(
         modules: [String],
-        dependencies: [objectId]
+        dependencies: [ObjectId]
     ) throws -> TransactionArgument {
         return try self.add(
             transaction: .publish(
@@ -360,8 +360,8 @@ public class TransactionBlock {
     /// - Returns: A `TransactionArgument` representing the result of the upgrade operation.
     public func upgrade(
         modules: [Data],
-        dependencies: [objectId],
-        packageId: objectId,
+        dependencies: [ObjectId],
+        packageId: ObjectId,
         ticket: TransactionArgument
     ) throws -> TransactionArgument {
         try self.add(
@@ -619,7 +619,7 @@ public class TransactionBlock {
         var moveModulesToResolve: [MoveCallTransaction] = []
         var objectsToResolve: [ObjectsToResolve] = []
         var resolvedObjects: [ObjectsToResolve] = []
-        
+
         for input in blockData.inputs {
             if case .string(let str) = input.value {
                 objectsToResolve.append(ObjectsToResolve(id: try Inputs.normalizeSuiAddress(value: str), input: input, normalizedType: nil))
@@ -735,7 +735,7 @@ public class TransactionBlock {
             }
 
             // Resolve the fetched objects and manage the object IDs and references
-            var objectsById: [String : SuiObjectResponse] = [:]
+            var objectsById: [String: SuiObjectResponse] = [:]
             zip(dedupedIds, objects).forEach { (id, object) in
                 objectsById[id] = object
             }
@@ -747,7 +747,7 @@ public class TransactionBlock {
             // Process each object to resolve and update the blockData and related structures accordingly
             for i in 0..<objectsToResolve.count {
                 var objectToResolve = objectsToResolve[i]
-                
+
                 guard let object = objectsById[objectToResolve.id] else { continue }
 
                 // Update the input value in the objectsToResolve array based on the initial shared version or object reference
@@ -811,7 +811,7 @@ public class TransactionBlock {
             for objectToResolve in resolvedObjects {
                 self.blockData.builder.inputs[Int(objectToResolve.input.index)] = objectToResolve.input
             }
-            
+
             self.blockData.builder.inputs = self.blockData.builder.inputs.sorted { $0.index < $1.index }
         }
     }
@@ -868,7 +868,7 @@ public class TransactionBlock {
                     Int(blockData.builder.gasConfig.price ?? "1")!
                 )
 
-                let baseComputationCostWithOverhead = 
+                let baseComputationCostWithOverhead =
                     (Int(dryRunResult.effects?.gasUsed.computationCost ?? "0")!) +
                     safeOverhead
 

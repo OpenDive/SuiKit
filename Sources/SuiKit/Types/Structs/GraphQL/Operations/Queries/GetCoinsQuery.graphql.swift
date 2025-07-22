@@ -40,7 +40,7 @@ public class GetCoinsQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("address", Address?.self, arguments: ["address": .variable("owner")]),
+      .field("address", Address?.self, arguments: ["address": .variable("owner")])
     ] }
 
     /// Look-up an Account by its SuiAddressApollo.
@@ -61,7 +61,7 @@ public class GetCoinsQuery: GraphQLQuery {
           "first": .variable("first"),
           "after": .variable("cursor"),
           "type": .variable("type")
-        ]),
+        ])
       ] }
 
       public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -81,7 +81,7 @@ public class GetCoinsQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("pageInfo", PageInfo.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// Information to aid in pagination.
@@ -100,7 +100,7 @@ public class GetCoinsQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("hasNextPage", Bool.self),
-            .field("endCursor", String?.self),
+            .field("endCursor", String?.self)
           ] }
 
           /// When paginating forwards, are there more items?
@@ -124,7 +124,7 @@ public class GetCoinsQuery: GraphQLQuery {
             .field("address", SuiKit.SuiAddressApollo.self),
             .field("version", SuiKit.UInt53Apollo.self),
             .field("digest", String?.self),
-            .field("previousTransactionBlock", PreviousTransactionBlock?.self),
+            .field("previousTransactionBlock", PreviousTransactionBlock?.self)
           ] }
 
           /// Balance of this coin object.
@@ -150,7 +150,7 @@ public class GetCoinsQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveValue }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("type", Type_SelectionSet.self),
+              .field("type", Type_SelectionSet.self)
             ] }
 
             /// The value's Move type.
@@ -166,7 +166,7 @@ public class GetCoinsQuery: GraphQLQuery {
               public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveType }
               public static var __selections: [ApolloAPI.Selection] { [
                 .field("__typename", String.self),
-                .field("repr", String.self),
+                .field("repr", String.self)
               ] }
 
               /// Flat representation of the type signature, as a displayable string.
@@ -184,7 +184,7 @@ public class GetCoinsQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .field("digest", String?.self),
+              .field("digest", String?.self)
             ] }
 
             /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

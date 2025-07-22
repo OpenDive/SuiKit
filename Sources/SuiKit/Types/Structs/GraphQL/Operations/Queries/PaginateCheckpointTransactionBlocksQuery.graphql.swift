@@ -32,7 +32,7 @@ public class PaginateCheckpointTransactionBlocksQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("checkpoint", Checkpoint?.self, arguments: ["id": .variable("id")]),
+      .field("checkpoint", Checkpoint?.self, arguments: ["id": .variable("id")])
     ] }
 
     /// Fetch checkpoint information by sequence number or digest (defaults to the latest available
@@ -49,7 +49,7 @@ public class PaginateCheckpointTransactionBlocksQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Checkpoint }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("transactionBlocks", TransactionBlocks.self, arguments: ["after": .variable("after")]),
+        .field("transactionBlocks", TransactionBlocks.self, arguments: ["after": .variable("after")])
       ] }
 
       /// Transactions in this checkpoint.
@@ -83,7 +83,7 @@ public class PaginateCheckpointTransactionBlocksQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("pageInfo", PageInfo.self),
-          .field("nodes", [Node].self),
+          .field("nodes", [Node].self)
         ] }
 
         /// Information to aid in pagination.
@@ -102,7 +102,7 @@ public class PaginateCheckpointTransactionBlocksQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("hasNextPage", Bool.self),
-            .field("endCursor", String?.self),
+            .field("endCursor", String?.self)
           ] }
 
           /// When paginating forwards, are there more items?
@@ -121,7 +121,7 @@ public class PaginateCheckpointTransactionBlocksQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.TransactionBlock }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("digest", String?.self),
+            .field("digest", String?.self)
           ] }
 
           /// A 32-byte hash that uniquely identifies the transaction block contents, encoded in Base58.

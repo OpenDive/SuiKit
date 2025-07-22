@@ -38,7 +38,7 @@ final class JWTUtilsTest: XCTestCase {
         )
         XCTAssertEqual(extractedValue, "https://accounts.google.com")
     }
-    
+
     func testThatGeneratingNonceWorksAsIntended() throws {
         let pk = try ED25519PublicKey(value: "dkUcNsSSYV2cFz+L/WAlyxINuXHpah/MJnYZ57/GtKY=")
         let nonce = try zkLoginNonce.generateNonce(

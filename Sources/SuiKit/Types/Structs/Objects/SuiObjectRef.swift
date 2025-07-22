@@ -43,7 +43,7 @@ public struct SuiObjectRef: KeyProtocol {
     ///   - version: A `String` representing the version of the Sui Object.
     ///   - digest: A `TransactionDigest` representing the transaction digest.
     public init(
-        objectId: objectId,
+        objectId: ObjectId,
         version: String,
         digest: TransactionDigest
     ) {

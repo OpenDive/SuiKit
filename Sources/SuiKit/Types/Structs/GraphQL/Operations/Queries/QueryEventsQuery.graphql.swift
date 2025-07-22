@@ -51,7 +51,7 @@ public class QueryEventsQuery: GraphQLQuery {
         "after": .variable("after"),
         "last": .variable("last"),
         "before": .variable("before")
-      ]),
+      ])
     ] }
 
     /// Query events that are emitted in the network.
@@ -70,7 +70,7 @@ public class QueryEventsQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -91,7 +91,7 @@ public class QueryEventsQuery: GraphQLQuery {
           .field("hasNextPage", Bool.self),
           .field("hasPreviousPage", Bool.self),
           .field("endCursor", String?.self),
-          .field("startCursor", String?.self),
+          .field("startCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -114,7 +114,7 @@ public class QueryEventsQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Event }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .fragment(RPC_EVENTS_FIELDS.self),
+          .fragment(RPC_EVENTS_FIELDS.self)
         ] }
 
         /// The Move module containing some function that when called by

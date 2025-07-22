@@ -87,7 +87,7 @@ final class SECP256K1WalletTest: XCTestCase {
     func testThatCreatingSecp256k1AccountFromInvalidSecretKeyWithThrowAnError() throws {
         func invalidKeyThrow() throws {
             let secretKey = Data(self.invalidSecp256k1SecretKey)
-            let _ = try Account(privateKey: secretKey, accountType: .secp256k1)
+            _ = try Account(privateKey: secretKey, accountType: .secp256k1)
         }
 
         XCTAssertThrowsError(
@@ -133,7 +133,7 @@ final class SECP256K1WalletTest: XCTestCase {
 
     func testThatInvalidMnemonicsForSecp256k1AccountInitializationWillThrow() throws {
         func invalidMnemonics() throws {
-            let _ = try Account("aaa", accountType: .secp256k1)
+            _ = try Account("aaa", accountType: .secp256k1)
         }
 
         XCTAssertThrowsError(try invalidMnemonics())

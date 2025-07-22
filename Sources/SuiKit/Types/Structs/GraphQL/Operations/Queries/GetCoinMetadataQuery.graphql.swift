@@ -24,7 +24,7 @@ public class GetCoinMetadataQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("coinMetadata", CoinMetadata?.self, arguments: ["coinType": .variable("coinType")]),
+      .field("coinMetadata", CoinMetadata?.self, arguments: ["coinType": .variable("coinType")])
     ] }
 
     /// The coin metadata associated with the given coin type. Note that if the latest version of
@@ -46,7 +46,7 @@ public class GetCoinMetadataQuery: GraphQLQuery {
         .field("symbol", String?.self),
         .field("description", String?.self),
         .field("iconUrl", String?.self),
-        .field("address", SuiKit.SuiAddressApollo.self),
+        .field("address", SuiKit.SuiAddressApollo.self)
       ] }
 
       /// The number of decimal places used to represent the token.

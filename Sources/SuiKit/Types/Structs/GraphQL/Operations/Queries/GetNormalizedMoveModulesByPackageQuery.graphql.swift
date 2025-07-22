@@ -33,7 +33,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
 
     public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Query }
     public static var __selections: [ApolloAPI.Selection] { [
-      .field("object", Object?.self, arguments: ["address": .variable("packageId")]),
+      .field("object", Object?.self, arguments: ["address": .variable("packageId")])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -50,7 +50,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .field("asMovePackage", AsMovePackage?.self),
+        .field("asMovePackage", AsMovePackage?.self)
       ] }
 
       /// Attempts to convert the object into a MovePackage
@@ -67,7 +67,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("address", SuiKit.SuiAddressApollo.self),
-          .field("modules", Modules?.self, arguments: ["after": .variable("cursor")]),
+          .field("modules", Modules?.self, arguments: ["after": .variable("cursor")])
         ] }
 
         public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -85,7 +85,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
             .field("pageInfo", PageInfo.self),
-            .field("nodes", [Node].self),
+            .field("nodes", [Node].self)
           ] }
 
           /// Information to aid in pagination.
@@ -104,7 +104,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
               .field("hasNextPage", Bool.self),
-              .field("endCursor", String?.self),
+              .field("endCursor", String?.self)
             ] }
 
             /// When paginating forwards, are there more items?
@@ -123,7 +123,7 @@ public class GetNormalizedMoveModulesByPackageQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveModule }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_MOVE_MODULE_FIELDS.self),
+              .fragment(RPC_MOVE_MODULE_FIELDS.self)
             ] }
 
             /// The module's (unqualified) name.

@@ -41,7 +41,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
         "first": .variable("limit"),
         "after": .variable("cursor"),
         "filter": ["objectIds": .variable("ids")]
-      ]),
+      ])
     ] }
 
     /// The objects that exist in the network.
@@ -58,7 +58,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("pageInfo", PageInfo.self),
-        .field("nodes", [Node].self),
+        .field("nodes", [Node].self)
       ] }
 
       /// Information to aid in pagination.
@@ -77,7 +77,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
           .field("hasNextPage", Bool.self),
-          .field("endCursor", String?.self),
+          .field("endCursor", String?.self)
         ] }
 
         /// When paginating forwards, are there more items?
@@ -96,7 +96,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
         public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
         public static var __selections: [ApolloAPI.Selection] { [
           .field("__typename", String.self),
-          .field("asMoveObject", AsMoveObject?.self),
+          .field("asMoveObject", AsMoveObject?.self)
         ] }
 
         /// Attempts to convert the object into a MoveObject
@@ -112,7 +112,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
           public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.MoveObject }
           public static var __selections: [ApolloAPI.Selection] { [
             .field("__typename", String.self),
-            .field("asStakedSui", AsStakedSui?.self),
+            .field("asStakedSui", AsStakedSui?.self)
           ] }
 
           /// Attempts to convert the Move object into a `0x3::staking_pool::StakedSui`.
@@ -128,7 +128,7 @@ public class GetStakesByIdsQuery: GraphQLQuery {
             public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.StakedSui }
             public static var __selections: [ApolloAPI.Selection] { [
               .field("__typename", String.self),
-              .fragment(RPC_STAKE_FIELDS.self),
+              .fragment(RPC_STAKE_FIELDS.self)
             ] }
 
             /// The SUI that was initially staked.

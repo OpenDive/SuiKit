@@ -65,7 +65,7 @@ public class TryGetPastObjectQuery: GraphQLQuery {
       .field("object", Object?.self, arguments: [
         "address": .variable("id"),
         "version": .variable("version")
-      ]),
+      ])
     ] }
 
     /// The object corresponding to the given address at the (optionally) given version.
@@ -86,7 +86,7 @@ public class TryGetPastObjectQuery: GraphQLQuery {
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
         .field("address", SuiKit.SuiAddressApollo.self),
-        .field("version", SuiKit.UInt53Apollo.self),
+        .field("version", SuiKit.UInt53Apollo.self)
       ] }
 
       public var address: SuiKit.SuiAddressApollo { __data["address"] }
@@ -103,7 +103,7 @@ public class TryGetPastObjectQuery: GraphQLQuery {
       public static var __parentType: any ApolloAPI.ParentType { SuiKit.Objects.Object }
       public static var __selections: [ApolloAPI.Selection] { [
         .field("__typename", String.self),
-        .fragment(RPC_OBJECT_FIELDS.self),
+        .fragment(RPC_OBJECT_FIELDS.self)
       ] }
 
       public var objectId: SuiKit.SuiAddressApollo { __data["objectId"] }

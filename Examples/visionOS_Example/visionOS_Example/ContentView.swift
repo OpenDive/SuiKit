@@ -15,7 +15,7 @@ import AppAuthCore
 import SuiKit
 
 struct ContentView: View {
-    @State private var zkAddress: String? = nil
+    @State private var zkAddress: String?
 
     var body: some View {
         VStack {
@@ -27,7 +27,7 @@ struct ContentView: View {
                     startGoogleSignIn()
                 }
             }
-            
+
             Text("Hello, world!")
         }
         .padding()
@@ -38,10 +38,10 @@ struct ContentView: View {
         let redirectUri = "io.opendive.TestOIDXROS:/oauth2redirect"
         let authUrl = URL(string: "https://accounts.google.com/o/oauth2/v2/auth?client_id=\(clientId)&redirect_uri=\(redirectUri)&response_type=code&scope=email")!
         let callbackUrlScheme = "io.opendive.TestOIDXROS"
-        
+
         let authenticationSession = ASWebAuthenticationSession(url: authUrl, callbackURLScheme: callbackUrlScheme) { callbackURL, error in
             guard error == nil, let callbackURL = callbackURL else { return }
-            
+
             let queryItems = URLComponents(string: callbackURL.absoluteString)?.queryItems
             if let code = queryItems?.first(where: { $0.name == "code" })?.value {
                 // Ensure the configuration is discovered before attempting to exchange the code
@@ -49,7 +49,7 @@ struct ContentView: View {
                 let googleTokenEndpoint = URL(string: "https://oauth2.googleapis.com/token")!
                 let googleConfiguration = OIDServiceConfiguration(authorizationEndpoint: googleAuthorizationEndpoint,
                                                                    tokenEndpoint: googleTokenEndpoint)
-                
+
                 let codeExchangeRequest = OIDTokenRequest(
                     configuration: googleConfiguration,
                     grantType: OIDGrantTypeAuthorizationCode,
@@ -62,13 +62,13 @@ struct ContentView: View {
                     codeVerifier: nil,
                     additionalParameters: nil
                 )
-                
+
                 // Perform the token request
                 OIDAuthorizationService.perform(codeExchangeRequest) { response, error in
                     DispatchQueue.main.async {
                         if let tokenResponse = response {
                             let credentials = GoogleAuthProvider.credential(withIDToken: tokenResponse.idToken!, accessToken: tokenResponse.accessToken!)
-                            
+
                             Auth.auth().signIn(with: credentials) { authResult, error in
                                 if let error = error {
                                     print(error.localizedDescription)

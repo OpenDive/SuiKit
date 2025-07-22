@@ -138,27 +138,27 @@ public final class Deserializer {
 
     private func deserializeU16() throws -> UInt16 {
         let bytes = try readBytes(2)
-        return bytes.load(as: UInt16.self).littleEndian
+        return bytes.loadUnaligned(as: UInt16.self).littleEndian
     }
 
     private func deserializeU32() throws -> UInt32 {
         let bytes = try readBytes(4)
-        return bytes.load(as: UInt32.self).littleEndian
+        return bytes.loadUnaligned(as: UInt32.self).littleEndian
     }
 
     private func deserializeU64() throws -> UInt64 {
         let bytes = try readBytes(8)
-        return bytes.load(as: UInt64.self).littleEndian
+        return bytes.loadUnaligned(as: UInt64.self).littleEndian
     }
 
     private func deserializeU128() throws -> UInt128 {
         let bytes = try readBytes(16)
-        return bytes.load(as: UInt128.self).littleEndian
+        return bytes.loadUnaligned(as: UInt128.self).littleEndian
     }
 
     private func deserializeU256() throws -> UInt256 {
         let bytes = try readBytes(32)
-        return bytes.load(as: UInt256.self).littleEndian
+        return bytes.loadUnaligned(as: UInt256.self).littleEndian
     }
 
     // MARK: - ULEB128 Decoding (Optimized)

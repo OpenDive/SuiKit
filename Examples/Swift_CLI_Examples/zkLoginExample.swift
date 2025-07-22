@@ -36,7 +36,7 @@ class ZkLoginExample {
 
     // Services
     private let provider: SuiProvider
-    private let zkLoginAuthenticator: zkLoginAuthenticator
+    private let zkLoginAuthenticator: ZkLoginAuthenticator
     private let proofService: RemoteZkProofService
 
     /// Initialize the zkLogin example
@@ -67,7 +67,7 @@ class ZkLoginExample {
 
         // Initialize services
         self.provider = SuiProvider(url: networkUrl)
-        self.zkLoginAuthenticator = zkLoginAuthenticator(provider: provider)
+        self.zkLoginAuthenticator = ZkLoginAuthenticator(provider: provider)
         self.proofService = RemoteZkProofService(url: proofServiceUrl!)
     }
 
@@ -83,17 +83,17 @@ class ZkLoginExample {
         provider: OAuthProvider
     ) async throws -> (url: URL, ephemeralKeypair: KeyPair, randomness: [UInt8], maxEpoch: UInt64) {
         // Generate ephemeral keypair - using Secure Enclave compatible key when possible
-        let ephemeralKeypair = try zkLoginAuthenticator.generateEphemeralKeypair(scheme: .secp256r1)
+        let ephemeralKeypair = try ZkLoginAuthenticator.generateEphemeralKeypair(scheme: .secp256r1)
 
         // Get current epoch and calculate max epoch (current + 2)
         let epochInfo = try await provider.getzkLoginEpochInfo()
         let maxEpoch = epochInfo.epoch + 2
 
         // Generate randomness for nonce
-        let randomness = try zkLoginAuthenticator.generateRandomness()
+        let randomness = try ZkLoginAuthenticator.generateRandomness()
 
         // Generate nonce using ephemeral public key
-        let nonce = try zkLoginAuthenticator.generateNonce(
+        let nonce = try ZkLoginAuthenticator.generateNonce(
             publicKey: ephemeralKeypair.publicKey,
             maxEpoch: maxEpoch,
             randomness: randomness
@@ -180,10 +180,10 @@ class ZkLoginExample {
         randomness: [UInt8]
     ) async throws -> (address: String, signature: zkLoginSignature) {
         // Get zkLogin address
-        let address = try zkLoginAuthenticator.derivezkLoginAddress(jwt: jwt, userSalt: salt)
+        let address = try ZkLoginAuthenticator.derivezkLoginAddress(jwt: jwt, userSalt: salt)
 
         // Generate ZK proof and get zkLogin signature
-        let signature = try await zkLoginAuthenticator.processJWT(
+        let signature = try await ZkLoginAuthenticator.processJWT(
             jwt: jwt,
             userSalt: salt,
             ephemeralKeyPair: ephemeralKeypair,
@@ -211,7 +211,7 @@ class ZkLoginExample {
         amount: UInt64
     ) async throws -> String {
         // Create zkLogin signer
-        let zkLoginSigner = zkLoginAuthenticator.createSigner(
+        let zkLoginAuthenticator = ZkLoginAuthenticator.createSigner(
             ephemeralKeyPair: ephemeralKeypair,
             zkLoginSignature: zkLoginSignature,
             userAddress: userAddress
@@ -225,7 +225,7 @@ class ZkLoginExample {
         try transaction.transferObjects([coin], transaction.pure(value: .address(recipientAddress)))
 
         // Sign and execute the transaction
-        let response = try await zkLoginSigner.signAndExecuteTransaction(
+        let response = try await zkLoginAuthenticator.signAndExecuteTransaction(
             transactionBlock: &transaction
         )
 

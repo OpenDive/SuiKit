@@ -1,5 +1,5 @@
 //
-//  zkLoginSignerTests.swift
+//  ZkLoginAuthenticatorTests.swift
 //  SuiKit
 //
 //  Copyright (c) 2024-2025 OpenDive
@@ -92,7 +92,7 @@ final class ZkLoginSignerTests: XCTestCase {
 
     func testSignatureParsedSuccessfully() throws {
         // Parse the signature (matching TypeScript test logic)
-        let parsedSignature = try zkLoginSigner.parseSignature(aSignature)
+        let parsedSignature = try ZkLoginAuthenticator.parseSignature(aSignature)
 
         // Verify the signature components match expected values
         XCTAssertEqual(parsedSignature.maxEpoch, 174)
@@ -124,7 +124,7 @@ final class ZkLoginSignerTests: XCTestCase {
         )
 
         // Serialize and verify it matches expected result
-        let serialized = try zkLoginSigner.serializeSignature(signature)
+        let serialized = try ZkLoginAuthenticator.serializeSignature(signature)
         XCTAssertEqual(serialized, aSignature)
     }
 
@@ -135,11 +135,11 @@ final class ZkLoginSignerTests: XCTestCase {
         let messageBytes = "hello".data(using: .utf8)!.bytes
 
         // Parse the personal message signature
-        let parsedSignature = try zkLoginSigner.parseSignature(personalMessageSignature)
+        let parsedSignature = try ZkLoginAuthenticator.parseSignature(personalMessageSignature)
 
         // Create a zkLogin signer with the mock client
         let toolbox = try fetchToolBox()
-        let signer = SuiKit.zkLoginSigner(
+        let signer = SuiKit.ZkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
             zkLoginSignature: parsedSignature,
@@ -174,11 +174,11 @@ final class ZkLoginSignerTests: XCTestCase {
         }
 
         // Parse the transaction signature
-        let parsedSignature = try zkLoginSigner.parseSignature(transactionSignature)
+        let parsedSignature = try ZkLoginAuthenticator.parseSignature(transactionSignature)
 
         // Create a zkLogin signer with the mock client
         let toolbox = try fetchToolBox()
-        let signer = SuiKit.zkLoginSigner(
+        let signer = SuiKit.ZkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
             zkLoginSignature: parsedSignature,
@@ -206,9 +206,9 @@ final class ZkLoginSignerTests: XCTestCase {
         XCTAssertFalse(failResult)
     }
 
-    // MARK: - zkLoginSigner Creation and Basic Operations Tests
+    // MARK: - ZkLoginAuthenticator Creation and Basic Operations Tests
 
-    func testzkLoginSignerCreation() throws {
+    func testZkLoginAuthenticatorCreation() throws {
         let toolbox = try fetchToolBox()
 
         let zkSignature = zkLoginSignature(
@@ -220,7 +220,7 @@ final class ZkLoginSignerTests: XCTestCase {
         let userAddress = "0x1234567890abcdef1234567890abcdef12345678"
 
         // Create signer
-        let signer = SuiKit.zkLoginSigner(
+        let signer = SuiKit.ZkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
             zkLoginSignature: zkSignature,
@@ -241,7 +241,7 @@ final class ZkLoginSignerTests: XCTestCase {
     func testzkLoginSignatureCreation() throws {
         let toolbox = try fetchToolBox()
 
-        let signer = SuiKit.zkLoginSigner(
+        let signer = SuiKit.ZkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
             zkLoginSignature: zkLoginSignature(
@@ -269,7 +269,7 @@ final class ZkLoginSignerTests: XCTestCase {
 
     func testParseSerializedzkLoginSignature() throws {
         // Test the utility function that extracts both public key and signature
-        let result = try SuiKit.zkLoginSigner.parseSerializedZkLoginSignature(
+        let result = try SuiKit.ZkLoginAuthenticator.parseSerializedZkLoginSignature(
             aSignature,
             graphQLClient: graphQLClient
         )
@@ -289,7 +289,7 @@ final class ZkLoginSignerTests: XCTestCase {
         let toolbox = try fetchToolBox()
 
         // Create signer without GraphQL client
-        let signer = SuiKit.zkLoginSigner(
+        let signer = SuiKit.ZkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
             zkLoginSignature: zkLoginSignature(

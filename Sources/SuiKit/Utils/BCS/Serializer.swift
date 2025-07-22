@@ -25,35 +25,60 @@
 
 import Foundation
 import UInt256
+import simd
+import Accelerate
 
 /// A highly optimized BCS (Binary Canonical Serialization) Serializer
 /// Based on the reference Rust implementation with zero-copy optimizations
+/// Includes SIMD optimizations for Apple Silicon devices
 public final class Serializer {
 
     // MARK: - Constants
     private static let MAX_SEQUENCE_LENGTH: UInt32 = (1 << 31) - 1
     private static let MAX_CONTAINER_DEPTH = 500
-    private static let INITIAL_CAPACITY = 1024
+    public static let INITIAL_CAPACITY = 1024
+
+    // SIMD optimization constants
+    private static let SIMD_THRESHOLD = 64 // Minimum elements for SIMD operations
+    private static let ALIGNMENT = 32 // Alignment for SIMD operations
 
     // MARK: - Properties
     private var buffer: UnsafeMutableRawBufferPointer
     private var capacity: Int
     private var count: Int = 0
     private var containerDepth: Int = 0
+    private var allocator: BCSAllocator?
+    private var isAligned: Bool = false
 
     // MARK: - Initialization
     public init() {
         self.capacity = Self.INITIAL_CAPACITY
         self.buffer = UnsafeMutableRawBufferPointer.allocate(byteCount: capacity, alignment: 1)
+        self.allocator = nil
+        self.isAligned = false
     }
 
     public init(capacity: Int) {
         self.capacity = capacity
         self.buffer = UnsafeMutableRawBufferPointer.allocate(byteCount: capacity, alignment: 1)
+        self.allocator = nil
+        self.isAligned = false
+    }
+
+    /// Initialize with a custom allocator for SIMD optimization
+    public init(allocator: BCSAllocator, capacity: Int = INITIAL_CAPACITY) {
+        self.capacity = capacity
+        self.allocator = allocator
+        self.buffer = allocator.allocateAligned(byteCount: capacity, alignment: Self.ALIGNMENT)
+        self.isAligned = true
     }
 
     deinit {
-        buffer.deallocate()
+        if let allocator = allocator {
+            allocator.deallocate(buffer)
+        } else {
+            buffer.deallocate()
+        }
     }
 
     /// Reset the serializer for reuse
@@ -73,13 +98,29 @@ public final class Serializer {
         guard count + needed > capacity else { return }
 
         let newCapacity = Swift.max(capacity * 2, count + needed)
-        let newBuffer = UnsafeMutableRawBufferPointer.allocate(byteCount: newCapacity, alignment: 1)
+        let newBuffer: UnsafeMutableRawBufferPointer
 
-        // Copy existing data
-        newBuffer.copyMemory(from: UnsafeRawBufferPointer(rebasing: buffer.prefix(count)))
+        if let allocator = allocator {
+            newBuffer = allocator.allocateAligned(byteCount: newCapacity, alignment: Self.ALIGNMENT)
+        } else {
+            newBuffer = UnsafeMutableRawBufferPointer.allocate(byteCount: newCapacity, alignment: 1)
+        }
 
-        // Update properties
-        buffer.deallocate()
+        // Copy existing data using optimized method if aligned
+        if count != 0 {
+            newBuffer.baseAddress!.copyMemory(
+                from: buffer.baseAddress!,
+                byteCount: count
+            )
+        }
+
+        // Deallocate old buffer
+        if let allocator = allocator {
+            allocator.deallocate(buffer)
+        } else {
+            buffer.deallocate()
+        }
+
         buffer = newBuffer
         capacity = newCapacity
     }
@@ -185,6 +226,178 @@ public final class Serializer {
             remaining >>= 7
         }
         writeByte(UInt8(remaining & 0x7F))
+    }
+
+    // MARK: - SIMD-Optimized Array Serialization
+
+    /// SIMD-optimized serialization for arrays of UInt16 values
+    public func serializeU16Array(_ values: [UInt16]) throws {
+        try serializeULEB128(UInt32(values.count))
+
+        guard values.count >= Self.SIMD_THRESHOLD else {
+            // Fallback to standard serialization for small arrays
+            for value in values {
+                serializeU16(value)
+            }
+            return
+        }
+
+        ensureCapacity(values.count * 2)
+
+        // Use SIMD for endian conversion and bulk processing
+        values.withUnsafeBufferPointer { valuesPtr in
+            let simdCount = (values.count / 8) * 8 // Round down to multiple of 8
+
+            // Process 8 elements at a time using SIMD
+            for i in stride(from: 0, to: simdCount, by: 8) {
+                // Convert to little endian using SIMD
+                let littleEndianValues = simd_ushort8(
+                    valuesPtr[i].littleEndian,
+                    valuesPtr[i + 1].littleEndian,
+                    valuesPtr[i + 2].littleEndian,
+                    valuesPtr[i + 3].littleEndian,
+                    valuesPtr[i + 4].littleEndian,
+                    valuesPtr[i + 5].littleEndian,
+                    valuesPtr[i + 6].littleEndian,
+                    valuesPtr[i + 7].littleEndian
+                )
+
+                // Store directly to buffer
+                withUnsafeBytes(of: littleEndianValues) { bytes in
+                    buffer.baseAddress!.advanced(by: count).copyMemory(
+                        from: bytes.baseAddress!,
+                        byteCount: 16
+                    )
+                }
+                count += 16
+            }
+
+            // Handle remaining elements
+            for i in simdCount..<values.count {
+                serializeU16(valuesPtr[i])
+            }
+        }
+    }
+
+    /// SIMD-optimized serialization for arrays of UInt32 values
+    public func serializeU32Array(_ values: [UInt32]) throws {
+        try serializeULEB128(UInt32(values.count))
+
+        guard values.count >= Self.SIMD_THRESHOLD else {
+            for value in values {
+                serializeU32(value)
+            }
+            return
+        }
+
+        ensureCapacity(values.count * 4)
+
+        values.withUnsafeBufferPointer { valuesPtr in
+            let simdCount = (values.count / 4) * 4
+
+            // Process 4 elements at a time using SIMD
+            for i in stride(from: 0, to: simdCount, by: 4) {
+                let simdValues = simd_uint4(
+                    valuesPtr[i].littleEndian,
+                    valuesPtr[i + 1].littleEndian,
+                    valuesPtr[i + 2].littleEndian,
+                    valuesPtr[i + 3].littleEndian
+                )
+
+                withUnsafeBytes(of: simdValues) { bytes in
+                    buffer.baseAddress!.advanced(by: count).copyMemory(
+                        from: bytes.baseAddress!,
+                        byteCount: 16
+                    )
+                }
+                count += 16
+            }
+
+            // Handle remaining elements
+            for i in simdCount..<values.count {
+                serializeU32(valuesPtr[i])
+            }
+        }
+    }
+
+    /// SIMD-optimized serialization for arrays of UInt64 values
+    public func serializeU64Array(_ values: [UInt64]) throws {
+        try serializeULEB128(UInt32(values.count))
+
+        guard values.count >= Self.SIMD_THRESHOLD else {
+            for value in values {
+                serializeU64(value)
+            }
+            return
+        }
+
+        ensureCapacity(values.count * 8)
+
+        values.withUnsafeBufferPointer { valuesPtr in
+            let simdCount = (values.count / 2) * 2
+
+            // Process 2 elements at a time using SIMD
+            for i in stride(from: 0, to: simdCount, by: 2) {
+                let simdValues = simd_ulong2(
+                    UInt(valuesPtr[i].littleEndian),
+                    UInt(valuesPtr[i + 1].littleEndian)
+                )
+
+                withUnsafeBytes(of: simdValues) { bytes in
+                    buffer.baseAddress!.advanced(by: count).copyMemory(
+                        from: bytes.baseAddress!,
+                        byteCount: 16
+                    )
+                }
+                count += 16
+            }
+
+            // Handle remaining elements
+            for i in simdCount..<values.count {
+                serializeU64(valuesPtr[i])
+            }
+        }
+    }
+
+    /// SIMD-optimized boolean array serialization
+    public func boolArray(_ values: [Bool]) throws {
+        try serializeULEB128(UInt32(values.count))
+
+        guard values.count >= Self.SIMD_THRESHOLD else {
+            for value in values {
+                serializeBool(value)
+            }
+            return
+        }
+
+        // Pack booleans into bytes using SIMD
+        ensureCapacity((values.count + 7) / 8)
+
+        values.withUnsafeBufferPointer { valuesPtr in
+            let packedCount = values.count / 8
+            let remainder = values.count % 8
+
+            for i in 0..<packedCount {
+                var packedByte: UInt8 = 0
+                for j in 0..<8 {
+                    if valuesPtr[i * 8 + j] {
+                        packedByte |= (1 << j)
+                    }
+                }
+                writeByte(packedByte)
+            }
+
+            // Handle remaining booleans
+            if remainder > 0 {
+                var packedByte: UInt8 = 0
+                for j in 0..<remainder {
+                    if valuesPtr[packedCount * 8 + j] {
+                        packedByte |= (1 << j)
+                    }
+                }
+                writeByte(packedByte)
+            }
+        }
     }
 
     // MARK: - Legacy API Compatibility Layer

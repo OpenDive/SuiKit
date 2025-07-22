@@ -25,6 +25,8 @@
 
 import Foundation
 import UInt256
+import simd
+import Accelerate
 
 /// The max UInt8 value
 let MAX_U8 = UInt8.max
@@ -46,22 +48,53 @@ let MAX_U256 = UInt256.max
 
 /// A highly optimized BCS (Binary Canonical Serialization) Deserializer
 /// Based on the reference Rust implementation with zero-copy optimizations
+/// Includes SIMD optimizations for Apple Silicon devices
 public final class Deserializer {
 
     // MARK: - Constants
     private static let MAX_SEQUENCE_LENGTH: UInt32 = (1 << 31) - 1
     private static let MAX_CONTAINER_DEPTH = 500
 
+    // SIMD optimization constants
+    private static let SIMD_THRESHOLD = 64 // Minimum elements for SIMD operations
+    private static let CACHE_LINE_SIZE = 64 // Apple Silicon cache line size
+    private static let PREFETCH_DISTANCE = 128 // Bytes to prefetch ahead
+
     // MARK: - Properties
     private let buffer: UnsafeRawBufferPointer
     private var position: Int = 0
     private var containerDepth: Int = 0
     private let originalData: Data // Keep reference to prevent deallocation
+    private var allocator: BCSAllocator?
+
+    // Performance tracking for SIMD operations
+    private var simdOperationsCount: Int = 0
+    private var totalBytesProcessed: Int = 0
+    private var cacheOptimalAccesses: Int = 0
+
+    // MARK: - Position Management (for Deserializer compatibility)
+    internal func setPosition(with newPosition: Int) {
+        position = newPosition
+    }
+
+    internal func getPosition() -> Int {
+        return position
+    }
 
     // MARK: - Initialization
 
     public init(data: Data) {
         self.originalData = data
+        self.allocator = nil
+        self.buffer = data.withUnsafeBytes { bytes in
+            UnsafeRawBufferPointer(bytes)
+        }
+    }
+
+    /// Initialize with a custom allocator for SIMD optimization
+    public init(data: Data, allocator: BCSAllocator) {
+        self.originalData = data
+        self.allocator = allocator
         self.buffer = data.withUnsafeBytes { bytes in
             UnsafeRawBufferPointer(bytes)
         }
@@ -221,6 +254,220 @@ public final class Deserializer {
     private func deserializeFixedData(_ length: Int) throws -> Data {
         let bytes = try readBytes(length)
         return Data(bytes)
+    }
+
+    // MARK: - SIMD-Optimized Array Deserialization
+
+    /// SIMD-optimized deserialization for arrays of UInt16 values
+    public func deserializeU16Array() throws -> [UInt16] {
+        let length = try deserializeULEB128()
+
+        guard length <= Self.MAX_SEQUENCE_LENGTH else {
+            throw BCSError.sequenceTooLong(Int(length))
+        }
+
+        let count = Int(length)
+        guard count >= Self.SIMD_THRESHOLD else {
+            // Fallback to standard deserialization for small arrays
+            var result: [UInt16] = []
+            result.reserveCapacity(count)
+            for _ in 0..<count {
+                result.append(try deserializeU16())
+            }
+            return result
+        }
+
+        simdOperationsCount += 1
+        let bytes = try readBytes(count * 2)
+
+        // Use SIMD for bulk endian conversion - use safe unaligned loads
+        let result: [UInt16] = Array(unsafeUninitializedCapacity: count) { buffer, initializedCount in
+            let simdCount = (count / 8) * 8
+
+            // Process 8 elements at a time using SIMD with safe unaligned loads
+            for i in stride(from: 0, to: simdCount, by: 8) {
+                let baseOffset = i * 2
+
+                // Load 8 UInt16 values safely using unaligned loads
+                let val0 = bytes.loadUnaligned(fromByteOffset: baseOffset, as: UInt16.self).littleEndian
+                let val1 = bytes.loadUnaligned(fromByteOffset: baseOffset + 2, as: UInt16.self).littleEndian
+                let val2 = bytes.loadUnaligned(fromByteOffset: baseOffset + 4, as: UInt16.self).littleEndian
+                let val3 = bytes.loadUnaligned(fromByteOffset: baseOffset + 6, as: UInt16.self).littleEndian
+                let val4 = bytes.loadUnaligned(fromByteOffset: baseOffset + 8, as: UInt16.self).littleEndian
+                let val5 = bytes.loadUnaligned(fromByteOffset: baseOffset + 10, as: UInt16.self).littleEndian
+                let val6 = bytes.loadUnaligned(fromByteOffset: baseOffset + 12, as: UInt16.self).littleEndian
+                let val7 = bytes.loadUnaligned(fromByteOffset: baseOffset + 14, as: UInt16.self).littleEndian
+
+                let simdValues = simd_ushort8(val0, val1, val2, val3, val4, val5, val6, val7)
+
+                // Store SIMD results
+                withUnsafeBytes(of: simdValues) { simdBytes in
+                    let simdU16Ptr = simdBytes.bindMemory(to: UInt16.self)
+                    for j in 0..<8 {
+                        buffer[i + j] = simdU16Ptr[j]
+                    }
+                }
+            }
+
+            // Handle remaining elements with safe unaligned loads
+            for i in simdCount..<count {
+                let offset = i * 2
+                buffer[i] = bytes.loadUnaligned(fromByteOffset: offset, as: UInt16.self).littleEndian
+            }
+
+            initializedCount = count
+        }
+
+        return result
+    }
+
+    /// SIMD-optimized deserialization for arrays of UInt32 values
+    public func deserializeU32Array() throws -> [UInt32] {
+        let length = try deserializeULEB128()
+        let count = Int(length)
+
+        guard count >= Self.SIMD_THRESHOLD else {
+            var result: [UInt32] = []
+            result.reserveCapacity(count)
+            for _ in 0..<count {
+                result.append(try deserializeU32())
+            }
+            return result
+        }
+
+        simdOperationsCount += 1
+        let bytes = try readBytes(count * 4)
+
+        let result: [UInt32] = Array(unsafeUninitializedCapacity: count) { buffer, initializedCount in
+            let simdCount = (count / 4) * 4
+
+            // Process 4 elements at a time using SIMD with safe unaligned loads
+            for i in stride(from: 0, to: simdCount, by: 4) {
+                let baseOffset = i * 4
+
+                // Load 4 UInt32 values safely using unaligned loads
+                let val0 = bytes.loadUnaligned(fromByteOffset: baseOffset, as: UInt32.self).littleEndian
+                let val1 = bytes.loadUnaligned(fromByteOffset: baseOffset + 4, as: UInt32.self).littleEndian
+                let val2 = bytes.loadUnaligned(fromByteOffset: baseOffset + 8, as: UInt32.self).littleEndian
+                let val3 = bytes.loadUnaligned(fromByteOffset: baseOffset + 12, as: UInt32.self).littleEndian
+
+                let simdValues = simd_uint4(val0, val1, val2, val3)
+
+                withUnsafeBytes(of: simdValues) { simdBytes in
+                    let simdU32Ptr = simdBytes.bindMemory(to: UInt32.self)
+                    for j in 0..<4 {
+                        buffer[i + j] = simdU32Ptr[j]
+                    }
+                }
+            }
+
+            // Handle remaining elements with safe unaligned loads
+            for i in simdCount..<count {
+                let offset = i * 4
+                buffer[i] = bytes.loadUnaligned(fromByteOffset: offset, as: UInt32.self).littleEndian
+            }
+
+            initializedCount = count
+        }
+
+        return result
+    }
+
+    /// SIMD-optimized deserialization for arrays of UInt64 values
+    public func deserializeU64Array() throws -> [UInt64] {
+        let length = try deserializeULEB128()
+        let count = Int(length)
+
+        guard count >= Self.SIMD_THRESHOLD else {
+            var result: [UInt64] = []
+            result.reserveCapacity(count)
+            for _ in 0..<count {
+                result.append(try deserializeU64())
+            }
+            return result
+        }
+
+        simdOperationsCount += 1
+        let bytes = try readBytes(count * 8)
+
+        let result: [UInt64] = Array(unsafeUninitializedCapacity: count) { buffer, initializedCount in
+            let simdCount = (count / 2) * 2
+
+            // Process 2 elements at a time using SIMD with safe unaligned loads
+            for i in stride(from: 0, to: simdCount, by: 2) {
+                let baseOffset = i * 8
+
+                // Load 2 UInt64 values safely using unaligned loads
+                let val0 = bytes.loadUnaligned(fromByteOffset: baseOffset, as: UInt64.self).littleEndian
+                let val1 = bytes.loadUnaligned(fromByteOffset: baseOffset + 8, as: UInt64.self).littleEndian
+
+                let simdValues = simd_ulong2(UInt(val0), UInt(val1))
+
+                withUnsafeBytes(of: simdValues) { simdBytes in
+                    let simdU64Ptr = simdBytes.bindMemory(to: UInt64.self)
+                    for j in 0..<2 {
+                        buffer[i + j] = simdU64Ptr[j]
+                    }
+                }
+            }
+
+            // Handle remaining elements with safe unaligned loads
+            for i in simdCount..<count {
+                let offset = i * 8
+                buffer[i] = bytes.loadUnaligned(fromByteOffset: offset, as: UInt64.self).littleEndian
+            }
+
+            initializedCount = count
+        }
+
+        return result
+    }
+
+    /// Deserialize packed boolean arrays using SIMD operations
+    public func deserializeBoolArray() throws -> [Bool] {
+        let length = try deserializeULEB128()
+        let count = Int(length)
+        
+        guard count >= Self.SIMD_THRESHOLD else {
+            var result: [Bool] = []
+            result.reserveCapacity(count)
+            for _ in 0..<count {
+                result.append(try deserializeBool())
+            }
+            return result
+        }
+
+        simdOperationsCount += 1
+        
+        // Read packed bytes
+        let packedByteCount = (count + 7) / 8
+        let packedBytes = try readBytes(packedByteCount)
+        
+        let result: [Bool] = Array(unsafeUninitializedCapacity: count) { buffer, initializedCount in
+            packedBytes.withMemoryRebound(to: UInt8.self) { byteBuffer in
+                let fullBytes = count / 8
+                let remainingBits = count % 8
+                
+                // Process full bytes using bit manipulation
+                for i in 0..<fullBytes {
+                    let packedByte = byteBuffer[i]
+                    for j in 0..<8 {
+                        buffer[i * 8 + j] = (packedByte & (1 << j)) != 0
+                    }
+                }
+                
+                // Handle remaining bits
+                if remainingBits > 0 {
+                    let packedByte = byteBuffer[fullBytes]
+                    for j in 0..<remainingBits {
+                        buffer[fullBytes * 8 + j] = (packedByte & (1 << j)) != 0
+                    }
+                }
+            }
+            initializedCount = count
+        }
+        
+        return result
     }
 
     // MARK: - Legacy API Compatibility Layer

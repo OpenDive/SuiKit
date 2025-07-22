@@ -30,13 +30,13 @@ import BigInt
 
 final class zkLoginAddressTests: XCTestCase {
     func testThatVerifieszkLoginFunctionsGenerateTheCorrectAddressAsIntended() throws {
-        let computedAddress = try zkLoginUtilities.computezkLoginAddressFromSeed(addressSeed: BigInt("13322897930163218532266430409510394316985274769125667290600321564259466511711"), issInput: "https://accounts.google.com")
-        XCTAssertEqual("0xf7badc2b245c7f74d7509a4aa357ecf80a29e7713fb4c44b0e7541ec43885ee1", computedAddress)
+        let computedAddress = try zkLoginPublicIdentifier(addressSeed: BigInt("13322897930163218532266430409510394316985274769125667290600321564259466511711"), iss: "https://accounts.google.com")
+        try XCTAssertEqual("0xf7badc2b245c7f74d7509a4aa357ecf80a29e7713fb4c44b0e7541ec43885ee1", computedAddress.toSuiAddress())
     }
 
     func testThatVerifieszkLoginFunctionsGenerateTheCorrectAddressWithLeadingZeros() throws {
-        let computedAddress = try zkLoginUtilities.computezkLoginAddressFromSeed(addressSeed: BigInt("380704556853533152350240698167704405529973457670972223618755249929828551006"), issInput: "https://accounts.google.com")
-        XCTAssertEqual("0xbd8b8ed42d90aebc71518385d8a899af14cef8b5a171c380434dd6f5bbfe7bf3", computedAddress)
+        let computedAddress = try zkLoginPublicIdentifier(addressSeed: BigInt("380704556853533152350240698167704405529973457670972223618755249929828551006"), iss: "https://accounts.google.com")
+        try XCTAssertEqual("0xbd8b8ed42d90aebc71518385d8a899af14cef8b5a171c380434dd6f5bbfe7bf3", computedAddress.toSuiAddress())
     }
 
     func testThatAValidJWTTokenShouldConvertOverToAnAddressWithNoErrorsAsIntended() throws {

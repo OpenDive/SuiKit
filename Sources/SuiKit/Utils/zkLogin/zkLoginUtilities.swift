@@ -36,13 +36,6 @@ public struct zkLoginUtilities {
     public static let maxAudValueLength = 145
     public static let packWidth = 248
 
-    public static func computezkLoginAddressFromSeed(addressSeed: BigInt, issInput: String) throws -> String {
-        // This method is used by the SDK tests but not by zkLoginPublicIdentifier
-        // For compatibility, we'll create a zkLoginPublicIdentifier and use that to compute the address
-        let pubId = try zkLoginPublicIdentifier(addressSeed: addressSeed, iss: issInput)
-        return try pubId.toSuiAddress()
-    }
-
     public static func toBigEndianBytes(num: BigInt, width: Int) -> [UInt8] {
         let bytes = Self.toPaddedBigEndianBytes(num: num, width: width)
         let firstNonZeroIndex = Self.findFirstNonZeroIndex(bytes: bytes)
@@ -211,14 +204,14 @@ public struct zkLoginUtilities {
         iss: String,
         aud: String
     ) throws -> String {
-        return try Self.computezkLoginAddressFromSeed(
+        return try zkLoginPublicIdentifier(
             addressSeed: Self.genAddressSeed(
                 _salt: userSalt,
                 name: claimName,
                 value: claimValue,
                 aud: aud
             ),
-            issInput: iss
-        )
+            iss: iss
+        ).toSuiAddress()
     }
 }

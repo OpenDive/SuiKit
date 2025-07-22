@@ -66,24 +66,6 @@ final class zkLoginPublicIdentifierTests: XCTestCase {
         XCTAssertEqual(try pubId1.toSuiAddress(), try pubId2.toSuiAddress())
     }
 
-    // Test that zkLoginPublicIdentifier toSuiAddress() matches computezkLoginAddressFromSeed
-    func testAddressMatchesComputezkLoginAddressFromSeed() throws {
-        let seed = "380704556853533152350240698167704405529973457670972223618755249929828551006"
-        let iss = "https://accounts.google.com"
-
-        let pubId = try zkLoginPublicIdentifier(
-            addressSeed: seed,
-            iss: iss
-        )
-
-        let computedAddress = try zkLoginUtilities.computezkLoginAddressFromSeed(
-            addressSeed: BigInt(seed)!,
-            issInput: iss
-        )
-
-        XCTAssertEqual(try pubId.toSuiAddress(), computedAddress)
-    }
-
     // Test parsing a zkLogin signature and extracting its public identifier
     func testParsezkLoginSignatureToPublicIdentifier() throws {
         // Skip this test for now since zkLoginSignature extraction has issues

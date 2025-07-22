@@ -1,5 +1,5 @@
 //
-//  zkLoginSigner.swift
+//  ZkLoginAuthenticator.swift
 //  SuiKit
 //
 //  Copyright (c) 2024-2025 OpenDive
@@ -27,7 +27,7 @@ import Foundation
 import BigInt
 
 /// A comprehensive zkLogin signer that can sign transactions and personal messages
-public class zkLoginSigner {
+public class ZkLoginSigner {
     /// The Sui provider for network operations
     private let provider: SuiProvider
 
@@ -43,7 +43,7 @@ public class zkLoginSigner {
     /// Optional GraphQL client for signature verification
     private let graphQLClient: GraphQLClientProtocol?
 
-    /// Initialize a new zkLoginSigner
+    /// Initialize a new ZkLoginAuthenticator
     /// - Parameters:
     ///   - provider: The Sui provider for network operations
     ///   - ephemeralKeyPair: The ephemeral keypair used for signing
@@ -223,7 +223,7 @@ public class zkLoginSigner {
 }
 
 /// Utility methods for zkLogin signature operations
-extension zkLoginSigner {
+extension ZkLoginAuthenticator {
     /// Parse a serialized zkLogin signature string
     /// - Parameter serialized: The base64 encoded signature string
     /// - Returns: A parsed zkLogin signature

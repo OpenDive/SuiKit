@@ -27,7 +27,7 @@ import Foundation
 import BigInt
 
 /// Manages the zkLogin authentication flow
-public class zkLoginAuthenticator {
+public class ZkLoginAuthenticator {
     private let provider: SuiProvider
 
     public init(provider: SuiProvider) {
@@ -203,14 +203,14 @@ public class zkLoginAuthenticator {
     ///   - zkLoginSignature: The zkLogin signature
     ///   - userAddress: The user's zkLogin address
     ///   - graphQLClient: Optional GraphQL client for signature verification
-    /// - Returns: A zkLoginSigner with enhanced capabilities
-    public func createzkLoginSigner(
+    /// - Returns: A ZkLoginAuthenticator with enhanced capabilities
+    public func createZkLoginSigner(
         ephemeralKeyPair: Account,
         zkLoginSignature: zkLoginSignature,
         userAddress: String,
         graphQLClient: GraphQLClientProtocol? = nil
-    ) -> zkLoginSigner {
-        return zkLoginSigner(
+    ) -> ZkLoginSigner {
+        return ZkLoginSigner(
             provider: provider,
             ephemeralKeyPair: ephemeralKeyPair,
             zkLoginSignature: zkLoginSignature,

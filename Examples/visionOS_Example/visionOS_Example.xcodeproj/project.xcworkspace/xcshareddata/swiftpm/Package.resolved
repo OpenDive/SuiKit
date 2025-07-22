@@ -1,5 +1,4 @@
 {
-  "originHash" : "250229a81fc23eb1ca3bf9a7fca3474519661b51affb9f456ce51c8f33a448f3",
   "pins" : [
     {
       "identity" : "abseil-cpp-binary",
@@ -13,10 +12,10 @@
     {
       "identity" : "anycodable",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/kolyuchiy/AnyCodable",
+      "location" : "https://github.com/MarcoDotIO/AnyCodable",
       "state" : {
-        "branch" : "add-sendable",
-        "revision" : "a457aa6962bd790eeafd65be9d37f62d2c15a71a"
+        "revision" : "862808b2070cd908cb04f9aafe7de83d35f81b05",
+        "version" : "1.0.0"
       }
     },
     {
@@ -24,8 +23,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apollographql/apollo-ios.git",
       "state" : {
-        "revision" : "9ec4b0b87c2f4214055b5dcac926b0a1dbfd7932",
-        "version" : "1.16.1"
+        "revision" : "e98e9d3b398b6005149074d51b097e31aaa44f63",
+        "version" : "1.17.0"
       }
     },
     {
@@ -222,8 +221,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/MarcoDotIO/UInt256.git",
       "state" : {
-        "branch" : "master",
-        "revision" : "ea633500311c4fd0711ff58ea8182d28745dee6e"
+        "revision" : "ea633500311c4fd0711ff58ea8182d28745dee6e",
+        "version" : "1.0.0"
       }
     },
     {
@@ -236,5 +235,5 @@
       }
     }
   ],
-  "version" : 3
+  "version" : 2
 }

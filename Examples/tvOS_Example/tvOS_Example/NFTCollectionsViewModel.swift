@@ -34,7 +34,7 @@ enum DataFetchPhase<T> {
 
 struct NFTCollection {
     let collectionName: String
-    let nfts: [NFT]
+    let nfts: [NFTItem]
 }
 
 struct NFTApi {
@@ -46,7 +46,7 @@ struct NFTApi {
     private init() { }
 
     func fetchCollections() async throws -> [NFTCollection] {
-        try await withThrowingTaskGroup(of: Swift.Result<NFT, Error>.self) { group in
+        try await withThrowingTaskGroup(of: Swift.Result<NFTItem, Error>.self) { group in
             let provider = SuiProvider(connection: MainnetConnection())
             let kiosk = KioskClient(client: provider, network: .mainnet)
 
@@ -58,7 +58,7 @@ struct NFTApi {
                 }
             }
 
-            var results = [Swift.Result<NFT, Error>]()
+            var results = [Swift.Result<NFTItem, Error>]()
 
             for try await result in group {
                 results.append(result)
@@ -70,7 +70,7 @@ struct NFTApi {
                 throw failure
             }
 
-            var nfts = [NFT]()
+            var nfts = [NFTItem]()
 
             for result in results {
                 if case .success(let nft) = result {
@@ -78,7 +78,7 @@ struct NFTApi {
                 }
             }
 
-            var sortedNFTs: [String: [NFT]] = [:]
+            var sortedNFTs: [String: [NFTItem]] = [:]
 
             for nft in nfts {
                 if sortedNFTs[nft.collectionName] == nil {
@@ -110,10 +110,10 @@ struct NFTApi {
         return try JSONDecoder().decode(CollectionDecoder.self, from: data).collectionName
     }
 
-    func fetchNFT(objectId: String, provider: SuiProvider) async -> Swift.Result<NFT, Error> {
+    func fetchNFT(objectId: String, provider: SuiProvider) async -> Swift.Result<NFTItem, Error> {
         do {
             guard let nft = try await provider.getObject(
-                objectId: ObjectId,
+                objectId: objectId,
                 options: SuiObjectDataOptions(showDisplay: true)
             ) else {
                 throw NSError(domain: "Unable to fetch NFT", code: 2)
@@ -128,7 +128,7 @@ struct NFTApi {
             print("DEBUG::: DISPLAY DATA - \(displayData)")
 
             return .success(
-                NFT(
+                NFTItem(
                     name: displayData["name"] ?? "Unknown",
                     imageUrl: URL(string: displayData["url"] ?? "https://google.com")!,
                     description: displayData["description"] ?? "No description available",

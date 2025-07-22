@@ -9,7 +9,7 @@ import SwiftUI
 
 struct NFTCarouselView: View {
     let collectionName: String
-    let nfts: [NFT]
+    let nfts: [NFTItem]
 
     var body: some View {
         Text(self.collectionName)

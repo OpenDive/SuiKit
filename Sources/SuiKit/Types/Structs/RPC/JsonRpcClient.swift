@@ -33,6 +33,23 @@ public struct JsonRpcClient {
 
     /// Represents the targeted RPC version.
     public static let TARGETED_RPC_VERSION = "1.1.0"
+    
+    /// Shared URLSession with optimized configuration
+    private static let sharedSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil  // Disable caching for RPC calls
+        config.httpMaximumConnectionsPerHost = 10
+        config.timeoutIntervalForRequest = 30
+        config.timeoutIntervalForResource = 60
+        config.waitsForConnectivity = true
+        config.httpAdditionalHeaders = [
+            "User-Agent": "SuiKit/\(PACKAGE_VERSION)",
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        ]
+        return URLSession(configuration: config)
+    }()
 
     private let url: URL
     private let httpHeaders: HttpHeaders
@@ -42,7 +59,8 @@ public struct JsonRpcClient {
     /// - Parameters:
     ///   - url: The URL of the JSON-RPC server.
     ///   - httpHeaders: Optional custom HTTP headers.
-    public init(url: URL, httpHeaders: HttpHeaders? = nil) {
+    ///   - session: Optional custom URLSession (uses optimized shared session by default).
+    public init(url: URL, httpHeaders: HttpHeaders? = nil, session: URLSession? = nil) {
         self.url = url
         self.httpHeaders = [
             "Content-Type": "application/json",
@@ -51,7 +69,7 @@ public struct JsonRpcClient {
             "Client-Target-Api-Version": Self.TARGETED_RPC_VERSION
         ].merging(httpHeaders ?? [:]) { (_, new) in new }
 
-        self.session = URLSession(configuration: .default)
+        self.session = session ?? Self.sharedSession
     }
 
     /// Process a JSON-RPC request and returns a `SuiResponse`.

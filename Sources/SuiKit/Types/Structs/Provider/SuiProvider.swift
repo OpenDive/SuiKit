@@ -1360,14 +1360,26 @@ public struct SuiProvider {
         tx: String,
         options: SuiTransactionBlockResponseOptions? = nil
     ) async throws -> SuiTransactionBlockResponse {
-        var count = 0
+        let maxRetries = 30  // Reduced from 60
+        var retryCount = 0
+        var delay: UInt64 = 500_000_000  // Start with 0.5 seconds
+        let maxDelay: UInt64 = 8_000_000_000  // Max 8 seconds
+
         repeat {
-            if count >= 60 {
-                throw SuiError.customError(message: "Transaction timed out after 60 seconds")
+            if retryCount >= maxRetries {
+                throw SuiError.customError(message: "Transaction timed out after \(maxRetries) attempts")
             }
-            try await Task.sleep(nanoseconds: 1_000_000_000)
-            count += 1
+
+            // Use exponential backoff with jitter to reduce server load
+            if retryCount > 0 {
+                let jitter = UInt64.random(in: 0...delay/4)  // Up to 25% jitter
+                try await Task.sleep(nanoseconds: delay + jitter)
+                delay = min(delay * 2, maxDelay)  // Exponential backoff, capped at maxDelay
+            }
+            
+            retryCount += 1
         } while await !(self.isValidTransactionBlock(tx: tx, options: options))
+        
         return try await self.getTransactionBlock(digest: tx, options: options)
     }
 

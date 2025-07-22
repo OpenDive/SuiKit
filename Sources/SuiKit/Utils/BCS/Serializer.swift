@@ -31,8 +31,23 @@ public class Serializer {
     /// The outputted data itself
     private var _output: Data
 
+    // Pre-allocate buffer to reduce memory allocations
+    private static let initialCapacity = 1024
+
     init() {
         self._output = Data()
+        self._output.reserveCapacity(Self.initialCapacity)
+    }
+
+    /// Initialize with pre-allocated capacity
+    init(capacity: Int) {
+        self._output = Data()
+        self._output.reserveCapacity(capacity)
+    }
+
+    /// Reset the serializer for reuse
+    func reset() {
+        self._output.removeAll(keepingCapacity: true)
     }
 
     /// Returns the `_output` object.
@@ -411,29 +426,43 @@ public class Serializer {
     }
 }
 
+// Thread-local serializer pool for better performance
+private final class SerializerPool {
+    private var serializers: [Serializer] = []
+    private let maxPoolSize = 10
+    
+    func borrowSerializer() -> Serializer {
+        if let serializer = serializers.popLast() {
+            serializer.reset()
+            return serializer
+        }
+        return Serializer()
+    }
+    
+    func returnSerializer(_ serializer: Serializer) {
+        guard serializers.count < maxPoolSize else { return }
+        serializer.reset()
+        serializers.append(serializer)
+    }
+}
+
+private let serializerPool = SerializerPool()
+
 /// Encode a value using a given encoding function and return the serialized data.
-///
-/// This function takes a value and an encoding function, and uses the function to encode the value
-/// using a new Serializer instance. It then returns the serialized data from the Serializer's output.
-///
-/// - Parameters:
-///    - value: The value to be encoded.
-///    - encoder: The encoding function that accepts a Serializer instance and the value to be encoded.
-///
-/// - Returns: A Data object containing the serialized representation of the value.
-///
-/// - Throws: Any error that may occur during the encoding process with the given encoding function.
+/// Uses a pooled serializer for better performance.
 func encoder<T>(
     _ value: T,
     _ encoder: (Serializer, T) throws -> Void
 ) throws -> Data {
-    let ser = Serializer()
+    let ser = serializerPool.borrowSerializer()
+    defer { serializerPool.returnSerializer(ser) }
     try encoder(ser, value)
     return ser.output()
 }
 
 func < (lhs: Data, rhs: Data) -> Bool {
-    let lhsString = lhs.reduce("", { $0 + String(format: "%02x", $1) })
-    let rhsString = rhs.reduce("", { $0 + String(format: "%02x", $1) })
-    return lhsString < rhsString
+    // Much more efficient comparison using lexicographical comparison
+    let lhsBytes = lhs.withUnsafeBytes { Array($0) }
+    let rhsBytes = rhs.withUnsafeBytes { Array($0) }
+    return lhsBytes.lexicographicallyPrecedes(rhsBytes)
 }

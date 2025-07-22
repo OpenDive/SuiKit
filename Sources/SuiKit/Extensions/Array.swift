@@ -39,8 +39,26 @@ extension Array {
     }
 
     func chunked(into size: Int) -> [[Element]] {
-        return stride(from: 0, to: count, by: size).map {
-            Array(self[$0 ..< Swift.min($0 + size, count)])
+        guard size > 0 else { return [] }
+        guard !isEmpty else { return [] }
+        
+        let chunkCount = (count + size - 1) / size  // Ceiling division
+        var result: [[Element]] = []
+        result.reserveCapacity(chunkCount)
+        
+        for i in stride(from: 0, to: count, by: size) {
+            let endIndex = Swift.min(i + size, count)
+            result.append(Array(self[i..<endIndex]))
+        }
+        
+        return result
+    }
+    
+    /// More memory-efficient chunking using lazy evaluation
+    func chunkedLazy(into size: Int) -> LazyMapSequence<StrideTo<Int>, ArraySlice<Element>> {
+        return stride(from: 0, to: count, by: size).lazy.map { start in
+            let endIndex = Swift.min(start + size, count)
+            return self[start..<endIndex]
         }
     }
 
@@ -51,31 +69,35 @@ extension Array {
 
 public extension Array where Element == UInt8 {
     init(hex: String) {
-        self.init(reserveCapacity: hex.unicodeScalars.lazy.underestimatedCount)
+        let cleanHex = hex.hasPrefix("0x") ? String(hex.dropFirst(2)) : hex
+        let hexLength = cleanHex.count
+        
+        // Pre-allocate capacity
+        self.init()
+        self.reserveCapacity((hexLength + 1) / 2)
+        
         var buffer: UInt8?
-        var skip = hex.hasPrefix("0x") ? 2 : 0
-        for char in hex.unicodeScalars.lazy {
-            guard skip == 0 else {
-                skip -= 1
-                continue
-            }
-            guard char.value >= 48, char.value <= 102 else {
-                removeAll()
-                return
-            }
-            let v: UInt8
-            let c = UInt8(char.value)
-            switch c {
-            case let c where c <= 57:
-                v = c - 48
-            case let c where c >= 65 && c <= 70:
-                v = c - 55
-            case let c where c >= 97:
-                v = c - 87
+        
+        for char in cleanHex.utf8 {
+            let value: UInt8?
+            
+            switch char {
+            case 48...57:  // '0'...'9'
+                value = char - 48
+            case 65...70:  // 'A'...'F'
+                value = char - 55
+            case 97...102: // 'a'...'f'
+                value = char - 87
             default:
                 removeAll()
                 return
             }
+            
+            guard let v = value else {
+                removeAll()
+                return
+            }
+            
             if let b = buffer {
                 append(b << 4 | v)
                 buffer = nil
@@ -83,6 +105,8 @@ public extension Array where Element == UInt8 {
                 buffer = v
             }
         }
+        
+        // Handle odd-length hex strings
         if let b = buffer {
             append(b)
         }
@@ -115,12 +139,31 @@ public extension Array where Element == UInt8 {
     }
 
     func toHexString() -> String {
-        lazy.reduce(into: "") {
-            var s = String($1, radix: 16)
-            if s.count == 1 {
-                s = "0" + s
+        // Pre-allocate string capacity for better performance
+        var result = String()
+        result.reserveCapacity(count * 2)
+        
+        for byte in self {
+            result += String(format: "%02x", byte)
+        }
+        return result
+    }
+    
+    /// High-performance hex string conversion using unsafe buffer operations
+    func toHexStringFast() -> String {
+        let hexChars: [UInt8] = [
+            48, 49, 50, 51, 52, 53, 54, 55, 56, 57,  // 0-9
+            97, 98, 99, 100, 101, 102                // a-f
+        ]
+        
+        return String(unsafeUninitializedCapacity: count * 2) { buffer in
+            var index = 0
+            for byte in self {
+                buffer[index] = hexChars[Int(byte >> 4)]
+                buffer[index + 1] = hexChars[Int(byte & 0x0F)]
+                index += 2
             }
-            $0 += s
+            return count * 2
         }
     }
 }

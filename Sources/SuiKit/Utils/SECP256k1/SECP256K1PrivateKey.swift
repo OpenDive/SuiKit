@@ -31,6 +31,14 @@ import Blake2
 import CryptoKit
 import secp256k1sui
 
+// Shared secp256k1 context for better performance
+private let sharedSecp256k1Context: OpaquePointer? = {
+    return secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY))
+}()
+
+// Thread-safe context access
+private let contextQueue = DispatchQueue(label: "secp256k1.context", qos: .userInteractive)
+
 /// `SECP256K1PrivateKey` is a struct representing a private key using the SECP256K1 elliptic curve cryptography.
 public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
     /// The type of the private key that corresponds to this private key.
@@ -217,28 +225,37 @@ public struct SECP256K1PrivateKey: Equatable, PrivateKeyProtocol {
 
     public func sign(data: Data) throws -> Signature {
         let hash = data.sha256
-        guard let ctx = secp256k1_context_create(UInt32(SECP256K1_CONTEXT_SIGN|SECP256K1_CONTEXT_VERIFY)) else { throw AccountError.invalidContext }
+        
+        // Use shared context for better performance
+        guard let ctx = sharedSecp256k1Context else { 
+            throw AccountError.invalidContext 
+        }
+        
         var signatureReturned: secp256k1_ecdsa_signature = secp256k1_ecdsa_signature()
-        let result = hash.withUnsafeBytes { hashRBPointer -> Int32? in
-            if let hashRPointer = hashRBPointer.baseAddress, !hashRBPointer.isEmpty {
-                let hashPointer = hashRPointer.assumingMemoryBound(to: UInt8.self)
-                return self.key.withUnsafeBytes { privateKeyRBPointer -> Int32? in
-                    if let privateKeyRPointer = privateKeyRBPointer.baseAddress, !privateKeyRBPointer.isEmpty {
-                        let privateKeyPointer = privateKeyRPointer.assumingMemoryBound(to: UInt8.self)
-                        return withUnsafeMutablePointer(
-                            to: &signatureReturned
-                        ) { (recSignaturePtr: UnsafeMutablePointer<secp256k1_ecdsa_signature>) -> Int32? in
-                            let res = secp256k1_ecdsa_sign(ctx, recSignaturePtr, hashPointer, privateKeyPointer, nil, nil)
-                            return res
+        
+        let result = contextQueue.sync {
+            hash.withUnsafeBytes { hashRBPointer -> Int32? in
+                if let hashRPointer = hashRBPointer.baseAddress, !hashRBPointer.isEmpty {
+                    let hashPointer = hashRPointer.assumingMemoryBound(to: UInt8.self)
+                    return self.key.withUnsafeBytes { privateKeyRBPointer -> Int32? in
+                        if let privateKeyRPointer = privateKeyRBPointer.baseAddress, !privateKeyRBPointer.isEmpty {
+                            let privateKeyPointer = privateKeyRPointer.assumingMemoryBound(to: UInt8.self)
+                            return withUnsafeMutablePointer(
+                                to: &signatureReturned
+                            ) { (recSignaturePtr: UnsafeMutablePointer<secp256k1_ecdsa_signature>) -> Int32? in
+                                let res = secp256k1_ecdsa_sign(ctx, recSignaturePtr, hashPointer, privateKeyPointer, nil, nil)
+                                return res
+                            }
+                        } else {
+                            return nil
                         }
-                    } else {
-                        return nil
                     }
+                } else {
+                    return nil
                 }
-            } else {
-                return nil
             }
         }
+        
         guard result != nil, result != 0 else { throw AccountError.invalidSignature }
         var serializedSignature = Data(repeating: 0x00, count: 64)
         let compactResult = serializedSignature.withUnsafeMutableBytes { (signatureRBPtr: UnsafeMutableRawBufferPointer) -> Int32? in

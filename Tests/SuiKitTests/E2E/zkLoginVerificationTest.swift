@@ -35,11 +35,15 @@ final class zkLoginVerificationTest: XCTestCase {
     let zkLoginTransactionSignature = "BQNNMTU3OTIzODY1NTAzNzA4NzM5OTYzOTkzNDc3MzM0NTE2MDk4OTk0MzMxOTU5MTE3NzAzNjA0NTA4OTA1NDQyMTUzNTk0NDA5ODcwME0xMzE4ODg0MTc0Mjc5ODQwNTE2ODI1MTM2OTY3MDc2MjU2Mzk5NzM3Njg0MTg4OTg3ODI5MjU3OTkwODcyNzc1NDgyNTA3MjYzOTYyOQExAwJNMTg0NzMzMTU5NTUwNDI3MDI2NzM5NjE5MDYxMzg1NjgyODEzMzkzOTcwMzc5MTMzMzYzOTQzNjAxNTMzNDExOTEwNDYzMzc0MDkxMTlMNDA1MjQ5NDA4OTk1NDk1MjQ5NzI4Mjc1MTI5NzQwMzA1NDQ0MTQ5OTE2NDYzMDQwMzA0MTAyNTIyMTEzOTgzMjY1MjU3ODI5MDUyOAJMNDkxNjA3NDg3ODU5NDkzNzk3ODY5ODMyNjI1NzY2NDE3NjMxODA4MzMzNzg0NjM0Mzk0OTA2NDUzNDc5NTM0MzAzMzMxOTE4ODQ1NDRMNzQzMjcyMzkyNTYxMzM4OTE2MzcxNDczOTIxMjkzODU2NDc3ODg5MDE3MDM1ODE0MjM0MzIxOTg4OTc4ODU3Mjg5NDcxMTE0NDE5MQIBMQEwA00xMTQ3OTIyNjUxNDg0MDA3NzUzNjg0MTg4NTIwNDkzMzAyNTg3NzE0NTAwMzYwNjM5NTcyMzYxNjg4NTMxODg2Mjk0MzUwOTExNTE1Nk0xMDc4NTMzMjAxMDgzNjIwODM2NDcwODczOTcxMTA4OTI5Nzc1MTM5MjQ1NDY1NzgxMjM5MzExNDkzMDUzMjM0MDA5MDczMDY4NjAwOQExKHdpYVhOeklqb2lhSFIwY0hNNkx5OXZZWFYwYUM1emRXa3VhVzhpTEMCPmV5SnJhV1FpT2lKemRXa3RhMlY1TFdsa0lpd2lkSGx3SWpvaVNsZFVJaXdpWVd4bklqb2lVbE15TlRZaWZRTTIwNDM1MzY2NjAwMDM2Mzc1NzQ1OTI1OTYzNDU2ODYxMzA3OTI1MjA5NDcwMjE5MzM0MDE4NTY0MTU4MTQ4NTQ0MDM2MTk2Mjg0NjQyBgAAAAAAAAAA+XrHUDMkMaPswTIFsqIgx3yX6j7IvU1T/1yzw4kjKwjgLL0ZtPQZjc2djX7Q9pFoBdObkSZ6JZ4epiOf05q4BrnG7hYw7z5xEUSmSNsGu7IoT3J0z77lP/zuUDzBpJIA"
     
     // Set up GraphQL client
-    var graphQLClient: GraphQLClient!
+    var graphQLClient: GraphQLClientProtocol!
     
     override func setUp() async throws {
-        // Set up mock GraphQL client for tests
-        graphQLClient = GraphQLClient()
+        // Set up GraphQL client for tests
+        if let graphqlUrl = URL(string: "https://sui-mainnet.mystenlabs.com/graphql") {
+            graphQLClient = SuiGraphQLClient(url: graphqlUrl)
+        } else {
+            XCTFail("Failed to create GraphQL URL")
+        }
     }
     
     // Test verifying personal messages with zkLogin signatures

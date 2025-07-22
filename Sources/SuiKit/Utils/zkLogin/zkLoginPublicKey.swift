@@ -29,6 +29,7 @@ import Blake2
 
 public struct zkLoginPublicIdentifier: PublicKeyProtocol {
     public var key: Data
+    private let client: GraphQLClientProtocol?
 
     public typealias DataValue = Data
 
@@ -39,9 +40,23 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
             throw AccountError.invalidPublicKey
         }
         self.key = data
+        self.client = nil
     }
 
-    public init(addressSeed: BigInt, iss: String, client: Any? = nil) throws {
+    // Convenience initializer from zkLoginSignature for testing
+    public init(data: zkLoginSignature) throws {
+        // Extract issuer from signature 
+        let issClaimJWT = zkLoginSignatureInputsClaim(
+            value: data.inputs.issBase64Details.value,
+            indexMod4: data.inputs.issBase64Details.indexMod4
+        )
+        let iss = try JWTUtilities.extractClaimValue(claim: issClaimJWT, claimName: "iss") as String
+        
+        // Initialize with address seed and issuer
+        try self.init(addressSeed: BigInt(data.inputs.addressSeed)!, iss: iss, client: nil)
+    }
+
+    public init(addressSeed: BigInt, iss: String, client: GraphQLClientProtocol? = nil) throws {
         // In Rust, the ZkLoginPublicIdentifier is:
         // iss_bytes_len || iss_bytes || padded_32_byte_address_seed
         
@@ -58,15 +73,26 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
         tmp.append(Data(addressSeedBytes)) // Then the padded 32-byte address seed
         
         self.key = tmp
+        self.client = client
     }
     
     // Added overload for string addressSeed
-    public init(addressSeed: String, iss: String, client: Any? = nil) throws {
+    public init(addressSeed: String, iss: String, client: GraphQLClientProtocol? = nil) throws {
         // Try to convert the string addressSeed to BigInt
         guard let bigIntSeed = BigInt(addressSeed, radix: 10) else {
             throw AccountError.invalidData
         }
         try self.init(addressSeed: bigIntSeed, iss: iss, client: client)
+    }
+
+    // Manual Equatable conformance - only compare the key data, not the client
+    public static func == (lhs: zkLoginPublicIdentifier, rhs: zkLoginPublicIdentifier) -> Bool {
+        return lhs.key == rhs.key
+    }
+    
+    // Manual Hashable conformance - only hash the key data, not the client
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(key)
     }
 
     public func base64() -> String {
@@ -121,15 +147,79 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
         return result
     }
 
-    // Methods needed for verification tests
+    // Methods for zkLogin signature verification
     
+    /// Verifies that the signature is valid for the provided transaction data
     public func verifyTransaction(transactionData: [UInt8], signature: zkLoginSignature) async throws -> Bool {
-        // For testing, we'll check if the maxEpoch is less than 10
-        return signature.maxEpoch < 10
+        guard let client = self.client else {
+            throw SuiError.customError(message: "GraphQL client not provided for verification")
+        }
+        
+        // Get the address from the signature components
+        let address = try extractAddressFromSignature(signature: signature)
+        
+        // Convert transaction data to base64
+        let transactionDataBase64 = Data(transactionData).base64EncodedString()
+        
+        // Serialize signature
+        let serializedSignature = signature.serialize()
+        
+        // Call GraphQL verification
+        guard let result = try? await client.verifyZkLoginSignature(
+            bytes: transactionDataBase64,
+            signature: serializedSignature,
+            intentScope: .transactionData,
+            author: address
+        ) else {
+            return false
+        }
+        
+        return result.success && result.errors.isEmpty
     }
     
+    /// Verifies that the signature is valid for the provided personal message
     public func verifyPersonalMessage(message: [UInt8], signature: zkLoginSignature) async throws -> Bool {
-        throw SuiError.customError(message: "Not implemented")
+        guard let client = self.client else {
+            throw SuiError.customError(message: "GraphQL client not provided for verification")
+        }
+        
+        // Get the address from the signature components  
+        let address = try extractAddressFromSignature(signature: signature)
+        
+        // Convert message to base64
+        let messageBase64 = Data(message).base64EncodedString()
+        
+        // Serialize signature
+        let serializedSignature = signature.serialize()
+        
+        // Call GraphQL verification
+        let result = try await client.verifyZkLoginSignature(
+            bytes: messageBase64,
+            signature: serializedSignature,
+            intentScope: .personalMessage,
+            author: address
+        )
+        
+        return result.success && result.errors.isEmpty
+    }
+    
+    /// Extract the zkLogin address from a signature
+    private func extractAddressFromSignature(signature: zkLoginSignature) throws -> String {
+        // Extract issuer from the signature inputs
+        let issClaimJWT = zkLoginSignatureInputsClaim(
+            value: signature.inputs.issBase64Details.value,
+            indexMod4: signature.inputs.issBase64Details.indexMod4
+        )
+        let iss = try JWTUtilities.extractClaimValue(claim: issClaimJWT, claimName: "iss") as String
+        
+        // Create a new public identifier from the signature data
+        let publicKey = try zkLoginPublicIdentifier(
+            addressSeed: BigInt(signature.inputs.addressSeed)!,
+            iss: iss,
+            client: self.client
+        )
+        
+        return try publicKey.toSuiAddress()
     }
 
     public func verify(data: Data, signature: Signature) throws -> Bool {
@@ -171,7 +261,6 @@ public struct zkLoginPublicIdentifier: PublicKeyProtocol {
 
 /// Provides functionality for generating zkLogin public keys and addresses
 public struct zkLoginPublicKey {
-    
     /// Generates a Sui address from zkLogin credentials
     /// - Parameters:
     ///   - keyClaimName: The name of the key claim (typically "sub")

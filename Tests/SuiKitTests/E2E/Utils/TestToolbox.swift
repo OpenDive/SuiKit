@@ -231,7 +231,18 @@ internal class TestToolbox {
             }
         }
     }
-    
+
+    func faucetAccount(to suiAddress: String, andIsWaitingForFaucet waitForFaucet: Bool = false) async throws {
+        let faucet = FaucetClient(connection: self.client.connection)
+        let txFaucet = try await faucet.funcAccount(suiAddress)
+        if waitForFaucet {
+            guard let coinsSent = txFaucet.coinsSent, !coinsSent.isEmpty else {
+                throw SuiError.customError(message: "No coins were sent")
+            }
+            let _ = try await self.client.waitForTransaction(tx: coinsSent[0].transferTxDigest)
+        }
+    }
+
     func publishKioskExtensions() async throws -> String {
         let result = try await self.publishPackage("kiosk")
         return result.packageId

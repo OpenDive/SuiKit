@@ -94,6 +94,12 @@ public struct SuiError: Error, CustomStringConvertible {
             return "The proof service returned an invalid response"
         case .missingGraphQLData:
             return "Missing GraphQL data"
+        case .missingJWTClaim:
+            return "Missing JWT claim in token"
+        case .saltServiceError:
+            return "Salt service returned an error"
+        case .invalidSaltServiceResponse:
+            return "Invalid response from salt service"
         }
     }
     
@@ -151,6 +157,15 @@ public struct SuiError: Error, CustomStringConvertible {
         
         /// Missing GraphQL data
         case missingGraphQLData
+        
+        /// Missing JWT claim in token
+        case missingJWTClaim
+        
+        /// Salt service returned an error
+        case saltServiceError
+        
+        /// Invalid response from salt service
+        case invalidSaltServiceResponse
     }
     
     /// Creates a new error with the given code.

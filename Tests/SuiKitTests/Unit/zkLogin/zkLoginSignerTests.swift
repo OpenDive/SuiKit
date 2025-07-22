@@ -28,18 +28,65 @@ import XCTest
 import BigInt
 @testable import SuiKit
 
-// Type alias to fix naming conflicts
-typealias zkLoginSigner = ZkLoginSigner
-
+// Note: Any tests that require the use of the GraphQL server must be started on call with the beginning of each test function.
+// This is due to the signatures below only being valid for an epoch of 3 or less (e.g., genesis to second block).
 final class zkLoginSignerTests: XCTestCase {
+    let anEphemeralSignature = "AEp+O5GEAF/5tKNDdWBObNf/1uIrbOJmE+xpnlBD2Vikqhbd0zLrQ2NJyquYXp4KrvWUOl7Hso+OK0eiV97ffwucM8VdtG2hjf/RUGNO5JNUH+D/gHtE9sHe6ZEnxwZL7g=="
+
+    // Test signature from TypeScript tests
+    let aSignature = "BQNNMTE3MDE4NjY4MTI3MDQ1MTcyMTM5MTQ2MTI3OTg2NzQ3NDg2NTc3NTU1NjY1ODY1OTc0MzQ4MTA5NDEyNDA0ODMzNDY3NjkzNjkyNjdNMTQxMjA0Mzg5OTgwNjM2OTIyOTczODYyNDk3NTQyMzA5NzI3MTUxNTM4NzY1Mzc1MzAxNjg4ODM5ODE1MTM1ODQ1ODYxNzIxOTU4NDEBMQMCTDE4Njc0NTQ1MDE2MDI1ODM4NDg4NTI3ODc3ODI3NjE5OTY1NjAxNzAxMTgyNDkyOTk1MDcwMTQ5OTkyMzA4ODY4NTI1NTY5OTgyNzNNMTQ0NjY0MTk2OTg2NzkxMTYzMTM0NzUyMTA2NTQ1NjI5NDkxMjgzNDk1OTcxMDE3NjkyNTY5NTkwMTAwMDMxODg4ODYwOTEwODAzMTACTTExMDcyOTU0NTYyOTI0NTg4NDk2MTQ4NjMyNDc0MDc4NDMyNDA2NjMzMjg4OTQ4MjU2NzE4ODA5NzE0ODYxOTg2MTE5MzAzNTI5NzYwTTE5NzkwNTE2MDEwNzg0OTM1MTAwMTUwNjE0OTg5MDk3OTA4MjMzODk5NzE4NjQ1NTM2MTMwNzI3NzczNzEzNDA3NjExMTYxMzY4MDQ2AgExATADTTEwNDIzMjg5MDUxODUzMDMzOTE1MzgwODEwNTE2MTMwMjA1NzQ3MTgyODY3NTk2NDU3MTM5OTk5MTc2NzE0NDc2NDE1MTQ4Mzc2MzUwTTIxNzg1NzE5Njk1ODQ4MDEzOTA4MDYxNDkyOTg5NzY1Nzc3Nzg4MTQyMjU1ODk3OTg2MzAwMjQxNTYxMjgwMTk2NzQ1MTc0OTM0NDU3ATExeUpwYzNNaU9pSm9kSFJ3Y3pvdkwyRmpZMjkxYm5SekxtZHZiMmRzWlM1amIyMGlMQwFmZXlKaGJHY2lPaUpTVXpJMU5pSXNJbXRwWkNJNkltSTVZV00yTURGa01UTXhabVEwWm1aa05UVTJabVl3TXpKaFlXSXhPRGc0T0RCalpHVXpZamtpTENKMGVYQWlPaUpLVjFRaWZRTTEzMzIyODk3OTMwMTYzMjE4NTMyMjY2NDMwNDA5NTEwMzk0MzE2OTg1Mjc0NzY5MTI1NjY3MjkwNjAwMzIxNTY0MjU5NDY2NTExNzExrgAAAAAAAABhAEp+O5GEAF/5tKNDdWBObNf/1uIrbOJmE+xpnlBD2Vikqhbd0zLrQ2NJyquYXp4KrvWUOl7Hso+OK0eiV97ffwucM8VdtG2hjf/RUGNO5JNUH+D/gHtE9sHe6ZEnxwZL7g=="
+    
+    // Personal message test data from TypeScript tests
+    let personalMessageSignature = "BQNMODIxMjAxNjM1OTAxNDk1MDg0Mjg0MTUyNTc3NTE1NjQ4NzI2MjEzOTk0OTQ3ODkwNjkwMTc5ODI5NjEwMTkyNTI3MTY5MTU2NTE4ME0xNjE1NTM3MDU2ODcyNzI3OTgxODg5MzYwMzc1NDQwNzYxNzM3NzcxNTgwOTA2NTUwMTYyODczNjg4MjcyNTU3NTIzMjgzNDkyMzcyNgExAwJNMTE2MTk3MTE1NjYyNDg1NTk1NzUyNzE0MDEzMTI1NzE2OTg5NTkxMDA2MjM3NjM4NzY0NjM1OTEzNDY1NTY2OTM1NzI5NzQxOTE1MDlMNTIyOTU4MjE1NDQ1MzkxMDM4MzYwMzYzNjEzNTY0NDU5MTc1NTk3NDI1OTQyMDg4NjUxMzYwMTQ2Mjc0OTk5Mzg2NTA2MTkyODU2NAJNMTA5MDE5ODc3NzAyNTI5NzkzOTM2NDM4NDU1MjM1MzQ2NTQ4MjY3MTkyODUzMzA2NzQwNTk3Nzg0Nzg3NzYwODQ2Mjc4NjQyNzg0NzJMMjg0MjQxNTQ4Mjg0NjQyNzg5NzAwNjM2OTIyMDk0NDUyNjUzMzgwNzc3ODIxMzQyOTA5NTQ2NDc1ODc0MTE5NTkxMTU5NjE0MzY4MwIBMQEwA00xODg1NDIyNzM3ODk4ODA1MDA3NTM2NTExNjAxNzEzNTYxOTQ1MzA3NDcyOTcwNzE5OTgyOTA5OTA2OTUwMDk3NzgzNTcwNjY1OTU4OEw0ODU5NzY1MTQ5OTgxMDYyMTIxOTc0Njg3NTYxNzc4NDA2ODU0NzAxNjEyNzk4NTU2NTE3NzQ4OTU1NDA5NzgxMjkxNTA1MDYzNjQxATEod2lhWE56SWpvaWFIUjBjSE02THk5dllYVjBhQzV6ZFdrdWFXOGlMQwI+ZXlKcmFXUWlPaUp6ZFdrdGEyVjVMV2xrSWl3aWRIbHdJam9pU2xkVUlpd2lZV3huSWpvaVVsTXlOVFlpZlFNMjA0MzUzNjY2MDAwMzYzNzU3NDU5MjU5NjM0NTY4NjEzMDc5MjUyMDk0NzAyMTkzMzQwMTg1NjQxNTgxNDg1NDQwMzYxOTYyODQ2NDIDAAAAAAAAAGEA+XrHUDMkMaPswTIFsqIgx3yX6j7IvU1T/1yzw4kjKwjgLL0ZtPQZjc2djX7Q9pFoBdObkSZ6JZ4epiOf05q4BrnG7hYw7z5xEUSmSNsGu7IoT3J0z77lP/zuUDzBpJIA"
+    
+    // Transaction data test from TypeScript tests
+    let transactionSignature = "BQNNMTUzODUzNzAwODM3MTY5NDUxNzk5NTQ4Nzk3ODgwMjEyODE0MDYxODAzODUyMTA3OTY2NjAyNzYwNjMwMTU4MDE0NzE0MzUwNDU5MDVNMTA3NTk1NzUzNjA4MTczNjIzODQ4NzE1MDY1NTkxMzA0NjEwMTAyNzI4MDg5NDY4OTc2NjUwMDg5NjkzNDUzNDkwNzI1NzkyMjE4NzIBMQMCTDE3NTYyNjk4MTk0Nzg2NzkwNTYzMjk1MjAxNTE2ODQ4OTU4NjIxNTQ2Njc3OTY5MDc4NDYxNzU0OTUzNzE3NjE3MTc4MzU1NjIyODFMNzY5MzM5MjIyNDkwNzAwODEzODgzMTMyNDI0NjYxMjA1NjM1MzkyNTU3Njk3NjY4NjIyMzMyMzMwMzE0MzkyNTg2NTg5NDcxNTMzOAJNMTc3MzUxMTQwOTU4MzY3NzY0NDQ0NTc3MTM2MzAwOTQxNzY2Mzc5NTYwMzc3MzQ0MTQ4MDc4OTcyNDk0NTI5NzI5OTQ0OTA1OTc3NTRMOTMxMzYyMzYyMTUwMzM4OTk0MzU4MjQ1Njc5NDkwMjM5NzUyNjc4NjczNjQ1MTQ4MzY0MTAzNzMyMzkzOTg3MzAxNzE0Nzg2NzA0OQIBMQEwA00yMDg3MDcxNTY2MzU5MTYwOTY5MjAzNzk5MzkyNDkwNzMyMjcwMjUwNTM4NzE5MjEyMjI3OTc5MDg0NzgyMzIxOTI4MjQxODc0OTA3M00yMDUyMjg2NTI1NjMyMjY1NTQzOTY2NTI3ODM3OTI1ODQ5NDcyMDQ0MTYzMzcxNzE3MjM3MTYzOTA5Njk2MTM4ODE0MjM0OTUzNDg4NQExKHdpYVhOeklqb2lhSFIwY0hNNkx5OXZZWFYwYUM1emRXa3VhVzhpTEMCPmV5SnJhV1FpT2lKemRXa3RhMlY1TFdsa0lpd2lkSGx3SWpvaVNsZFVJaXdpWVd4bklqb2lVbE15TlRZaWZRTTIwNDM1MzY2NjAwMDM2Mzc1NzQ1OTI1OTYzNDU2ODYxMzA3OTI1MjA5NDcwMjE5MzM0MDE4NTY0MTU4MTQ4NTQ0MDM2MTk2Mjg0NjQyBQAAAAAAAABhAMY6yGE+HfJrftA5rtd/SH4DxhNNXMCfjZNP5XmIBxi46JE9TQeGoArtwbWF3dSI7Vm1DxkGaXh3TT2tGz0yfwi5xu4WMO8+cRFEpkjbBruyKE9ydM++5T/87lA8waSSAA=="
+    
+    let transactionBytes = "AAACACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAxawU0NcBzUEjfOeFhCMcbEO0UZDc8fySmLcBavf7cF8AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEBAQEBAAEAAMDw0OKiyouNDkBV7EghDsd9BV2zU0As2gHXCFumHT1cAc/OLfzdVoEphi8yCEaHgSSrh8nwhU6goYIZ39PLEoYkAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADA8NDiosqLjQ5AVexIIQ7HfQVds1NALNoB1whbph09XAEAAAAAAAAAAQAAAAAAAAAA"
+
+    let receiver = "0xfa0f8542f256e669694624aa3ee7bfbde5af54641646a3a05924cf9e329a8a36"
+
+    // Create sample zkLogin signature components using realistic test data
+    let aSignatureInputs = zkLoginSignatureInputs(
+        proofPoints: zkLoginSignatureInputsProofPoints(
+            a: [
+                "11701866812704517213914612798674748657755566586597434810941240483346769369267",
+                "14120438998063692297386249754230972715153876537530168883981513584586172195841",
+                "1"
+            ],
+            b: [
+                [
+                    "1867454501602583848852787782761996560170118249299507014999230886852556998273",
+                    "14466419698679116313475210654562949128349597101769256959010003188886091080310"
+                ],
+                [
+                    "11072954562924588496148632474078432406633288948256718809714861986119303529760",
+                    "19790516010784935100150614989097908233899718645536130727773713407611161368046"
+                ],
+                ["1", "0"]
+            ],
+            c: [
+                "10423289051853033915380810516130205747182867596457139999176714476415148376350",
+                "21785719695848013908061492989765777788142255897986300241561280196745174934457",
+                "1"
+            ]
+        ),
+        issBase64Details: zkLoginSignatureInputsClaim(value: "yJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLC", indexMod4: 1),
+        headerBase64: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5YWM2MDFkMTMxZmQ0ZmZkNTU2ZmYwMzJhYWIxODg4ODBjZGUzYjkiLCJ0eXAiOiJKV1QifQ",
+        addressSeed: "13322897930163218532266430409510394316985274769125667290600321564259466511711"
+    )
+    
     var toolBox: TestToolbox?
+    var graphQLClient: SuiGraphQLClient!
     
     let issInput = "https://accounts.google.com"
 
     override func setUp() async throws {
-        self.toolBox = try await TestToolbox(true)
+        self.toolBox = try await TestToolbox()
+        // TODO: Implement toggle between localnet and deployed nets
+        self.graphQLClient = SuiGraphQLClient(url: URL(string: "http://127.0.0.1:9125")!)
     }
-    
+
     private func fetchToolBox() throws -> TestToolbox {
         guard let toolBox = self.toolBox else {
             XCTFail("Failed to get Toolbox")
@@ -47,210 +94,245 @@ final class zkLoginSignerTests: XCTestCase {
         }
         return toolBox
     }
+
+    // MARK: - Signature Parsing Tests
     
-    // Test signing and executing a transaction with zkLogin
-    func testzkLoginSignerExecuteTransaction() async throws {
-        // Setup toolbox
-        let toolbox = try fetchToolBox()
+    func testSignatureParsedSuccessfully() throws {
+        // Parse the signature (matching TypeScript test logic)
+        let parsedSignature = try zkLoginSigner.parseSignature(aSignature)
         
-        // Create sample zkLogin signature components using realistic test data
-        let aSignatureInputs = zkLoginSignatureInputs(
-            proofPoints: zkLoginSignatureInputsProofPoints(
-                a: [
-                    "11701866812704517213914612798674748657755566586597434810941240483346769369267",
-                    "14120438998063692297386249754230972715153876537530168883981513584586172195841",
-                    "1"
-                ],
-                b: [
-                    [
-                        "1867454501602583848852787782761996560170118249299507014999230886852556998273",
-                        "14466419698679116313475210654562949128349597101769256959010003188886091080310"
-                    ],
-                    [
-                        "11072954562924588496148632474078432406633288948256718809714861986119303529760",
-                        "19790516010784935100150614989097908233899718645536130727773713407611161368046"
-                    ],
-                    ["1", "0"]
-                ],
-                c: [
-                    "10423289051853033915380810516130205747182867596457139999176714476415148376350",
-                    "21785719695848013908061492989765777788142255897986300241561280196745174934457",
-                    "1"
-                ]
-            ),
-            issBase64Details: zkLoginSignatureInputsClaim(value: "yJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLC", indexMod4: 1),
-            headerBase64: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5YWM2MDFkMTMxZmQ0ZmZkNTU2ZmYwMzJhYWIxODg4ODBjZGUzYjkiLCJ0eXAiOiJKV1QifQ",
-            addressSeed: "13322897930163218532266430409510394316985274769125667290600321564259466511711"
+        // Verify the signature components match expected values
+        XCTAssertEqual(parsedSignature.maxEpoch, 174)
+        XCTAssertEqual(parsedSignature.inputs.addressSeed, "13322897930163218532266430409510394316985274769125667290600321564259466511711")
+        XCTAssertEqual(parsedSignature.inputs.headerBase64, "eyJhbGciOiJSUzI1NiIsImtpZCI6ImI5YWM2MDFkMTMxZmQ0ZmZkNTU2ZmYwMzJhYWIxODg4ODBjZGUzYjkiLCJ0eXAiOiJKV1QifQ")
+        
+        // Verify user signature matches
+        XCTAssertEqual(Data(parsedSignature.userSignature).base64EncodedString(), anEphemeralSignature)
+        
+        // Verify proof points
+        XCTAssertEqual(parsedSignature.inputs.proofPoints.a[0], "11701866812704517213914612798674748657755566586597434810941240483346769369267")
+        XCTAssertEqual(parsedSignature.inputs.proofPoints.a[1], "14120438998063692297386249754230972715153876537530168883981513584586172195841")
+        XCTAssertEqual(parsedSignature.inputs.proofPoints.a[2], "1")
+    }
+    
+    // MARK: - Signature Serialization Tests (matching TypeScript "is serialized successfully")
+    
+    func testSignatureSerializedSuccessfully() throws {
+        // Create signature from components
+        guard let userSignature = Data(base64Encoded: anEphemeralSignature) else {
+            XCTFail("Failed to decode ephemeral signature")
+            return
+        }
+        
+        let signature = zkLoginSignature(
+            inputs: aSignatureInputs,
+            maxEpoch: 174,
+            userSignature: [UInt8](userSignature)
         )
         
-        print("DEBUG::: ZK SIGNATURE INPUTS - \(aSignatureInputs)")
+        // Serialize and verify it matches expected result
+        let serialized = try zkLoginSigner.serializeSignature(signature)
+        XCTAssertEqual(serialized, aSignature)
+    }
+    
+    // MARK: - Personal Message Verification Tests (matching TypeScript personal message test)
+    
+    func testVerifyPersonalMessageWithzkLogin() async throws {
+        // Test data: base64 encoding of "hello"
+        let messageBytes = "hello".data(using: .utf8)!.bytes
+        
+        // Parse the personal message signature
+        let parsedSignature = try zkLoginSigner.parseSignature(personalMessageSignature)
+        
+        // Create a zkLogin signer with the mock client
+        let toolbox = try fetchToolBox()
+        let signer = SuiKit.zkLoginSigner(
+            provider: toolbox.client,
+            ephemeralKeyPair: toolbox.account,
+            zkLoginSignature: parsedSignature,
+            userAddress: "0x1234567890abcdef1234567890abcdef12345678",
+            graphQLClient: graphQLClient
+        )
+        
+        // Verify the message - should succeed
+        let result = try await signer.verifyPersonalMessage(
+            message: messageBytes,
+            signature: parsedSignature
+        )
+        XCTAssertTrue(result)
+        
+        // Test data: base64 encoding of "hello"
+        let invalidMessageBytes = "hello1".data(using: .utf8)!.bytes
+        
+        let failResult = try await signer.verifyPersonalMessage(
+            message: invalidMessageBytes,
+            signature: parsedSignature
+        )
+        XCTAssertFalse(failResult)
+    }
+    
+    // MARK: - Transaction Verification Tests (matching TypeScript transaction verification test)
+    
+    func testVerifyTransactionDataWithzkLogin() async throws {
+        // Parse transaction bytes
+        guard let txBytes = Data(base64Encoded: transactionBytes) else {
+            XCTFail("Failed to decode transaction bytes")
+            return
+        }
+
+        // Parse the transaction signature
+        let parsedSignature = try zkLoginSigner.parseSignature(transactionSignature)
+
+        // Create a zkLogin signer with the mock client
+        let toolbox = try fetchToolBox()
+        let signer = SuiKit.zkLoginSigner(
+            provider: toolbox.client,
+            ephemeralKeyPair: toolbox.account,
+            zkLoginSignature: parsedSignature,
+            userAddress: "0x1234567890abcdef1234567890abcdef12345678",
+            graphQLClient: graphQLClient
+        )
+
+        // Verify the transaction - should succeed
+        let result = try await signer.verifyTransaction(
+            transactionData: txBytes.bytes,
+            signature: parsedSignature
+        )
+        XCTAssertTrue(result)
+        
+        // Test with modified transaction data (should fail)
+        var modifiedTxBytes = txBytes.bytes
+        if !modifiedTxBytes.isEmpty {
+            modifiedTxBytes[0] = modifiedTxBytes[0] ^ 0xFF // Flip bits
+        }
+        
+        let failResult = try await signer.verifyTransaction(
+            transactionData: modifiedTxBytes,
+            signature: parsedSignature
+        )
+        XCTAssertFalse(failResult)
+    }
+    
+    // MARK: - zkLoginSigner Creation and Basic Operations Tests
+    
+    func testzkLoginSignerCreation() throws {
+        let toolbox = try fetchToolBox()
         
         let zkSignature = zkLoginSignature(
             inputs: aSignatureInputs,
             maxEpoch: 174,
-            userSignature: [UInt8](repeating: 0, count: 64) // Empty signature for now
+            userSignature: [UInt8](repeating: 0, count: 64)
         )
         
-        // Calculate address properly
-        let userAddress = try zkLoginUtilities.computezkLoginAddressFromSeed(
-            addressSeed: BigInt(aSignatureInputs.addressSeed)!,
-            issInput: self.issInput
-        )
+        let userAddress = "0x1234567890abcdef1234567890abcdef12345678"
         
-        print("Using zkLogin address: \(userAddress)")
-        
-        // Faucet 10 SUI to zkLogin account
-        print("Fauceting funds to \(userAddress)...")
-        let faucet = FaucetClient(connection: toolbox.client.connection)
-        let response = try await faucet.funcAccount(userAddress)
-        guard let faucet_coins = response.coinsSent else {
-            XCTFail("Unable to send coins to address \(userAddress)")
-            return
-        }
-        for faucet_coin in faucet_coins {
-            let _ = try await toolbox.client.waitForTransaction(tx: faucet_coin.transferTxDigest)
-            print("--- \(faucet_coin.transferTxDigest) ::: \(userAddress) ---")
-            try await Task.sleep(nanoseconds: 3_000_000_000)
-        }
-        
-        // Create zkLoginSigner
-        let signer = zkLoginSigner(
+        // Create signer
+        let signer = SuiKit.zkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
             zkLoginSignature: zkSignature,
-            userAddress: userAddress
+            userAddress: userAddress,
+            graphQLClient: graphQLClient
         )
         
-        // Create a sample transaction
-        var tx = try TransactionBlock()
-        try tx.setSenderIfNotSet(sender: userAddress)
+        // Test basic operations
+        XCTAssertEqual(signer.getAddress(), userAddress)
         
-        // Execute the transaction
-        var transactionResult = try await signer.signAndExecuteTransactionBlock(
-            transactionBlock: &tx
-        )
-        transactionResult = try await toolbox.client.waitForTransaction(tx: transactionResult.digest)
-        let ser = Serializer()
-        try transactionResult.transaction!.data.serialize(ser)
-        
-        // Verify the provider was called with the correct parameters
-        guard transactionResult.effects?.status.status == .success else {
-            XCTFail("Transaction execution failed with error: \(transactionResult.effects?.status.error ?? "UNKNOWN_ERROR")")
-            return
-        }
-        
-        // Verify the signature starts with the zkLogin signature scheme byte (5)
-        if let signatures = transactionResult.transaction,
-           !signatures.txSignature.isEmpty,
-           let signature = signatures.txSignature.first
-        {
-            if let firstByte = Data(base64Encoded: signature)?[0] {
-                XCTAssertEqual(firstByte, SignatureSchemeFlags.SIGNATURE_SCHEME_TO_FLAG["zkLogin"])
-            } else {
-                XCTFail("Could not decode signature: \(signature)")
-            }
-        }
+        // Test public key creation
+        let publicKey = try signer.getPublicKey()
+        XCTAssertNotNil(publicKey)
     }
     
-    // Test creating a zkLogin signature with correct format
-    func testCreatezkLoginSignature() throws {
-        // Setup toolbox
-        let toolbox = try fetchToolBox()
-        
-        // Create sample zkLogin signature components using realistic test data
-        let zkSigInputs = try! JWTUtilities.decodezkLoginInputs(
-            fromJson: "{\"proofPoints\":{\"a\":[\"17318089125952421736342263717932719437717844282410187957984751939942898251250\",\"11373966645469122582074082295985388258840681618268593976697325892280915681207\",\"1\"],\"b\":[[\"5939871147348834997361720122238980177152303274311047249905942384915768690895\",\"4533568271134785278731234570361482651996740791888285864966884032717049811708\"],[\"10564387285071555469753990661410840118635925466597037018058770041347518461368\",\"12597323547277579144698496372242615368085801313343155735511330003884767957854\"],[\"1\",\"0\"]],\"c\":[\"15791589472556826263231644728873337629015269984699404073623603352537678813171\",\"4547866499248881449676161158024748060485373250029423904113017422539037162527\",\"1\"]},\"issBase64Details\":{\"value\":\"wiaXNzIjoiaHR0cHM6Ly9pZC50d2l0Y2gudHYvb2F1dGgyIiw\",\"indexMod4\":2},\"headerBase64\":\"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjEifQ\"}",
-            andAddressSeed: "20794788559620669596206457022966176986688727876128223628113916380927502737911"
-        )
-        
-        let zkSignature = zkLoginSignature(
-            inputs: zkSigInputs,
-            maxEpoch: 5,
-            userSignature: [UInt8](repeating: 0, count: 64) // Empty signature for now
-        )
-        
-        // Serialize the signature
-        let serialized = zkLoginSignature.serialize(signature: zkSignature)
-        print("Serialized zkLogin signature: \(serialized)")
-        
-        // Parse it back
-        let parsedSignature = try zkLoginSignature.parse(serialized: serialized)
-        
-        // Verify the deserialized signature matches the original
-        XCTAssertEqual(parsedSignature.maxEpoch, zkSignature.maxEpoch)
-        XCTAssertEqual(parsedSignature.inputs.addressSeed, zkSignature.inputs.addressSeed)
-        XCTAssertEqual(parsedSignature.inputs.headerBase64, zkSignature.inputs.headerBase64)
-        XCTAssertEqual(parsedSignature.inputs.issBase64Details.value, zkSignature.inputs.issBase64Details.value)
-        
-        // Test points should match in the proofPoints struct
-        XCTAssertEqual(parsedSignature.inputs.proofPoints.a, zkSignature.inputs.proofPoints.a)
-        XCTAssertEqual(parsedSignature.inputs.proofPoints.b, zkSignature.inputs.proofPoints.b)
-        XCTAssertEqual(parsedSignature.inputs.proofPoints.c, zkSignature.inputs.proofPoints.c)
-    }
+    // MARK: - Signature Creation Tests
     
-    // Test integration with TransactionBlock
-    func testzkLoginWithTransactionBlock() async throws {
-        // Setup toolbox
+    func testzkLoginSignatureCreation() throws {
         let toolbox = try fetchToolBox()
         
-        // Create sample zkLogin signature components using realistic test data
-        let zkSigInputs = try! JWTUtilities.decodezkLoginInputs(
-            fromJson: "{\"proofPoints\":{\"a\":[\"17318089125952421736342263717932719437717844282410187957984751939942898251250\",\"11373966645469122582074082295985388258840681618268593976697325892280915681207\",\"1\"],\"b\":[[\"5939871147348834997361720122238980177152303274311047249905942384915768690895\",\"4533568271134785278731234570361482651996740791888285864966884032717049811708\"],[\"10564387285071555469753990661410840118635925466597037018058770041347518461368\",\"12597323547277579144698496372242615368085801313343155735511330003884767957854\"],[\"1\",\"0\"]],\"c\":[\"15791589472556826263231644728873337629015269984699404073623603352537678813171\",\"4547866499248881449676161158024748060485373250029423904113017422539037162527\",\"1\"]},\"issBase64Details\":{\"value\":\"wiaXNzIjoiaHR0cHM6Ly9pZC50d2l0Y2gudHYvb2F1dGgyIiw\",\"indexMod4\":2},\"headerBase64\":\"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjEifQ\"}",
-            andAddressSeed: "20794788559620669596206457022966176986688727876128223628113916380927502737911"
-        )
-        
-        let zkSignature = zkLoginSignature(
-            inputs: zkSigInputs,
-            maxEpoch: 5,
-            userSignature: [UInt8](repeating: 0, count: 64) // Empty signature for now
-        )
-        
-        // Get address from zkLogin components
-        let userAddress = try zkLoginUtilities.computezkLoginAddressFromSeed(
-            addressSeed: BigInt(zkSigInputs.addressSeed)!,
-            issInput: self.issInput
-        )
-        
-        print("Using zkLogin address in TransactionBlock test: \(userAddress)")
-        
-        // Create zkLoginSigner
-        let signer = zkLoginSigner(
+        let signer = SuiKit.zkLoginSigner(
             provider: toolbox.client,
             ephemeralKeyPair: toolbox.account,
-            zkLoginSignature: zkSignature,
-            userAddress: userAddress
+            zkLoginSignature: zkLoginSignature(
+                inputs: aSignatureInputs,
+                maxEpoch: 174,
+                userSignature: []
+            ),
+            userAddress: "0x1234567890abcdef1234567890abcdef12345678"
         )
         
-        // Create a transaction block with SUI transfer
-        var tx = try TransactionBlock()
-        try tx.setSender(sender: userAddress)
+        // Test transaction signing
+        let txData = "hello world".data(using: .utf8)!.bytes
+        let txSignature = try signer.signTransaction(txData)
+        XCTAssertFalse(txSignature.isEmpty)
+        XCTAssertTrue(txSignature.starts(with: "BQ")) // Should start with zkLogin flag in base64
         
-        // Add a SUI transfer operation
-        let transferResult = try tx.moveCall(
-            target: "0x2::pay::split_and_transfer",
-            arguments: [
-                .gasCoin,
-                .input(tx.pure(value: .string("0x5fbcee7f5365c5a1aeea13600b56a0aea8f17a0129ff99894aa6b47f3a7efe38"))),
-                .input(tx.pure(value: .number(UInt64(1_000_000_000))))  // 1 SUI
-            ]
+        // Test personal message signing
+        let messageData = "hello world".data(using: .utf8)!.bytes
+        let messageSignature = try signer.signPersonalMessage(messageData)
+        XCTAssertFalse(messageSignature.isEmpty)
+        XCTAssertTrue(messageSignature.starts(with: "BQ")) // Should start with zkLogin flag in base64
+    }
+    
+    // MARK: - Serialization Utilities Tests
+    
+    func testParseSerializedzkLoginSignature() throws {
+        // Test the utility function that extracts both public key and signature
+        let result = try SuiKit.zkLoginSigner.parseSerializedZkLoginSignature(
+            aSignature,
+            graphQLClient: graphQLClient
         )
         
-        XCTAssertNotNil(transferResult)
+        // Verify we got both components
+        XCTAssertNotNil(result.publicKey)
+        XCTAssertNotNil(result.signature)
         
-        // Execute the transaction
-        let response = try await signer.signAndExecuteTransactionBlock(
-            transactionBlock: &tx
+        // Verify signature components
+        XCTAssertEqual(result.signature.maxEpoch, 174)
+        XCTAssertEqual(result.signature.inputs.addressSeed, "13322897930163218532266430409510394316985274769125667290600321564259466511711")
+    }
+    
+    // MARK: - Error Handling Tests
+    
+    func testSignerWithoutGraphQLClientThrowsError() async throws {
+        let toolbox = try fetchToolBox()
+        
+        // Create signer without GraphQL client
+        let signer = SuiKit.zkLoginSigner(
+            provider: toolbox.client,
+            ephemeralKeyPair: toolbox.account,
+            zkLoginSignature: zkLoginSignature(
+                inputs: aSignatureInputs,
+                maxEpoch: 174,
+                userSignature: []
+            ),
+            userAddress: "0x1234567890abcdef1234567890abcdef12345678"
+            // No graphQLClient parameter
         )
         
-        // Verify response
-        XCTAssertEqual(response.digest, response.digest)
-        XCTAssertNotNil(response.confirmedLocalExecution)
-        XCTAssertTrue(response.confirmedLocalExecution!)
+        let signature = zkLoginSignature(
+            inputs: aSignatureInputs,
+            maxEpoch: 174,
+            userSignature: []
+        )
         
-        let ser = Serializer()
-        try response.transaction!.data.serialize(ser)
+        // Should throw error when trying to verify without GraphQL client
+        do {
+            _ = try await signer.verifyTransaction(
+                transactionData: [1, 2, 3],
+                signature: signature
+            )
+            XCTFail("Expected error when verifying without GraphQL client")
+        } catch {
+            XCTAssertTrue(error is SuiError)
+        }
         
-        // Verify transaction was properly built
-        XCTAssertNotNil(ser.output())
+        do {
+            _ = try await signer.verifyPersonalMessage(
+                message: [1, 2, 3],
+                signature: signature
+            )
+            XCTFail("Expected error when verifying without GraphQL client")
+        } catch {
+            XCTAssertTrue(error is SuiError)
+        }
     }
 }

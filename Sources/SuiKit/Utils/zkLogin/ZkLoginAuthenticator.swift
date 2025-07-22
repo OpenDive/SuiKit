@@ -178,7 +178,7 @@ public class zkLoginAuthenticator {
         )
     }
     
-    /// Create a signer that can sign transactions with zkLogin
+    /// Create a signer that can sign transactions with zkLogin (legacy version)
     /// - Parameters:
     ///   - ephemeralKeyPair: The ephemeral keypair used for signing
     ///   - zkLoginSignature: The zkLogin signature
@@ -194,6 +194,28 @@ public class zkLoginAuthenticator {
             ephemeralKeyPair: ephemeralKeyPair,
             zkLoginSignature: zkLoginSignature,
             userAddress: userAddress
+        )
+    }
+    
+    /// Create a comprehensive zkLogin signer with verification capabilities
+    /// - Parameters:
+    ///   - ephemeralKeyPair: The ephemeral keypair used for signing
+    ///   - zkLoginSignature: The zkLogin signature
+    ///   - userAddress: The user's zkLogin address
+    ///   - graphQLClient: Optional GraphQL client for signature verification
+    /// - Returns: A zkLoginSigner with enhanced capabilities
+    public func createzkLoginSigner(
+        ephemeralKeyPair: Account,
+        zkLoginSignature: zkLoginSignature,
+        userAddress: String,
+        graphQLClient: GraphQLClientProtocol? = nil
+    ) -> zkLoginSigner {
+        return zkLoginSigner(
+            provider: provider,
+            ephemeralKeyPair: ephemeralKeyPair,
+            zkLoginSignature: zkLoginSignature,
+            userAddress: userAddress,
+            graphQLClient: graphQLClient
         )
     }
 }

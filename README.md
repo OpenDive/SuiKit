@@ -33,6 +33,7 @@ SuiKit is a Swift SDK natively designed to make developing for the Sui Blockchai
 - [x] Local Transaction Building.
 - [x] Local, custom, dev, test, and main net compatiblity.
 - [x] ED25519, SECP256K1, SECP256R1, and zkLogin Key and HD Wallet generation.
+- [x] zkLogin support, transaction signing, signature parsing.
 - [x] SuiNS support.
 - [x] Kiosk Support.
 - [x] Native Swift BCS Implementation.
@@ -61,7 +62,7 @@ The [Swift Package Manager](https://swift.org/package-manager/) allows for devel
 
 * File > Swift Packages > Add Package Dependency
 * Add `https://github.com/opendive/SuiKit.git`
-* Select "Up to next Major" with "1.2.3"
+* Select "Up to next Major" with "1.3.0"
 
 #### SPM Through Xcode Package
 
@@ -69,7 +70,7 @@ Once you have your Swift package set up, add the Git link within the `dependenci
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/opendive/SuiKit.git", .upToNextMajor(from: "1.2.3"))
+    .package(url: "https://github.com/opendive/SuiKit.git", .upToNextMajor(from: "1.3.0"))
 ]
 ```
 

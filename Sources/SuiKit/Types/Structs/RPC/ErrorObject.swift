@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import AnyCodable
+@preconcurrency import AnyCodable
 
 public struct ErrorObject: Codable {
     /// Represents the error code, can be of any type that conforms to Codable.

@@ -25,7 +25,7 @@
 
 import Foundation
 import SwiftyJSON
-import AnyCodable
+@preconcurrency import AnyCodable
 
 /// `SuiRequest` represents a request structure conforming to JSON-RPC 2.0 specifications.
 /// JSON-RPC is a remote procedure call (RPC) protocol encoded in JSON.

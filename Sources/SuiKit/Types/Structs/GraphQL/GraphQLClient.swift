@@ -36,7 +36,7 @@ internal struct GraphQLClient {
     /// - Returns: A GraphQLResult object of either T.Data type, or throws an error.
     internal static func fetchQuery<T: GraphQLQuery>(client: ApolloClient, query: T) async throws -> GraphQLResult<T.Data> {
         return try await withCheckedThrowingContinuation { (con: CheckedContinuation<GraphQLResult<T.Data>, Error>) in
-            let _ = client.fetch(query: query) { result in
+            let _ = client.fetch(query: query) { @Sendable result in
                 switch result {
                 case .success(let graphQLresult):
                     con.resume(returning: graphQLresult)

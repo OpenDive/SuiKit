@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import AnyCodable
+@preconcurrency import AnyCodable
 
 public struct PurchaseOptions {
     public let extraArgs: [String: AnyCodable]?

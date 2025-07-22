@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import AnyCodable
+@preconcurrency import AnyCodable
 
 /// Represents a field within a Move event, conforming to `Codable` to support encoding and decoding.
 public struct MoveEventField: Codable {

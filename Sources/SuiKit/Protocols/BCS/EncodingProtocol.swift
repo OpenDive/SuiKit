@@ -25,7 +25,7 @@
 
 import Foundation
 import UInt256
-import AnyCodable
+@preconcurrency import AnyCodable
 
 public protocol EncodingProtocol: EncodingContainer { }
 

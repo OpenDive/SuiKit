@@ -109,7 +109,7 @@ public struct SuiError: Error, CustomStringConvertible {
     }
     
     /// Type representing possible error codes.
-    public enum Code: Equatable {
+    public enum Code: Equatable, Sendable {
         /// A generic error with a message.
         case error(message: String)
         

@@ -25,7 +25,7 @@
 
 import Foundation
 import SwiftyJSON
-import AnyCodable
+@preconcurrency import AnyCodable
 import Blake2
 import BigInt
 

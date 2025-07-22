@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import AnyCodable
+@preconcurrency import AnyCodable
 
 public typealias HttpHeaders = [String: String]
 public typealias RequestParamsLike = [AnyCodable]

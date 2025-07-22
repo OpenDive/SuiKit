@@ -24,7 +24,7 @@
 //
 
 import SwiftyJSON
-import AnyCodable
+@preconcurrency import AnyCodable
 import Foundation
 
 public class SuiNSClient {

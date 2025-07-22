@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import AnyCodable
+@preconcurrency import AnyCodable
 
 /// Represents the parameters required for making a Remote Procedure Call (RPC).
 public struct RpcParameters: Codable, RPCErrorRequest {

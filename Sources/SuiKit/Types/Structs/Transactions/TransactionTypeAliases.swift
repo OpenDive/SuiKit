@@ -24,7 +24,7 @@
 //
 
 import Foundation
-import AnyCodable
+@preconcurrency import AnyCodable
 
 public typealias EpochId = String
 public typealias SequenceNumber = String

@@ -1,5 +1,5 @@
 //
-//  watchOS_ExampleApp.swift
+//  NFTItem.swift
 //  SuiKit
 //
 //  Copyright (c) 2024-2025 OpenDive
@@ -23,13 +23,14 @@
 //  THE SOFTWARE.
 //
 
-import SwiftUI
+import Foundation
 
-@main
-struct WatchOSExampleWatchAppApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
+struct NFTItem: Identifiable {
+    let id = UUID()
+
+    let name: String
+    let imageUrl: URL?
+    let description: String
+    let stats: [String: String]?
+    let collectionName: String
 }

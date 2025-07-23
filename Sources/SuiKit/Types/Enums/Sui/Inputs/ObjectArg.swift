@@ -34,6 +34,8 @@ public enum ObjectArg: KeyProtocol {
 
     /// Represents a shared object argument.
     case shared(SharedObjectArg)
+    
+    case receiving(ReceivingObject)
 
     /// A static function to create an `ObjectArg` instance from a JSON object.
     ///
@@ -46,6 +48,8 @@ public enum ObjectArg: KeyProtocol {
         case "sharedObject":
             guard let shared = SharedObjectArg(input: input) else { return nil }
             return .shared(shared)
+        case "receiving":
+            return .receiving(ReceivingObject(input: input))
         default:
             return nil
         }
@@ -63,6 +67,9 @@ public enum ObjectArg: KeyProtocol {
         case .shared(let sharedArg):
             try Serializer.u8(serializer, UInt8(1))
             try Serializer._struct(serializer, value: sharedArg)
+        case .receiving(let receiving):
+            try Serializer.u8(serializer, UInt8(2))
+            try Serializer._struct(serializer, value: receiving)
         }
     }
 
@@ -83,6 +90,11 @@ public enum ObjectArg: KeyProtocol {
             return ObjectArg.shared(
                 try Deserializer._struct(deserializer)
             )
+        case 2:
+            return ObjectArg.receiving(
+                try Deserializer._struct(deserializer)
+            )
+
         default:
             throw SuiError.customError(message: "Unable to Deserialize")
         }

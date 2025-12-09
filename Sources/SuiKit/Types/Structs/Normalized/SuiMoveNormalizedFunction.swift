@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import graphqlSchemaSuiKit
 
 /// Represents a normalized function within a SuiMove entity.
 public struct SuiMoveNormalizedFunction: Equatable {
@@ -42,25 +43,6 @@ public struct SuiMoveNormalizedFunction: Equatable {
 
     /// Represents the types of the values that the function can return.
     public let returnValues: [SuiMoveNormalizedType]
-
-    public init?(graphql: GetNormalizedMoveFunctionQuery.Data) {
-        let function = graphql.object!.asMovePackage!.module!.function!
-        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
-        self.visibility = visibility
-        self.isEntry = function.isEntry ?? false
-        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
-        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
-        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
-    }
-
-    public init?(function: RPC_MOVE_MODULE_FIELDS.Functions.Node) {
-        guard let visibility = SuiMoveVisibility.parseGraphQL(function.visibility) else { return nil }
-        self.visibility = visibility
-        self.isEntry = function.isEntry ?? false
-        self.typeParameters = function.typeParameters != nil ? function.typeParameters!.compactMap { SuiMoveAbilitySet(graphql: $0) } : []
-        self.parameters = function.parameters != nil ? function.parameters!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
-        self.returnValues = function.return != nil ? function.return!.compactMap { SuiMoveNormalizedType.parseGraphQL($0.signature) } : []
-    }
 
     /// Initializes a new instance of `SuiMoveNormalizedFunction` with the provided parameters.
     ///
@@ -82,6 +64,20 @@ public struct SuiMoveNormalizedFunction: Equatable {
         self.typeParameters = typeParameters
         self.parameters = parameters
         self.returnValues = returnValues
+    }
+
+    public init(graphql: graphqlSchemaSuiKit.MoveFunction) {
+        self.visibility = SuiMoveVisibility(graphql: graphql.visibility)!
+        self.isEntry = graphql.isEntry
+        self.typeParameters = graphql.typeParameters.map {
+            SuiMoveAbilitySet(abilities: $0.constraints.map { $0.rawValue })
+        }
+        self.parameters = graphql.parameters?.map {
+            SuiMoveNormalizedType.parseGraphQL($0.signature)
+        } ?? []
+        // GraphQL return type signature parsing is complex; reusing type parser if available or assuming structure
+        // Note: MoveFunction.return in GraphQL provides [OpenMoveTypeSignature]
+        self.returnValues = graphql.`return`.map { SuiMoveNormalizedType.parseGraphQL($0.signature) }.compactMap { $0 }
     }
 
     /// Initializes a new instance of `SuiMoveNormalizedFunction` from a JSON representation.

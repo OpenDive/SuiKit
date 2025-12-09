@@ -37,10 +37,6 @@ public struct SuiMoveAbilitySet: Equatable {
         self.abilities = abilities.map { $0.capitalized }
     }
 
-    public init(graphql: RPC_MOVE_FUNCTION_FIELDS.TypeParameter) {
-        self.abilities = graphql.constraints.map { $0.value!.rawValue.capitalized }
-    }
-
     /// Initializes a new instance of `SuiMoveAbilitySet` with the abilities extracted from the given JSON.
     /// - Parameter input: A `JSON` object containing the abilities.
     public init(input: JSON) {

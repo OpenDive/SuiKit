@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import graphqlSchemaSuiKit
 
 public struct SuiEvent {
     /// The unique identifier of the event.
@@ -51,15 +52,15 @@ public struct SuiEvent {
     /// An optional string representing the timestamp of the event in milliseconds.
     public let timestampMs: String?
 
-    public init(graphql: QueryEventsQuery.Data.Events.Node) {
-        self.id = nil  // TODO: Turn ID into an Object
-        self.bcs = graphql.contents.bcs
-        self.packageId = graphql.sendingModule!.package.address
-        self.parsedJson = JSON(parseJSON: graphql.JSONApollo)
-        self.sender = try! AccountAddress.fromHex(graphql.sender!.address)
-        self.timestampMs = graphql.timestamp
-        self.transactionModule = graphql.sendingModule != nil ? graphql.sendingModule!.name : "NONE"
-        self.type = graphql.contents.type.repr
+    public init(graphql: graphqlSchemaSuiKit.Event) {
+        self.id = nil // TODO: Map EventId from GraphQL cursor or other fields
+        self.packageId = graphql.sendingModule?.package.address ?? ""
+        self.transactionModule = graphql.sendingModule?.name ?? ""
+        self.sender = try! AccountAddress.fromHex(graphql.sender?.address ?? "")
+        self.type = graphql.type.repr
+        self.parsedJson = JSON(graphql.json)
+        self.bcs = graphql.bcs
+        self.timestampMs = String(Int(graphql.timestamp?.timeIntervalSince1970 ?? 0) * 1000)
     }
 
     /// Initializes a new `SuiEvent` with the provided JSON input.

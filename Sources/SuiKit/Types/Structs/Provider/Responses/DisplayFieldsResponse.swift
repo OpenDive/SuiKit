@@ -37,34 +37,6 @@ public struct DisplayFieldsResponse: Equatable {
     /// This will be `nil` if there is no error to report.
     public var error: ObjectResponseError?
 
-    public init(graphql: [RPC_OBJECT_FIELDS.Display]) {
-        var data: [String: String] = [:]
-        var error: ObjectResponseError?
-        for displayItem in graphql {
-            if displayItem.error != nil {
-                error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
-            } else if displayItem.value != nil {
-                data[displayItem.key] = displayItem.value!
-            }
-        }
-        self.data = data.isEmpty ? nil : data
-        self.error = error
-    }
-
-    public init(graphql: [RPC_MOVE_OBJECT_FIELDS.Display]) {
-        var data: [String: String] = [:]
-        var error: ObjectResponseError?
-        for displayItem in graphql {
-            if displayItem.error != nil {
-                error = ObjectResponseError.parseJSON(JSON(displayItem.error!))
-            } else if displayItem.value != nil {
-                data[displayItem.key] = displayItem.value!
-            }
-        }
-        self.data = data.isEmpty ? nil : data
-        self.error = error
-    }
-
     public init(data: [String: String]? = nil, error: ObjectResponseError? = nil) {
         self.data = data
         self.error = error

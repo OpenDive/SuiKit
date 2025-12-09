@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import graphqlSchemaSuiKit
 
 /// Represents a collection of `ValidatorApy` instances associated with a specific epoch.
 public struct ValidatorApys: Equatable {
@@ -38,14 +39,9 @@ public struct ValidatorApys: Equatable {
     /// to organize the APY data in the blockchain's timeline.
     public var epoch: String
 
-    public init(graphql: GetValidatorsApyQuery.Data) {
-        self.apys = graphql.epoch!.validatorSet!.activeValidators.nodes.map { validator in
-            ValidatorApy(
-                address: validator.address.address,
-                apy: validator.apy != nil ? UInt64((validator.apy! / 100)) : nil
-            )
-        }
-        self.epoch = "\(graphql.epoch!.epochId)"
+    public init(graphql: graphqlSchemaSuiKit.GetValidatorsApyQuery.Data) {
+        self.apys = graphql.apys?.apys.map { ValidatorApy(graphql: $0) } ?? []
+        self.epoch = String(graphql.epoch?.sequenceNumber ?? 0)
     }
 
     public init(input: JSON) {

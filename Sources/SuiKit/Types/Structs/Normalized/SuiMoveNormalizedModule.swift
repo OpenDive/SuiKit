@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import graphqlSchemaSuiKit
 
 /// Represents a normalized SuiMove Module, containing various details about the module including its address,
 /// name, friend modules, structs, and exposed functions.
@@ -47,66 +48,19 @@ public struct SuiMoveNormalizedModule: Equatable {
     /// A dictionary containing the exposed functions of the module, where the key is the name of the function and the value is an instance of `SuiMoveNormalizedFunction`.
     public let exposedFunctions: [String: SuiMoveNormalizedFunction]
 
-    public init(graphql: GetNormalizedMoveModuleQuery.Data.Object.AsMovePackage.Module, package: String) {
-        let module = graphql
-        var structs: [String: SuiMoveNormalizedStruct] = [:]
-        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
-
-        if let structures = module.structs {
-            for structure in structures.nodes {
-                structs[structure.name] = SuiMoveNormalizedStruct(
-                    structure: structure
-                )
-            }
-        }
-
-        if let functions = module.functions {
-            for function in functions.filterUsable() {
-                if let value = SuiMoveNormalizedFunction(function: function) {
-                    exposedFunctions[function.name] = value
-                }
-            }
-        }
-
-        self.fileFormatVersion = module.fileFormatVersion
+    public init(graphql: graphqlSchemaSuiKit.MoveModule, package: String) {
+        self.fileFormatVersion = graphql.fileFormatVersion
         self.address = package
-        self.name = module.name
-        self.friends = module.friends.nodes.map {
+        self.name = graphql.name
+        self.friends = graphql.friends.nodes.map {
             SuiMoveModuleId(address: $0.package.address, name: $0.name)
         }
-        self.structs = structs
-        self.exposedFunctions = exposedFunctions
-    }
-
-    public init(graphql: GetNormalizedMoveModulesByPackageQuery.Data.Object.AsMovePackage.Modules.Node, package: String) {
-        let module = graphql
-        var structs: [String: SuiMoveNormalizedStruct] = [:]
-        var exposedFunctions: [String: SuiMoveNormalizedFunction] = [:]
-
-        if let structures = module.structs {
-            for structure in structures.nodes {
-                structs[structure.name] = SuiMoveNormalizedStruct(
-                    structure: structure
-                )
-            }
-        }
-
-        if let functions = module.functions {
-            for function in functions.filterUsable() {
-                if let value = SuiMoveNormalizedFunction(function: function) {
-                    exposedFunctions[function.name] = value
-                }
-            }
-        }
-
-        self.fileFormatVersion = module.fileFormatVersion
-        self.address = package
-        self.name = module.name
-        self.friends = module.friends.nodes.map {
-            SuiMoveModuleId(address: $0.package.address, name: $0.name)
-        }
-        self.structs = structs
-        self.exposedFunctions = exposedFunctions
+        self.structs = graphql.structs?.nodes.reduce(into: [String: SuiMoveNormalizedStruct]()) {
+            $0[$1.name] = SuiMoveNormalizedStruct(graphql: $1)
+        } ?? [:]
+        self.exposedFunctions = graphql.functions?.nodes.reduce(into: [String: SuiMoveNormalizedFunction]()) {
+            $0[$1.name] = SuiMoveNormalizedFunction(graphql: $1)
+        } ?? [:]
     }
 
     /// Initializes a new instance of `SuiMoveNormalizedModule` from a JSON representation.

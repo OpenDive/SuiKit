@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import graphqlSchemaSuiKit
 
 /// Enumeration representing visibility levels in the SuiMove environment.
 public enum SuiMoveVisibility: String, Equatable {
@@ -37,13 +38,12 @@ public enum SuiMoveVisibility: String, Equatable {
     /// Represents a friend visibility level, accessible only by designated friend modules.
     case Friend
 
-    public static func parseGraphQL(_ data: GraphQLEnum<MoveVisibility>?) -> SuiMoveVisibility? {
-        guard data != nil else { return nil }
-        switch data! {
-        case .friend: return .Friend
-        case .public: return .Public
-        case .private: return .Private
-        default: return nil
+    public init?(graphql: graphqlSchemaSuiKit.MoveVisibility) {
+        switch graphql {
+        case .private: self = .Private
+        case .public: self = .Public
+        case .friend: self = .Friend
+        case .__unknown(_): return nil
         }
     }
 

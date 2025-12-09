@@ -5,8 +5,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apollographql/apollo-ios.git",
       "state" : {
-        "revision" : "e98e9d3b398b6005149074d51b097e31aaa44f63",
-        "version" : "1.17.0"
+        "revision" : "0d2c0dec44dab10a2c4e51f4114eb00d08294cd1",
+        "version" : "2.0.3"
       }
     },
     {
@@ -52,24 +52,6 @@
       "state" : {
         "revision" : "36a5ce735a61c4bc119593f43ce2c027b4ca7392",
         "version" : "3.3.0"
-      }
-    },
-    {
-      "identity" : "sqlite.swift",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/stephencelis/SQLite.swift.git",
-      "state" : {
-        "revision" : "392dd6058624d9f6c5b4c769d165ddd8c7293394",
-        "version" : "0.15.4"
-      }
-    },
-    {
-      "identity" : "swift-toolchain-sqlite",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/swiftlang/swift-toolchain-sqlite",
-      "state" : {
-        "revision" : "b626d3002773b1a1304166643e7f118f724b2132",
-        "version" : "1.0.4"
       }
     },
     {

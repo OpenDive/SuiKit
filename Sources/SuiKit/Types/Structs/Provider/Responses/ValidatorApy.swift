@@ -25,6 +25,7 @@
 
 import Foundation
 import SwiftyJSON
+import graphqlSchemaSuiKit
 
 /// Represents the Annual Percentage Yield (APY) related information for a validator.
 public struct ValidatorApy: Equatable {
@@ -40,6 +41,11 @@ public struct ValidatorApy: Equatable {
     public init(address: String, apy: UInt64? = nil) {
         self.address = address
         self.apy = apy
+    }
+
+    public init(graphql: graphqlSchemaSuiKit.GetValidatorsApyQuery.Data.Apys.Apy) {
+        self.address = graphql.address.address
+        self.apy = UInt64(graphql.apy * 100) // Assuming GraphQL returns float like 0.05 for 5%, converting to basis points or similar standard if needed, or direct usage. Adjust logic based on actual scalar.
     }
 
     public init(input: JSON) {

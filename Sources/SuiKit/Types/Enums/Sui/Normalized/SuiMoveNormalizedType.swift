@@ -183,6 +183,23 @@ public indirect enum SuiMoveNormalizedType: Equatable, KeyProtocol {
     }
 
     public static func parseGraphQL(_ data: AnyHashable) -> SuiMoveNormalizedType? {
+        // Handle GraphQL OpenMoveTypeSignature scalar which might be a string
+        if let stringData = data as? String {
+            // Basic parsing for simple types if string
+            switch stringData {
+            case "Bool": return .bool
+            case "U8": return .u8
+            case "U16": return .u16
+            case "U32": return .u32
+            case "U64": return .u64
+            case "U128": return .u128
+            case "U256": return .u256
+            case "Address": return .address
+            case "Signer": return .signer
+            default: break
+            }
+        }
+        
         if JSON(data)["ref"].exists() && JSON(data)["ref"].string == "&mut" {
             guard let mutableReference = Self.parseGraphQLInner(data) else { return nil }
             return .mutableReference(mutableReference)

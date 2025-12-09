@@ -1,11 +1,30 @@
 //
-//  File.swift
-//  
+//  CoinStruct.swift
+//  SuiKit
 //
-//  Created by Marcus Arnett on 5/3/23.
+//  Copyright (c) 2024-2025 OpenDive
+//
+//  Permission is hereby granted, free of charge, to any person obtaining a copy
+//  of this software and associated documentation files (the "Software"), to deal
+//  in the Software without restriction, including without limitation the rights
+//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//  copies of the Software, and to permit persons to whom the Software is
+//  furnished to do so, subject to the following conditions:
+//
+//  The above copyright notice and this permission notice shall be included in
+//  all copies or substantial portions of the Software.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//  THE SOFTWARE.
 //
 
 import Foundation
+import graphqlSchemaSuiKit
 
 /// Represents the details of a specific coin object.
 public struct CoinStruct: Equatable {
@@ -57,13 +76,20 @@ public struct CoinStruct: Equatable {
         )
     }
 
-    public init(graphql: GetCoinsQuery.Data.Address.Coins.Node) throws {
-        self.balance = graphql.coinBalance!
+    public init(graphql: graphqlSchemaSuiKit.Coin) throws {
+        guard let contents = graphql.asMoveObject?.contents else {
+            throw SuiError.customError(message: "Invalid Coin Object")
+        }
+        self.coinType = try StructTag.fromStr(contents.type.repr)
         self.coinObjectId = graphql.address
-        self.coinType = try StructTag.fromStr(graphql.contents!.type.repr)
-        self.digest = graphql.digest!
-        self.previousTransaction = graphql.previousTransactionBlock!.digest!
-        self.version = graphql.version
+        self.version = String(graphql.version)
+        self.digest = graphql.digest
+        if let balanceBigInt = graphql.balance {
+            self.balance = String(balanceBigInt.description)
+        } else {
+            self.balance = "0"
+        }
+        self.previousTransaction = graphql.previousTransactionBlock?.digest ?? ""
     }
 
     public init(

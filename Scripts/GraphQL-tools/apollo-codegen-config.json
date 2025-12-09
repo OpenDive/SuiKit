@@ -1,0 +1,28 @@
+{
+    "schemaNamespace" : "GraphqlSchemaSuiKit",
+    "input" : {
+      "operationSearchPaths" : [
+        "./queries/*.graphql"
+      ],
+      "schemaSearchPaths" : [
+        "./schema.graphqls"
+      ]
+    },
+    "output" : {
+      "testMocks" : {
+        "none" : {
+        }
+      },
+    "schemaTypes" : {
+      "path" : "./GraphqlSchemaSuiKit",
+      "moduleType" : {
+        "swiftPackage" : {
+        }
+      }
+    },
+      "operations" : {
+        "inSchemaModule" : {
+        }
+      }
+    }
+  }

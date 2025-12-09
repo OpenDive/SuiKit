@@ -52,15 +52,6 @@ public struct SuiCoinMetadata: Equatable {
     /// reference to this specific coin instance within the system.
     let id: String
 
-    public init(graphql: GetCoinMetadataQuery.Data.CoinMetadata) {
-        self.decimals = UInt8(graphql.decimals!)
-        self.name = graphql.name!
-        self.symbol = graphql.symbol!
-        self.description = graphql.description!
-        self.iconUrl = graphql.iconUrl
-        self.id = graphql.address
-    }
-
     public init(decimals: UInt8, description: String, iconUrl: String?, name: String, symbol: String, id: String) {
         self.decimals = decimals
         self.description = description

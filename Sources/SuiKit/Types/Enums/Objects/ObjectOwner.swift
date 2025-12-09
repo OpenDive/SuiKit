@@ -40,38 +40,6 @@ public enum ObjectOwner: KeyProtocol, Equatable {
     /// Represents an object that is immutable and cannot be owned.
     case immutable
 
-    public static func parseGraphQL(graphql: TryGetPastObjectQuery.Data.Object.Owner) -> ObjectOwner {
-        if graphql.asAddressOwner?.owner?.asObject != nil {
-            return .addressOwner(graphql.asAddressOwner!.owner!.asObject!.address)
-        }
-
-        if graphql.asParent?.parent != nil {
-            return .objectOwner(graphql.asParent!.parent!.address)
-        }
-
-        if graphql.asShared != nil {
-            return .shared(Int(graphql.asShared!.initialSharedVersion)!)
-        }
-
-        return .immutable
-    }
-
-    public static func parseGraphQL(graphql: RPC_MOVE_OBJECT_FIELDS.Owner) -> ObjectOwner {
-        if graphql.asAddressOwner != nil {
-            return .addressOwner(graphql.asAddressOwner!.owner!.asAddress!.address)
-        }
-
-        if graphql.asParent != nil {
-            return .objectOwner(graphql.asParent!.parent!.address)
-        }
-
-        if graphql.asShared != nil {
-            return .shared(Int(graphql.asShared!.initialSharedVersion)!)
-        }
-
-        return .immutable
-    }
-
     /// Parses a `JSON` object to produce an `ObjectOwner` object if possible.
     ///
     /// - Parameters:
